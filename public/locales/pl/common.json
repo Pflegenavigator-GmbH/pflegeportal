@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "title": "PflegeNavigator - Darmowy Kalkulator Poziomu Opieki",
+    "description": "Oblicz swój poziom opieki za darmo. W prostym języku, dostępny i zgodny z ochroną danych.",
+    "ogTitle": "PflegeNavigator - Darmowy Kalkulator Poziomu Opieki"
+  },
+  "header": {
+    "logo": "PflegeNavigator",
+    "tagline": "Darmowe Obliczanie Poziomu Opieki"
+  },
+  "footer": {
+    "copyright": "© 2025 PflegeNavigator",
+    "datenschutz": "Polityka Prywatności",
+    "impressum": "Nota Prawna"
+  },
+  "language": {
+    "current": "Aktualny Język",
+    "select": "Wybierz Język",
+    "detected": "Wykryty automatycznie"
+  }
+}

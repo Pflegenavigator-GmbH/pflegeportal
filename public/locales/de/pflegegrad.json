@@ -1,0 +1,223 @@
+{
+  "title": "Pflegegrad berechnen",
+  "subtitle": "Beantworten Sie einige Fragen. Wir berechnen Ihren möglichen Pflegegrad.",
+  "simpleLanguage": {
+    "label": "Leichte Sprache",
+    "description": "Einfache Wörter und kurze Sätze"
+  },
+  "modules": {
+    "mobilitaet": {
+      "title": "Mobilität",
+      "subtitle": "Gehen und sich bewegen",
+      "simple": "Können Sie gut laufen? Oder brauchen Sie Hilfe beim Gehen?",
+      "questions": {
+        "laufen": {
+          "label": "Gehen und Laufen",
+          "simple": "Können Sie alleine gehen?",
+          "options": {
+            "selbst": "Ich kann alleine gehen",
+            "hilfe": "Ich brauche manchmal Hilfe",
+            "nicht": "Ich kann nicht alleine gehen"
+          }
+        },
+        "treppen": {
+          "label": "Treppen steigen",
+          "simple": "Können Sie Treppen steigen?",
+          "options": {
+            "selbst": "Keine Probleme",
+            "teilweise": "Ich brauche Hilfe",
+            "nicht": "Geht nicht"
+          }
+        },
+        "rollstuhl": {
+          "label": "Rollstuhl",
+          "simple": "Brauchen Sie einen Rollstuhl?",
+          "options": {
+            "nein": "Nein",
+            "manchmal": "Manchmal",
+            "immer": "Immer"
+          }
+        }
+      }
+    },
+    "koerperpflege": {
+      "title": "Körperpflege",
+      "subtitle": "Waschen und Anziehen",
+      "simple": "Können Sie sich alleine waschen und anziehen?",
+      "questions": {
+        "waschen": {
+          "label": "Körper waschen",
+          "simple": "Können Sie sich alleine waschen?",
+          "options": {
+            "selbst": "Ja, alleine",
+            "teilweise": "Manchmal Hilfe nötig",
+            "nicht": "Brauche immer Hilfe"
+          }
+        },
+        "zaehne": {
+          "label": "Zähne putzen",
+          "simple": "Können Sie Ihre Zähne putzen?",
+          "options": {
+            "selbst": "Ja",
+            "teilweise": "Manchmal",
+            "nicht": "Nein"
+          }
+        },
+        "anziehen": {
+          "label": "An- und Ausziehen",
+          "simple": "Können Sie sich alleine anziehen?",
+          "options": {
+            "selbst": "Ja",
+            "teilweise": "Manchmal",
+            "nicht": "Nein"
+          }
+        }
+      }
+    },
+    "ernaehrung": {
+      "title": "Ernährung",
+      "subtitle": "Essen und Trinken",
+      "simple": "Können Sie alleine essen und trinken?",
+      "questions": {
+        "essen": {
+          "label": "Essen",
+          "simple": "Können Sie alleine essen?",
+          "options": {
+            "selbst": "Ja",
+            "teilweise": "Manchmal Hilfe",
+            "nicht": "Brauche Hilfe"
+          }
+        },
+        "trinken": {
+          "label": "Trinken",
+          "simple": "Können Sie alleine trinken?",
+          "options": {
+            "selbst": "Ja",
+            "teilweise": "Manchmal",
+            "nicht": "Brauche Hilfe"
+          }
+        }
+      }
+    },
+    "toilette": {
+      "title": "Toilette",
+      "subtitle": "Auf die Toilette gehen",
+      "simple": "Können Sie alleine auf die Toilette gehen?",
+      "questions": {
+        "toilette": {
+          "label": "Toilettengang",
+          "simple": "Können Sie alleine auf die Toilette?",
+          "options": {
+            "selbst": "Ja",
+            "teilweise": "Manchmal",
+            "nicht": "Brauche Hilfe"
+          }
+        },
+        "inkontinenz": {
+          "label": "Hilfe bei Inkontinenz",
+          "simple": "Brauchen Sie Windeln?",
+          "options": {
+            "nein": "Nein",
+            "manchmal": "Manchmal",
+            "immer": "Ja, immer"
+          }
+        }
+      }
+    },
+    "schlaf": {
+      "title": "Schlaf",
+      "subtitle": "Nachts aufwachen",
+      "simple": "Brauchen Sie nachts Hilfe?",
+      "questions": {
+        "nacht": {
+          "label": "Nächtliche Hilfe",
+          "simple": "Wachen Sie nachts auf? Brauchen Sie dann Hilfe?",
+          "options": {
+            "nein": "Nein",
+            "manchmal": "Manchmal",
+            "oft": "Oft"
+          }
+        }
+      }
+    },
+    "haushalt": {
+      "title": "Haushalt",
+      "subtitle": "Hausarbeit",
+      "simple": "Können Sie Hausarbeit machen?",
+      "questions": {
+        "einkaufen": {
+          "label": "Einkaufen",
+          "simple": "Können Sie einkaufen gehen?",
+          "options": {
+            "selbst": "Ja",
+            "teilweise": "Manchmal",
+            "nicht": "Nein"
+          }
+        },
+        "kochen": {
+          "label": "Kochen",
+          "simple": "Können Sie kochen?",
+          "options": {
+            "selbst": "Ja",
+            "teilweise": "Manchmal",
+            "nicht": "Nein"
+          }
+        }
+      }
+    },
+    "kognitive": {
+      "title": "Denken und Erinnern",
+      "subtitle": "Demenz und Verwirrtheit",
+      "simple": "Haben Sie Probleme mit dem Gedächtnis?",
+      "questions": {
+        "gedaechtnis": {
+          "label": "Gedächtnis",
+          "simple": "Vergessen Sie Dinge?",
+          "options": {
+            "nein": "Nein",
+            "manchmal": "Manchmal",
+            "oft": "Oft"
+          }
+        },
+        "verwirrung": {
+          "label": "Verwirrung",
+          "simple": "Sind Sie manchmal verwirrt?",
+          "options": {
+            "nein": "Nein",
+            "manchmal": "Manchmal",
+            "oft": "Oft"
+          }
+        }
+      }
+    },
+    "kommunikation": {
+      "title": "Kommunikation",
+      "subtitle": "Sprechen und Verstehen",
+      "simple": "Können Sie gut sprechen und verstehen?",
+      "questions": {
+        "sprechen": {
+          "label": "Sprechen",
+          "simple": "Können Sie gut sprechen?",
+          "options": {
+            "ja": "Ja",
+            "teilweise": "Manchmal schwierig",
+            "nein": "Nein"
+          }
+        },
+        "verstehen": {
+          "label": "Verstehen",
+          "simple": "Verstehen Sie andere?",
+          "options": {
+            "ja": "Ja",
+            "teilweise": "Manchmal",
+            "nein": "Nein"
+          }
+        }
+      }
+    }
+  },
+  "progress": {
+    "step": "Schritt {{current}} von {{total}}",
+    "percent": "{{percent}}% fertig"
+  }
+}

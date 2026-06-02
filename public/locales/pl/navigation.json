@@ -1,0 +1,18 @@
+{
+  "nav": {
+    "home": "Home",
+    "pflegegrad": "Calculate Care Level",
+    "tagebuch": "Care Diary",
+    "unterstuetzung": "Help & Support",
+    "bewertung": "Right to Appeal",
+    "datenschutz": "Privacy",
+    "impressum": "Imprint",
+    "briefe": "Letter Generator",
+    "hilfe": "Help"
+  },
+  "breadcrumbs": {
+    "home": "Home",
+    "current": "Current Page"
+  },
+  "skipLink": "Skip to main content"
+}

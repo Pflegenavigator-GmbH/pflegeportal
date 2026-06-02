@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Briefpapier - PflegeNavigator EU</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            width: 210mm;
+            height: 297mm;
+            margin: 0 auto;
+            background: white;
+            position: relative;
+        }
+        .briefkopf {
+            padding: 20mm 25mm 10mm 25mm;
+            border-bottom: 3px solid #20b2aa;
+        }
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+        }
+        .logo-text h1 {
+            font-size: 24px;
+            color: #0f2744;
+            font-weight: 700;
+            margin: 0;
+        }
+        .logo-text h1 span {
+            color: #20b2aa;
+        }
+        .logo-text p {
+            font-size: 11px;
+            color: #64748b;
+            margin: 3px 0 0 0;
+        }
+        .eu-badge {
+            background: #0f2744;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        .kontakt-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            color: #64748b;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .kontakt-info div {
+            line-height: 1.6;
+        }
+        .brief-inhalt {
+            padding: 15mm 25mm;
+            min-height: 180mm;
+        }
+        .empfaenger {
+            margin-bottom: 20mm;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+        .datum-ort {
+            text-align: right;
+            font-size: 11px;
+            color: #64748b;
+            margin-bottom: 10mm;
+        }
+        .betreff {
+            font-size: 13px;
+            font-weight: bold;
+            color: #0f2744;
+            margin-bottom: 8mm;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 3mm;
+        }
+        .brief-text {
+            font-size: 11px;
+            line-height: 1.6;
+            color: #334155;
+        }
+        .brief-text p {
+            margin-bottom: 4mm;
+        }
+        .fusszeile {
+            position: absolute;
+            bottom: 15mm;
+            left: 25mm;
+            right: 25mm;
+            font-size: 8px;
+            color: #94a3b8;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 5mm;
+            display: flex;
+            justify-content: space-between;
+        }
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Briefkopf -->
+    <div class="briefkopf">
+        <div class="logo-container">
+            <!-- Logo SVG -->
+            <svg class="logo-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="#0f2744" stroke-width="3"/>
+                <circle cx="50" cy="50" r="38" fill="white"/>
+                <circle cx="50" cy="12" r="4" fill="#0f2744"/>
+                <text x="50" y="16" text-anchor="middle" font-family="Arial" font-size="8" font-weight="bold" fill="white">N</text>
+                <g transform="translate(50, 50) rotate(-45)">
+                    <polygon points="0,-32 -6,0 6,0" fill="#20b2aa"/>
+                    <polygon points="0,32 -6,0 6,0" fill="#0f2744"/>
+                    <circle cx="0" cy="0" r="5" fill="white" stroke="#0f2744" stroke-width="2"/>
+                </g>
+            </svg>
+            <div class="logo-text">
+                <h1>Pflege<span>Navigator</span><span class="eu-badge">EU</span></h1>
+                <p>Ihr digitaler Wegweiser im Sozialrecht</p>
+            </div>
+        </div>
+        <div class="kontakt-info">
+            <div>
+                <strong>PflegeNavigator EU gUG (haftungsbeschränkt)</strong><br>
+                Heeper Straße 205<br>
+                33607 Bielefeld<br>
+                Deutschland
+            </div>
+            <div>
+                <strong>Kontakt:</strong><br>
+                E-Mail: info@pflegenavigatoreu.com<br>
+                Web: www.pflegenavigatoreu.com<br>
+                Geschäftsführer: Franz Held
+            </div>
+            <div>
+                <strong>Rechtliches:</strong><br>
+                HRB: [Nummer einfügen]<br>
+                USt-IdNr.: [Nummer einfügen]<br>
+                Amtsgericht: Bielefeld
+            </div>
+        </div>
+    </div>
+
+    <!-- Briefinhalt -->
+    <div class="brief-inhalt">
+        <div class="empfaenger">
+            [Empfänger Name]<br>
+            [Straße Hausnummer]<br>
+            [PLZ Ort]
+        </div>
+
+        <div class="datum-ort">
+            Bielefeld, den [Datum]
+        </div>
+
+        <div class="betreff">
+            Betreff: [Betreffzeile einfügen]
+        </div>
+
+        <div class="brief-text">
+            <p>Sehr geehrte Damen und Herren,</p>
+            
+            <p>[Hier beginnt der Brieftext...]</p>
+            
+            <p>Mit freundlichen Grüßen</p>
+            <br><br>
+            <p><strong>Franz Held</strong><br>
+            Geschäftsführer</p>
+        </div>
+    </div>
+
+    <!-- Fußzeile -->
+    <div class="fusszeile">
+        <span>© 2026 PflegeNavigator EU - Alle Rechte vorbehalten</span>
+        <span>Datenschutz: datenschutz@pflegenavigatoreu.com</span>
+    </div>
+
+    <script>
+        // Automatisches Datum
+        document.addEventListener('DOMContentLoaded', function() {
+            const heute = new Date();
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            const datumElement = document.querySelector('.datum-ort');
+            if (datumElement && datumElement.textContent.includes('[Datum]')) {
+                datumElement.innerHTML = 'Bielefeld, den ' + heute.toLocaleDateString('de-DE', options);
+            }
+        });
+    </script>
+</body>
+</html>

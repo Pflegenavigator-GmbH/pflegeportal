@@ -1,0 +1,445 @@
+{
+  "meta": {
+    "title": "PflegeNavigator - Your Care Assistance",
+    "description": "Support for care level applications, appeals and nursing care insurance",
+    "keywords": "care, care level, application, appeal, nursing insurance, Germany"
+  },
+  "navigation": {
+    "home": "Home",
+    "homeDescription": "Overview of all care modules",
+    "pflegegrad": "Care Level Calculator",
+    "pflegegradDescription": "Determine your possible care level",
+    "briefe": "Letter Templates",
+    "briefeDescription": "Templates for applications and appeals",
+    "hilfe": "Help & Contact",
+    "hilfeDescription": "FAQ and support",
+    "dashboard": "My Area",
+    "profil": "Profile",
+    "einstellungen": "Settings",
+    "abmelden": "Sign Out",
+    "anmelden": "Sign In"
+  },
+  "pflegegrad": {
+    "title": "Care Level Calculator",
+    "subtitle": "Determine your possible care level based on MDK module",
+    "progress": "Question {{current}} of {{total}}",
+    "module": {
+      "mobilität": {
+        "title": "1. Mobility",
+        "description": "Ability to move independently",
+        "questions": {
+          "q1": {
+            "text": "Can the person move independently in the living space?",
+            "help": "Includes: Getting up, walking, using chair, leaving bed"
+          },
+          "q2": {
+            "text": "Can the person climb stairs?",
+            "help": "With or without aids such as stairlift"
+          },
+          "q3": {
+            "text": "Does the person need help with transfers (bed/chair)?",
+            "help": "Transfer includes: positioning, repositioning, help getting up"
+          },
+          "q4": {
+            "text": "Does the person rely on mobility aids?",
+            "help": "E.g. walker, walking frame, wheelchair"
+          }
+        }
+      },
+      "kognitiveLeistungen": {
+        "title": "2. Cognitive Performance",
+        "description": "Mental abilities and orientation",
+        "questions": {
+          "q1": {
+            "text": "Is the person oriented in time, place and situation?",
+            "help": "Can the person grasp date, location and current situation?"
+          },
+          "q2": {
+            "text": "Are there problems remembering things?",
+            "help": "Forgetfulness in daily life: medication, appointments, meal times"
+          },
+          "q3": {
+            "text": "Can the person make decisions?",
+            "help": "Ability to make everyday decisions independently"
+          },
+          "q4": {
+            "text": "Are there behavioral abnormalities?",
+            "help": "E.g. confusion, agitation, rejection of help"
+          }
+        }
+      },
+      "körperlichePflege": {
+        "title": "3. Personal Care",
+        "description": "Body hygiene and personal cleanliness",
+        "questions": {
+          "q1": {
+            "text": "Can the person wash themselves?",
+            "help": "Washing, showering, bathing – which body parts independently?"
+          },
+          "q2": {
+            "text": "Can the person brush teeth and comb hair?",
+            "help": "Oral hygiene and hair care"
+          },
+          "q3": {
+            "text": "Can the person shave/apply makeup themselves?",
+            "help": "Facial care, shaving, decorative makeup"
+          },
+          "q4": {
+            "text": "Does the person need help using the toilet?",
+            "help": "Bladder/bowel control, intimate care, incontinence care"
+          }
+        }
+      },
+      "behandlungspflege": {
+        "title": "4. Medical Care",
+        "description": "Medical care and treatment",
+        "questions": {
+          "q1": {
+            "text": "Can the person take medication themselves?",
+            "help": "Dosing, taking, monitoring medication intake"
+          },
+          "q2": {
+            "text": "Can the person perform wound care alone?",
+            "help": "Changing bandages, wound cleaning, applying ointments"
+          },
+          "q3": {
+            "text": "Does the person need help with injections/medication?",
+            "help": "Insulin, injections, eye drops, ear drops"
+          },
+          "q4": {
+            "text": "Are there special treatments?",
+            "help": "E.g. compression stockings, oxygen therapy, catheter"
+          }
+        }
+      },
+      "hauswirtschaftlicheVersorgung": {
+        "title": "5. Household Management",
+        "description": "Household management and meals",
+        "questions": {
+          "q1": {
+            "text": "Can the person prepare meals?",
+            "help": "Shopping, cooking, washing dishes, reheating"
+          },
+          "q2": {
+            "text": "Can the person manage the household?",
+            "help": "Cleaning, washing, ironing, waste disposal"
+          },
+          "q3": {
+            "text": "Can the person do shopping?",
+            "help": "Groceries, household items, medication"
+          },
+          "q4": {
+            "text": "Can the person manage finances?",
+            "help": "Paying bills, banking, mail"
+          }
+        }
+      },
+      "sozialeKontakte": {
+        "title": "6. Social Contacts",
+        "description": "Communication and participation in life",
+        "questions": {
+          "q1": {
+            "text": "Can the person communicate actively?",
+            "help": "Speaking, hearing, seeing, gestures, facial expressions"
+          },
+          "q2": {
+            "text": "Can the person use the telephone?",
+            "help": "Making/receiving calls, understanding messages"
+          },
+          "q3": {
+            "text": "Can the person maintain social contacts?",
+            "help": "Visits, conversations, participation in community life"
+          },
+          "q4": {
+            "text": "Can the person engage in leisure activities?",
+            "help": "Hobbies, interests, physical activities"
+          }
+        }
+      }
+    },
+    "results": {
+      "title": "Your Result",
+      "subtitle": "Based on your information",
+      "gradeLabel": "Possible Care Level",
+      "gradeDescription": "Note: This is a guideline. Final determination is made by MDK.",
+      "pointsLabel": "Points",
+      "recommendation": "Recommended next steps",
+      "downloadReport": "Download Report",
+      "newCalculation": "New Calculation",
+      "consultation": "Book Free Consultation",
+      "grades": {
+        "0": "No Care Level",
+        "1": "Care Level 1",
+        "2": "Care Level 2",
+        "3": "Care Level 3",
+        "4": "Care Level 4",
+        "5": "Care Level 5"
+      },
+      "explanations": {
+        "0": "No care needs identified.",
+        "1": "Low care needs (from 27 points)",
+        "2": "Significant care needs (from 47 points)",
+        "3": "Severe care needs (from 72 points)",
+        "4": "Most severe care needs (from 95 points)",
+        "5": "Most severe care needs with special requirements (from 115 points)"
+      }
+    }
+  },
+  "briefe": {
+    "title": "Letter Templates",
+    "subtitle": "Professional templates for all care matters",
+    "description": "Download free sample letters or customize them online.",
+    "types": {
+      "pflegeantrag": {
+        "title": "Care Application",
+        "description": "Application for care benefits from care insurance",
+        "purpose": "Initial application for care benefits",
+        "fields": {
+          "versicherungsnummer": "Insurance Number",
+          "krankenkasse": "Health/Care Insurance",
+          "pflegebedürftiger": "Care Recipient Name",
+          "geburtsdatum": "Date of Birth",
+          "adresse": "Address",
+          "telefon": "Phone",
+          "email": "Email",
+          "pflegegradWunsch": "Desired Care Level (optional)"
+        }
+      },
+      "pflegegradEinstufung": {
+        "title": "Care Level Assessment",
+        "description": "Application for MDK assessment",
+        "purpose": "Request care level determination",
+        "fields": {
+          "versicherungsnummer": "Insurance Number",
+          "krankenkasse": "Health Insurance",
+          "name": "Name",
+          "adresse": "Address",
+          "symptome": "Description of care needs",
+          "dringlichkeit": "Urgency"
+        }
+      },
+      "pflegegeldErhoehung": {
+        "title": "Care Level Increase",
+        "description": "Application for higher care level",
+        "purpose": "Deterioration of health condition",
+        "fields": {
+          "versicherungsnummer": "Insurance Number",
+          "aktuellerGrad": "Current Care Level",
+          "veraenderungen": "Changes since last assessment",
+          "neuerPflegebedarf": "New care needs"
+        }
+      },
+      "widerspruchMdk": {
+        "title": "Appeal MDK",
+        "description": "Appeal against care level assessment",
+        "purpose": "Rejection or insufficient classification",
+        "fields": {
+          "versicherungsnummer": "Insurance Number",
+          "entscheidungsdatum": "Decision Date",
+          "bescheidNummer": "Decision Number",
+          "widerspruchsgruende": "Reasons for appeal"
+        }
+      },
+      "kurzzeitpflege": {
+        "title": "Short-Term Care",
+        "description": "Application for respite care",
+        "purpose": "Care by relatives during vacation/illness",
+        "fields": {
+          "versicherungsnummer": "Insurance Number",
+          "zeitraum": "Desired Period",
+          "begruendung": "Reason",
+          "einrichtung": "Preferred Facility"
+        }
+      },
+      "tagespflege": {
+        "title": "Day Care",
+        "description": "Application for day or night care",
+        "purpose": "Care during day or night",
+        "fields": {
+          "versicherungsnummer": "Insurance Number",
+          "tage": "Desired Days",
+          "zeiten": "Desired Times",
+          "einrichtung": "Preferred Facility"
+        }
+      },
+      "betreuungsleistungen": {
+        "title": "Care Services",
+        "description": "Application for care/personal assistance",
+        "purpose": "Daily life help through assistants",
+        "fields": {
+          "versicherungsnummer": "Insurance Number",
+          "leistungsarten": "Desired Service Types",
+          "umfang": "Extent per week"
+        }
+      },
+      "hilfsmittel": {
+        "title": "Aids",
+        "description": "Application for care aids",
+        "purpose": "Walker, care bed, lifter etc.",
+        "fields": {
+          "versicherungsnummer": "Insurance Number",
+          "hilfsmittel": "Required Aid",
+          "aerztlicheVerordnung": "Medical prescription available?",
+          "begruendung": "Reason"
+        }
+      }
+    },
+    "form": {
+      "title": "Create Letter",
+      "fillForm": "Fill Form",
+      "preview": "Preview",
+      "download": "Download (PDF)",
+      "copyText": "Copy Text",
+      "print": "Print",
+      "sendEmail": "Send via Email",
+      "save": "Save",
+      "edit": "Edit",
+      "cancel": "Cancel",
+      "required": "Required",
+      "optional": "Optional"
+    }
+  },
+  "hilfe": {
+    "title": "Help & Contact",
+    "subtitle": "We are here for you",
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "categories": {
+        "allgemein": "General",
+        "pflegegrad": "Care Level",
+        "leistungen": "Benefits",
+        "antrag": "Application",
+        "technisch": "Technical"
+      },
+      "questions": {
+        "q1": {
+          "question": "What is PflegeNavigator?",
+          "answer": "PflegeNavigator helps you determine your care level and provides sample letters for all care matters."
+        },
+        "q2": {
+          "question": "Is the use free of charge?",
+          "answer": "Yes, all features of PflegeNavigator are free to use."
+        },
+        "q3": {
+          "question": "How is the care level calculated?",
+          "answer": "The calculator is based on the MDK (Medical Service) assessment criteria. The result is a guideline."
+        },
+        "q4": {
+          "question": "Are the sample letters legally binding?",
+          "answer": "The letters are templates. Check the content before sending and add personal information."
+        },
+        "q5": {
+          "question": "How long does care level assessment take?",
+          "answer": "Processing by MDK usually takes 3-5 weeks from application submission."
+        }
+      },
+      "showMore": "Show more questions",
+      "showLess": "Show less",
+      "search": "Search..."
+    },
+    "contact": {
+      "title": "Contact Us",
+      "phone": "Phone",
+      "email": "Email",
+      "hours": "Availability",
+      "phoneHours": "Mon-Fri 8:00-18:00",
+      "emailResponse": "Response within 24h",
+      "formTitle": "Send Message",
+      "formName": "Your Name",
+      "formEmail": "Your Email",
+      "formSubject": "Subject",
+      "formMessage": "Your Message",
+      "formSend": "Send",
+      "formSuccess": "Message sent successfully!",
+      "formError": "Error sending. Please try again."
+    }
+  },
+  "common": {
+    "buttons": {
+      "back": "Back",
+      "next": "Next",
+      "continue": "Continue",
+      "start": "Start",
+      "finish": "Finish",
+      "cancel": "Cancel",
+      "close": "Close",
+      "save": "Save",
+      "delete": "Delete",
+      "edit": "Edit",
+      "create": "Create",
+      "confirm": "Confirm",
+      "submit": "Submit",
+      "loading": "Loading...",
+      "retry": "Retry",
+      "download": "Download",
+      "share": "Share",
+      "copy": "Copy",
+      "print": "Print"
+    },
+    "errors": {
+      "generic": "An error occurred",
+      "network": "Connection error. Please check your internet connection.",
+      "notFound": "Page not found",
+      "unauthorized": "Access not allowed",
+      "validation": "Please check your input",
+      "required": "This field is required",
+      "invalidEmail": "Please enter a valid email address",
+      "minLength": "At least {{count}} characters required",
+      "maxLength": "Maximum {{count}} characters allowed",
+      "serverError": "Server error. Please try again later."
+    },
+    "accessibility": {
+      "skipToContent": "Skip to main content",
+      "mainNavigation": "Main navigation",
+      "breadcrumb": "Breadcrumb navigation",
+      "closeMenu": "Close menu",
+      "openMenu": "Open menu",
+      "languageSelector": "Select language",
+      "search": "Search",
+      "formError": "Form error",
+      "requiredField": "Required field",
+      "optionalField": "Optional field",
+      "helpText": "Help text",
+      "expand": "Expand",
+      "collapse": "Collapse",
+      "modal": "Dialog",
+      "closeModal": "Close dialog",
+      "loading": "Loading",
+      "progress": "Progress",
+      "step": "Step"
+    },
+    "ampel": {
+      "green": "Good - No limitations",
+      "yellow": "Moderate - Partial limitations",
+      "red": "Poor - Severe limitations",
+      "notApplicable": "Not applicable",
+      "self": "Independent",
+      "partial": "Partial help",
+      "dependent": "Help needed"
+    },
+    "time": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "tomorrow": "Tomorrow",
+      "now": "Now",
+      "minutesAgo": "{{count}} minutes ago",
+      "hoursAgo": "{{count}} hours ago",
+      "daysAgo": "{{count}} days ago"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page",
+      "of": "of",
+      "showing": "Showing {{from}}-{{to}} of {{total}}"
+    }
+  },
+  "language": {
+    "title": "Language",
+    "current": "Current Language",
+    "select": "Select Language",
+    "search": "Search language",
+    "changed": "Language changed to: {{language}}",
+    "detected": "Language automatically detected"
+  }
+}

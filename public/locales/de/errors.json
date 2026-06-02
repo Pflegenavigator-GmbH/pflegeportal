@@ -1,0 +1,33 @@
+{
+  "general": {
+    "title": "Es ist ein Fehler aufgetreten",
+    "simple": "Etwas ist schiefgelaufen. Versuchen Sie es noch einmal.",
+    "retry": "Erneut versuchen"
+  },
+  "validation": {
+    "required": "Diese Angabe ist wichtig",
+    "requiredSimple": "Bitte hier etwas eingeben",
+    "invalid": "Eingabe ist nicht richtig",
+    "selectOption": "Bitte eine Antwort wählen"
+  },
+  "network": {
+    "title": "Keine Verbindung",
+    "message": "Bitte prüfen Sie Ihre Internet-Verbindung",
+    "simple": "Das Internet funktioniert nicht. Schauen Sie nach dem WLAN."
+  },
+  "notFound": {
+    "title": "Seite nicht gefunden",
+    "message": "Die Seite gibt es nicht",
+    "simple": "Diese Seite können wir nicht finden."
+  },
+  "server": {
+    "title": "Server-Fehler",
+    "message": "Ein technisches Problem ist aufgetreten",
+    "simple": "Ein Problem mit dem Computer. Versuchen Sie es später."
+  },
+  "pflegegrad": {
+    "berechnung": "Berechnung fehlgeschlagen",
+    "incomplete": "Bitte alle Fragen beantworten",
+    "incompleteSimple": "Es fehlen noch Antworten."
+  }
+}

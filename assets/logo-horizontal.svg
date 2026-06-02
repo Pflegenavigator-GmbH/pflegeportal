@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 60" width="300" height="60">
+  <!-- Compact horizontal version for letterhead -->
+  
+  <!-- Icon -->
+  <g transform="translate(10, 5) scale(0.5)">
+    <circle cx="50" cy="50" r="42" fill="none" stroke="#0f2744" stroke-width="3"/>
+    <circle cx="50" cy="50" r="36" fill="white"/>
+    <circle cx="50" cy="10" r="5" fill="#0f2744"/>
+    <text x="50" y="14" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="white">N</text>
+    <g transform="translate(50, 50) rotate(-45)">
+      <polygon points="0,-32 -7,0 7,0" fill="#20b2aa"/>
+      <polygon points="0,32 -7,0 7,0" fill="#0f2744"/>
+      <circle cx="0" cy="0" r="5" fill="white" stroke="#0f2744" stroke-width="2"/>
+    </g>
+  </g>
+  
+  <!-- Text -->
+  <g transform="translate(65, 20)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#0f2744">
+      Pflege<tspan fill="#20b2aa">Navigator</tspan>
+    </text>
+    <rect x="162" y="-16" width="28" height="16" rx="2" fill="#0f2744"/>
+    <text x="176" y="-5" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">EU</text>
+    <text x="0" y="18" font-family="Arial, sans-serif" font-size="10" fill="#64748b">
+      Ihr Weg durch die Pflege
+    </text>
+  </g>
+</svg>

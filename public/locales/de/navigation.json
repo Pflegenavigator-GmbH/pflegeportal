@@ -1,0 +1,18 @@
+{
+  "nav": {
+    "home": "Startseite",
+    "pflegegrad": "Pflegegrad berechnen",
+    "tagebuch": "Pflege-Tagebuch",
+    "unterstuetzung": "Hilfe & Unterstützung",
+    "bewertung": "Recht auf Bewertung",
+    "datenschutz": "Datenschutz",
+    "impressum": "Impressum",
+    "briefe": "Brief-Generator",
+    "hilfe": "Hilfe"
+  },
+  "breadcrumbs": {
+    "home": "Start",
+    "current": "Aktuelle Seite"
+  },
+  "skipLink": "Zum Hauptinhalt springen"
+}

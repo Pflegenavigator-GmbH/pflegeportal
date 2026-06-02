@@ -1,0 +1,445 @@
+{
+  "meta": {
+    "title": "PflegeNavigator - Ihre Pflegehilfe",
+    "description": "Unterstützung bei Pflegegrad-Anfragen, Anträgen und Widersprüchen",
+    "keywords": "Pflege, Pflegegrad, Antrag, Widerspruch, Pflegeversicherung"
+  },
+  "navigation": {
+    "home": "Startseite",
+    "homeDescription": "Übersicht über alle Pflege-Module",
+    "pflegegrad": "Pflegegrad-Rechner",
+    "pflegegradDescription": "Ermitteln Sie Ihren möglichen Pflegegrad",
+    "briefe": "Musterbriefe",
+    "briefeDescription": "Vorlagen für Anträge und Widersprüche",
+    "hilfe": "Hilfe & Kontakt",
+    "hilfeDescription": "Häufige Fragen und Support",
+    "dashboard": "Mein Bereich",
+    "profil": "Profil",
+    "einstellungen": "Einstellungen",
+    "abmelden": "Abmelden",
+    "anmelden": "Anmelden"
+  },
+  "pflegegrad": {
+    "title": "Pflegegrad-Rechner",
+    "subtitle": "Ermitteln Sie Ihren möglichen Pflegegrad anhand des MDK-Moduls",
+    "progress": "Frage {{current}} von {{total}}",
+    "module": {
+      "mobilität": {
+        "title": "1. Mobilität",
+        "description": "Fähigkeit, sich selbstständig fortzubewegen",
+        "questions": {
+          "q1": {
+            "text": "Kann die Person sich im Wohnraum selbstständig fortbewegen?",
+            "help": "Dazu zählen: Aufstehen, Gehen, Stuhl benutzen, Bett verlassen"
+          },
+          "q2": {
+            "text": "Kann die Person Treppen steigen?",
+            "help": "Mit oder ohne Hilfsmittel wie Treppenlift"
+          },
+          "q3": {
+            "text": "Benötigt die Person Hilfe beim Transfer (Bett/Stuhl)?",
+            "help": "Transfer umfasst: Lagerung, Positionierung, Hilfe beim Aufstehen"
+          },
+          "q4": {
+            "text": "Ist die Person auf Hilfsmittel angewiesen?",
+            "help": "Z.B. Rollator, Gehhilfe, Rollstuhl"
+          }
+        }
+      },
+      "kognitiveLeistungen": {
+        "title": "2. Kognitive Leistungen",
+        "description": "Geistige Fähigkeiten und Orientierung",
+        "questions": {
+          "q1": {
+            "text": "Ist die Person zeitlich, örtlich und situativ orientiert?",
+            "help": "Kann die Person Datum, Ort und aktuelle Situation erfassen?"
+          },
+          "q2": {
+            "text": "Gibt es Probleme beim Erinnern von Dingen?",
+            "help": "Vergesslichkeit im Alltag: Medikamente, Termine, Essenszeiten"
+          },
+          "q3": {
+            "text": "Kann die Person Entscheidungen treffen?",
+            "help": "Fähigkeit, Alltagsentscheidungen selbst zu treffen"
+          },
+          "q4": {
+            "text": "Gibt es Verhaltensauffälligkeiten?",
+            "help": "Z.B. Verwirrtheit, Agitiertheit, Abwehr von Hilfe"
+          }
+        }
+      },
+      "körperlichePflege": {
+        "title": "3. Körperliche Pflege",
+        "description": "Körperhygiene und persönliche Sauberkeit",
+        "questions": {
+          "q1": {
+            "text": "Kann die Person sich selbst waschen?",
+            "help": "Waschen, Duschen, Baden – welche Körperteile selbstständig?"
+          },
+          "q2": {
+            "text": "Kann die Person Zähneputzen und Haare kämmen?",
+            "help": "Mundhygiene und Haarpflege"
+          },
+          "q3": {
+            "text": "Kann die Person sich selbst rasieren/schminken?",
+            "help": "Gesichtspflege, Rasur, dekoratives Schminken"
+          },
+          "q4": {
+            "text": "Benötigt die Person Hilfe beim Toilettengang?",
+            "help": "Blasen-/Darmkontrolle, Intimpflege, Inkontinenzversorgung"
+          }
+        }
+      },
+      "behandlungspflege": {
+        "title": "4. Behandlungspflege",
+        "description": "Medizinische Versorgung und Behandlung",
+        "questions": {
+          "q1": {
+            "text": "Kann die Person Medikamente selbst einnehmen?",
+            "help": "Dosieren, Einnehmen, Kontrolle der Medikamenteneinnahme"
+          },
+          "q2": {
+            "text": "Kann die Person Wundversorgung allein durchführen?",
+            "help": "Verbandwechsel, Wundreinigung, Salbenauftrag"
+          },
+          "q3": {
+            "text": "Benötigt die Person Hilfe bei Spritzen/Medikamenten?",
+            "help": "Insulin, Injektionen, Augentropfen, Ohrentropfen"
+          },
+          "q4": {
+            "text": "Gibt es spezielle Behandlungen?",
+            "help": "Z.B. Kompressionsstrümpfe, Sauerstofftherapie, Katheter"
+          }
+        }
+      },
+      "hauswirtschaftlicheVersorgung": {
+        "title": "5. Hauswirtschaftliche Versorgung",
+        "description": "Haushaltsführung und Mahlzeiten",
+        "questions": {
+          "q1": {
+            "text": "Kann die Person Mahlzeiten zubereiten?",
+            "help": "Einkaufen, Kochen, Geschirr spülen, Aufwärmen"
+          },
+          "q2": {
+            "text": "Kann die Person den Haushalt führen?",
+            "help": "Putzen, Waschen, Bügeln, Müllentsorgung"
+          },
+          "q3": {
+            "text": "Kann die Person Einkäufe erledigen?",
+            "help": "Lebensmittel, Haushaltswaren, Medikamente"
+          },
+          "q4": {
+            "text": "Kann die Person Finanzielles regeln?",
+            "help": "Rechnungen bezahlen, Bankgeschäfte, Post"
+          }
+        }
+      },
+      "sozialeKontakte": {
+        "title": "6. Soziale Kontakte",
+        "description": "Kommunikation und Teilhabe am Leben",
+        "questions": {
+          "q1": {
+            "text": "Kann die Person aktiv kommunizieren?",
+            "help": "Sprechen, Hören, Sehen, Gestik, Mimik"
+          },
+          "q2": {
+            "text": "Kann die Person das Telefon benutzen?",
+            "help": "Anrufen tätigen/entgegennehmen, Nachrichten verstehen"
+          },
+          "q3": {
+            "text": "Kann die Person soziale Kontakte pflegen?",
+            "help": "Besuche, Gespräche, Teilnahme am Gemeindeleben"
+          },
+          "q4": {
+            "text": "Kann die Person Freizeitaktivitäten ausüben?",
+            "help": "Hobbys, Interessen, körperliche Aktivitäten"
+          }
+        }
+      }
+    },
+    "results": {
+      "title": "Ihr Ergebnis",
+      "subtitle": "Basierend auf Ihren Angaben",
+      "gradeLabel": "Möglicher Pflegegrad",
+      "gradeDescription": "Hinweis: Dies ist eine Orientierung. Die endgültige Feststellung erfolgt durch den MDK.",
+      "pointsLabel": "Punkte",
+      "recommendation": "Empfohlene nächste Schritte",
+      "downloadReport": "Bericht herunterladen",
+      "newCalculation": "Neue Berechnung",
+      "consultation": "Kostenlose Beratung buchen",
+      "grades": {
+        "0": "Kein Pflegegrad",
+        "1": "Pflegegrad 1",
+        "2": "Pflegegrad 2",
+        "3": "Pflegegrad 3",
+        "4": "Pflegegrad 4",
+        "5": "Pflegegrad 5"
+      },
+      "explanations": {
+        "0": "Es liegen keine Pflegebedürftigkeit vor.",
+        "1": "Geringe Pflegebedürftigkeit (ab 27 Punkte)",
+        "2": "Erhebliche Pflegebedürftigkeit (ab 47 Punkte)",
+        "3": "Schwere Pflegebedürftigkeit (ab 72 Punkte)",
+        "4": "Schwerste Pflegebedürftigkeit (ab 95 Punkte)",
+        "5": "Schwerste Pflegebedürftigkeit mit besonderen Anforderungen (ab 115 Punkte)"
+      }
+    }
+  },
+  "briefe": {
+    "title": "Musterbriefe",
+    "subtitle": "Professionelle Vorlagen für alle Pflege-Anliegen",
+    "description": "Laden Sie kostenlose Musterbriefe herunter oder passen Sie sie online an.",
+    "types": {
+      "pflegeantrag": {
+        "title": "Pflegeantrag",
+        "description": "Antrag auf Pflegeleistungen bei der Pflegekasse",
+        "purpose": "Erstmalige Beantragung von Pflegeleistungen",
+        "fields": {
+          "versicherungsnummer": "Versicherungsnummer",
+          "krankenkasse": "Krankenkasse/Pflegekasse",
+          "pflegebedürftiger": "Name Pflegebedürftiger",
+          "geburtsdatum": "Geburtsdatum",
+          "adresse": "Adresse",
+          "telefon": "Telefon",
+          "email": "E-Mail",
+          "pflegegradWunsch": "Gewünschter Pflegegrad (optional)"
+        }
+      },
+      "pflegegradEinstufung": {
+        "title": "Einstufung Pflegegrad",
+        "description": "Antrag auf Begutachtung durch den MDK",
+        "purpose": "Beantragung einer Pflegegrad-Feststellung",
+        "fields": {
+          "versicherungsnummer": "Versicherungsnummer",
+          "krankenkasse": "Krankenkasse",
+          "name": "Name",
+          "adresse": "Adresse",
+          "symptome": "Beschreibung der Pflegebedürftigkeit",
+          "dringlichkeit": "Dringlichkeit"
+        }
+      },
+      "pflegegeldErhoehung": {
+        "title": "Erhöhung Pflegegeld",
+        "description": "Antrag auf höheren Pflegegrad",
+        "purpose": "Verschlechterung des Gesundheitszustands",
+        "fields": {
+          "versicherungsnummer": "Versicherungsnummer",
+          "aktuellerGrad": "Aktueller Pflegegrad",
+          "veraenderungen": "Veränderungen seit der letzten Einstufung",
+          "neuerPflegebedarf": "Neuer Pflegebedarf"
+        }
+      },
+      "widerspruchMdk": {
+        "title": "Widerspruch MDK",
+        "description": "Widerspruch gegen Pflegegrad-Einstufung",
+        "purpose": "Ablehnung oder zu niedrige Einstufung",
+        "fields": {
+          "versicherungsnummer": "Versicherungsnummer",
+          "entscheidungsdatum": "Datum der MDK-Entscheidung",
+          "bescheidNummer": "Bescheid-Nummer",
+          "widerspruchsgruende": "Gründe für den Widerspruch"
+        }
+      },
+      "kurzzeitpflege": {
+        "title": "Kurzzeitpflege",
+        "description": "Antrag auf Verhinderungspflege",
+        "purpose": "Pflege durch Angehörige bei Urlaub/Krankheit",
+        "fields": {
+          "versicherungsnummer": "Versicherungsnummer",
+          "zeitraum": "Gewünschter Zeitraum",
+          "begruendung": "Begründung",
+          "einrichtung": "Gewünschte Einrichtung"
+        }
+      },
+      "tagespflege": {
+        "title": "Tagespflege",
+        "description": "Antrag auf Tages- oder Nachtpflege",
+        "purpose": "Betreuung tagsüber oder nachts",
+        "fields": {
+          "versicherungsnummer": "Versicherungsnummer",
+          "tage": "Gewünschte Tage",
+          "zeiten": "Gewünschte Zeiten",
+          "einrichtung": "Gewünschte Einrichtung"
+        }
+      },
+      "betreuungsleistungen": {
+        "title": "Betreuungsleistungen",
+        "description": "Antrag auf Betreuung/Persönliche Assistenz",
+        "purpose": "Hilfe im Alltag durch Assistenten",
+        "fields": {
+          "versicherungsnummer": "Versicherungsnummer",
+          "leistungsarten": "Gewünschte Leistungsarten",
+          "umfang": "Umfang pro Woche"
+        }
+      },
+      "hilfsmittel": {
+        "title": "Hilfsmittel",
+        "description": "Antrag auf Pflege-Hilfsmittel",
+        "purpose": "Rollator, Pflegebett, Lifter etc.",
+        "fields": {
+          "versicherungsnummer": "Versicherungsnummer",
+          "hilfsmittel": "Benötigtes Hilfsmittel",
+          "aerztlicheVerordnung": "Ärztliche Verordnung vorhanden?",
+          "begruendung": "Begründung"
+        }
+      }
+    },
+    "form": {
+      "title": "Brief erstellen",
+      "fillForm": "Formular ausfüllen",
+      "preview": "Vorschau",
+      "download": "Herunterladen (PDF)",
+      "copyText": "Text kopieren",
+      "print": "Drucken",
+      "sendEmail": "Per E-Mail senden",
+      "save": "Speichern",
+      "edit": "Bearbeiten",
+      "cancel": "Abbrechen",
+      "required": "Pflichtfeld",
+      "optional": "Optional"
+    }
+  },
+  "hilfe": {
+    "title": "Hilfe & Kontakt",
+    "subtitle": "Wir sind für Sie da",
+    "faq": {
+      "title": "Häufige Fragen",
+      "categories": {
+        "allgemein": "Allgemein",
+        "pflegegrad": "Pflegegrad",
+        "leistungen": "Leistungen",
+        "antrag": "Antragstellung",
+        "technisch": "Technisch"
+      },
+      "questions": {
+        "q1": {
+          "question": "Was ist der PflegeNavigator?",
+          "answer": "Der PflegeNavigator hilft Ihnen bei der Ermittlung Ihres Pflegegrads und stellt Musterbriefe für alle Pflege-Anliegen zur Verfügung."
+        },
+        "q2": {
+          "question": "Ist die Nutzung kostenlos?",
+          "answer": "Ja, alle Funktionen des PflegeNavigators sind kostenlos nutzbar."
+        },
+        "q3": {
+          "question": "Wie wird der Pflegegrad berechnet?",
+          "answer": "Der Rechner basiert auf den Bewertungskriterien des MDK (Medizinischer Dienst). Die Ermittlung ist eine Orientierungshilfe."
+        },
+        "q4": {
+          "question": "Sind die Musterbriefe rechtsverbindlich?",
+          "answer": "Die Briefe sind Vorlagen. Prüfen Sie die Inhalte vor dem Absenden und ergänzen Sie persönliche Angaben."
+        },
+        "q5": {
+          "question": "Wie lange dauert eine Pflegegrad-Einstufung?",
+          "answer": "Die Bearbeitung durch den MDK dauert in der Regel 3-5 Wochen ab Antragstellung."
+        }
+      },
+      "showMore": "Weitere Fragen anzeigen",
+      "showLess": "Weniger anzeigen",
+      "search": "Suchen..."
+    },
+    "contact": {
+      "title": "Kontaktieren Sie uns",
+      "phone": "Telefon",
+      "email": "E-Mail",
+      "hours": "Erreichbarkeit",
+      "phoneHours": "Mo-Fr 8:00-18:00 Uhr",
+      "emailResponse": "Antwort innerhalb 24h",
+      "formTitle": "Nachricht senden",
+      "formName": "Ihr Name",
+      "formEmail": "Ihre E-Mail",
+      "formSubject": "Betreff",
+      "formMessage": "Ihre Nachricht",
+      "formSend": "Absenden",
+      "formSuccess": "Nachricht erfolgreich gesendet!",
+      "formError": "Fehler beim Senden. Bitte versuchen Sie es erneut."
+    }
+  },
+  "common": {
+    "buttons": {
+      "back": "Zurück",
+      "next": "Weiter",
+      "continue": "Fortfahren",
+      "start": "Starten",
+      "finish": "Abschließen",
+      "cancel": "Abbrechen",
+      "close": "Schließen",
+      "save": "Speichern",
+      "delete": "Löschen",
+      "edit": "Bearbeiten",
+      "create": "Erstellen",
+      "confirm": "Bestätigen",
+      "submit": "Absenden",
+      "loading": "Wird geladen...",
+      "retry": "Erneut versuchen",
+      "download": "Herunterladen",
+      "share": "Teilen",
+      "copy": "Kopieren",
+      "print": "Drucken"
+    },
+    "errors": {
+      "generic": "Ein Fehler ist aufgetreten",
+      "network": "Verbindungsfehler. Bitte überprüfen Sie Ihre Internetverbindung.",
+      "notFound": "Seite nicht gefunden",
+      "unauthorized": "Zugriff nicht erlaubt",
+      "validation": "Bitte überprüfen Sie Ihre Eingaben",
+      "required": "Dieses Feld ist erforderlich",
+      "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+      "minLength": "Mindestens {{count}} Zeichen erforderlich",
+      "maxLength": "Maximal {{count}} Zeichen erlaubt",
+      "serverError": "Serverfehler. Bitte versuchen Sie es später erneut."
+    },
+    "accessibility": {
+      "skipToContent": "Zum Hauptinhalt springen",
+      "mainNavigation": "Hauptnavigation",
+      "breadcrumb": "Brotkrümelnavigation",
+      "closeMenu": "Menü schließen",
+      "openMenu": "Menü öffnen",
+      "languageSelector": "Sprache wählen",
+      "search": "Suche",
+      "formError": "Formularfehler",
+      "requiredField": "Erforderliches Feld",
+      "optionalField": "Optionales Feld",
+      "helpText": "Hilfetext",
+      "expand": "Aufklappen",
+      "collapse": "Zuklappen",
+      "modal": "Dialog",
+      "closeModal": "Dialog schließen",
+      "loading": "Wird geladen",
+      "progress": "Fortschritt",
+      "step": "Schritt"
+    },
+    "ampel": {
+      "green": "Gut - Keine Einschränkung",
+      "yellow": "Mittel - Teilweise Einschränkung",
+      "red": "Schlecht - Starke Einschränkung",
+      "notApplicable": "Nicht zutreffend",
+      "self": "Selbstständig",
+      "partial": "Teilweise Hilfe",
+      "dependent": "Hilfe benötigt"
+    },
+    "time": {
+      "today": "Heute",
+      "yesterday": "Gestern",
+      "tomorrow": "Morgen",
+      "now": "Jetzt",
+      "minutesAgo": "Vor {{count}} Minuten",
+      "hoursAgo": "Vor {{count}} Stunden",
+      "daysAgo": "Vor {{count}} Tagen"
+    },
+    "pagination": {
+      "previous": "Vorherige",
+      "next": "Nächste",
+      "page": "Seite",
+      "of": "von",
+      "showing": "Zeige {{from}}-{{to}} von {{total}}"
+    }
+  },
+  "language": {
+    "title": "Sprache",
+    "current": "Aktuelle Sprache",
+    "select": "Sprache auswählen",
+    "search": "Sprache suchen",
+    "changed": "Sprache geändert zu: {{language}}",
+    "detected": "Sprache automatisch erkannt"
+  }
+}

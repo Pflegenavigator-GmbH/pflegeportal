@@ -1,0 +1,47 @@
+{
+  "title": "Ihr Ergebnis",
+  "subtitle": "Das ist eine erste Einschätzung",
+  "pflegegrad": {
+    "title": "Möglicher Pflegegrad: {{grad}}",
+    "keiner": "Kein Pflegegrad",
+    "keinerSimple": "Vielleicht kein Pflegegrad",
+    "hinweis": "Dies ist eine grobe Einschätzung. Nur der MDK kann den Pflegegrad feststellen.",
+    "hinweisSimple": "Das ist nur ein Schätzwert. Der MDK muss es genau prüfen."
+  },
+  "details": {
+    "title": "Details",
+    "punkte": "Punkte",
+    "bereiche": "Bereiche mit Einschränkungen"
+  },
+  "nextSteps": {
+    "title": "Was kommt jetzt?",
+    "titleSimple": "Was machen Sie jetzt?",
+    "antrag": {
+      "title": "Antrag stellen",
+      "simple": "Beim Versorgungsamt einen Antrag machen",
+      "description": "Stellen Sie einen Antrag beim Medizinischen Dienst der Krankenkassen (MDK)."
+    },
+    "unterstuetzung": {
+      "title": "Unterstützung finden",
+      "simple": "Hilfe finden",
+      "description": "Wir zeigen Ihnen Hilfsangebote in Ihrer Nähe."
+    },
+    "tagebuch": {
+      "title": "Pflege-Tagebuch",
+      "simple": "Pflege aufschreiben",
+      "description": "Notieren Sie die Pflege für den Antrag."
+    }
+  },
+  "brief": {
+    "title": "Brief erstellen",
+    "titleSimple": "Brief schreiben",
+    "description": "Erstellen Sie einen Antragsbrief",
+    "descriptionSimple": "Wir helfen Ihnen, einen Brief zu schreiben."
+  },
+  "save": {
+    "title": "Ergebnis speichern",
+    "qr": "Als QR-Code senden",
+    "email": "Per E-Mail senden",
+    "pdf": "Als PDF herunterladen"
+  }
+}

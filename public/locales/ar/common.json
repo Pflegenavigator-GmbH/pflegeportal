@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "title": "PflegeNavigator - حاسبة مستوى الرعاية المجانية",
+    "description": "احسب مستوى الرعاية الخاص بك مجانًا. بلغة بسيطة، وسهلة الوصول، ومتوافقة مع حماية البيانات.",
+    "ogTitle": "PflegeNavigator - حاسبة مستوى الرعاية المجانية"
+  },
+  "header": {
+    "logo": "PflegeNavigator",
+    "tagline": "حساب مستوى الرعاية المجاني"
+  },
+  "footer": {
+    "copyright": "© 2025 PflegeNavigator",
+    "datenschutz": "سياسة الخصوصية",
+    "impressum": "بيان قانوني"
+  },
+  "language": {
+    "current": "اللغة الحالية",
+    "select": "اختر اللغة",
+    "detected": "تم التعرف تلقائيًا"
+  }
+}

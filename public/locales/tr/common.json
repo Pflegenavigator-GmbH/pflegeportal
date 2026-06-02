@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "title": "PflegeNavigator - Ücretsiz Bakım Seviyesi Hesaplayıcı",
+    "description": "Bakım seviyenizi ücretsiz hesaplayın. Basit dil, erişilebilir ve veri korumasına uygun.",
+    "ogTitle": "PflegeNavigator - Ücretsiz Bakım Seviyesi Hesaplayıcı"
+  },
+  "header": {
+    "logo": "PflegeNavigator",
+    "tagline": "Ücretsiz Bakım Seviyesi Hesaplama"
+  },
+  "footer": {
+    "copyright": "© 2025 PflegeNavigator",
+    "datenschutz": "Gizlilik Politikası",
+    "impressum": "Yasal Uyarı"
+  },
+  "language": {
+    "current": "Mevcut Dil",
+    "select": "Dil Seç",
+    "detected": "Otomatik algılandı"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "general": {
+    "title": "An error has occurred",
+    "simple": "Something went wrong. Please try again.",
+    "retry": "Try Again"
+  },
+  "validation": {
+    "required": "This information is required",
+    "requiredSimple": "Please enter something here",
+    "invalid": "Input is not valid",
+    "selectOption": "Please select an answer"
+  },
+  "network": {
+    "title": "No Connection",
+    "message": "Please check your internet connection",
+    "simple": "The internet is not working. Please check your WiFi."
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "message": "This page does not exist",
+    "simple": "We cannot find this page."
+  },
+  "server": {
+    "title": "Server Error",
+    "message": "A technical problem has occurred",
+    "simple": "A computer problem. Please try again later."
+  },
+  "pflegegrad": {
+    "berechnung": "Calculation failed",
+    "incomplete": "Please answer all questions",
+    "incompleteSimple": "Some answers are missing."
+  }
+}

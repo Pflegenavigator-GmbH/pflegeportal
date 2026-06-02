@@ -1,0 +1,223 @@
+{
+  "title": "Calculate Care Level",
+  "subtitle": "Answer a few questions. We'll calculate your potential care level.",
+  "simpleLanguage": {
+    "label": "Simple Language",
+    "description": "Easy words and short sentences"
+  },
+  "modules": {
+    "mobilitaet": {
+      "title": "Mobility",
+      "subtitle": "Walking and Moving",
+      "simple": "Can you walk well? Or do you need help walking?",
+      "questions": {
+        "laufen": {
+          "label": "Walking and Running",
+          "simple": "Can you walk alone?",
+          "options": {
+            "selbst": "I can walk alone",
+            "hilfe": "I sometimes need help",
+            "nicht": "I cannot walk alone"
+          }
+        },
+        "treppen": {
+          "label": "Climbing Stairs",
+          "simple": "Can you climb stairs?",
+          "options": {
+            "selbst": "No problems",
+            "teilweise": "I need help",
+            "nicht": "Not possible"
+          }
+        },
+        "rollstuhl": {
+          "label": "Wheelchair",
+          "simple": "Do you need a wheelchair?",
+          "options": {
+            "nein": "No",
+            "manchmal": "Sometimes",
+            "immer": "Always"
+          }
+        }
+      }
+    },
+    "koerperpflege": {
+      "title": "Personal Care",
+      "subtitle": "Washing and Dressing",
+      "simple": "Can you wash and dress yourself?",
+      "questions": {
+        "waschen": {
+          "label": "Washing Body",
+          "simple": "Can you wash yourself alone?",
+          "options": {
+            "selbst": "Yes, alone",
+            "teilweise": "Sometimes need help",
+            "nicht": "Always need help"
+          }
+        },
+        "zaehne": {
+          "label": "Brushing Teeth",
+          "simple": "Can you brush your teeth?",
+          "options": {
+            "selbst": "Yes",
+            "teilweise": "Sometimes",
+            "nicht": "No"
+          }
+        },
+        "anziehen": {
+          "label": "Dressing and Undressing",
+          "simple": "Can you dress yourself?",
+          "options": {
+            "selbst": "Yes",
+            "teilweise": "Sometimes",
+            "nicht": "No"
+          }
+        }
+      }
+    },
+    "ernaehrung": {
+      "title": "Nutrition",
+      "subtitle": "Eating and Drinking",
+      "simple": "Can you eat and drink alone?",
+      "questions": {
+        "essen": {
+          "label": "Eating",
+          "simple": "Can you eat alone?",
+          "options": {
+            "selbst": "Yes",
+            "teilweise": "Sometimes need help",
+            "nicht": "Need help"
+          }
+        },
+        "trinken": {
+          "label": "Drinking",
+          "simple": "Can you drink alone?",
+          "options": {
+            "selbst": "Yes",
+            "teilweise": "Sometimes",
+            "nicht": "Need help"
+          }
+        }
+      }
+    },
+    "toilette": {
+      "title": "Toilet",
+      "subtitle": "Using the toilet",
+      "simple": "Can you use the toilet alone?",
+      "questions": {
+        "toilette": {
+          "label": "Toilet Use",
+          "simple": "Can you go to the toilet alone?",
+          "options": {
+            "selbst": "Yes",
+            "teilweise": "Sometimes",
+            "nicht": "Need help"
+          }
+        },
+        "inkontinenz": {
+          "label": "Incontinence Help",
+          "simple": "Do you need diapers?",
+          "options": {
+            "nein": "No",
+            "manchmal": "Sometimes",
+            "immer": "Yes, always"
+          }
+        }
+      }
+    },
+    "schlaf": {
+      "title": "Sleep",
+      "subtitle": "Waking up at night",
+      "simple": "Do you need help at night?",
+      "questions": {
+        "nacht": {
+          "label": "Night Help",
+          "simple": "Do you wake up at night? Do you need help then?",
+          "options": {
+            "nein": "No",
+            "manchmal": "Sometimes",
+            "oft": "Often"
+          }
+        }
+      }
+    },
+    "haushalt": {
+      "title": "Household",
+      "subtitle": "Housework",
+      "simple": "Can you do housework?",
+      "questions": {
+        "einkaufen": {
+          "label": "Shopping",
+          "simple": "Can you go shopping?",
+          "options": {
+            "selbst": "Yes",
+            "teilweise": "Sometimes",
+            "nicht": "No"
+          }
+        },
+        "kochen": {
+          "label": "Cooking",
+          "simple": "Can you cook?",
+          "options": {
+            "selbst": "Yes",
+            "teilweise": "Sometimes",
+            "nicht": "No"
+          }
+        }
+      }
+    },
+    "kognitive": {
+      "title": "Thinking and Remembering",
+      "subtitle": "Dementia and Confusion",
+      "simple": "Do you have memory problems?",
+      "questions": {
+        "gedaechtnis": {
+          "label": "Memory",
+          "simple": "Do you forget things?",
+          "options": {
+            "nein": "No",
+            "manchmal": "Sometimes",
+            "oft": "Often"
+          }
+        },
+        "verwirrung": {
+          "label": "Confusion",
+          "simple": "Are you sometimes confused?",
+          "options": {
+            "nein": "No",
+            "manchmal": "Sometimes",
+            "oft": "Often"
+          }
+        }
+      }
+    },
+    "kommunikation": {
+      "title": "Communication",
+      "subtitle": "Speaking and Understanding",
+      "simple": "Can you speak and understand well?",
+      "questions": {
+        "sprechen": {
+          "label": "Speaking",
+          "simple": "Can you speak well?",
+          "options": {
+            "ja": "Yes",
+            "teilweise": "Sometimes difficult",
+            "nein": "No"
+          }
+        },
+        "verstehen": {
+          "label": "Understanding",
+          "simple": "Do you understand others?",
+          "options": {
+            "ja": "Yes",
+            "teilweise": "Sometimes",
+            "nein": "No"
+          }
+        }
+      }
+    }
+  },
+  "progress": {
+    "step": "Step {{current}} of {{total}}",
+    "percent": "{{percent}}% complete"
+  }
+}

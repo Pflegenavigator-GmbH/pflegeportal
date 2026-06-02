@@ -1,0 +1,47 @@
+{
+  "title": "Your Result",
+  "subtitle": "This is a first assessment",
+  "pflegegrad": {
+    "title": "Possible Care Level: {{grad}}",
+    "keiner": "No Care Level",
+    "keinerSimple": "Maybe no care level",
+    "hinweis": "This is a rough estimate. Only the MDK can determine the care level.",
+    "hinweisSimple": "This is just an estimate. The MDK must check it properly."
+  },
+  "details": {
+    "title": "Details",
+    "punkte": "Points",
+    "bereiche": "Areas with limitations"
+  },
+  "nextSteps": {
+    "title": "What happens now?",
+    "titleSimple": "What do you do now?",
+    "antrag": {
+      "title": "Submit Application",
+      "simple": "Make an application at the social welfare office",
+      "description": "Submit an application to the Medical Service of the Health Insurance Funds (MDK)."
+    },
+    "unterstuetzung": {
+      "title": "Find Support",
+      "simple": "Find help",
+      "description": "We show you support services in your area."
+    },
+    "tagebuch": {
+      "title": "Care Diary",
+      "simple": "Write down care",
+      "description": "Record care for the application."
+    }
+  },
+  "brief": {
+    "title": "Create Letter",
+    "titleSimple": "Write a letter",
+    "description": "Create an application letter",
+    "descriptionSimple": "We help you write a letter."
+  },
+  "save": {
+    "title": "Save Result",
+    "qr": "Send as QR Code",
+    "email": "Send by Email",
+    "pdf": "Download as PDF"
+  }
+}

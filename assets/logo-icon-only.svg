@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="iconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#20b2aa;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f2744;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Circle -->
+  <circle cx="50" cy="50" r="48" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+  
+  <!-- Outer Ring -->
+  <circle cx="50" cy="50" r="42" fill="none" stroke="#0f2744" stroke-width="3"/>
+  
+  <!-- Inner Background -->
+  <circle cx="50" cy="50" r="36" fill="white"/>
+  
+  <!-- Direction Markers -->
+  <circle cx="50" cy="10" r="5" fill="#0f2744"/>
+  <text x="50" y="14" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="white">N</text>
+  
+  <!-- Compass Needle -->
+  <g transform="translate(50, 50) rotate(-45)">
+    <polygon points="0,-32 -7,0 7,0" fill="#20b2aa"/>
+    <polygon points="0,32 -7,0 7,0" fill="#0f2744"/>
+    <circle cx="0" cy="0" r="5" fill="white" stroke="#0f2744" stroke-width="2"/>
+  </g>
+  
+  <!-- Subtle Heart/Care Element -->
+  <path d="M 50 60 Q 44 55 50 50 Q 56 55 50 60" fill="#20b2aa" opacity="0.5"/>
+</svg>

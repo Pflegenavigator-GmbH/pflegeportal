@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "title": "PflegeNavigator - ماشین حساب رایگان سطح مراقبت",
+    "description": "سطح مراقبت خود را به صورت رایگان محاسبه کنید. با زبان ساده، در دسترس و مطابق با حفاظت از داده‌ها.",
+    "ogTitle": "PflegeNavigator - ماشین حساب رایگان سطح مراقبت"
+  },
+  "header": {
+    "logo": "PflegeNavigator",
+    "tagline": "محاسبه رایگان سطح مراقبت"
+  },
+  "footer": {
+    "copyright": "© 2025 PflegeNavigator",
+    "datenschutz": "سیاست حفظ حریم خصوصی",
+    "impressum": "اطلاعیه حقوقی"
+  },
+  "language": {
+    "current": "زبان فعلی",
+    "select": "انتخاب زبان",
+    "detected": "به طور خودکار شناسایی شد"
+  }
+}

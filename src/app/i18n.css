@@ -1,0 +1,138 @@
+/* src/app/i18n.css */
+@import 'tailwindcss';
+
+/* RTL Support */
+[dir='rtl'] {
+    direction: rtl;
+    text-align: right;
+}
+
+[dir='ltr'] {
+    direction: ltr;
+    text-align: left;
+}
+
+/* RTL-specific utilities */
+.rtl-grid {
+    direction: rtl;
+}
+
+[dir='rtl'] .rtl-flip {
+    transform: scaleX(-1);
+}
+
+[dir='rtl'] .rtl-space-x-reverse > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-x-reverse: 1;
+}
+
+[dir='rtl'] .rtl-inset-x-0 {
+    right: 0;
+    left: 0;
+}
+
+[dir='rtl'] .rtl-left-auto {
+    left: auto;
+}
+
+[dir='rtl'] .rtl-right-auto {
+    right: auto;
+}
+
+[dir='rtl'] .rtl-right-0 {
+    right: 0;
+    left: auto;
+}
+
+[dir='rtl'] .rtl-left-0 {
+    left: 0;
+    right: auto;
+}
+
+[dir='rtl'] .rtl-text-right {
+    text-align: right;
+}
+
+[dir='rtl'] .rtl-text-left {
+    text-align: left;
+}
+
+[dir='rtl'] .rtl-border-l {
+    border-left-width: 1px;
+    border-right-width: 0;
+}
+
+[dir='rtl'] .rtl-border-r {
+    border-right-width: 1px;
+    border-left-width: 0;
+}
+
+[dir='rtl'] .rtl-ml-2 {
+    margin-left: 0.5rem;
+    margin-right: 0;
+}
+
+[dir='rtl'] .rtl-mr-2 {
+    margin-right: 0.5rem;
+    margin-left: 0;
+}
+
+[dir='rtl'] .rtl-pl-2 {
+    padding-left: 0.5rem;
+    padding-right: 0;
+}
+
+[dir='rtl'] .rtl-pr-2 {
+    padding-right: 0.5rem;
+    padding-left: 0;
+}
+
+/* Arabic and Persian font support */
+[lang='ar'],
+[lang='fa'] {
+    font-family: 'Segoe UI', 'Noto Sans Arabic', 'Arial', 'Tahoma', system-ui, sans-serif;
+}
+
+/* RTL icon mirroring */
+[dir='rtl'] .icon-mirror-rtl {
+    transform: scaleX(-1);
+}
+
+[dir='rtl'] .rtl-rotate-arrow {
+    transform: rotate(180deg);
+}
+
+/* Language switcher dropdown positioning */
+[dir='rtl'] .language-dropdown {
+    right: auto;
+    left: 0;
+}
+
+/* Custom scrollbar for RTL */
+[dir='rtl'] .custom-scrollbar {
+    direction: rtl;
+}
+
+/* Form elements in RTL */
+[dir='rtl'] input,
+[dir='rtl'] textarea,
+[dir='rtl'] select {
+    text-align: right;
+}
+
+[dir='rtl'] .text-left-form {
+    text-align: left;
+}
+
+/* Cards and containers in RTL */
+[dir='rtl'] .card-content {
+    direction: rtl;
+}
+
+/* Ensure proper flex behavior in RTL */
+[dir='rtl'] .flex-row-rtl {
+    flex-direction: row-reverse;
+}
+
+[dir='rtl'] .flex-col-rtl {
+    align-items: flex-end;
+}

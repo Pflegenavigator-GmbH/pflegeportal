@@ -1,0 +1,445 @@
+{
+  "meta": {
+    "title": "PflegeNavigator - Votre Assistance Soins",
+    "description": "Aide pour les demandes de niveau de soins, recours et assurance soins",
+    "keywords": "soins, niveau de soins, demande, recours, assurance soins, Allemagne"
+  },
+  "navigation": {
+    "home": "Accueil",
+    "homeDescription": "Aperçu de tous les modules de soins",
+    "pflegegrad": "Calculateur Niveau Soins",
+    "pflegegradDescription": "Déterminez votre niveau de soins possible",
+    "briefe": "Modèles de Lettres",
+    "briefeDescription": "Modèles pour demandes et recours",
+    "hilfe": "Aide & Contact",
+    "hilfeDescription": "FAQ et support",
+    "dashboard": "Mon Espace",
+    "profil": "Profil",
+    "einstellungen": "Paramètres",
+    "abmelden": "Déconnexion",
+    "anmelden": "Connexion"
+  },
+  "pflegegrad": {
+    "title": "Calculateur Niveau Soins",
+    "subtitle": "Déterminez votre niveau de soins possible selon le module MDK",
+    "progress": "Question {{current}} sur {{total}}",
+    "module": {
+      "mobilität": {
+        "title": "1. Mobilité",
+        "description": "Capacité à se déplacer de manière autonome",
+        "questions": {
+          "q1": {
+            "text": "La personne peut-elle se déplacer de manière autonome dans l'espace de vie?",
+            "help": "Inclut: Se lever, marcher, utiliser une chaise, quitter le lit"
+          },
+          "q2": {
+            "text": "La personne peut-elle monter des escaliers?",
+            "help": "Avec ou sans aides telles que monte-escalier"
+          },
+          "q3": {
+            "text": "La personne a-t-elle besoin d'aide pour les transferts (lit/chaise)?",
+            "help": "Transfert comprend: positionnement, aide pour se lever"
+          },
+          "q4": {
+            "text": "La personne dépend-elle d'aides à la mobilité?",
+            "help": "Ex. déambulateur, cadre de marche, fauteuil roulant"
+          }
+        }
+      },
+      "kognitiveLeistungen": {
+        "title": "2. Performance Cognitive",
+        "description": "Capacités mentales et orientation",
+        "questions": {
+          "q1": {
+            "text": "La personne est-elle orientée dans le temps, l'espace et la situation?",
+            "help": "La personne peut-elle saisir la date, le lieu et la situation actuelle?"
+          },
+          "q2": {
+            "text": "Y a-t-il des problèmes de mémoire?",
+            "help": "Oublis quotidiens: médicaments, rendez-vous, repas"
+          },
+          "q3": {
+            "text": "La personne peut-elle prendre des décisions?",
+            "help": "Capacité à prendre des décisions quotidiennes de manière autonome"
+          },
+          "q4": {
+            "text": "Y a-t-il des anomalies comportementales?",
+            "help": "Ex. confusion, agitation, rejet d'aide"
+          }
+        }
+      },
+      "körperlichePflege": {
+        "title": "3. Soins Corporels",
+        "description": "Hygiène corporelle et propreté personnelle",
+        "questions": {
+          "q1": {
+            "text": "La personne peut-elle se laver elle-même?",
+            "help": "Se laver, se doucher, se baigner – quelles parties du corps en autonomie?"
+          },
+          "q2": {
+            "text": "La personne peut-elle se brosser les dents et se coiffer?",
+            "help": "Hygiène bucco-dentaire et soins des cheveux"
+          },
+          "q3": {
+            "text": "La personne peut-elle se raser/se maquiller elle-même?",
+            "help": "Soins du visage, rasage, maquillage décoratif"
+          },
+          "q4": {
+            "text": "La personne a-t-elle besoin d'aide pour utiliser les toilettes?",
+            "help": "Contrôle vésical/intestinal, soins intimes, soins d'incontinence"
+          }
+        }
+      },
+      "behandlungspflege": {
+        "title": "4. Soins Médicaux",
+        "description": "Soins médicaux et traitement",
+        "questions": {
+          "q1": {
+            "text": "La personne peut-elle prendre ses médicaments elle-même?",
+            "help": "Dosage, prise, surveillance de la prise de médicaments"
+          },
+          "q2": {
+            "text": "La personne peut-elle effectuer les soins de plaie seule?",
+            "help": "Changement de pansements, nettoyage des plaies, application de pommades"
+          },
+          "q3": {
+            "text": "La personne a-t-elle besoin d'aide pour les injections/médicaments?",
+            "help": "Insuline, injections, gouttes pour les yeux, gouttes auriculaires"
+          },
+          "q4": {
+            "text": "Y a-t-il des traitements spéciaux?",
+            "help": "Ex. bas de contention, oxygénothérapie, cathéter"
+          }
+        }
+      },
+      "hauswirtschaftlicheVersorgung": {
+        "title": "5. Gestion du Foyer",
+        "description": "Gestion du foyer et repas",
+        "questions": {
+          "q1": {
+            "text": "La personne peut-elle préparer des repas?",
+            "help": "Courses, cuisine, vaisselle, réchauffage"
+          },
+          "q2": {
+            "text": "La personne peut-elle gérer le ménage?",
+            "help": "Nettoyage, lavage, repassage, élimination des déchets"
+          },
+          "q3": {
+            "text": "La personne peut-elle faire des courses?",
+            "help": "Provisions, articles ménagers, médicaments"
+          },
+          "q4": {
+            "text": "La personne peut-elle gérer ses finances?",
+            "help": "Paiement des factures, opérations bancaires, courrier"
+          }
+        }
+      },
+      "sozialeKontakte": {
+        "title": "6. Contacts Sociaux",
+        "description": "Communication et participation à la vie",
+        "questions": {
+          "q1": {
+            "text": "La personne peut-elle communiquer activement?",
+            "help": "Parole, audition, vision, gestes, expressions faciales"
+          },
+          "q2": {
+            "text": "La personne peut-elle utiliser le téléphone?",
+            "help": "Passer/recevoir des appels, comprendre les messages"
+          },
+          "q3": {
+            "text": "La personne peut-elle maintenir des contacts sociaux?",
+            "help": "Visites, conversations, participation à la vie communautaire"
+          },
+          "q4": {
+            "text": "La personne peut-elle pratiquer des activités de loisir?",
+            "help": "Loisirs, intérêts, activités physiques"
+          }
+        }
+      }
+    },
+    "results": {
+      "title": "Votre Résultat",
+      "subtitle": "Basé sur vos informations",
+      "gradeLabel": "Niveau de Soins Possible",
+      "gradeDescription": "Note: Ceci est une indication. La détermination finale est faite par le MDK.",
+      "pointsLabel": "Points",
+      "recommendation": "Prochaines étapes recommandées",
+      "downloadReport": "Télécharger le Rapport",
+      "newCalculation": "Nouveau Calcul",
+      "consultation": "Réserver Consultation Gratuite",
+      "grades": {
+        "0": "Aucun Niveau de Soins",
+        "1": "Niveau de Soins 1",
+        "2": "Niveau de Soins 2",
+        "3": "Niveau de Soins 3",
+        "4": "Niveau de Soins 4",
+        "5": "Niveau de Soins 5"
+      },
+      "explanations": {
+        "0": "Aucun besoin de soins identifié.",
+        "1": "Besoins de soins faibles (à partir de 27 points)",
+        "2": "Besoins de soins significatifs (à partir de 47 points)",
+        "3": "Besoins de soins sévères (à partir de 72 points)",
+        "4": "Besoins de soins très sévères (à partir de 95 points)",
+        "5": "Besoins de soins très sévères avec exigences spéciales (à partir de 115 points)"
+      }
+    }
+  },
+  "briefe": {
+    "title": "Modèles de Lettres",
+    "subtitle": "Modèles professionnels pour toutes les démarches de soins",
+    "description": "Téléchargez gratuitement des modèles de lettres ou personnalisez-les en ligne.",
+    "types": {
+      "pflegeantrag": {
+        "title": "Demande de Soins",
+        "description": "Demande de prestations de soins auprès de l'assurance soins",
+        "purpose": "Demande initiale de prestations de soins",
+        "fields": {
+          "versicherungsnummer": "Numéro d'Assurance",
+          "krankenkasse": "Assurance Maladie/Soins",
+          "pflegebedürftiger": "Nom du Bénéficiaire",
+          "geburtsdatum": "Date de Naissance",
+          "adresse": "Adresse",
+          "telefon": "Téléphone",
+          "email": "Email",
+          "pflegegradWunsch": "Niveau de Soins Souhaité (optionnel)"
+        }
+      },
+      "pflegegradEinstufung": {
+        "title": "Évaluation Niveau Soins",
+        "description": "Demande d'évaluation par le MDK",
+        "purpose": "Demande de détermination du niveau de soins",
+        "fields": {
+          "versicherungsnummer": "Numéro d'Assurance",
+          "krankenkasse": "Assurance Maladie",
+          "name": "Nom",
+          "adresse": "Adresse",
+          "symptome": "Description des besoins de soins",
+          "dringlichkeit": "Urgence"
+        }
+      },
+      "pflegegeldErhoehung": {
+        "title": "Augmentation Niveau Soins",
+        "description": "Demande d'augmentation du niveau de soins",
+        "purpose": "Détérioration de l'état de santé",
+        "fields": {
+          "versicherungsnummer": "Numéro d'Assurance",
+          "aktuellerGrad": "Niveau de Soins Actuel",
+          "veraenderungen": "Changements depuis la dernière évaluation",
+          "neuerPflegebedarf": "Nouveaux besoins de soins"
+        }
+      },
+      "widerspruchMdk": {
+        "title": "Recours MDK",
+        "description": "Recours contre l'évaluation du niveau de soins",
+        "purpose": "Rejet ou classification insuffisante",
+        "fields": {
+          "versicherungsnummer": "Numéro d'Assurance",
+          "entscheidungsdatum": "Date de Décision",
+          "bescheidNummer": "Numéro de Décision",
+          "widerspruchsgruende": "Motifs du recours"
+        }
+      },
+      "kurzzeitpflege": {
+        "title": "Soins de Court Séjour",
+        "description": "Demande de soins de répit",
+        "purpose": "Soins par les proches pendant vacances/maladie",
+        "fields": {
+          "versicherungsnummer": "Numéro d'Assurance",
+          "zeitraum": "Période Souhaitée",
+          "begruendung": "Motif",
+          "einrichtung": "Établissement Préféré"
+        }
+      },
+      "tagespflege": {
+        "title": "Accueil de Jour",
+        "description": "Demande d'accueil de jour ou de nuit",
+        "purpose": "Accueil pendant la journée ou la nuit",
+        "fields": {
+          "versicherungsnummer": "Numéro d'Assurance",
+          "tage": "Jours Souhaités",
+          "zeiten": "Horaires Souhaités",
+          "einrichtung": "Établissement Préféré"
+        }
+      },
+      "betreuungsleistungen": {
+        "title": "Services d'Accompagnement",
+        "description": "Demande d'accompagnement/assistance personnelle",
+        "purpose": "Aide quotidienne par des assistants",
+        "fields": {
+          "versicherungsnummer": "Numéro d'Assurance",
+          "leistungsarten": "Types de Services Souhaités",
+          "umfang": "Volume par semaine"
+        }
+      },
+      "hilfsmittel": {
+        "title": "Aides Techniques",
+        "description": "Demande d'aides techniques pour soins",
+        "purpose": "Déambulateur, lit médicalisé, lève-malade etc.",
+        "fields": {
+          "versicherungsnummer": "Numéro d'Assurance",
+          "hilfsmittel": "Aide Technique Requise",
+          "aerztlicheVerordnung": "Ordonnance médicale disponible?",
+          "begruendung": "Motif"
+        }
+      }
+    },
+    "form": {
+      "title": "Créer une Lettre",
+      "fillForm": "Remplir le Formulaire",
+      "preview": "Aperçu",
+      "download": "Télécharger (PDF)",
+      "copyText": "Copier le Texte",
+      "print": "Imprimer",
+      "sendEmail": "Envoyer par Email",
+      "save": "Enregistrer",
+      "edit": "Modifier",
+      "cancel": "Annuler",
+      "required": "Obligatoire",
+      "optional": "Optionnel"
+    }
+  },
+  "hilfe": {
+    "title": "Aide & Contact",
+    "subtitle": "Nous sommes là pour vous",
+    "faq": {
+      "title": "Questions Fréquentes",
+      "categories": {
+        "allgemein": "Général",
+        "pflegegrad": "Niveau Soins",
+        "leistungen": "Prestations",
+        "antrag": "Demande",
+        "technisch": "Technique"
+      },
+      "questions": {
+        "q1": {
+          "question": "Qu'est-ce que PflegeNavigator?",
+          "answer": "PflegeNavigator vous aide à déterminer votre niveau de soins et fournit des modèles de lettres pour toutes les démarches de soins."
+        },
+        "q2": {
+          "question": "L'utilisation est-elle gratuite?",
+          "answer": "Oui, toutes les fonctionnalités de PflegeNavigator sont gratuites."
+        },
+        "q3": {
+          "question": "Comment le niveau de soins est-il calculé?",
+          "answer": "Le calculateur est basé sur les critères d'évaluation du MDK (Service Médical). Le résultat est une indication."
+        },
+        "q4": {
+          "question": "Les modèles de lettres sont-ils juridiquement contraignants?",
+          "answer": "Les lettres sont des modèles. Vérifiez le contenu avant l'envoi et ajoutez vos informations personnelles."
+        },
+        "q5": {
+          "question": "Combien de temps prend l'évaluation du niveau de soins?",
+          "answer": "Le traitement par le MDK prend généralement 3-5 semaines à partir du dépôt de la demande."
+        }
+      },
+      "showMore": "Afficher plus de questions",
+      "showLess": "Afficher moins",
+      "search": "Rechercher..."
+    },
+    "contact": {
+      "title": "Contactez-nous",
+      "phone": "Téléphone",
+      "email": "Email",
+      "hours": "Disponibilité",
+      "phoneHours": "Lun-Ven 8h00-18h00",
+      "emailResponse": "Réponse sous 24h",
+      "formTitle": "Envoyer un Message",
+      "formName": "Votre Nom",
+      "formEmail": "Votre Email",
+      "formSubject": "Sujet",
+      "formMessage": "Votre Message",
+      "formSend": "Envoyer",
+      "formSuccess": "Message envoyé avec succès!",
+      "formError": "Erreur d'envoi. Veuillez réessayer."
+    }
+  },
+  "common": {
+    "buttons": {
+      "back": "Retour",
+      "next": "Suivant",
+      "continue": "Continuer",
+      "start": "Commencer",
+      "finish": "Terminer",
+      "cancel": "Annuler",
+      "close": "Fermer",
+      "save": "Enregistrer",
+      "delete": "Supprimer",
+      "edit": "Modifier",
+      "create": "Créer",
+      "confirm": "Confirmer",
+      "submit": "Soumettre",
+      "loading": "Chargement...",
+      "retry": "Réessayer",
+      "download": "Télécharger",
+      "share": "Partager",
+      "copy": "Copier",
+      "print": "Imprimer"
+    },
+    "errors": {
+      "generic": "Une erreur s'est produite",
+      "network": "Erreur de connexion. Veuillez vérifier votre connexion internet.",
+      "notFound": "Page non trouvée",
+      "unauthorized": "Accès non autorisé",
+      "validation": "Veuillez vérifier vos entrées",
+      "required": "Ce champ est obligatoire",
+      "invalidEmail": "Veuillez entrer une adresse email valide",
+      "minLength": "Au moins {{count}} caractères requis",
+      "maxLength": "Maximum {{count}} caractères autorisés",
+      "serverError": "Erreur serveur. Veuillez réessayer plus tard."
+    },
+    "accessibility": {
+      "skipToContent": "Passer au contenu principal",
+      "mainNavigation": "Navigation principale",
+      "breadcrumb": "Fil d'Ariane",
+      "closeMenu": "Fermer le menu",
+      "openMenu": "Ouvrir le menu",
+      "languageSelector": "Sélectionner la langue",
+      "search": "Rechercher",
+      "formError": "Erreur de formulaire",
+      "requiredField": "Champ obligatoire",
+      "optionalField": "Champ optionnel",
+      "helpText": "Texte d'aide",
+      "expand": "Développer",
+      "collapse": "Réduire",
+      "modal": "Dialogue",
+      "closeModal": "Fermer le dialogue",
+      "loading": "Chargement",
+      "progress": "Progression",
+      "step": "Étape"
+    },
+    "ampel": {
+      "green": "Bon - Aucune limitation",
+      "yellow": "Moyen - Limitations partielles",
+      "red": "Faible - Limitations sévères",
+      "notApplicable": "Non applicable",
+      "self": "Autonome",
+      "partial": "Aide partielle",
+      "dependent": "Aide nécessaire"
+    },
+    "time": {
+      "today": "Aujourd'hui",
+      "yesterday": "Hier",
+      "tomorrow": "Demain",
+      "now": "Maintenant",
+      "minutesAgo": "Il y a {{count}} minutes",
+      "hoursAgo": "Il y a {{count}} heures",
+      "daysAgo": "Il y a {{count}} jours"
+    },
+    "pagination": {
+      "previous": "Précédent",
+      "next": "Suivant",
+      "page": "Page",
+      "of": "sur",
+      "showing": "Affichage {{from}}-{{to}} sur {{total}}"
+    }
+  },
+  "language": {
+    "title": "Langue",
+    "current": "Langue Actuelle",
+    "select": "Sélectionner la Langue",
+    "search": "Rechercher une langue",
+    "changed": "Langue changée en: {{language}}",
+    "detected": "Langue détectée automatiquement"
+  }
+}

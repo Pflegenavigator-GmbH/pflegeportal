@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "title": "PflegeNavigator - Free Care Level Calculator",
+    "description": "Calculate your care level for free. With simple language, accessible and data protection compliant.",
+    "ogTitle": "PflegeNavigator - The Free Care Level Calculator"
+  },
+  "header": {
+    "logo": "PflegeNavigator",
+    "tagline": "Free Care Level Calculation"
+  },
+  "footer": {
+    "copyright": "© 2025 PflegeNavigator",
+    "datenschutz": "Privacy Policy",
+    "impressum": "Legal Notice"
+  },
+  "language": {
+    "current": "Current Language",
+    "select": "Select Language",
+    "detected": "Automatically detected"
+  }
+}
