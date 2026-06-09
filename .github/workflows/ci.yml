@@ -19,7 +19,7 @@ jobs:
       - name: Node.js Setup
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: "npm"
 
       # 🚀 NEU: Next.js Build-Cache (Macht die Pipeline drastisch schneller)
