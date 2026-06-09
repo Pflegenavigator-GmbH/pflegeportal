@@ -1,0 +1,17 @@
+# .github/dependabot.yml
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Berlin"
+    target-branch: "develop"
+    open-pull-requests-limit: 5
+    assignees:
+      - "@rodrigueai"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
