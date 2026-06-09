@@ -33,11 +33,17 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
     const [inputCode, setInputCode] = useState("");
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
+    const readCaseCode = () => {
+        if (typeof window === 'undefined') return null;
+        return localStorage.getItem('case_code');
+    };
+
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            setCaseCode(localStorage.getItem('case_code'));
-        }
-    }, [pathname]);
+        const syncCaseCode = () => setCaseCode(readCaseCode());
+
+        window.addEventListener('storage', syncCaseCode);
+        return () => window.removeEventListener('storage', syncCaseCode);
+    }, []);
 
     const istStartseite = pathname === `/${locale}` || pathname === `/${locale}/`;
 
