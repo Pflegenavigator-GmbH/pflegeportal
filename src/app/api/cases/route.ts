@@ -1,8 +1,9 @@
 // src/api/cases/route.ts
-import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { Database } from '@/src/types/supabase';
+import { NextResponse } from 'next/server';
+
 import { handleApiError } from '@/src/lib/api/error-handler';
+import { Database } from '@/src/types/supabase';
 
 interface CreateCaseRpcResponse {
   id: string;
@@ -16,15 +17,17 @@ export async function POST() {
     const supabaseSecretKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!supabaseUrl || !supabaseSecretKey) {
-      throw new Error('Supabase URL oder der neue Secret Key (sb_secret) fehlt in den Server-Umgebungsvariablen.');
+      throw new Error(
+        'Supabase URL oder der neue Secret Key (sb_secret) fehlt in den Server-Umgebungsvariablen.'
+      );
     }
 
     // Erstellung des hochprivilegierten Admin-Clients auf Server-Ebene
     const supabaseAdmin = createClient<Database>(supabaseUrl, supabaseSecretKey, {
       auth: {
         persistSession: false,
-        autoRefreshToken: false
-      }
+        autoRefreshToken: false,
+      },
     });
 
     const { data, error } = await supabaseAdmin.rpc('create_case');
@@ -36,14 +39,18 @@ export async function POST() {
     const caseData = data as unknown as CreateCaseRpcResponse;
 
     if (!caseData || !caseData.id || !caseData.case_code) {
-      throw new Error('Systemfehler: Unvollständige oder korrupte Datenstruktur von der Datenbank empfangen.');
+      throw new Error(
+        'Systemfehler: Unvollständige oder korrupte Datenstruktur von der Datenbank empfangen.'
+      );
     }
 
-    return NextResponse.json({
-      id: caseData.id,
-      caseCode: caseData.case_code
-    }, { status: 201 });
-
+    return NextResponse.json(
+      {
+        id: caseData.id,
+        caseCode: caseData.case_code,
+      },
+      { status: 201 }
+    );
   } catch (err: unknown) {
     // Ersetzt das verbotene 'any' durch 'unknown' und nutzt das zentrale Error-Handling
     return handleApiError(err, 'api.cases.create.new_secret_key');

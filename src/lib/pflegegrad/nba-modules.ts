@@ -13,46 +13,46 @@ export interface NBAModule {
 export const NBA_MODULE: NBAModule[] = [
   {
     id: 1,
-    name: "Mobilität",
-    gewichtung: 0.10,
+    name: 'Mobilität',
+    gewichtung: 0.1,
     punkte: 0,
-    beschreibung: "Fähigkeit, sich im Raum zu bewegen, zu laufen, Treppen zu steigen"
+    beschreibung: 'Fähigkeit, sich im Raum zu bewegen, zu laufen, Treppen zu steigen',
   },
   {
     id: 2,
-    name: "Kognition & Kommunikation",
+    name: 'Kognition & Kommunikation',
     gewichtung: 0.15,
     punkte: 0,
-    beschreibung: "Orientierung, Erinnern, Entscheiden, Kommunizieren"
+    beschreibung: 'Orientierung, Erinnern, Entscheiden, Kommunizieren',
   },
   {
     id: 3,
-    name: "Verhaltensweisen & Psyche",
+    name: 'Verhaltensweisen & Psyche',
     gewichtung: 0.15,
     punkte: 0,
-    beschreibung: "Umgang mit belastendem Verhalten, psychische Erkrankungen"
+    beschreibung: 'Umgang mit belastendem Verhalten, psychische Erkrankungen',
   },
   {
     id: 4,
-    name: "Selbstversorgung",
-    gewichtung: 0.40,
+    name: 'Selbstversorgung',
+    gewichtung: 0.4,
     punkte: 0,
-    beschreibung: "Körperpflege, Essen, Trinken, Toilette, Anziehen (HÖCHSTE GEWICHTUNG)"
+    beschreibung: 'Körperpflege, Essen, Trinken, Toilette, Anziehen (HÖCHSTE GEWICHTUNG)',
   },
   {
     id: 5,
-    name: "Krankheitsbewältigung",
-    gewichtung: 0.20,
+    name: 'Krankheitsbewältigung',
+    gewichtung: 0.2,
     punkte: 0,
-    beschreibung: "Medikamente nehmen, ärztliche Anordnungen umsetzen, Therapien"
+    beschreibung: 'Medikamente nehmen, ärztliche Anordnungen umsetzen, Therapien',
   },
   {
     id: 6,
-    name: "Alltagsgestaltung",
-    gewichtung: 0.00,
+    name: 'Alltagsgestaltung',
+    gewichtung: 0.0,
     punkte: 0,
-    beschreibung: "Haushalt führen (nicht für Pflegegrad, aber relevant für Widerspruch)"
-  }
+    beschreibung: 'Haushalt führen (nicht für Pflegegrad, aber relevant für Widerspruch)',
+  },
 ];
 
 // Pflegegrad-Schwellen nach SGB XI
@@ -61,7 +61,7 @@ export const PFLEGEGRAD_SCHWELLEN = {
   2: { min: 27, max: 47.5, schwelle: 27 },
   3: { min: 47.5, max: 70, schwelle: 47.5 },
   4: { min: 70, max: 90, schwelle: 70 },
-  5: { min: 90, max: 100, schwelle: 90 }
+  5: { min: 90, max: 100, schwelle: 90 },
 };
 
 export interface PflegegradErgebnis {
@@ -79,12 +79,11 @@ export interface PflegegradErgebnis {
 }
 
 export class PflegegradRechner {
-  
   berechnePflegegrad(module: { modulId: number; punkte: number }[]): PflegegradErgebnis {
     // Modul 2 und 3: Nur der HÖHERE Wert zählt!
-    const modul2 = module.find(m => m.modulId === 2);
-    const modul3 = module.find(m => m.modulId === 3);
-    
+    const modul2 = module.find((m) => m.modulId === 2);
+    const modul3 = module.find((m) => m.modulId === 3);
+
     let kognitionPunkte = 0;
     if (modul2 && modul3) {
       kognitionPunkte = Math.max(modul2.punkte, modul3.punkte);
@@ -95,32 +94,34 @@ export class PflegegradRechner {
     }
 
     // Berechnung
-    const ergebnisse = module.map(m => {
-      const modulDef = NBA_MODULE.find(def => def.id === m.modulId);
-      if (!modulDef) return null;
+    const ergebnisse = module
+      .map((m) => {
+        const modulDef = NBA_MODULE.find((def) => def.id === m.modulId);
+        if (!modulDef) return null;
 
-      // Spezialfall: Modul 2 oder 3
-      if (m.modulId === 2 || m.modulId === 3) {
-        const punkte = m.modulId === 2 ? kognitionPunkte : 0; // Nur Modul 2 zählt offiziell
+        // Spezialfall: Modul 2 oder 3
+        if (m.modulId === 2 || m.modulId === 3) {
+          const punkte = m.modulId === 2 ? kognitionPunkte : 0; // Nur Modul 2 zählt offiziell
+          return {
+            modulId: m.modulId,
+            name: modulDef.name,
+            rohpunkte: m.punkte,
+            gewichtetePunkte: m.modulId === 2 ? punkte * modulDef.gewichtung : 0,
+          };
+        }
+
         return {
           modulId: m.modulId,
           name: modulDef.name,
           rohpunkte: m.punkte,
-          gewichtetePunkte: m.modulId === 2 ? punkte * modulDef.gewichtung : 0
+          gewichtetePunkte: m.punkte * modulDef.gewichtung,
         };
-      }
-
-      return {
-        modulId: m.modulId,
-        name: modulDef.name,
-        rohpunkte: m.punkte,
-        gewichtetePunkte: m.punkte * modulDef.gewichtung
-      };
-    }).filter(Boolean) as PflegegradErgebnis['modulErgebnisse'];
+      })
+      .filter(Boolean) as PflegegradErgebnis['modulErgebnisse'];
 
     // Gesamtpunkte (nur Module 1, 2/3, 4, 5)
     const gesamtpunkte = ergebnisse
-      .filter(e => e.modulId !== 6) // Modul 6 nicht für Pflegegrad
+      .filter((e) => e.modulId !== 6) // Modul 6 nicht für Pflegegrad
       .reduce((sum, e) => sum + e.gewichtetePunkte, 0);
 
     // Pflegegrad bestimmen
@@ -132,9 +133,10 @@ export class PflegegradRechner {
     else if (gesamtpunkte >= 12.5) pflegegrad = 1;
 
     // Ampel-Logik
-    const aktuelleSchwelle = pflegegrad > 0 ? PFLEGEGRAD_SCHWELLEN[pflegegrad as 1|2|3|4|5].schwelle : 0;
+    const aktuelleSchwelle =
+      pflegegrad > 0 ? PFLEGEGRAD_SCHWELLEN[pflegegrad as 1 | 2 | 3 | 4 | 5].schwelle : 0;
     const pufferPunkte = gesamtpunkte - aktuelleSchwelle;
-    
+
     let ampel: 'gruen' | 'gelb' | 'rot';
     if (pflegegrad === 0) {
       ampel = 'rot';
@@ -155,7 +157,7 @@ export class PflegegradRechner {
       ampel,
       pufferPunkte,
       modulErgebnisse: ergebnisse,
-      empfehlungen
+      empfehlungen,
     };
   }
 
@@ -163,22 +165,30 @@ export class PflegegradRechner {
     const empfehlungen: string[] = [];
 
     if (pflegegrad === 0) {
-      empfehlungen.push("Ihr Ergebnis reicht noch nicht für einen Pflegegrad.");
-      empfehlungen.push("Empfohlen: Wiederholen Sie die Begutachtung in 6 Monaten bei Verschlechterung.");
+      empfehlungen.push('Ihr Ergebnis reicht noch nicht für einen Pflegegrad.');
+      empfehlungen.push(
+        'Empfohlen: Wiederholen Sie die Begutachtung in 6 Monaten bei Verschlechterung.'
+      );
     } else if (pflegegrad >= 1 && pflegegrad <= 2) {
-      empfehlungen.push("Sie haben Anspruch auf Pflegegeld und Beratung nach § 37 Abs. 3 SGB XI.");
-      empfehlungen.push("Empfohlen: Pflegekurs für Angehörige (4× pro Pflegegrad möglich).");
+      empfehlungen.push('Sie haben Anspruch auf Pflegegeld und Beratung nach § 37 Abs. 3 SGB XI.');
+      empfehlungen.push('Empfohlen: Pflegekurs für Angehörige (4× pro Pflegegrad möglich).');
     } else if (pflegegrad >= 3) {
-      empfehlungen.push("Sie haben Anspruch auf Pflegegeld, Sachleistungen oder Kombinationsleistungen.");
-      empfehlungen.push("Möglich: Entlastungsbetrag (600€/Jahr), Kurzzeitpflege (bis zu 4×/Jahr).");
+      empfehlungen.push(
+        'Sie haben Anspruch auf Pflegegeld, Sachleistungen oder Kombinationsleistungen.'
+      );
+      empfehlungen.push('Möglich: Entlastungsbetrag (600€/Jahr), Kurzzeitpflege (bis zu 4×/Jahr).');
     }
 
     if (ampel === 'gelb') {
-      empfehlungen.push("⚠️ Ihr Ergebnis ist knapp - bei Verschlechterung Widerspruch/Wiederholung prüfen.");
+      empfehlungen.push(
+        '⚠️ Ihr Ergebnis ist knapp - bei Verschlechterung Widerspruch/Wiederholung prüfen.'
+      );
     }
 
     if (pflegegrad >= 3) {
-      empfehlungen.push("💡 Tipp: Prüfen Sie zusätzlich den Antrag auf Schwerbehindertenausweis (GdB 50+).");
+      empfehlungen.push(
+        '💡 Tipp: Prüfen Sie zusätzlich den Antrag auf Schwerbehindertenausweis (GdB 50+).'
+      );
     }
 
     return empfehlungen;
@@ -188,42 +198,42 @@ export class PflegegradRechner {
   getModulFragen(modulId: number): string[] {
     const fragen: Record<number, string[]> = {
       1: [
-        "Können Sie selbstständig aufstehen und sich fortbewegen?",
-        "Benötigen Sie Hilfe beim Gehen oder Stehen?",
-        "Können Sie Treppen steigen?",
-        "Sind Sie auf einen Rollstuhl angewiesen?"
+        'Können Sie selbstständig aufstehen und sich fortbewegen?',
+        'Benötigen Sie Hilfe beim Gehen oder Stehen?',
+        'Können Sie Treppen steigen?',
+        'Sind Sie auf einen Rollstuhl angewiesen?',
       ],
       2: [
-        "Wissen Sie immer, wo Sie sind (Orientierung)?",
-        "Können Sie sich an aktuelle Ereignisse erinnern?",
-        "Können Sie komplexe Entscheidungen treffen?",
-        "Verstehen Sie Gespräche und können antworten?"
+        'Wissen Sie immer, wo Sie sind (Orientierung)?',
+        'Können Sie sich an aktuelle Ereignisse erinnern?',
+        'Können Sie komplexe Entscheidungen treffen?',
+        'Verstehen Sie Gespräche und können antworten?',
       ],
       3: [
-        "Gibt es belastendes Verhalten (z.B. herumlaufen, rufen)?",
-        "Sind psychische Erkrankungen vorhanden (Depression, Demenz)?",
-        "Besteht Suizidgefährdung oder Verwirrtheit?",
-        "Benötigen Sie psychologische Unterstützung?"
+        'Gibt es belastendes Verhalten (z.B. herumlaufen, rufen)?',
+        'Sind psychische Erkrankungen vorhanden (Depression, Demenz)?',
+        'Besteht Suizidgefährdung oder Verwirrtheit?',
+        'Benötigen Sie psychologische Unterstützung?',
       ],
       4: [
-        "Können Sie sich selbst waschen und duschen?",
-        "Können Sie sich allein an- und ausziehen?",
-        "Können Sie selbstständig essen und trinken?",
-        "Können Sie die Toilette allein benutzen?",
-        "Können Sie Ihre Medikamente selbst einnehmen?"
+        'Können Sie sich selbst waschen und duschen?',
+        'Können Sie sich allein an- und ausziehen?',
+        'Können Sie selbstständig essen und trinken?',
+        'Können Sie die Toilette allein benutzen?',
+        'Können Sie Ihre Medikamente selbst einnehmen?',
       ],
       5: [
-        "Können Sie Medikamente pünktlich nehmen?",
-        "Können Sie sich selbst spritzen/verbinden?",
-        "Können Sie ärztliche Anordnungen umsetzen?",
-        "Benötigen Sie Hilfe bei Therapien?"
+        'Können Sie Medikamente pünktlich nehmen?',
+        'Können Sie sich selbst spritzen/verbinden?',
+        'Können Sie ärztliche Anordnungen umsetzen?',
+        'Benötigen Sie Hilfe bei Therapien?',
       ],
       6: [
-        "Können Sie den Haushalt allein führen?",
-        "Können Sie einkaufen gehen?",
-        "Können Sie kochen und aufräumen?",
-        "Benötigen Sie Hilfe bei Geldangelegenheiten?"
-      ]
+        'Können Sie den Haushalt allein führen?',
+        'Können Sie einkaufen gehen?',
+        'Können Sie kochen und aufräumen?',
+        'Benötigen Sie Hilfe bei Geldangelegenheiten?',
+      ],
     };
 
     return fragen[modulId] || [];

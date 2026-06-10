@@ -1,15 +1,15 @@
 // src/lib/brevo/templates.ts
 
 interface AccessEmailProps {
-    caseCode: string;
-    portalLink: string;
+  caseCode: string;
+  portalLink: string;
 }
 
 export const EmailTemplates = {
-    /**
-     * Template für den Erstzugang nach Kauf oder manuellem Teilen
-     */
-    getAccessEmailHtml: ({ caseCode, portalLink }: AccessEmailProps): string => `
+  /**
+   * Template für den Erstzugang nach Kauf oder manuellem Teilen
+   */
+  getAccessEmailHtml: ({ caseCode, portalLink }: AccessEmailProps): string => `
         <!DOCTYPE html>
         <html lang="de">
         <head>
@@ -51,5 +51,5 @@ export const EmailTemplates = {
             </div>
         </body>
         </html>
-    `
+    `,
 };

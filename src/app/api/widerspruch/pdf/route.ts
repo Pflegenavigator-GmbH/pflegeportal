@@ -123,9 +123,10 @@ const WIDERSPRUCH_TEMPLATE = (data: WiderspruchData) => `
   </div>
 
   <div class="text-block">
-    ${data.bescheidDaten.pflegegradAktuell !== null 
-      ? `Mein aktueller Pflegegrad ${data.bescheidDaten.pflegegradAktuell} wurde nicht angehoben, obwohl ich beantragt habe, in Pflegegrad ${data.bescheidDaten.pflegegradBeantragt} eingestuft zu werden.`
-      : `Ich wurde nicht in den beantragten Pflegegrad ${data.bescheidDaten.pflegegradBeantragt} eingestuft.`
+    ${
+      data.bescheidDaten.pflegegradAktuell !== null
+        ? `Mein aktueller Pflegegrad ${data.bescheidDaten.pflegegradAktuell} wurde nicht angehoben, obwohl ich beantragt habe, in Pflegegrad ${data.bescheidDaten.pflegegradBeantragt} eingestuft zu werden.`
+        : `Ich wurde nicht in den beantragten Pflegegrad ${data.bescheidDaten.pflegegradBeantragt} eingestuft.`
     }
     Diese Entscheidung halte ich für nicht nachvollziehbar.
   </div>
@@ -135,26 +136,34 @@ const WIDERSPRUCH_TEMPLATE = (data: WiderspruchData) => `
     <div>${data.widerspruchsBegruendung.replace(/\n/g, '<br>')}</div>
   </div>
 
-  ${data.bescheidDaten.begruendung ? `
+  ${
+    data.bescheidDaten.begruendung
+      ? `
   <div class="text-block">
     <strong>Zur Begründung des Bescheids:</strong><br>
     ${data.bescheidDaten.begruendung}
   </div>
-  ` : ''}
+  `
+      : ''
+  }
 
   <div class="text-block">
     Ich bitte um erneute Prüfung und eine schriftliche Mitteilung über das Ergebnis des Widerspruchsverfahrens.
     Sollten Sie meinem Widerspruch nicht abhelfen, bitte ich um Weiterleitung an die zuständige Widerspruchsstelle.
   </div>
 
-  ${data.beilagen && data.beilagen.length > 0 ? `
+  ${
+    data.beilagen && data.beilagen.length > 0
+      ? `
   <div class="beilagen">
     <strong>Anlagen:</strong>
     <ul class="beilagen-list">
-      ${data.beilagen.map(beilage => `<li>${beilage}</li>`).join('')}
+      ${data.beilagen.map((beilage) => `<li>${beilage}</li>`).join('')}
     </ul>
   </div>
-  ` : ''}
+  `
+      : ''
+  }
 
   <div class="schluss">
     Mit freundlichen Grüßen
@@ -183,21 +192,27 @@ export async function POST(request: NextRequest): Promise<Response> {
     const body: WiderspruchData = await request.json();
     const { caseCode, antragsteller, pflegekasse, bescheidDaten, widerspruchsBegruendung } = body;
 
-    // Validierung
+    // Validierung der Pflichtfelder
     if (!caseCode || !antragsteller || !pflegekasse || !bescheidDaten || !widerspruchsBegruendung) {
       return NextResponse.json(
-        { 
-          error: 'Fehlende Pflichtfelder',
-          required: ['caseCode', 'antragsteller', 'pflegekasse', 'bescheidDaten', 'widerspruchsBegruendung']
-        },
-        { status: 400, headers: getCorsHeaders() }
+          {
+            error: 'Fehlende Pflichtfelder',
+            required: [
+              'caseCode',
+              'antragsteller',
+              'pflegekasse',
+              'bescheidDaten',
+              'widerspruchsBegruendung',
+            ],
+          },
+          { status: 400, headers: getCorsHeaders() }
       );
     }
 
     if (!antragsteller.name || !antragsteller.strasse || !antragsteller.plz || !antragsteller.ort) {
       return NextResponse.json(
-        { error: 'Antragsteller-Adresse unvollständig' },
-        { status: 400, headers: getCorsHeaders() }
+          { error: 'Antragsteller-Adresse unvollständig' },
+          { status: 400, headers: getCorsHeaders() }
       );
     }
 
@@ -207,16 +222,16 @@ export async function POST(request: NextRequest): Promise<Response> {
     browser = await puppeteer.launch({
       headless: true,
       executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
     });
 
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+    await page.setContent(html, { waitUntil: 'domcontentloaded' });
 
     const pdfBuffer = await page.pdf({
       format: 'A4',
       printBackground: true,
-      margin: { top: '25mm', right: '20mm', bottom: '30mm', left: '20mm' }
+      margin: { top: '25mm', right: '20mm', bottom: '30mm', left: '20mm' },
     });
 
     await browser.close();
@@ -228,20 +243,19 @@ export async function POST(request: NextRequest): Promise<Response> {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="Widerspruch_${sanitizeFilename(antragsteller.name)}_${caseCode}.pdf"`,
         'Content-Length': pdfBuffer.length.toString(),
-        'X-Case-Code': caseCode
-      }
+        'X-Case-Code': caseCode,
+      },
     });
-
   } catch (error) {
     if (browser) await browser.close();
-    
+
     console.error('Widerspruch PDF error:', error);
     return NextResponse.json(
-      { 
-        error: 'PDF Generierung fehlgeschlagen',
-        details: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      },
-      { status: 500, headers: getCorsHeaders() }
+        {
+          error: 'PDF Generierung fehlgeschlagen',
+          details: error instanceof Error ? error.message : 'Unbekannter Fehler',
+        },
+        { status: 500, headers: getCorsHeaders() }
     );
   }
 }
@@ -249,7 +263,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 export async function OPTIONS(): Promise<NextResponse> {
   return new NextResponse(null, {
     status: 204,
-    headers: getCorsHeaders()
+    headers: getCorsHeaders(),
   });
 }
 
@@ -261,6 +275,6 @@ function getCorsHeaders(): Record<string, string> {
   return {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   };
 }

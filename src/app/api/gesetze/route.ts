@@ -34,7 +34,7 @@ const VERFUEGBARE_GESETZE: GesetzInfo[] = [
     anzahlParagraphs: 92,
     kategorien: ['Pflegegeld', 'Pflegesachleistungen', 'Pflegegrad', 'Widerspruch', 'Anträge'],
     letzteAenderung: '01.01.2024',
-    verfuegbarAb: '1995-01-01'
+    verfuegbarAb: '1995-01-01',
   },
   {
     sgb: 'V',
@@ -42,7 +42,7 @@ const VERFUEGBARE_GESETZE: GesetzInfo[] = [
     fullName: 'Gesetzliche Krankenversicherung',
     anzahlParagraphs: 365,
     kategorien: ['Krankenversicherung', 'Leistungen', 'Zuzahlungen', 'Prävention'],
-    letzteAenderung: '01.01.2024'
+    letzteAenderung: '01.01.2024',
   },
   {
     sgb: 'IX',
@@ -50,21 +50,66 @@ const VERFUEGBARE_GESETZE: GesetzInfo[] = [
     fullName: 'Rehabilitation und Teilhabe behinderter Menschen',
     anzahlParagraphs: 232,
     kategorien: ['Rehabilitation', 'Teilhabe', 'Schwerbehinderung', 'Leistungen'],
-    letzteAenderung: '01.01.2024'
-  }
+    letzteAenderung: '01.01.2024',
+  },
 ];
 
 // Volltext-Index für die Suche (vereinfachte Demo-Daten)
 const SUCH_INDEX = [
-  { sgb: 'XI', paragraph: '1', titel: 'Leistungen zur Pflege', keywords: ['pflegebedürftig', 'pflegegeld', 'leistungen', 'pflege'] },
-  { sgb: 'XI', paragraph: '14', titel: 'Pflegegrade', keywords: ['pflegegrad', 'md', 'medizinischer dienst', 'einstufung', 'begutachtung'] },
-  { sgb: 'XI', paragraph: '15', titel: 'Pflegegeld', keywords: ['pflegegeld', 'geldleistung', 'monatlich', 'höhe', 'betrag'] },
-  { sgb: 'XI', paragraph: '18', titel: 'Pflegesachleistungen', keywords: ['sachleistungen', 'pflegedienst', 'ambulant', 'stunden'] },
-  { sgb: 'XI', paragraph: '19', titel: 'Kombinationsleistungen', keywords: ['kombi', 'kombinationsleistungen', 'geld', 'sachleistungen'] },
-  { sgb: 'XI', paragraph: '45', titel: 'Widerspruch', keywords: ['widerspruch', 'beschwerde', 'einspruch', 'md', 'widerspruchsverfahren'] },
-  { sgb: 'V', paragraph: '1', titel: 'Mitglieder', keywords: ['mitglied', 'versicherung', 'mitgliedschaft', 'kasse'] },
-  { sgb: 'IX', paragraph: '1', titel: 'Ziel der Rehabilitation', keywords: ['reha', 'rehabilitation', 'teilhabe', 'behinderung'] },
-  { sgb: 'IX', paragraph: '2', titel: 'Leistungsträger', keywords: ['reha', 'träger', 'leistungsträger', 'rentenversicherung'] }
+  {
+    sgb: 'XI',
+    paragraph: '1',
+    titel: 'Leistungen zur Pflege',
+    keywords: ['pflegebedürftig', 'pflegegeld', 'leistungen', 'pflege'],
+  },
+  {
+    sgb: 'XI',
+    paragraph: '14',
+    titel: 'Pflegegrade',
+    keywords: ['pflegegrad', 'md', 'medizinischer dienst', 'einstufung', 'begutachtung'],
+  },
+  {
+    sgb: 'XI',
+    paragraph: '15',
+    titel: 'Pflegegeld',
+    keywords: ['pflegegeld', 'geldleistung', 'monatlich', 'höhe', 'betrag'],
+  },
+  {
+    sgb: 'XI',
+    paragraph: '18',
+    titel: 'Pflegesachleistungen',
+    keywords: ['sachleistungen', 'pflegedienst', 'ambulant', 'stunden'],
+  },
+  {
+    sgb: 'XI',
+    paragraph: '19',
+    titel: 'Kombinationsleistungen',
+    keywords: ['kombi', 'kombinationsleistungen', 'geld', 'sachleistungen'],
+  },
+  {
+    sgb: 'XI',
+    paragraph: '45',
+    titel: 'Widerspruch',
+    keywords: ['widerspruch', 'beschwerde', 'einspruch', 'md', 'widerspruchsverfahren'],
+  },
+  {
+    sgb: 'V',
+    paragraph: '1',
+    titel: 'Mitglieder',
+    keywords: ['mitglied', 'versicherung', 'mitgliedschaft', 'kasse'],
+  },
+  {
+    sgb: 'IX',
+    paragraph: '1',
+    titel: 'Ziel der Rehabilitation',
+    keywords: ['reha', 'rehabilitation', 'teilhabe', 'behinderung'],
+  },
+  {
+    sgb: 'IX',
+    paragraph: '2',
+    titel: 'Leistungsträger',
+    keywords: ['reha', 'träger', 'leistungsträger', 'rentenversicherung'],
+  },
 ];
 
 /**
@@ -78,10 +123,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     // Filter nach spezifischem SGB
     if (sgb) {
-      const gefundenesGesetz = VERFUEGBARE_GESETZE.find(g => g.sgb === sgb.toUpperCase());
+      const gefundenesGesetz = VERFUEGBARE_GESETZE.find((g) => g.sgb === sgb.toUpperCase());
       if (!gefundenesGesetz) {
         return NextResponse.json(
-          { error: 'Gesetz nicht gefunden', verfuegbar: VERFUEGBARE_GESETZE.map(g => g.sgb) },
+          { error: 'Gesetz nicht gefunden', verfuegbar: VERFUEGBARE_GESETZE.map((g) => g.sgb) },
           { status: 404, headers: getCorsHeaders() }
         );
       }
@@ -89,12 +134,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     // Standard: Liste aller Gesetze
-    const response = detail === 'full' 
-      ? { gesetze: VERFUEGBARE_GESETZE, meta: { total: VERFUEGBARE_GESETZE.length, apiVersion: '1.0' } }
-      : VERFUEGBARE_GESETZE;
+    const response =
+      detail === 'full'
+        ? {
+            gesetze: VERFUEGBARE_GESETZE,
+            meta: { total: VERFUEGBARE_GESETZE.length, apiVersion: '1.0' },
+          }
+        : VERFUEGBARE_GESETZE;
 
     return NextResponse.json(response, { status: 200, headers: getCorsHeaders() });
-
   } catch (error) {
     console.error('Gesetze LIST error:', error);
     return NextResponse.json(
@@ -109,7 +157,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const startTime = Date.now();
-  
+
   try {
     const body = await request.json();
     const { query, sgbFilter, limit = 10 } = body;
@@ -122,32 +170,31 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     const searchTerm = query.toLowerCase();
-    
+
     // Suche durchführen
-    const treffer = SUCH_INDEX
-      .filter(eintrag => {
-        // SGB Filter
-        if (sgbFilter && !sgbFilter.includes(eintrag.sgb)) {
-          return false;
-        }
-        // Volltext-Suche
-        const matchInTitel = eintrag.titel.toLowerCase().includes(searchTerm);
-        const matchInKeywords = eintrag.keywords.some(k => k.includes(searchTerm));
-        return matchInTitel || matchInKeywords;
-      })
-      .map(eintrag => {
+    const treffer = SUCH_INDEX.filter((eintrag) => {
+      // SGB Filter
+      if (sgbFilter && !sgbFilter.includes(eintrag.sgb)) {
+        return false;
+      }
+      // Volltext-Suche
+      const matchInTitel = eintrag.titel.toLowerCase().includes(searchTerm);
+      const matchInKeywords = eintrag.keywords.some((k) => k.includes(searchTerm));
+      return matchInTitel || matchInKeywords;
+    })
+      .map((eintrag) => {
         // Relevance scoring
         let relevance = 0;
         if (eintrag.titel.toLowerCase().includes(searchTerm)) relevance += 10;
-        if (eintrag.keywords.some(k => k === searchTerm)) relevance += 5;
-        if (eintrag.keywords.some(k => k.includes(searchTerm))) relevance += 3;
-        
+        if (eintrag.keywords.some((k) => k === searchTerm)) relevance += 5;
+        if (eintrag.keywords.some((k) => k.includes(searchTerm))) relevance += 3;
+
         return {
           sgb: eintrag.sgb,
           paragraph: eintrag.paragraph,
           titel: eintrag.titel,
           ausschnitt: generateAusschnitt(eintrag, searchTerm),
-          relevance
+          relevance,
         };
       })
       .sort((a, b) => b.relevance - a.relevance)
@@ -157,11 +204,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       gesamt: treffer.length,
       treffer,
       query: searchTerm,
-      dauerMs: Date.now() - startTime
+      dauerMs: Date.now() - startTime,
     };
 
     return NextResponse.json(ergebnis, { status: 200, headers: getCorsHeaders() });
-
   } catch (error) {
     console.error('Gesetze SEARCH error:', error);
     return NextResponse.json(
@@ -174,15 +220,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 export async function OPTIONS(): Promise<NextResponse> {
   return new NextResponse(null, {
     status: 204,
-    headers: getCorsHeaders()
+    headers: getCorsHeaders(),
   });
 }
 
-function generateAusschnitt(eintrag: typeof SUCH_INDEX[0], searchTerm: string): string {
-  const matchingKeyword = eintrag.keywords.find(k => k.includes(searchTerm));
-  return matchingKeyword 
-    ? `${eintrag.titel} - ${matchingKeyword}`
-    : eintrag.titel;
+function generateAusschnitt(eintrag: (typeof SUCH_INDEX)[0], searchTerm: string): string {
+  const matchingKeyword = eintrag.keywords.find((k) => k.includes(searchTerm));
+  return matchingKeyword ? `${eintrag.titel} - ${matchingKeyword}` : eintrag.titel;
 }
 
 function getCorsHeaders(): Record<string, string> {
@@ -190,6 +234,6 @@ function getCorsHeaders(): Record<string, string> {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   };
 }

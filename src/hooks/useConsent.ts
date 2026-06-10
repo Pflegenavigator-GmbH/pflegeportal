@@ -1,26 +1,38 @@
 // src/hooks/useConsent.ts
-import { useState, useEffect } from 'react';
+'use client';
+
+import { useSyncExternalStore } from 'react';
+
+const subscribe = (listener: () => void) => {
+  window.addEventListener('consentChange', listener);
+  window.addEventListener('storage', listener);
+  return () => {
+    window.removeEventListener('consentChange', listener);
+    window.removeEventListener('storage', listener);
+  };
+};
+
+const getSnapshot = () => {
+  return localStorage.getItem('user_consent');
+};
+
+const getServerSnapshot = () => {
+  return null;
+};
 
 export function useConsent() {
-    const [hasAnalyticsConsent, setHasAnalyticsConsent] = useState(false);
+  const consentString = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-    useEffect(() => {
-        // Initialer Check beim Laden
-        const stored = localStorage.getItem('user_consent');
-        if (stored) {
-            const parsed = JSON.parse(stored);
-            setHasAnalyticsConsent(parsed.analytics);
-        }
+  let hasAnalyticsConsent = false;
 
-        // Listener: 'Event' Typ verwenden und als CustomEvent mit unseren Daten casten
-        const handleConsent = (e: Event) => {
-            const customEvent = e as CustomEvent<{ analytics: boolean }>;
-            setHasAnalyticsConsent(customEvent.detail.analytics);
-        };
+  if (consentString) {
+    try {
+      const parsed = JSON.parse(consentString);
+      hasAnalyticsConsent = Boolean(parsed.analytics);
+    } catch (error) {
+      console.error('Fehler beim Parsen der Consent-Daten:', error);
+    }
+  }
 
-        window.addEventListener('consentChange', handleConsent);
-        return () => window.removeEventListener('consentChange', handleConsent);
-    }, []);
-
-    return { hasAnalyticsConsent };
+  return { hasAnalyticsConsent };
 }

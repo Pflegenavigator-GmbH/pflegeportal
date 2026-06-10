@@ -6,21 +6,23 @@ import { BriefPayload } from '@/src/types/briefe';
 
 export const BEHOERDEN_VORLAGEN = {
   uni_pruefungsamt: {
-    anrede: "Sehr geehrte Damen und Herren,",
-    rechtshinweis: "Anträge an das Prüfungsamt unterliegen den Ausschlussfristen der jeweiligen Prüfungsordnung."
+    anrede: 'Sehr geehrte Damen und Herren,',
+    rechtshinweis:
+      'Anträge an das Prüfungsamt unterliegen den Ausschlussfristen der jeweiligen Prüfungsordnung.',
   },
   versicherung_kranken: {
-    anrede: "Sehr geehrte Damen und Herren,",
-    rechtshinweis: "Leistungsansprüche gegenüber gesetzlichen Krankenkassen richten sich nach dem SGB V."
+    anrede: 'Sehr geehrte Damen und Herren,',
+    rechtshinweis:
+      'Leistungsansprüche gegenüber gesetzlichen Krankenkassen richten sich nach dem SGB V.',
   },
   finanzamt: {
-    anrede: "Sehr geehrte Damen und Herren,",
-    rechtshinweis: "Mitteilungen an das Finanzamt sind gemäß § 122 AO formgebunden."
+    anrede: 'Sehr geehrte Damen und Herren,',
+    rechtshinweis: 'Mitteilungen an das Finanzamt sind gemäß § 122 AO formgebunden.',
   },
   amt_gericht: {
-    anrede: "Sehr geehrte Damen und Herren,",
-    rechtshinweis: "Schriftsätze an Gerichte unterliegen den strengen Vorgaben der ZPO bzw. VwGO."
-  }
+    anrede: 'Sehr geehrte Damen und Herren,',
+    rechtshinweis: 'Schriftsätze an Gerichte unterliegen den strengen Vorgaben der ZPO bzw. VwGO.',
+  },
 };
 
 export class AllgemeinerBriefGenerator {
@@ -28,7 +30,7 @@ export class AllgemeinerBriefGenerator {
     const heute = new Date().toLocaleDateString('de-DE', {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
     });
 
     // DIN 5008 Absenderblock
@@ -68,7 +70,7 @@ export class AllgemeinerBriefGenerator {
     // Anlagenverzeichnis
     if (data.anlagen && data.anlagen.length > 0) {
       brief += `\n\nAnlagen:\n`;
-      data.anlagen.forEach(anlage => {
+      data.anlagen.forEach((anlage) => {
         brief += `- ${anlage}\n`;
       });
     }

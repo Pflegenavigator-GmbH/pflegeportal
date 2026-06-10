@@ -37,34 +37,33 @@ export interface BetreuungsrechtData {
 
 export const BETREUUNGS_PARAGRAPHEN = {
   betreuungsrecht: {
-    paragraph: "§§ 1896 ff. BGB",
-    titel: "Betreuungsrecht",
-    text: "Rechtliche Betreuung für volljährige Menschen bei Krankheit oder Behinderung",
+    paragraph: '§§ 1896 ff. BGB',
+    titel: 'Betreuungsrecht',
+    text: 'Rechtliche Betreuung für volljährige Menschen bei Krankheit oder Behinderung',
   },
   vorsorgevollmacht: {
-    paragraph: "§ 171 BGB",
-    titel: "Vorsorgevollmacht",
-    text: "Vorsorgevollmacht für den Fall der eigenen Einwilligungsunfähigkeit",
+    paragraph: '§ 171 BGB',
+    titel: 'Vorsorgevollmacht',
+    text: 'Vorsorgevollmacht für den Fall der eigenen Einwilligungsunfähigkeit',
   },
   patientenverfuegung: {
-    paragraph: "§ 1901a BGB",
-    titel: "Patientenverfügung",
-    text: "Verfügung über ärztliche Behandlung für den Fall der Einwilligungsunfähigkeit",
+    paragraph: '§ 1901a BGB',
+    titel: 'Patientenverfügung',
+    text: 'Verfügung über ärztliche Behandlung für den Fall der Einwilligungsunfähigkeit',
   },
   betreuungsverein: {
-    paragraph: "§ 1908 BGB",
-    titel: "Betreuungsverein",
-    text: "Betreuungsverein als Betreuer bestellen",
+    paragraph: '§ 1908 BGB',
+    titel: 'Betreuungsverein',
+    text: 'Betreuungsverein als Betreuer bestellen',
   },
 };
 
 export class BetreuungsrechtGenerator {
-
   generateBrief(data: BetreuungsrechtData): string {
     const heute = new Date().toLocaleDateString('de-DE', {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
     });
 
     const dringlichkeitText = this.getDringlichkeitText(data.dringlichkeit);
@@ -121,9 +120,9 @@ ${data.begruendung}
             gesundheit: 'Gesundheitssorge (ärztliche Behandlung, Pflege)',
             aufenthalt: 'Aufenthaltsbestimmung (Wohnort, Umzug, Pflegeheim)',
             post: 'Post- und Telekommunikation',
-            sonstiges: 'Sonstige Angelegenheiten'
+            sonstiges: 'Sonstige Angelegenheiten',
           };
-          data.betreuungsbereich.forEach(bereich => {
+          data.betreuungsbereich.forEach((bereich) => {
             brief += `- ${bereichText[bereich]}\n`;
           });
         }
@@ -177,9 +176,9 @@ Die Vorsorgevollmacht umfasst:
             gesundheit: 'Gesundheitssorge',
             aufenthalt: 'Aufenthaltsbestimmung',
             post: 'Post und Telekommunikation',
-            sonstiges: 'Sonstige Angelegenheiten'
+            sonstiges: 'Sonstige Angelegenheiten',
           };
-          data.betreuungsbereich.forEach(bereich => {
+          data.betreuungsbereich.forEach((bereich) => {
             brief += `- ${bereichText[bereich]}\n`;
           });
         }
@@ -208,7 +207,7 @@ ${data.begruendung}
 `;
         if (data.betreuungsbereich) {
           brief += `Die Patientenverfügung enthält folgende Regelungen:\n`;
-          data.betreuungsbereich.forEach(bereich => {
+          data.betreuungsbereich.forEach((bereich) => {
             if (bereich === 'gesundheit') brief += `- Verzicht auf lebensverlängernde Maßnahmen\n`;
             if (bereich === 'sonstiges') brief += `- Palliativmedizinische Versorgung gewünscht\n`;
           });
@@ -234,9 +233,9 @@ Anlagen:
 `;
 
     const standardAnlagen = [
-      "Kopie des Personalausweises",
-      "Ärztliche Atteste (bei Betreuungsantrag)",
-      "Vorsorgevollmacht (beglaubigt, bei Vollmacht)"
+      'Kopie des Personalausweises',
+      'Ärztliche Atteste (bei Betreuungsantrag)',
+      'Vorsorgevollmacht (beglaubigt, bei Vollmacht)',
     ];
 
     const alleAnlagen = [...standardAnlagen, ...(data.anlagen || [])];
@@ -257,9 +256,12 @@ Bei dringenden Gesundheitsgefahren kann das Gericht sofort einen vorläufigen Be
 
   private getDringlichkeitText(dringlichkeit?: string): string {
     switch (dringlichkeit) {
-      case 'sehr_hoch': return '\n\n*** DRINGEND - SOFORTIGE BESTELLUNG ERFORDERLICH ***';
-      case 'hoch': return '\n\n*Eilbedürftig*';
-      default: return '';
+      case 'sehr_hoch':
+        return '\n\n*** DRINGEND - SOFORTIGE BESTELLUNG ERFORDERLICH ***';
+      case 'hoch':
+        return '\n\n*Eilbedürftig*';
+      default:
+        return '';
     }
   }
 
@@ -270,19 +272,19 @@ Bei dringenden Gesundheitsgefahren kann das Gericht sofort einen vorläufigen Be
   ): string {
     return this.generateBrief({
       empfaenger: {
-        name: "Notar",
-        strasse: "[Adresse eintragen]",
-        plz: "[PLZ]",
-        ort: "[Ort]"
+        name: 'Notar',
+        strasse: '[Adresse eintragen]',
+        plz: '[PLZ]',
+        ort: '[Ort]',
       },
       antragsteller: {
         ...vollmachtgeber,
-        geburtsdatum: '[TT.MM.JJJJ]'
+        geburtsdatum: '[TT.MM.JJJJ]',
       },
       verfahrensart: 'vorsorgevollmacht',
       begruendung: 'Vorsorge für den Fall der eigenen Einwilligungsunfähigkeit',
       vorsorgebevollmaechtigter: bevollmaechtigter,
-      betreuungsbereich: ['vermoegen', 'gesundheit', 'aufenthalt']
+      betreuungsbereich: ['vermoegen', 'gesundheit', 'aufenthalt'],
     });
   }
 }
