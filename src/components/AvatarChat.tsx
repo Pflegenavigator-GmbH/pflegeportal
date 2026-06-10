@@ -14,36 +14,7 @@ import {
 } from 'lucide-react';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 
-// Saubere Typisierung der Web Speech API ohne 'any'
-interface ISpeechRecognitionEvent {
-  resultIndex: number;
-  results: {
-    [index: number]: {
-      [index: number]: {
-        transcript: string;
-      };
-    };
-  };
-}
-
-interface ISpeechRecognition {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  onstart: () => void;
-  onend: () => void;
-  onresult: (event: ISpeechRecognitionEvent) => void;
-  onerror: (event: unknown) => void;
-  start: () => void;
-  stop: () => void;
-}
-
-declare global {
-  interface Window {
-    SpeechRecognition?: new () => ISpeechRecognition;
-    webkitSpeechRecognition?: new () => ISpeechRecognition;
-  }
-}
+import {ISpeechRecognition, ISpeechRecognitionEvent} from "@/src/lib/voice";
 
 interface Message {
   id: string;
@@ -95,7 +66,7 @@ interface AvatarChatResponse {
 const VOICE_COMMANDS = {
   HILFE: ['hilfe', 'help', 'assistent', 'unterstützung'],
   WEITER: ['weiter', 'next', 'fortfahren', 'continue'],
-  ZURÜCK: ['zurück', 'back', 'zurueck', 'vorherige'],
+  ZURUECK: ['zurück', 'back', 'zurueck', 'vorherige'],
 };
 
 export default function AvatarChat({
@@ -232,7 +203,7 @@ export default function AvatarChat({
         sendMessage('Weiter zum nächsten Schritt');
         return;
       }
-      if (VOICE_COMMANDS.ZURÜCK.some((cmd) => lowerText.includes(cmd))) {
+      if (VOICE_COMMANDS.ZURUECK.some((cmd) => lowerText.includes(cmd))) {
         sendMessage('Zurück zum vorherigen Schritt');
         return;
       }

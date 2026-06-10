@@ -30,7 +30,7 @@ export default function PflegekraeftePage(props: PageProps) {
 
   return (
     <div className="min-h-screen bg-slate-900 font-sans text-white">
-      <PflegekraefteHeader locale={locale} onBack={() => router.push(`/${locale}`)} />
+      <PflegekraefteHeader locale={locale} onBackAction={() => router.push(`/${locale}`)} />
 
       <main className="mx-auto max-w-6xl space-y-8 px-4 py-8">
         <TransparencyNotice />

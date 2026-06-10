@@ -192,27 +192,27 @@ export async function POST(request: NextRequest): Promise<Response> {
     const body: WiderspruchData = await request.json();
     const { caseCode, antragsteller, pflegekasse, bescheidDaten, widerspruchsBegruendung } = body;
 
-    // Validierung
+    // Validierung der Pflichtfelder
     if (!caseCode || !antragsteller || !pflegekasse || !bescheidDaten || !widerspruchsBegruendung) {
       return NextResponse.json(
-        {
-          error: 'Fehlende Pflichtfelder',
-          required: [
-            'caseCode',
-            'antragsteller',
-            'pflegekasse',
-            'bescheidDaten',
-            'widerspruchsBegruendung',
-          ],
-        },
-        { status: 400, headers: getCorsHeaders() }
+          {
+            error: 'Fehlende Pflichtfelder',
+            required: [
+              'caseCode',
+              'antragsteller',
+              'pflegekasse',
+              'bescheidDaten',
+              'widerspruchsBegruendung',
+            ],
+          },
+          { status: 400, headers: getCorsHeaders() }
       );
     }
 
     if (!antragsteller.name || !antragsteller.strasse || !antragsteller.plz || !antragsteller.ort) {
       return NextResponse.json(
-        { error: 'Antragsteller-Adresse unvollständig' },
-        { status: 400, headers: getCorsHeaders() }
+          { error: 'Antragsteller-Adresse unvollständig' },
+          { status: 400, headers: getCorsHeaders() }
       );
     }
 
@@ -226,7 +226,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     });
 
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+    await page.setContent(html, { waitUntil: 'domcontentloaded' });
 
     const pdfBuffer = await page.pdf({
       format: 'A4',
@@ -251,11 +251,11 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     console.error('Widerspruch PDF error:', error);
     return NextResponse.json(
-      {
-        error: 'PDF Generierung fehlgeschlagen',
-        details: error instanceof Error ? error.message : 'Unbekannter Fehler',
-      },
-      { status: 500, headers: getCorsHeaders() }
+        {
+          error: 'PDF Generierung fehlgeschlagen',
+          details: error instanceof Error ? error.message : 'Unbekannter Fehler',
+        },
+        { status: 500, headers: getCorsHeaders() }
     );
   }
 }

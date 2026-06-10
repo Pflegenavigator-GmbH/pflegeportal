@@ -12,32 +12,31 @@ export interface TTSOptions {
 // ============================================
 // TYPE DEFINITIONS FÜR WEB SPEECH API (Ersetzt 'any')
 // ============================================
-interface ISpeechRecognitionEvent {
+export interface ISpeechRecognitionEvent {
   results: {
     length: number;
     [index: number]: {
-      [index: number]: {
-        transcript: string;
-      };
+      [index: number]: { transcript: string };
     };
   };
 }
 
-interface ISpeechRecognitionErrorEvent {
+export interface ISpeechRecognitionErrorEvent {
   error: string;
 }
 
-interface ISpeechRecognition {
+export interface ISpeechRecognition {
   lang: string;
   continuous: boolean;
   interimResults: boolean;
+  onstart: () => void;
+  onend: () => void;
   onresult: ((event: ISpeechRecognitionEvent) => void) | null;
   onerror: ((event: ISpeechRecognitionErrorEvent) => void) | null;
   start: () => void;
   stop: () => void;
 }
 
-// Erweitert das globale Window-Objekt, damit TypeScript nicht meckert
 declare global {
   interface Window {
     SpeechRecognition?: new () => ISpeechRecognition;
