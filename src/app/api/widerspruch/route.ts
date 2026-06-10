@@ -1,8 +1,9 @@
 // src/app/api/widerspruch/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import {calculatePflegegrad} from "@/src/lib/pflegegrad/rechner";
-import {ModuleScores} from "@/src/types/pflegegrad";
-import {calculateWiderspruchChance} from "@/src/lib/pflegegrad-berechnung";
+
+import { calculatePflegegrad } from '@/src/lib/pflegegrad/rechner';
+import { calculateWiderspruchChance } from '@/src/lib/pflegegrad-berechnung';
+import { ModuleScores } from '@/src/types/pflegegrad';
 
 /**
  * POST /api/widerspruch
@@ -23,15 +24,12 @@ export async function POST(request: NextRequest) {
 
     // Validierung
     if (!caseCode || !currentLevel || !expectedLevel || !moduleScores) {
-      return NextResponse.json(
-        { error: 'Fehlende Pflichtfelder' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Fehlende Pflichtfelder' }, { status: 400 });
     }
 
     // Pflegegrad berechnen für Validierung
     const calculation = calculatePflegegrad(moduleScores as ModuleScores);
-    
+
     // Widerspruch-Chance berechnen
     const widerspruchChance = calculateWiderspruchChance(
       currentLevel,
@@ -88,15 +86,13 @@ export async function POST(request: NextRequest) {
       nextSteps,
       calculation,
       widerspruchChance,
-      fristInfo: 'WICHTIG: Widerspruch muss innerhalb von 4 Wochen nach Zugang des Bescheids eingelegt werden!',
+      fristInfo:
+        'WICHTIG: Widerspruch muss innerhalb von 4 Wochen nach Zugang des Bescheids eingelegt werden!',
       legalBase: '§ 124 SGB XI',
     });
   } catch (error) {
     console.error('Widerspruch-Fehler:', error);
-    return NextResponse.json(
-      { error: 'Interner Server-Fehler' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Interner Server-Fehler' }, { status: 500 });
   }
 }
 
@@ -112,7 +108,9 @@ function generateWiderspruchBegruendung(
   const parts: string[] = [];
 
   // Einleitung
-  parts.push(`Nach den NBA-Kriterien (Neues Begutachtungs-Assessment) ergibt sich aus meinen Einschränkungen ein höherer Pflegebedarf als im Pflegegrad ${currentLevel} berücksichtigt.`);
+  parts.push(
+    `Nach den NBA-Kriterien (Neues Begutachtungs-Assessment) ergibt sich aus meinen Einschränkungen ein höherer Pflegebedarf als im Pflegegrad ${currentLevel} berücksichtigt.`
+  );
   parts.push('');
 
   // Modul-Beschreibungen
@@ -147,8 +145,12 @@ function generateWiderspruchBegruendung(
   }
 
   // Zusammenfassung
-  parts.push(`Die Summe meiner Beeinträchtigungen in den verschiedenen Lebensbereichen entspricht dem Pflegegrad ${expectedLevel}.`);
-  parts.push(`Die aktuelle Einstufung in Pflegegrad ${currentLevel} berücksichtigt meinen tatsächlichen Hilfebedarf nicht ausreichend.`);
+  parts.push(
+    `Die Summe meiner Beeinträchtigungen in den verschiedenen Lebensbereichen entspricht dem Pflegegrad ${expectedLevel}.`
+  );
+  parts.push(
+    `Die aktuelle Einstufung in Pflegegrad ${currentLevel} berücksichtigt meinen tatsächlichen Hilfebedarf nicht ausreichend.`
+  );
   parts.push('');
 
   // Benutzer-Gründe
@@ -160,7 +162,9 @@ function generateWiderspruchBegruendung(
 
   // Rechtliche Basis
   parts.push('Rechtliche Grundlage:');
-  parts.push('Gemäß § 124 SGB XI habe ich Anspruch auf eine Wiederholungsbegutachtung, wenn die Einstufung nicht meinem tatsächlichen Pflegebedarf entspricht.');
+  parts.push(
+    'Gemäß § 124 SGB XI habe ich Anspruch auf eine Wiederholungsbegutachtung, wenn die Einstufung nicht meinem tatsächlichen Pflegebedarf entspricht.'
+  );
 
   return parts.join('\n');
 }

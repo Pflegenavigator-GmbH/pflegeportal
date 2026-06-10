@@ -4,7 +4,7 @@
 
 export interface EMRenteData {
   empfaenger: {
-    name: string;  // z.B. "Deutsche Rentenversicherung Bund"
+    name: string; // z.B. "Deutsche Rentenversicherung Bund"
     strasse: string;
     plz: string;
     ort: string;
@@ -24,7 +24,7 @@ export interface EMRenteData {
     diagnose: string;
     icd10?: string;
     behandelnder_arzt: string;
-    krank_seit: string;  // Korrigiert: Unterstrich statt Leerzeichen
+    krank_seit: string; // Korrigiert: Unterstrich statt Leerzeichen
     voraussichtlich_bis?: string;
   };
   arbeitgeber?: {
@@ -40,48 +40,49 @@ export interface EMRenteData {
 // Muster-Vorlagen für EM-Rente
 export const EM_VORLAGEN = {
   em_rente_antrag: {
-    betreff: "Antrag auf Erwerbsminderungsrente",
-    einleitung: "hiermit stelle ich Antrag auf Erwerbsminderungsrente gemäß § 240 SGB VI.",
-    paragraphen: ["§ 240 SGB VI", "§ 43 SGB VI"],
+    betreff: 'Antrag auf Erwerbsminderungsrente',
+    einleitung: 'hiermit stelle ich Antrag auf Erwerbsminderungsrente gemäß § 240 SGB VI.',
+    paragraphen: ['§ 240 SGB VI', '§ 43 SGB VI'],
   },
   berufsunfaehigkeit: {
-    betreff: "Antrag auf Berufsunfähigkeitsrente",
-    einleitung: "hiermit stelle ich Antrag auf Berufsunfähigkeitsrente gemäß § 240 SGB VI.",
-    paragraphen: ["§ 240 SGB VI", "§ 237 SGB VI"],
+    betreff: 'Antrag auf Berufsunfähigkeitsrente',
+    einleitung: 'hiermit stelle ich Antrag auf Berufsunfähigkeitsrente gemäß § 240 SGB VI.',
+    paragraphen: ['§ 240 SGB VI', '§ 237 SGB VI'],
   },
   vorlaeufige_em: {
-    betreff: "Antrag auf vorläufige Erwerbsminderungsrente",
-    einleitung: "hiermit stelle ich Antrag auf vorläufige Erwerbsminderungsrente gemäß § 241 SGB VI.",
-    paragraphen: ["§ 241 SGB VI"],
+    betreff: 'Antrag auf vorläufige Erwerbsminderungsrente',
+    einleitung:
+      'hiermit stelle ich Antrag auf vorläufige Erwerbsminderungsrente gemäß § 241 SGB VI.',
+    paragraphen: ['§ 241 SGB VI'],
   },
   widerspruch_leistung: {
-    betreff: "Widerspruch gegen Leistungsbescheid",
-    einleitung: "lege ich hiermit fristgerecht Widerspruch ein gegen den Bescheid vom {datum}.",
-    paragraphen: ["§ 78 SGB X"],
+    betreff: 'Widerspruch gegen Leistungsbescheid',
+    einleitung: 'lege ich hiermit fristgerecht Widerspruch ein gegen den Bescheid vom {datum}.',
+    paragraphen: ['§ 78 SGB X'],
   },
   nachzahlung: {
-    betreff: "Antrag auf Rentennachzahlung",
-    einleitung: "hiermit beantrage ich eine Überprüfung und Nachzahlung meiner Rente.",
-    paragraphen: ["§ 44 SGB VI"],
+    betreff: 'Antrag auf Rentennachzahlung',
+    einleitung: 'hiermit beantrage ich eine Überprüfung und Nachzahlung meiner Rente.',
+    paragraphen: ['§ 44 SGB VI'],
   },
   widerspruch_mdl: {
-    betreff: "Widerspruch gegen medizinisches Gutachten",
-    einleitung: "lege ich hiermit Widerspruch ein gegen das medizinische Gutachten vom {datum}.",
-    paragraphen: ["§ 78 SGB X", "§ 109 SGB X"],
-  }
+    betreff: 'Widerspruch gegen medizinisches Gutachten',
+    einleitung: 'lege ich hiermit Widerspruch ein gegen das medizinische Gutachten vom {datum}.',
+    paragraphen: ['§ 78 SGB X', '§ 109 SGB X'],
+  },
 };
 
 export class EMRenteBriefGenerator {
-
   generateBrief(data: EMRenteData): string {
     const heute = new Date().toLocaleDateString('de-DE', {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
     });
 
     const vorlage = this.getVorlage(data.rentenart);
-    const dringlichkeit = data.dringlichkeit === 'hoch' ? '\\n\\n*Eilbedürftig - Krankengeld läuft ab*' : '';
+    const dringlichkeit =
+      data.dringlichkeit === 'hoch' ? '\\n\\n*Eilbedürftig - Krankengeld läuft ab*' : '';
 
     return `\\
 ${data.antragsteller.name}\\
@@ -142,7 +143,7 @@ ${data.antragsteller.name}\\
 \\
 Anlagen:\\
 - Personalausweis (Kopie)\\
-${data.unterlagen.map(u => `- ${u}`).join("\\n")}\\
+${data.unterlagen.map((u) => `- ${u}`).join('\\n')}\\
 \\
 \\
 Kontakt:\\
@@ -152,16 +153,19 @@ ${data.antragsteller.email ? `E-Mail: ${data.antragsteller.email}` : ''}\\
   }
 
   private getVorlage(rentenart: string) {
-    switch(rentenart) {
-      case 'berufsunfaehigkeit': return EM_VORLAGEN.berufsunfaehigkeit;
-      case 'vorlaeufige': return EM_VORLAGEN.vorlaeufige_em;
-      default: return EM_VORLAGEN.em_rente_antrag;
+    switch (rentenart) {
+      case 'berufsunfaehigkeit':
+        return EM_VORLAGEN.berufsunfaehigkeit;
+      case 'vorlaeufige':
+        return EM_VORLAGEN.vorlaeufige_em;
+      default:
+        return EM_VORLAGEN.em_rente_antrag;
     }
   }
 
   private generateArbeitgeberSection(data: EMRenteData): string {
     if (!data.arbeitgeber) return '';
-    
+
     return `Arbeitgeber:\\
 - Firma: ${data.arbeitgeber.name}\\
 - Eingetreten seit: ${data.arbeitgeber.eingetreten_seit}\\
@@ -170,23 +174,23 @@ ${data.antragsteller.email ? `E-Mail: ${data.antragsteller.email}` : ''}\\
   }
 
   private generateRenteDetails(data: EMRenteData): string {
-    let text = "\\nGewünschte Rentenart:\\n";
-    
-    switch(data.rentenart) {
+    let text = '\\nGewünschte Rentenart:\\n';
+
+    switch (data.rentenart) {
       case 'volle':
-        text += "- Volle Erwerbsminderungsrente (mindestens 6 Stunden täglich nicht arbeitsfähig)";
+        text += '- Volle Erwerbsminderungsrente (mindestens 6 Stunden täglich nicht arbeitsfähig)';
         break;
       case 'teilweise':
-        text += "- Teilweise Erwerbsminderungsrente (3-6 Stunden täglich arbeitsfähig)";
+        text += '- Teilweise Erwerbsminderungsrente (3-6 Stunden täglich arbeitsfähig)';
         break;
       case 'vorlaeufige':
-        text += "- Vorläufige Erwerbsminderungsrente (Heilungsaussicht ungewiss)";
+        text += '- Vorläufige Erwerbsminderungsrente (Heilungsaussicht ungewiss)';
         break;
       case 'berufsunfaehigkeit':
-        text += "- Berufsunfähigkeitsrente (nicht mehr im erlernten Beruf tätig)";
+        text += '- Berufsunfähigkeitsrente (nicht mehr im erlernten Beruf tätig)';
         break;
     }
-    
+
     return text;
   }
 
@@ -198,13 +202,13 @@ ${data.antragsteller.email ? `E-Mail: ${data.antragsteller.email}` : ''}\\
   // Gutachten-Vorbereitung
   generateGutachtenFragen(): string[] {
     return [
-      "Welche Tätigkeiten können Sie noch ausführen?",
-      "Welche Beschwerden haben Sie bei körperlicher Belastung?",
-      "Wie lange können Sie konzentriert arbeiten?",
-      "Gibt es Tageszeiten mit weniger Beschwerden?",
-      "Benötigen Sie Pausen? Wie oft und wie lange?",
-      "Können Sie sich ohne Hilfe fortbewegen?",
-      "Benötigen Sie Hilfe im Haushalt?"
+      'Welche Tätigkeiten können Sie noch ausführen?',
+      'Welche Beschwerden haben Sie bei körperlicher Belastung?',
+      'Wie lange können Sie konzentriert arbeiten?',
+      'Gibt es Tageszeiten mit weniger Beschwerden?',
+      'Benötigen Sie Pausen? Wie oft und wie lange?',
+      'Können Sie sich ohne Hilfe fortbewegen?',
+      'Benötigen Sie Hilfe im Haushalt?',
     ];
   }
 }

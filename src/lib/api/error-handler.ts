@@ -1,12 +1,13 @@
 // src/app/lib/api/error-handler.ts
 import { NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '@/src/lib/supabase/server';
+
 import { normalizeError, shouldLogError } from '@/src/lib/api/errors';
+import { createServerSupabaseClient } from '@/src/lib/supabase/server';
 
 export async function handleApiError(
-    error: unknown,
-    source: string,
-    caseCode?: string
+  error: unknown,
+  source: string,
+  caseCode?: string
 ): Promise<NextResponse> {
   // Normalisiert jeden Fehler (egal ob String, nativer Error oder Supabase-Fehler) in unsere Struktur
   const normalized = normalizeError(error);
@@ -14,7 +15,7 @@ export async function handleApiError(
   // Konsolen-Log für die lokale Entwicklung / Hetzner-Server-Logs
   console.error(`[API ERROR] [${source}] [Case: ${caseCode || 'Kein'}] [${normalized.code}]:`, {
     message: normalized.message,
-    context: normalized.context
+    context: normalized.context,
   });
 
   // Nur loggen, wenn das Log-Level nicht 'debug' ist
@@ -31,9 +32,9 @@ export async function handleApiError(
           context: normalized.context,
           code: normalized.code,
           retryable: normalized.retryable,
-          timestamp: normalized.timestamp
+          timestamp: normalized.timestamp,
         },
-        case_code: caseCode || null
+        case_code: caseCode || null,
       });
     } catch (logErr) {
       console.error('Kritisch: System-Log konnte nicht in Supabase geschrieben werden:', logErr);
@@ -41,14 +42,14 @@ export async function handleApiError(
   }
 
   return NextResponse.json(
-      {
-        success: false,
-        error: {
-          code: normalized.code,
-          message: normalized.userMessage, // Dem User wird IMMER die sichere, verständliche Nachricht gezeigt
-          retryable: normalized.retryable
-        }
+    {
+      success: false,
+      error: {
+        code: normalized.code,
+        message: normalized.userMessage, // Dem User wird IMMER die sichere, verständliche Nachricht gezeigt
+        retryable: normalized.retryable,
       },
-      { status: normalized.statusCode || 500 }
+    },
+    { status: normalized.statusCode || 500 }
   );
 }

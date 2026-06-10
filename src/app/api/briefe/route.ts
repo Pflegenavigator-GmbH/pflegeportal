@@ -1,11 +1,12 @@
 // src/app/api/briefe/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { BriefPayload } from '@/src/types/briefe';
+
 import {
   allgemeinerBriefGenerator,
   antragPflegegradGenerator,
-  schwerbehindertenausweisGenerator
+  schwerbehindertenausweisGenerator,
 } from '@/src/lib/briefe';
+import { BriefPayload } from '@/src/types/briefe';
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,9 +29,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       brief: briefText,
-      meta: { zeichenAnzahl: briefText.length }
+      meta: { zeichenAnzahl: briefText.length },
     });
-
   } catch (error) {
     console.error('Zentraler Brief-API-Fehler:', error);
     return NextResponse.json({ error: 'Fehler bei der Schrifttum-Generierung' }, { status: 500 });

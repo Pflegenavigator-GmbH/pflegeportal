@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Datenschutz muss akzeptiert werden' }, { status: 400 });
     }
 
-    if (subscribers.some(s => s.email.toLowerCase() === data.email.toLowerCase())) {
+    if (subscribers.some((s) => s.email.toLowerCase() === data.email.toLowerCase())) {
       return NextResponse.json({ error: 'Diese E-Mail ist bereits angemeldet' }, { status: 409 });
     }
 
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       privacyAccepted: data.privacyAccepted,
       subscribedAt: new Date().toISOString(),
       confirmed: false,
-      confirmationToken: Math.random().toString(36).substring(2) + Date.now().toString(36)
+      confirmationToken: Math.random().toString(36).substring(2) + Date.now().toString(36),
     };
 
     subscribers.push(subscriber);
@@ -43,9 +43,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Bitte bestaetigen Sie Ihre E-Mail-Adresse',
-      requiresConfirmation: true
+      requiresConfirmation: true,
     });
-
   } catch (error) {
     return NextResponse.json({ error: 'Fehler bei der Anmeldung' }, { status: 500 });
   }

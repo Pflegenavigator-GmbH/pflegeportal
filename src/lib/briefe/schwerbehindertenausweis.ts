@@ -4,8 +4,10 @@
 import { BriefPayload } from '@/src/types/briefe';
 
 export const SCHWERBEHINDERTEN_LEITLINIEN = {
-  sgb_ix_2: "Schwerbehindert im Sinne des Gesetzes sind Personen mit einem Grad der Behinderung (GdB) von mindestens 50.",
-  sgb_ix_152: "Die Feststellung des Vorliegens einer Behinderung und des Grades der Behinderung (GdB) erfolgt auf Antrag durch die zuständigen Versorgungsämter."
+  sgb_ix_2:
+    'Schwerbehindert im Sinne des Gesetzes sind Personen mit einem Grad der Behinderung (GdB) von mindestens 50.',
+  sgb_ix_152:
+    'Die Feststellung des Vorliegens einer Behinderung und des Grades der Behinderung (GdB) erfolgt auf Antrag durch die zuständigen Versorgungsämter.',
 };
 
 export class SchwerbehindertenausweisGenerator {
@@ -13,14 +15,15 @@ export class SchwerbehindertenausweisGenerator {
     const heute = new Date().toLocaleDateString('de-DE', {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
     });
 
     let brief = `${data.absender.name}\n`;
     brief += `${data.absender.strasse}\n`;
     brief += `${data.absender.plz} ${data.absender.ort}\n`;
     if (data.absender.telefon) brief += `Tel.: ${data.absender.telefon}\n`;
-    if (data.absender.sozialversicherungsnummer) brief += `Sozialversicherungs-Nr.: ${data.absender.sozialversicherungsnummer}\n`;
+    if (data.absender.sozialversicherungsnummer)
+      brief += `Sozialversicherungs-Nr.: ${data.absender.sozialversicherungsnummer}\n`;
 
     brief += `\n\n\n`;
     brief += `${data.empfaenger.name}\n`;
@@ -54,7 +57,7 @@ export class SchwerbehindertenausweisGenerator {
     brief += `- Kopie Personalausweis\n`;
     brief += `- Liste der behandelnden Fachärzte und Kliniken\n`;
     if (data.anlagen) {
-      data.anlagen.forEach(anlage => {
+      data.anlagen.forEach((anlage) => {
         brief += `- ${anlage}\n`;
       });
     }

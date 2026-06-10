@@ -40,8 +40,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json(
-          { error: 'Message is required' },
-          { status: 400, headers: getCorsHeaders() }
+        { error: 'Message is required' },
+        { status: 400, headers: getCorsHeaders() }
       );
     }
 
@@ -52,30 +52,30 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const OPENCLAW_TOKEN = process.env.OPENCLAW_TOKEN;
 
     if (!OPENCLAW_URL || !OPENCLAW_TOKEN) {
-      console.error("OpenClaw Umgebungsvariablen sind nicht definiert!");
+      console.error('OpenClaw Umgebungsvariablen sind nicht definiert!');
       return NextResponse.json(
-          { error: 'Configuration error' },
-          { status: 500, headers: getCorsHeaders() }
+        { error: 'Configuration error' },
+        { status: 500, headers: getCorsHeaders() }
       );
     }
 
-// Verbindung zu OpenClaw herstellen
+    // Verbindung zu OpenClaw herstellen
     const openClawResponse = await fetch(OPENCLAW_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Hook-Token': OPENCLAW_TOKEN // Manchmal erwartet OpenClaw das Token im 'X-Hook-Token' Header anstelle von Bearer. Falls 'Authorization' nicht klappt, nimm diesen.
+        'X-Hook-Token': OPENCLAW_TOKEN, // Manchmal erwartet OpenClaw das Token im 'X-Hook-Token' Header anstelle von Bearer. Falls 'Authorization' nicht klappt, nimm diesen.
       },
       body: JSON.stringify({
-        event: "agent_run",
+        event: 'agent_run',
         prompt: message,
         // Optionale Zusatzdaten für den PflegeNavigator
         context: {
           pflegegrad: pflegegrad,
           aktiveModule: userModules,
-          userProfile: context?.userProfile
-        }
-      })
+          userProfile: context?.userProfile,
+        },
+      }),
     });
 
     if (!openClawResponse.ok) {
@@ -88,12 +88,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const openClawData = await openClawResponse.json();
 
-// Antwort für deine App strukturieren
+    // Antwort für deine App strukturieren
     const response: AvatarChatResponse = {
       // Wichtig: Falls OpenClaw das Ergebnis in einem anderen Feld als '.output' liefert (z.B. '.text'), hier anpassen
       text: openClawData.output || 'Ich konnte leider keine Antwort generieren.',
-      suggestions: generateSuggestions(pflegegrad, userModules),
-      sources: openClawData.sources || []
+      suggestions: generateSuggestions(pflegegrad),
+      sources: openClawData.sources || [],
     };
 
     // Optional: Dynamische Aktionen triggern, falls OpenClaw bestimmte Key-Words liefert
@@ -103,17 +103,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json(response, {
       status: 200,
-      headers: getCorsHeaders()
+      headers: getCorsHeaders(),
     });
-
   } catch (error) {
     console.error('Avatar chat error:', error);
     return NextResponse.json(
-        {
-          error: 'Internal server error',
-          text: 'Entschuldigung, es ist ein Fehler bei der Verarbeitung der KI-Anfrage aufgetreten.'
-        },
-        { status: 500, headers: getCorsHeaders() }
+      {
+        error: 'Internal server error',
+        text: 'Entschuldigung, es ist ein Fehler bei der Verarbeitung der KI-Anfrage aufgetreten.',
+      },
+      { status: 500, headers: getCorsHeaders() }
     );
   }
 }
@@ -121,11 +120,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 export async function OPTIONS(): Promise<NextResponse> {
   return new NextResponse(null, {
     status: 204,
-    headers: getCorsHeaders()
+    headers: getCorsHeaders(),
   });
 }
 
-function generateSuggestions(pflegegrad?: number | null, modules?: string[]): string[] {
+function generateSuggestions(pflegegrad?: number | null): string[] {
   const suggestions: string[] = [];
   if (!pflegegrad) suggestions.push('Pflegegrad ermitteln');
   suggestions.push('Leistungen anzeigen', 'Antrag ausfüllen');
@@ -137,6 +136,6 @@ function getCorsHeaders(): Record<string, string> {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   };
 }

@@ -2,12 +2,12 @@
 // 6 Module, Gewichtungen, Kinder-Modus, Ampel-System
 
 export interface ModuleScores {
-  1: number; // Mobilität (10%)
-  2: number; // Kognition (15%)
-  3: number; // Verhalten (15%)
-  4: number; // Selbstversorgung (40%)
-  5: number; // Therapie (20%)
-  6: number; // Alltag (0% - nur für Widerspruch)
+  1: number;
+  2: number;
+  3: number;
+  4: number;
+  5: number;
+  6: number;
 }
 
 export interface PflegegradResult {
@@ -34,12 +34,12 @@ export interface PflegegradResult {
 
 // GEWICHTUNGEN NBA
 const WEIGHTS = {
-  1: 0.10, // Mobilität
+  1: 0.1, // Mobilität
   2: 0.15, // Kognition
   3: 0.15, // Verhalten
-  4: 0.40, // Selbstversorgung (WICHTIGSTE!)
-  5: 0.20, // Therapie
-  6: 0.00, // Alltag (nur für Widerspruch)
+  4: 0.4, // Selbstversorgung (WICHTIGSTE!)
+  5: 0.2, // Therapie
+  6: 0.0, // Alltag (nur für Widerspruch)
 };
 
 // PFLEGEGRAD-SCHWELLEN
@@ -80,7 +80,7 @@ export function calculatePflegegrad(
   };
 
   // Prüfe ob Daten fehlen
-  const missingData = Object.values(fullScores).some(s => s === 0 || s === undefined);
+  const missingData = Object.values(fullScores).some((s) => s === 0 || s === undefined);
 
   // Gewichtete Scores berechnen
   const weightedScores = {
@@ -96,18 +96,12 @@ export function calculatePflegegrad(
   const weightedMaxOf23 = maxOf23 * WEIGHTS[2]; // 15% Gewichtung
 
   // Gesamtpunktzahl
-  const totalScore = 
-    weightedScores[1] +           // Modul 1 (10%)
-    weightedMaxOf23 +            // Max(Modul 2, Modul 3) (15%)
-    weightedScores[4] +          // Modul 4 (40%)
-    weightedScores[5];           // Modul 5 (20%)
+  const totalScore = weightedScores[1] + weightedMaxOf23 + weightedScores[4] + weightedScores[5];
 
-  // Kinder-Modus (unter 18 Monate)
   if (isChild && childAge && childAge < 18) {
     return calculateChildCareLevel(totalScore, fullScores, weightedScores, maxOf23, missingData);
   }
 
-  // Pflegegrad bestimmen
   let careLevel: number | null = null;
   for (let level = 5; level >= 1; level--) {
     const threshold = THRESHOLDS[level as keyof typeof THRESHOLDS];
@@ -117,10 +111,8 @@ export function calculatePflegegrad(
     }
   }
 
-  // Ampel-Logik
   const { trafficLight, buffer } = calculateTrafficLight(totalScore, careLevel);
 
-  // Leistungen berechnen
   const benefits = calculateBenefits(careLevel);
 
   return {
@@ -151,17 +143,13 @@ function calculateTrafficLight(
   }
 
   const threshold = THRESHOLDS[careLevel as keyof typeof THRESHOLDS];
-  const upperThreshold = careLevel < 5 ? THRESHOLDS[(careLevel + 1) as keyof typeof THRESHOLDS].min : 100;
-  
-  // Puffer bis zur nächsten Schwelle
-  const bufferToUpper = upperThreshold - totalScore;
   const bufferFromLower = totalScore - threshold.min;
 
   // Grün: Deutlich über Schwelle (>5 Punkte)
   if (bufferFromLower > 5) {
     return { trafficLight: 'green', buffer: Math.round(bufferFromLower * 10) / 10 };
   }
-  
+
   // Gelb: Knapp an Schwelle (0-5 Punkte)
   if (bufferFromLower >= 0 && bufferFromLower <= 5) {
     return { trafficLight: 'yellow', buffer: Math.round(bufferFromLower * 10) / 10 };
@@ -217,14 +205,12 @@ function calculateBenefits(careLevel: number | null): {
 function calculateChildCareLevel(
   totalScore: number,
   fullScores: ModuleScores,
-  weightedScores: any,
+  weightedScores: Record<number, number>,
   maxOf23: number,
   missingData: boolean
 ): PflegegradResult {
-  // Kinder haben andere Schwellen und keinen PG 1 unter 18 Monaten
   let careLevel: number | null = null;
-  
-  // Vereinfachte Berechnung für Kinder (würde eigentlich komplexere Logik brauchen)
+
   if (totalScore >= 27.0) {
     careLevel = 2;
     if (totalScore >= 47.5) careLevel = 3;
@@ -239,7 +225,7 @@ function calculateChildCareLevel(
     careLevel,
     totalScore: Math.round(totalScore * 10) / 10,
     moduleScores: fullScores,
-    weightedScores,
+    weightedScores: weightedScores as PflegegradResult['weightedScores'],
     maxOf23,
     trafficLight,
     buffer,
@@ -257,7 +243,7 @@ export function calculateWiderspruchChance(
   scores: ModuleScores
 ): { chance: 'high' | 'medium' | 'low'; reason: string } {
   const scoreDiff = expectedLevel - currentLevel;
-  
+
   // Hohe Chance: Nur 1 Level Unterschied und gute Daten
   if (scoreDiff === 1 && scores[4] > 40) {
     return {

@@ -19,7 +19,12 @@ export interface ErbrechtData {
     familienstand: 'ledig' | 'verheiratet' | 'geschieden' | 'verwitwet';
     kirchensteuer?: boolean;
   };
-  verfahrensart: 'testament' | 'pflichtteil' | 'erbschaftsteuer' | 'vorweggenommene_erbschaft' | 'erbschaftsausgleich';
+  verfahrensart:
+    | 'testament'
+    | 'pflichtteil'
+    | 'erbschaftsteuer'
+    | 'vorweggenommene_erbschaft'
+    | 'erbschaftsausgleich';
   erben: {
     name: string;
     verwandtschaftsgrad: string; // z.B. "Tochter", "Sohn", "Enkel"
@@ -46,39 +51,38 @@ export interface ErbrechtData {
 
 export const ERBRECHT_PARAGRAPHEN = {
   erbfolge: {
-    paragraph: "§§ 1922 ff. BGB",
-    titel: "Gesetzliche Erbfolge",
-    text: "Wenn kein Testament vorhanden ist, erben Ehegatte und Kinder nach gesetzlicher Erbfolge",
+    paragraph: '§§ 1922 ff. BGB',
+    titel: 'Gesetzliche Erbfolge',
+    text: 'Wenn kein Testament vorhanden ist, erben Ehegatte und Kinder nach gesetzlicher Erbfolge',
   },
   pflichtteil: {
-    paragraph: "§§ 2303 ff. BGB",
-    titel: "Pflichtteil",
-    text: "Abkömmlinge, Eltern und Ehegatten haben Anspruch auf Pflichtteil (50% des gesetzlichen Erbteils)",
+    paragraph: '§§ 2303 ff. BGB',
+    titel: 'Pflichtteil',
+    text: 'Abkömmlinge, Eltern und Ehegatten haben Anspruch auf Pflichtteil (50% des gesetzlichen Erbteils)',
   },
   enterbung: {
-    paragraph: "§ 2333 BGB",
-    titel: "Enterbung",
-    text: "Enterbung nur bei schwerwiegenden Gründen (z.B. vorsätzliche Körperverletzung)",
+    paragraph: '§ 2333 BGB',
+    titel: 'Enterbung',
+    text: 'Enterbung nur bei schwerwiegenden Gründen (z.B. vorsätzliche Körperverletzung)',
   },
   erbschaftsteuer: {
-    paragraph: "§ 1 ErbStG",
-    titel: "Erbschaftsteuer",
-    text: "Schenkungen und Erbschaften unterliegen der Erbschaftsteuer mit Freibeträgen",
+    paragraph: '§ 1 ErbStG',
+    titel: 'Erbschaftsteuer',
+    text: 'Schenkungen und Erbschaften unterliegen der Erbschaftsteuer mit Freibeträgen',
   },
   freibetraege: {
-    paragraph: "§ 16 ErbStG",
-    titel: "Freibeträge",
-    text: "Ehegatte: 500.000€, Kinder: 400.000€, Enkel: 200.000€",
+    paragraph: '§ 16 ErbStG',
+    titel: 'Freibeträge',
+    text: 'Ehegatte: 500.000€, Kinder: 400.000€, Enkel: 200.000€',
   },
 };
 
 export class ErbrechtGenerator {
-
   generateBrief(data: ErbrechtData): string {
     const heute = new Date().toLocaleDateString('de-DE', {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
     });
 
     let brief = `${data.erblasser.name}
@@ -136,7 +140,7 @@ ${data.erblasser.kirchensteuer ? 'Kirchensteuerpflichtig: Ja' : ''}
           brief += `Wertpapiere: ${data.vermoegen.wertpapiere.toLocaleString('de-DE')} EUR
 `;
         }
-        
+
         brief += `
 
 3. VERERBUNGSWÜNSCHE
@@ -163,7 +167,7 @@ Ich bestimme hiermit folgende Erbfolge:
 
 Folgende Personen sind enterbt:
 `;
-          data.testament_details.enterbung.forEach(person => {
+          data.testament_details.enterbung.forEach((person) => {
             brief += `- ${person}
 `;
           });
@@ -172,13 +176,16 @@ Begründung: ${data.testament_details.letzter_wille || 'Siehe gesonderte Begrün
 `;
         }
 
-        if (data.testament_details?.besondere_verfuegungen && data.testament_details.besondere_verfuegungen.length > 0) {
+        if (
+          data.testament_details?.besondere_verfuegungen &&
+          data.testament_details.besondere_verfuegungen.length > 0
+        ) {
           brief += `
 
 5. BESONDERE VERFÜGUNGEN
 
 `;
-          data.testament_details.besondere_verfuegungen.forEach(verfuegung => {
+          data.testament_details.besondere_verfuegungen.forEach((verfuegung) => {
             brief += `- ${verfuegung}
 `;
           });
@@ -216,7 +223,7 @@ Datum des Todes: [TT.MM.JJJJ]
 
 `;
         }
-        
+
         brief += `3. PFLICHTTEILSBERECHTIGUNG
 
 Als [Verwandtschaftsgrad] des/der Verstorbenen bin ich pflichtteilsberechtigt nach § 2303 BGB.
@@ -322,10 +329,10 @@ Anlagen:
 `;
 
     const standardAnlagen = [
-      "Kopie des Personalausweises",
-      "Familienstands-/Geburtsurkunden",
-      "Vermögensnachweise (bei Testament)",
-      "Sterbeurkunde (bei Erbschaft)",
+      'Kopie des Personalausweises',
+      'Familienstands-/Geburtsurkunden',
+      'Vermögensnachweise (bei Testament)',
+      'Sterbeurkunde (bei Erbschaft)',
     ];
 
     const alleAnlagen = [...standardAnlagen, ...(data.anlagen || [])];
@@ -347,16 +354,23 @@ Die gesetzlichen Erbfolge ist abzulösen durch letztwillige Verfügung (Testamen
 
   // Schnell-Generator für Testament
   generateTestament(
-    erblasser: { name: string; strasse: string; plz: string; ort: string; telefon: string; geburtsdatum: string },
+    erblasser: {
+      name: string;
+      strasse: string;
+      plz: string;
+      ort: string;
+      telefon: string;
+      geburtsdatum: string;
+    },
     erben: { name: string; verwandtschaftsgrad: string; vermoegensanteil?: number }[],
     gesamtvermoegen: number
   ): string {
     return this.generateBrief({
       empfaenger: {
-        name: "Notar",
-        strasse: "[Adresse eintragen]",
-        plz: "[PLZ]",
-        ort: "[Ort]"
+        name: 'Notar',
+        strasse: '[Adresse eintragen]',
+        plz: '[PLZ]',
+        ort: '[Ort]',
       },
       erblasser: {
         ...erblasser,
@@ -368,7 +382,7 @@ Die gesetzlichen Erbfolge ist abzulösen durch letztwillige Verfügung (Testamen
       testament_details: {
         eigenhaendig: false,
         notariell_beglaubigt: true,
-      }
+      },
     });
   }
 }

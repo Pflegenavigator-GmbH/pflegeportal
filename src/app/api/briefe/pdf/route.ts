@@ -1,12 +1,13 @@
 // src/app/api/briefe/pdf/routes.ts
 import { NextRequest, NextResponse } from 'next/server';
 import puppeteer from 'puppeteer-core';
-import { BriefPayload } from '@/src/types/briefe';
+
 import {
   allgemeinerBriefGenerator,
   antragPflegegradGenerator,
-  schwerbehindertenausweisGenerator
+  schwerbehindertenausweisGenerator,
 } from '@/src/lib/briefe';
+import { BriefPayload } from '@/src/types/briefe';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -73,7 +74,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     browser = await puppeteer.launch({
       headless: true,
       executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
     });
 
     const page = await browser.newPage();
@@ -82,7 +83,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     const pdfBuffer = await page.pdf({
       format: 'A4',
       printBackground: true,
-      margin: { top: '25mm', right: '20mm', bottom: '30mm', left: '25mm' }
+      margin: { top: '25mm', right: '20mm', bottom: '30mm', left: '25mm' },
     });
 
     await browser.close();
@@ -93,20 +94,19 @@ export async function POST(request: NextRequest): Promise<Response> {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="${title}.pdf"`,
-        'Content-Length': pdfBuffer.length.toString()
-      }
+        'Content-Length': pdfBuffer.length.toString(),
+      },
     });
-
   } catch (error) {
     if (browser) await browser.close();
 
     console.error('PDF Engine Fatal Error:', error);
     return NextResponse.json(
-        {
-          error: 'PDF Generierung serverseitig abgebrochen',
-          details: error instanceof Error ? error.message : 'Unbekannter Fehler'
-        },
-        { status: 500 }
+      {
+        error: 'PDF Generierung serverseitig abgebrochen',
+        details: error instanceof Error ? error.message : 'Unbekannter Fehler',
+      },
+      { status: 500 }
     );
   }
 }

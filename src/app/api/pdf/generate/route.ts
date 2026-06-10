@@ -1,12 +1,13 @@
 // src/app/api/pdf/generate/route.ts
+import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { Browser } from 'puppeteer-core';
-import { cookies } from 'next/headers';
-import { createServerSupabaseClient } from '@/src/lib/supabase/server';
+
 import { handleApiError } from '@/src/lib/api/error-handler';
+import { pdfRamCache } from '@/src/lib/pdf/cache';
 import { launchPDFBrowser, sanitizeFilename } from '@/src/lib/pdf/puppeteer';
 import { buildStandardPdfHtml, compilePageToA4Buffer } from '@/src/lib/pdf/templates';
-import { pdfRamCache } from '@/src/lib/pdf/cache';
+import { createServerSupabaseClient } from '@/src/lib/supabase/server';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -41,7 +42,10 @@ export async function POST(request: NextRequest): Promise<Response> {
     // Falls auf localhost kein Cookie übertragen wurde, sichert uns die nachfolgende
     // Supabase-Datenbankprüfung (billing_status Check) unbestechlich ab.
     if (sessionCookie && sessionCookie.toUpperCase() !== upperCode) {
-      return NextResponse.json({ error: 'Nicht autorisierter Zugriff. Code-Konflikt.' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Nicht autorisierter Zugriff. Code-Konflikt.' },
+        { status: 401 }
+      );
     }
 
     // ============================================================================
@@ -55,18 +59,18 @@ export async function POST(request: NextRequest): Promise<Response> {
           'Content-Type': 'application/pdf',
           'Content-Disposition': `attachment; filename="PflegeGutachten_${sanitizeFilename(upperCode)}.pdf"`,
           'Content-Length': cachedBuffer.length.toString(),
-          'X-Cache': 'HIT' // Diagnose-Header für dich im Netzwerk-Tab
-        }
+          'X-Cache': 'HIT', // Diagnose-Header für dich im Netzwerk-Tab
+        },
       });
     }
 
     // 💳 UMSATZ-SCHUTZ: Status-Check in der Datenbank (Nur bei Cache-Miss)
     const supabase = await createServerSupabaseClient();
     const { data: currentCase, error: caseError } = await supabase
-        .from('cases')
-        .select('billing_status, product_tier')
-        .eq('case_code', upperCode)
-        .single();
+      .from('cases')
+      .select('billing_status, product_tier')
+      .eq('case_code', upperCode)
+      .single();
 
     if (caseError || !currentCase) {
       return NextResponse.json({ error: 'Fallcode ungültig.' }, { status: 404 });
@@ -79,7 +83,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     const fullHtml = buildStandardPdfHtml({
       caseCode: upperCode,
       productTier: currentCase.product_tier || 'beta',
-      contentHtml: html
+      contentHtml: html,
     });
 
     browser = await launchPDFBrowser();
@@ -100,10 +104,9 @@ export async function POST(request: NextRequest): Promise<Response> {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="PflegeGutachten_${sanitizeFilename(upperCode)}.pdf"`,
         'Content-Length': pdfBuffer.length.toString(),
-        'X-Cache': 'MISS'
-      }
+        'X-Cache': 'MISS',
+      },
     });
-
   } catch (error: unknown) {
     if (browser) await (browser as Browser).close();
     return handleApiError(error, 'api.pdf.generate.secure_dossier');
