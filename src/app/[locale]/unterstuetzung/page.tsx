@@ -5,11 +5,8 @@ import {
   MapPin,
   Search,
   Star,
-  Users,
   GraduationCap,
-  Heart,
   AlertCircle,
-  LifeBuoy,
   MessageCircle,
   ExternalLink,
   ChevronDown,
@@ -19,7 +16,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect, Suspense, lazy, use } from 'react';
+import { useState, Suspense, lazy, use } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/src/components/ui/button';
