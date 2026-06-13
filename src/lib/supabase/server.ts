@@ -2,6 +2,8 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
+import { logger } from '@/src/lib/logger';
+
 export async function createServerSupabaseClient() {
   const cookieStore = await cookies();
 
@@ -18,8 +20,11 @@ export async function createServerSupabaseClient() {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
             );
-          } catch {
-            // Kann ignoriert werden, wenn die Server Action von einer Server Komponente aufgerufen wird
+          } catch (error) {
+            logger.debug(
+              { error },
+              'Fehler beim Setzen der Cookies (oft in Server Components ignoriert)'
+            );
           }
         },
       },

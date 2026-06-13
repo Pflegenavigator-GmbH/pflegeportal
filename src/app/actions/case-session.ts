@@ -3,6 +3,7 @@
 
 import { cookies } from 'next/headers';
 
+import { logger } from '@/src/lib/logger';
 import { createServerSupabaseClient } from '@/src/lib/supabase/server';
 
 interface SessionStatus {
@@ -15,6 +16,8 @@ interface SessionStatus {
 }
 
 export async function validateAndStoreSession(caseCode: string): Promise<SessionStatus> {
+  logger.info({ caseCode }, 'Validiere Fall-Session');
+
   try {
     const cookieStore = await cookies();
     const supabase = await createServerSupabaseClient();
@@ -26,6 +29,7 @@ export async function validateAndStoreSession(caseCode: string): Promise<Session
       .single();
 
     if (error || !currentCase) {
+      logger.warn({ caseCode }, 'Fall nicht gefunden oder Datenbankfehler');
       return {
         success: false,
         isUnlocked: false,
@@ -45,6 +49,7 @@ export async function validateAndStoreSession(caseCode: string): Promise<Session
 
       if (new Date() > expirationDate) {
         isExpired = true;
+        logger.info({ caseCode, activationDate }, 'Beta-Zugriff abgelaufen');
       }
     }
 
@@ -61,6 +66,9 @@ export async function validateAndStoreSession(caseCode: string): Promise<Session
         maxAge: 60 * 60 * 24 * 30, // 30 Tage gültig
         path: '/',
       });
+      logger.debug({ caseCode }, 'Session-Cookie erfolgreich gesetzt');
+    } else {
+      logger.warn({ caseCode, isUnlocked, isExpired }, 'Zugriff verweigert');
     }
 
     return {
@@ -71,7 +79,7 @@ export async function validateAndStoreSession(caseCode: string): Promise<Session
       caseCode: currentCase.case_code,
     };
   } catch (err) {
-    console.error('Kritischer Fehler bei Session-Validierung:', err);
+    logger.error({ err, caseCode }, 'Kritischer Fehler bei Session-Validierung');
     return {
       success: false,
       isUnlocked: false,

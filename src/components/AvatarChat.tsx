@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 
-import {ISpeechRecognition, ISpeechRecognitionEvent} from "@/src/lib/voice";
+import { ISpeechRecognition, ISpeechRecognitionEvent } from '@/src/lib/voice';
 
 interface Message {
   id: string;

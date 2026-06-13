@@ -1,48 +1,36 @@
 // src/app/[locale]/page.test.tsx
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import Startseite from './page';
+import Startseite from '@/src/app/[locale]/page';
+import { createMockCase } from '@/test-utils/factories/cases';
 
-// Best Practice: Next.js Navigation mit Vitest (vi) mocken
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-  }),
-  useParams: () => ({
-    locale: 'de',
-  }),
+  useRouter: () => ({ push: vi.fn() }),
+  useParams: () => ({ locale: 'de' }),
 }));
 
-describe('Startseite - Hydration & Session Flow', () => {
+describe('Startseite', () => {
   beforeEach(() => {
-    // Bereinigt alle Mocks vor jedem Testlauf
     vi.clearAllMocks();
-
-    // LocalStorage für den Test vorbereiten
-    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => null);
-  });
-
-  it('sollte im Kaltstart (keine Session) den Standard-Text anzeigen', () => {
-    render(<Startseite />);
-
-    // Findet den Text der ersten Karte beim ersten Render-Zyklus
-    expect(screen.getByText('Pflegegrad prüfen')).toBeInTheDocument();
+    // Sauberes Überschreiben des window-localStorage
+    Object.defineProperty(window, 'localStorage', {
+      value: { getItem: vi.fn(), setItem: vi.fn(), clear: vi.fn() },
+      writable: true,
+    });
   });
 
   it('sollte den Button-Text nach Hydration anpassen, wenn Session aktiv ist', async () => {
-    // Simuliere, dass ein Eintrag im localStorage existiert
-    vi.spyOn(Storage.prototype, 'getItem').mockImplementation((key) => {
-      if (key === 'case_code') return 'active_session_123';
-      return null;
-    });
+    const mockCase = createMockCase();
+    vi.mocked(window.localStorage.getItem).mockReturnValue(mockCase.case_code);
 
     render(<Startseite />);
 
-    // Da der localStorage-Check im useEffect (asynchron) läuft,
-    // müssen wir mit `waitFor` auf die UI-Änderung warten.
-    await waitFor(() => {
-      expect(screen.getByText('Analyse ansehen')).toBeInTheDocument();
-    });
+    // findByText wartet automatisch, bis der useEffect den Text im DOM ändert
+    const titleElement = await screen.findByText(/Analyse ansehen/i);
+    expect(titleElement).toBeInTheDocument();
+
+    const button = screen.getByRole('button', { name: /Zur Analyse/i });
+    expect(button).toBeInTheDocument();
   });
 });

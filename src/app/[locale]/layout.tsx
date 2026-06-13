@@ -9,6 +9,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { Toaster } from 'sonner';
 
+import BetaBanner from '@/src/components/BetaBanner';
 import { CookieBanner } from '@/src/components/legal/CookieBanner';
 import AppHeaderChrome from '@/src/components/navigation/AppHeaderChrome';
 import { isValidLocale } from '@/src/i18n/config';
@@ -59,7 +60,7 @@ export default async function LocaleLayout({
       <body className="antialiased bg-[#0f2744] text-white min-h-screen flex flex-col">
         <NextIntlClientProvider messages={messages} locale={locale}>
           <Toaster closeButton richColors position="top-right" />
-
+          <BetaBanner />
           <a
             href="#main-content"
             className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:text-[#0f2744] focus:px-4 focus:py-2 focus:rounded-lg"

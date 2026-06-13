@@ -14,6 +14,7 @@ import {
   BookOpen,
   KeyRound,
   Share2,
+  Menu, // Hinzugefügt für das Mobile-Menü
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
@@ -44,6 +45,7 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
   const [caseCode, setCaseCode] = useState<string | null>(null);
   const [inputCode, setInputCode] = useState('');
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const readCaseCode = () => {
     if (typeof window === 'undefined') return null;
@@ -64,7 +66,7 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
       localStorage.setItem('case_code', inputCode.trim().toUpperCase());
       setCaseCode(inputCode.trim().toUpperCase());
       toast.success('Fall geladen');
-      window.location.reload(); // Erzwingt Neuladen zur Validierung
+      window.location.reload();
     }
   };
 
@@ -98,10 +100,19 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
         />
       )}
 
-      <header className="bg-[#0f2744] border-b border-white/10 py-4 px-4 sticky top-0 z-40 backdrop-blur-md bg-opacity-95 text-white">
-        <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
-          {/* Linke Flanke: Logo */}
-          <div className="flex items-center gap-3">
+      <header className="bg-[#0f2744] border-b border-white/10 py-3 sm:py-4 px-4 sticky top-0 z-40 backdrop-blur-md bg-opacity-95 text-white">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
+          {/* Linke Flanke: Logo & Mobile Burger Trigger */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Mobile Burger Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 md:hidden hover:bg-white/5 rounded-xl border border-white/10 transition-colors text-gray-300"
+              aria-label="Menü öffnen"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+
             {!istStartseite && (
               <button
                 onClick={() => router.back()}
@@ -113,14 +124,16 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
             )}
             <Link
               href={`/${locale}`}
-              className="text-xl font-bold tracking-tight text-white cursor-pointer select-none flex items-center gap-1.5 hover:opacity-80 transition-opacity"
+              className="text-base sm:text-xl font-bold tracking-tight text-white cursor-pointer select-none flex items-center gap-1.5 hover:opacity-80 transition-opacity"
             >
-              <Home className="w-4 h-4 text-[#20b2aa] sm:inline hidden" />
-              PflegeNavigator <span className="text-[#20b2aa]">EU</span>
+              <Home className="w-4 h-4 text-[#20b2aa] md:inline hidden" />
+              <span>
+                PflegeNavigator <span className="text-[#20b2aa]">EU</span>
+              </span>
             </Link>
           </div>
 
-          {/* 🧭 MITTE: Die Navigationsleiste (Desktop) */}
+          {/* 🧭 MITTE: Navigationsleiste (Desktop-only) */}
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-300">
             <Link
               href={`/${locale}/briefe`}
@@ -149,22 +162,25 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
           </nav>
 
           {/* Rechte Flanke: Session & Sprache */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <div className="flex items-center bg-slate-950/40 border border-white/10 rounded-xl px-3 py-1.5 gap-2 shadow-inner cursor-pointer hover:bg-slate-900 transition-colors">
+                <div className="flex items-center bg-slate-950/40 border border-white/10 rounded-xl px-2 sm:px-3 py-1.5 gap-1.5 sm:gap-2 shadow-inner cursor-pointer hover:bg-slate-900 transition-colors max-w-[140px] sm:max-w-none truncate">
                   <FolderLock
-                    className={`w-3.5 h-3.5 ${caseCode ? 'text-[#20b2aa]' : 'text-gray-500'}`}
+                    className={`w-3.5 h-3.5 flex-shrink-0 ${caseCode ? 'text-[#20b2aa]' : 'text-gray-500'}`}
                   />
-                  <span className="text-xs font-mono text-gray-300 font-medium">
-                    {caseCode ? caseCode.toUpperCase() : 'Fall laden...'}
+                  <span className="text-[11px] sm:text-xs font-mono text-gray-300 font-medium truncate">
+                    {caseCode ? caseCode.toUpperCase() : 'Laden...'}
                   </span>
                 </div>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-64 bg-[#0f2744] border-white/10 text-white p-4">
+              <DropdownMenuContent
+                className="w-64 bg-[#0f2744] border-white/10 text-white p-4"
+                align="end"
+              >
                 {!caseCode ? (
                   <div className="space-y-2">
-                    <DropdownMenuLabel className="text-xs text-gray-400">
+                    <DropdownMenuLabel className="text-xs text-gray-400 p-0">
                       Fallcode eingeben
                     </DropdownMenuLabel>
                     <Input
@@ -191,17 +207,12 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
                       </Link>
                     </DropdownMenuItem>
 
-                    {/* Trigger für das Share Modal (Custom Button, um Radix-Event-Blocking zu umgehen) */}
                     <button
                       type="button"
                       onClick={(e) => {
                         e.preventDefault();
-                        e.stopPropagation(); // Stoppt das Event, bevor Radix es fressen kann
-
-                        // Zuerst den State setzen
+                        e.stopPropagation();
                         setIsShareModalOpen(true);
-
-                        // Dann den Radix Escape-Hatch nutzen, um das Dropdown zu schließen (simuliert einen Klick außerhalb)
                         document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
                       }}
                       className="relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-white/5 focus:bg-white/5"
@@ -232,6 +243,42 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
             <LanguageSwitcher />
           </div>
         </div>
+
+        {/* 📱 Mobile Navigations-Akkordeon / Drawer (Einklappbar) */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-white/5 mt-3 pt-3 bg-[#0f2744] animate-in fade-in slide-in-from-top-2 duration-200">
+            <nav className="flex flex-col gap-1 text-sm font-medium">
+              <Link
+                href={`/${locale}/briefe`}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="text-[#20b2aa] hover:bg-white/5 p-2.5 rounded-xl flex items-center gap-3 transition-colors"
+              >
+                <FileText className="w-4 h-4" /> Brief-Zentrum
+              </Link>
+              <Link
+                href={`/${locale}/ueber-uns`}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="hover:text-white hover:bg-white/5 p-2.5 rounded-xl flex items-center gap-3 transition-colors text-gray-300"
+              >
+                <Info className="w-4 h-4" /> Über uns
+              </Link>
+              <Link
+                href={`/${locale}/faq`}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="hover:text-white hover:bg-white/5 p-2.5 rounded-xl flex items-center gap-3 transition-colors text-gray-300"
+              >
+                <HelpCircle className="w-4 h-4" /> FAQ
+              </Link>
+              <Link
+                href={`/${locale}/presse`}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="hover:text-white hover:bg-white/5 p-2.5 rounded-xl flex items-center gap-3 transition-colors text-gray-300"
+              >
+                <Newspaper className="w-4 h-4" /> Presse & Blog
+              </Link>
+            </nav>
+          </div>
+        )}
       </header>
     </>
   );

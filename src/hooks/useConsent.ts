@@ -3,6 +3,8 @@
 
 import { useSyncExternalStore } from 'react';
 
+import { logger } from '@/src/lib/logger';
+
 const subscribe = (listener: () => void) => {
   window.addEventListener('consentChange', listener);
   window.addEventListener('storage', listener);
@@ -12,27 +14,25 @@ const subscribe = (listener: () => void) => {
   };
 };
 
-const getSnapshot = () => {
-  return localStorage.getItem('user_consent');
-};
+const getSnapshot = () => localStorage.getItem('user_consent');
+const getServerSnapshot = () => null;
 
-const getServerSnapshot = () => {
-  return null;
-};
+export function parseConsentString(consentString: string | null) {
+  if (!consentString) {
+    logger.debug('Keine Consent-Daten im localStorage gefunden');
+    return false;
+  }
+
+  try {
+    const parsed = JSON.parse(consentString);
+    return Boolean(parsed.analytics);
+  } catch (error) {
+    logger.error({ error, consentString }, 'Fehler beim Parsen der Consent-Daten aus localStorage');
+    return false;
+  }
+}
 
 export function useConsent() {
   const consentString = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-
-  let hasAnalyticsConsent = false;
-
-  if (consentString) {
-    try {
-      const parsed = JSON.parse(consentString);
-      hasAnalyticsConsent = Boolean(parsed.analytics);
-    } catch (error) {
-      console.error('Fehler beim Parsen der Consent-Daten:', error);
-    }
-  }
-
-  return { hasAnalyticsConsent };
+  return { hasAnalyticsConsent: parseConsentString(consentString) };
 }

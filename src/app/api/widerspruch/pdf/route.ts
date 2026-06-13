@@ -195,24 +195,24 @@ export async function POST(request: NextRequest): Promise<Response> {
     // Validierung der Pflichtfelder
     if (!caseCode || !antragsteller || !pflegekasse || !bescheidDaten || !widerspruchsBegruendung) {
       return NextResponse.json(
-          {
-            error: 'Fehlende Pflichtfelder',
-            required: [
-              'caseCode',
-              'antragsteller',
-              'pflegekasse',
-              'bescheidDaten',
-              'widerspruchsBegruendung',
-            ],
-          },
-          { status: 400, headers: getCorsHeaders() }
+        {
+          error: 'Fehlende Pflichtfelder',
+          required: [
+            'caseCode',
+            'antragsteller',
+            'pflegekasse',
+            'bescheidDaten',
+            'widerspruchsBegruendung',
+          ],
+        },
+        { status: 400, headers: getCorsHeaders() }
       );
     }
 
     if (!antragsteller.name || !antragsteller.strasse || !antragsteller.plz || !antragsteller.ort) {
       return NextResponse.json(
-          { error: 'Antragsteller-Adresse unvollständig' },
-          { status: 400, headers: getCorsHeaders() }
+        { error: 'Antragsteller-Adresse unvollständig' },
+        { status: 400, headers: getCorsHeaders() }
       );
     }
 
@@ -251,11 +251,11 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     console.error('Widerspruch PDF error:', error);
     return NextResponse.json(
-        {
-          error: 'PDF Generierung fehlgeschlagen',
-          details: error instanceof Error ? error.message : 'Unbekannter Fehler',
-        },
-        { status: 500, headers: getCorsHeaders() }
+      {
+        error: 'PDF Generierung fehlgeschlagen',
+        details: error instanceof Error ? error.message : 'Unbekannter Fehler',
+      },
+      { status: 500, headers: getCorsHeaders() }
     );
   }
 }

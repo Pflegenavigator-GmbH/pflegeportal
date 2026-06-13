@@ -1,23 +1,6 @@
 // src/lib/pflegegrad/rechner.ts
-import { ModuleScores, PflegegradErgebnis, EinstufungAmpel } from '@/src/types/pflegegrad';
-
-const THRESHOLDS = [
-  { level: 5, min: 90.0 },
-  { level: 4, min: 70.0 },
-  { level: 3, min: 47.5 },
-  { level: 2, min: 27.0 },
-  { level: 1, min: 12.5 },
-];
-
-// Offizielle NBA-Gewichtungspunkte-Transformation (Beispielhaft für Überleitung)
-function transformRohToSystemPoints(modulId: number, rohPunkte: number): number {
-  // Das Gesetz konvertiert Rohpunkte in feste Systempunkte (z.B. Modul 4 Max 15 Roh -> 40 System)
-  const maxRoh = modulId === 4 ? 12 : 12; // Modulabhängige Maxima
-  const gewichtung = modulId === 1 ? 10 : modulId === 4 ? 40 : modulId === 5 ? 20 : 15;
-
-  if (rohPunkte === 0) return 0;
-  return Math.min(gewichtung, (rohPunkte / maxRoh) * gewichtung);
-}
+import { NBA_CONFIG } from '@/src/lib/pflegegrad/constants';
+import { ModuleScores, PflegegradErgebnis } from '@/src/types/pflegegrad';
 
 export function calculatePflegegrad(scores: Partial<ModuleScores>): PflegegradErgebnis {
   const fullScores: ModuleScores = {
@@ -29,75 +12,51 @@ export function calculatePflegegrad(scores: Partial<ModuleScores>): PflegegradEr
     6: scores[6] ?? 0,
   };
 
-  const missingData = Object.values(fullScores).some((s) => s === undefined);
   const maxOf23 = Math.max(fullScores[2], fullScores[3]);
 
-  // Gesetzlich korrekte Transformation
-  const weightedScores = {
-    1: transformRohToSystemPoints(1, fullScores[1]),
-    23: transformRohToSystemPoints(2, maxOf23),
-    4: transformRohToSystemPoints(4, fullScores[4]),
-    5: transformRohToSystemPoints(5, fullScores[5]),
+  // Berechnung der gewichteten Punkte basierend auf den NBA-Prozenten
+  const weighted = {
+    1: fullScores[1] * NBA_CONFIG.WEIGHTS[1],
+    2: fullScores[2] * NBA_CONFIG.WEIGHTS[2], // Hilfswert für Objekt-Struktur
+    3: fullScores[3] * NBA_CONFIG.WEIGHTS[3], // Hilfswert für Objekt-Struktur
+    23: maxOf23 * NBA_CONFIG.WEIGHTS[2], // Entscheidender Wert
+    4: fullScores[4] * NBA_CONFIG.WEIGHTS[4],
+    5: fullScores[5] * NBA_CONFIG.WEIGHTS[5],
   };
 
-  const totalScore =
-    Math.round(
-      (weightedScores[1] + weightedScores[23] + weightedScores[4] + weightedScores[5]) * 10
-    ) / 10;
+  const totalScore = Math.round((weighted[1] + weighted[23] + weighted[4] + weighted[5]) * 10) / 10;
 
-  let careLevel = 0;
-  for (const t of THRESHOLDS) {
-    if (totalScore >= t.min) {
-      careLevel = t.level;
-      break;
-    }
-  }
+  const levelMatch = NBA_CONFIG.THRESHOLDS.find((t) => totalScore >= t.min) || { level: 0, min: 0 };
+  const careLevel = levelMatch.level;
 
-  // Ampel-Ermittlung
-  let trafficLight: EinstufungAmpel = 'gruen';
-  let buffer = 0;
-  if (careLevel === 0) {
-    trafficLight = 'rot';
-    buffer = 12.5 - totalScore;
-  } else {
-    const aktuelleSchwelle = THRESHOLDS.find((t) => t.level === careLevel)?.min || 0;
-    buffer = totalScore - aktuelleSchwelle;
-    trafficLight = buffer <= 3 ? 'rot' : buffer <= 5 ? 'gelb' : 'gruen';
-  }
+  // Ampel & Benefits
+  const buffer = totalScore - levelMatch.min;
+  const trafficLight =
+    careLevel === 0 ? 'rot' : buffer <= 2 ? 'rot' : buffer <= 5 ? 'gelb' : 'gruen';
 
   return {
     careLevel,
     totalScore,
     moduleScores: fullScores,
     weightedScores: {
-      1: weightedScores[1],
-      2: fullScores[2],
-      3: fullScores[3],
-      4: weightedScores[4],
-      5: weightedScores[5],
+      1: weighted[1],
+      2: weighted[2],
+      3: weighted[3],
+      4: weighted[4],
+      5: weighted[5],
     },
     maxOf23,
     trafficLight,
     buffer: Math.round(buffer * 10) / 10,
-    missingData,
+    missingData: Object.values(fullScores).some((s) => s === 0),
     benefits: {
       monthlyAmount:
-        careLevel === 2
-          ? 347
-          : careLevel === 3
-            ? 599
-            : careLevel === 4
-              ? 800
-              : careLevel === 5
-                ? 990
-                : 0,
-      reliefBudget: careLevel >= 1 ? 131 : 0,
+        NBA_CONFIG.BENEFITS[careLevel as keyof typeof NBA_CONFIG.BENEFITS]?.monthly ?? 0,
+      reliefBudget: NBA_CONFIG.BENEFITS[careLevel as keyof typeof NBA_CONFIG.BENEFITS]?.relief ?? 0,
       additionalBenefits:
-        careLevel >= 2 ? ['Pflegehilfsmittel: 42 €/Monat', 'Wohnraumanpassung: 4.180 €'] : [],
+        careLevel >= 2 ? ['Pflegehilfsmittel (42€)', 'Wohnraumanpassung (4.180€)'] : [],
     },
     recommendations:
-      careLevel === 0
-        ? ['Wiederholung in 6 Monaten prüfen']
-        : ['Antrag auf Schwerbehindertenausweis prüfen'],
+      careLevel === 0 ? ['Wiederholung bei Verschlechterung'] : ['Schwerbehindertenausweis prüfen'],
   };
 }

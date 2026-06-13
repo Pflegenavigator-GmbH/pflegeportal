@@ -1,4 +1,4 @@
-// src/app/[locale]/pflegegrad/ergebnis/ModulListe.tsx
+// src/app/[locale]/pflegegrad/ergebnis/_component/ModulListe.tsx
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
@@ -23,8 +23,26 @@ export function ModulListe({ metadata, ergebnis }: ModulListeProps) {
       </CardHeader>
       <CardContent className="p-6 pt-0 space-y-4">
         {metadata.map((meta) => {
-          const isModul3 = meta.id === 3;
-          const gewichtetePunkte = isModul3 ? 0 : ergebnis.weightedScores[meta.id as 1 | 2 | 4 | 5];
+          // Sicheres Mapping für die TypeScript-Typen (1-5 haben gewichtete Punkte, 6 nicht)
+          const isValidWeightedModule = meta.id >= 1 && meta.id <= 5;
+
+          // Höchstwertprinzip: Wenn Modul 3 < Modul 2 ist, fließt Modul 3 mit 0 in die Wertung ein (und vice versa)
+          let gewichtetePunkte = 0;
+          let showHoechstwertInfo = false;
+
+          if (isValidWeightedModule) {
+            gewichtetePunkte = ergebnis.weightedScores[meta.id as 1 | 2 | 3 | 4 | 5];
+
+            // Wenn es Modul 2 oder 3 ist, prüfen wir, ob es der "Verlierer" des Höchstwertprinzips ist
+            if (meta.id === 2 || meta.id === 3) {
+              const maxRohpunkte = Math.max(ergebnis.moduleScores[2], ergebnis.moduleScores[3]);
+              if (ergebnis.moduleScores[meta.id as 2 | 3] < maxRohpunkte) {
+                gewichtetePunkte = 0; // Dieser Wert zählt nicht fürs Gesamtergebnis
+              }
+              showHoechstwertInfo = true; // Info bei beiden Modulen anzeigen
+            }
+          }
+
           const rohpunkte = ergebnis.moduleScores[meta.id as 1 | 2 | 3 | 4 | 5 | 6];
 
           return (
@@ -42,10 +60,13 @@ export function ModulListe({ metadata, ergebnis }: ModulListeProps) {
                 <p className="text-xs text-gray-400 max-w-xl leading-relaxed">
                   {meta.beschreibung}
                 </p>
-                {meta.id === 2 && (
-                  <p className="text-[11px] text-purple-400 font-medium">
+                {showHoechstwertInfo && (
+                  <p className="text-[11px] text-purple-400 font-medium mt-1">
                     ℹ️ Höchstwertprinzip aktiv (Vergleich Modul 2: {ergebnis.moduleScores[2]} Pkt.
                     vs Modul 3: {ergebnis.moduleScores[3]} Pkt.)
+                    {gewichtetePunkte === 0
+                      ? ' -> Fließt nicht in die Gesamtwertung ein.'
+                      : ' -> Höherer Wert zählt.'}
                   </p>
                 )}
               </div>

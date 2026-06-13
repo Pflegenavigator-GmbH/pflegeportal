@@ -159,6 +159,8 @@ export function detectBrowserLanguage(): string {
   const browserLanguages = navigator.languages || [navigator.language];
 
   for (const lang of browserLanguages) {
+    if (typeof lang !== 'string') continue;
+
     const normalized = languageCodeMap[lang.toLowerCase()];
     if (normalized && isSupportedLanguage(normalized)) {
       return normalized;

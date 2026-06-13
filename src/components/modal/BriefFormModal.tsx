@@ -45,11 +45,16 @@ export function BriefFormModal({ typ, isOpen, onClose }: BriefFormModalProps) {
 
   const assemblePayload = (): BriefPayload => ({
     type: typ,
-    absender,
-    empfaenger,
+    absender: {
+      ...absender,
+      plz: absender.plz,
+    },
+    empfaenger: {
+      ...empfaenger,
+      ort: empfaenger.ort || '', // Absicherung für leere Felder
+    },
     betreff,
     inhalt: {
-      betreff,
       anrede: 'Sehr geehrte Damen und Herren,',
       hauptteil,
     },

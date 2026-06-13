@@ -4,6 +4,7 @@ import { BookOpen, Brain, ClipboardList, MessageCircle, Pill } from 'lucide-reac
 import { useCallback, useMemo } from 'react';
 
 import { tools, type Tool, type ToolCategory } from '@/src/data/pflegekraefte.tools';
+import { logger } from '@/src/lib/logger';
 
 type CategoryMetaEntry = {
   label: string;
@@ -43,6 +44,7 @@ const categoryMeta: CategoryMeta = {
 
 export function usePflegekraefte() {
   const toolsByCategory = useMemo(() => {
+    logger.debug('Kategorisiere Pflegekräfte-Tools');
     return tools.reduce(
       (acc, tool) => {
         (acc[tool.category] ??= []).push(tool);
@@ -53,9 +55,12 @@ export function usePflegekraefte() {
   }, []);
 
   const scrollToSection = useCallback((id: string) => {
+    logger.debug({ sectionId: id }, 'Versuche zu Sektion zu scrollen');
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      logger.warn({ sectionId: id }, 'Scroll-Ziel-Element nicht gefunden');
     }
   }, []);
 
