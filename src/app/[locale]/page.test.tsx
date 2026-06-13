@@ -2,10 +2,8 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-
-import Startseite from "@/src/app/[locale]/page";
-import {createMockCase} from "@/test-utils/factories/cases";
-
+import Startseite from '@/src/app/[locale]/page';
+import { createMockCase } from '@/test-utils/factories/cases';
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn() }),
@@ -18,7 +16,7 @@ describe('Startseite', () => {
     // Sauberes Überschreiben des window-localStorage
     Object.defineProperty(window, 'localStorage', {
       value: { getItem: vi.fn(), setItem: vi.fn(), clear: vi.fn() },
-      writable: true
+      writable: true,
     });
   });
 

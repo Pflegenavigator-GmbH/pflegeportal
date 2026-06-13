@@ -2,20 +2,8 @@
 // Antrag auf Pflegegrad (Erstbeantragung)
 // PflegeNavigator EU - MDK-Begutachtung
 
+import { ANTRAG_PFLEGEGRAD_PARAGRAPHEN } from '@/src/lib/briefe/constants';
 import { BriefPayload } from '@/src/types/briefe';
-
-export const ANTRAG_PFLEGEGRAD_PARAGRAPHEN = {
-  sgb_xi_14: {
-    paragraph: '§ 14 SGB XI',
-    titel: 'Antrag auf Einstufung in einen Pflegegrad',
-    text: 'Die Einstufung erfolgt auf Antrag. Antragsberechtigt sind die pflegebedürftige Person selbst sowie deren gesetzliche Vertreter oder Bevollmächtigte.',
-  },
-  sgb_xi_15: {
-    paragraph: '§ 15 SGB XI',
-    titel: 'Begutachtung durch den Medizinischen Dienst',
-    text: 'Der Medizinische Dienst (MD) ermittelt den Pflegegrad durch eine Begutachtung vor Ort oder im Rahmen eines strukturierten Telefoninterviews.',
-  },
-};
 
 export class AntragPflegegradGenerator {
   generateBrief(data: BriefPayload): string {

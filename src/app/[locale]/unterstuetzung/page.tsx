@@ -89,8 +89,6 @@ export default function UnterstuetzungPage(props: PageProps) {
   const [dienste, setDienste] = useState<PflegedienstRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [expandedKurs, setExpandedKurs] = useState<number | null>(null);
-  const [expandedAngehoerige, setExpandedAngehoerige] = useState(false);
-
   // ⚡ Debounced oder Event-gesteuerter DB-Fetch statt lokaler Filterung
   const triggerLiveSuche = async (val: string) => {
     setSuchOrt(val);

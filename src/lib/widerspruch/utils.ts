@@ -1,4 +1,8 @@
-import { addMonths, addDays, format, differenceInDays } from 'date-fns';
+// src/lib/widerspruch/utils.ts
+import { addDays, addMonths, differenceInDays, format } from 'date-fns';
+
+import { logger } from '@/src/lib/logger';
+import { ModuleScores } from '@/src/types/pflegegrad';
 
 export type WiderspruchTyp = 'pflegegrad' | 'mdk-gutachten' | 'klage';
 export type AmpelStatus = 'gruen' | 'gelb' | 'rot' | 'abgelaufen';
@@ -54,10 +58,14 @@ const WIDERSPRUCH_KONFIG: Record<
   klage: { bezeichnung: 'Klageerhebung beim Sozialgericht', gesetz: '§ 84 SGG', fristMonate: 1 },
 };
 
+// --- FRISTEN LOGIK ---
+
 export function berechneFrist(
   bescheidDatum: Date,
   typ: WiderspruchTyp = 'pflegegrad'
 ): WiderspruchFrist {
+  logger.debug({ bescheidDatum, typ }, 'Berechne Frist für Widerspruch');
+
   const konfig = WIDERSPRUCH_KONFIG[typ];
   const fristEnde = addMonths(bescheidDatum, konfig.fristMonate);
   const fristEndeWerktag = naechsterWerktag(fristEnde);
@@ -74,7 +82,7 @@ export function berechneFrist(
   else if (verbleibendeTage >= 7) ampelStatus = 'gelb';
   else ampelStatus = 'rot';
 
-  return {
+  const resultat = {
     typ,
     bezeichnung: konfig.bezeichnung,
     gesetz: konfig.gesetz,
@@ -86,12 +94,14 @@ export function berechneFrist(
     verbleibendeTage: Math.max(0, verbleibendeTage),
     ampelStatus,
   };
+
+  logger.debug({ resultat }, 'Fristberechnung abgeschlossen');
+  return resultat;
 }
 
 function istFeiertag(datum: Date): boolean {
   const jahr = datum.getFullYear().toString();
-  const tagMonat = format(datum, 'MM-dd');
-  return (FEIERTAGE_DE[jahr] || []).includes(tagMonat);
+  return (FEIERTAGE_DE[jahr] || []).includes(format(datum, 'MM-dd'));
 }
 
 function istWochenende(datum: Date): boolean {
@@ -114,11 +124,14 @@ export function formatiereFristInfo(frist: WiderspruchFrist): string {
   return `${emoji} Noch ${frist.verbleibendeTage} Tage bis zum wirksamen Fristende am ${format(frist.fristEndeWerktag, 'dd.MM.yyyy')}`;
 }
 
-// ✅ JETZT DYNAMISCH NACH VERFAHRENSTYP (Pflegegrad, Gutachten oder Klage)
+// --- TEXT GENERIERUNG ---
+
 export function generiereWiderspruchBrief(
   daten: WiderspruchDaten,
   frist: WiderspruchFrist
 ): string {
+  logger.info({ typ: daten.typ, caseCode: daten.caseCode }, 'Generiere Widerspruchsbrief');
+
   const heute = format(new Date(), 'dd.MM.yyyy');
   const bescheidDatum = format(new Date(daten.bescheidDatum), 'dd.MM.yyyy');
 
@@ -138,39 +151,88 @@ export function generiereWiderspruchBrief(
     kernAnschreiben = `hiermit erhebe ich fristgerecht Klage beim zuständigen Sozialgericht gegen den Widerspruchsbescheid vom ${bescheidDatum}.`;
     kernBegruendung =
       daten.begruendung ||
-      'Der Widerspruchsbescheid vom %bescheidDatum% verkennt die tatsächliche Pflegebedürftigkeit und die Einschränkungen der Selbstständigkeit im Alltag. Eine umfassende Klagebegründung erfolgt nach Akteneinsicht durch das Gericht.';
+      `Der Widerspruchsbescheid vom ${bescheidDatum} verkennt die tatsächliche Pflegebedürftigkeit und die Einschränkungen der Selbstständigkeit im Alltag. Eine umfassende Klagebegründung erfolgt nach Akteneinsicht durch das Gericht.`;
   }
 
-  return `
-${daten.versicherterName}
-${daten.strasse}
-${daten.plz} ${daten.ort}
+  return `${daten.versicherterName}\n${daten.strasse}\n${daten.plz} ${daten.ort}\n\nAn die\n${daten.pflegekasse}\nWiderspruchsstelle\n[Bitte Anschrift der Kasse ergänzen]\n\n\n${daten.ort}, den ${heute}\n\nBetreff: ${betreffzeile}\nVersicherungsnummer: ${daten.versicherungsnummer || '[BITTE EINTRAGEN]'}\nAktenzeichen Portal: ${daten.caseCode?.toUpperCase() || 'OFFLINE_CORE'}\n\nSehr geehrte Damen und Herren,\n\n${kernAnschreiben}\n\nBEGRÜNDUNG / ANTRAGSMATERIE:\n${kernBegruendung}\n\nDie gesetzliche Frist für dieses Verfahren läuft gemäß ${frist.gesetz} am ${format(frist.fristEndeWerktag, 'dd.MM.yyyy')} ab. Ich bitte um eine schriftliche Bestätigung des Eingangs.\n\nMit freundlichen Grüßen,\n\n\n___________________________\n${daten.versicherterName}`;
+}
 
-An die
-${daten.pflegekasse}
-Widerspruchsstelle
-[Bitte Anschrift der Kasse ergänzen]
+export function generateWiderspruchBegruendung(
+  currentLevel: number,
+  expectedLevel: number,
+  scores: ModuleScores,
+  userReasons?: string
+): string {
+  const lines: string[] = [
+    `Nach den NBA-Kriterien ergibt sich aus den vorliegenden Einschränkungen ein höherer Pflegebedarf als im Pflegegrad ${currentLevel} berücksichtigt.\n`,
+  ];
+  if (scores[4] > 40)
+    lines.push(
+      'Selbstversorgung (Gewichtung 40%): Deutliche Einschränkungen bei Körperpflege, An-/Auskleiden sowie Essen/Trinken erfordern tägliche Unterstützung.'
+    );
+  if (scores[2] > 15 || scores[3] > 15)
+    lines.push(
+      'Kognition/Verhalten (Gewichtung 15%): Einschränkungen in Orientierung, Entscheidungsfähigkeit oder psychische Belastungen liegen vor.'
+    );
+  if (scores[5] > 20)
+    lines.push(
+      'Krankheitsbewältigung (Gewichtung 20%): Komplexe medizinische Maßnahmen und Medikamentenmanagement sind notwendig.'
+    );
+  if (scores[1] > 10)
+    lines.push(
+      'Mobilität (Gewichtung 10%): Einschränkungen bei Aufstehen, Gehen oder Treppensteigen schränken die Teilhabe ein.'
+    );
+  lines.push(
+    '\n',
+    `Die Summe der Beeinträchtigungen entspricht dem Pflegegrad ${expectedLevel}. Die aktuelle Einstufung in Pflegegrad ${currentLevel} bildet den tatsächlichen Hilfebedarf nicht ab.`
+  );
+  if (userReasons) lines.push('\n', 'Zusätzliche Begründung:', userReasons);
+  lines.push(
+    '\n',
+    'Rechtliche Grundlage:',
+    'Gemäß § 124 SGB XI beantrage ich eine erneute Begutachtung durch den MDK.'
+  );
+  return lines.join('\n');
+}
 
+// --- CHANCEN & CHECKLISTEN ---
 
-${daten.ort}, den ${heute}
+export function calculateWiderspruchChance(
+  currentLevel: number,
+  expectedLevel: number,
+  scores: ModuleScores
+): {
+  chance: 'high' | 'medium' | 'low';
+  reason: string;
+} {
+  const scoreDiff = expectedLevel - currentLevel;
+  if (scoreDiff === 1 && scores[4] > 40)
+    return {
+      chance: 'high',
+      reason: 'Nur 1 Level Unterschied, starke Selbstversorgungs-Einschränkungen (40% Gewichtung)',
+    };
+  if (scoreDiff <= 2 && (scores[2] > 10 || scores[3] > 10))
+    return {
+      chance: 'medium',
+      reason: 'Mögliche Verbesserung durch vollständige Begutachtung aller Module',
+    };
+  return {
+    chance: 'low',
+    reason: 'Größerer Unterschied - erfolgreich wenn neue medizinische Entwicklungen vorliegen',
+  };
+}
 
-Betreff: ${betreffzeile}
-Versicherungsnummer: ${daten.versicherungsnummer || '[BITTE EINTRAGEN]'}
-Aktenzeichen Portal: ${daten.caseCode?.toUpperCase() || 'OFFLINE_CORE'}
-
-Sehr geehrte Damen und Herren,
-
-${kernAnschreiben}
-
-BEGRÜNDUNG / ANTRAGSMATERIE:
-${kernBegruendung}
-
-Die gesetzliche Frist für dieses Verfahren läuft gemäß ${frist.gesetz} am ${format(frist.fristEndeWerktag, 'dd.MM.yyyy')} ab. Ich bitte um eine schriftliche Bestätigung des Eingangs.
-
-Mit freundlichen Grüßen,
-
-
-___________________________
-${daten.versicherterName}
-  `.trim();
+export function getMDPreparationChecklist(): string[] {
+  return [
+    'Alle Medikamente bereitlegen',
+    'Ärztliche Berichte parat haben',
+    'Pflegeprotokoll/Tagebuch aktuell (letzte 4 Wochen)',
+    'Zeitaufwand dokumentiert: Wie lange dauert was?',
+    'Häufigkeiten notiert: Wie oft pro Tag?',
+    'Schlechte Tage beschreiben (nicht die guten!)',
+    'Fragen vorbereitet',
+    'Unterlagen sortiert: Arztberichte, Rezepte, Labor',
+    'Begleitung organisiert',
+    'Notizblock für eigene Notizen',
+  ];
 }

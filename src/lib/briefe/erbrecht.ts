@@ -1,4 +1,6 @@
 // src/lib/briefe/erbrecht.ts
+import { logger } from '@/src/lib/logger';
+
 // Erbrecht - Testament, Pflichtteil, Erbschaftsteuer
 // PflegeNavigator EU - Vorsorge bei Pflegebedürftigkeit
 
@@ -79,6 +81,11 @@ export const ERBRECHT_PARAGRAPHEN = {
 
 export class ErbrechtGenerator {
   generateBrief(data: ErbrechtData): string {
+    logger.info(
+      { verfahrensart: data.verfahrensart, erblasser: data.erblasser.name },
+      'Generiere Erbrecht-Brief'
+    );
+
     const heute = new Date().toLocaleDateString('de-DE', {
       day: '2-digit',
       month: '2-digit',

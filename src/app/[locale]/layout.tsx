@@ -9,7 +9,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { Toaster } from 'sonner';
 
-import BetaBanner from "@/src/components/BetaBanner";
+import BetaBanner from '@/src/components/BetaBanner';
 import { CookieBanner } from '@/src/components/legal/CookieBanner';
 import AppHeaderChrome from '@/src/components/navigation/AppHeaderChrome';
 import { isValidLocale } from '@/src/i18n/config';

@@ -2,7 +2,18 @@
 import '@testing-library/jest-dom/vitest';
 import { vi } from 'vitest';
 
-// 1. LocalStorage global mocken (wird sehr oft benötigt)
+// 1. Umgebungsvariablen global stubben
+vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://mock.supabase.co');
+vi.stubEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY', 'mock-key');
+
+// 2. CookieStore-Mocking (da dies in fast allen Server-Supabase-Tests vorkommt)
+vi.mock('next/headers', () => ({
+    cookies: vi.fn().mockResolvedValue({
+        getAll: vi.fn().mockReturnValue([]),
+        set: vi.fn(),
+    }),
+}));
+
 const localStorageMock = {
     getItem: vi.fn(),
     setItem: vi.fn(),
@@ -13,5 +24,5 @@ const localStorageMock = {
 };
 Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
-// 2. Fetch global mocken (nützlich für API-Tests)
+// 3. Fetch global mocken (nützlich für API-Tests)
 global.fetch = vi.fn();
