@@ -1,8 +1,7 @@
 // src/app/[locale]/pflegegrad/start/page.tsx
-
 'use client';
 
-import { Shield, ArrowRight, Plus, ArrowLeft } from 'lucide-react';
+import { Shield, ArrowRight, Plus, ArrowLeft, Users, Baby } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, use } from 'react';
 import { toast } from 'sonner';
@@ -44,6 +43,9 @@ export default function PflegegradStartPage(props: PageProps) {
   const [error, setError] = useState('');
   const [isNewCase, setIsNewCase] = useState(false);
   const [caseCode, setCaseCode] = useState('');
+
+  // Neuer State für die Altersweichen-Selektion im Frontend
+  const [showAgeSelection, setShowAgeSelection] = useState(false);
 
   const [showPaywall, setShowPaywall] = useState(false);
   const [dbProducts, setDbProducts] = useState<ProductFromDb[]>([]);
@@ -95,7 +97,12 @@ export default function PflegegradStartPage(props: PageProps) {
       }
 
       toast.success('Willkommen zurück! Daten geladen.');
-      router.push(`/${locale}/pflegegrad/modul1`);
+      // Fallbacks prüfen: Falls ein fertiges Ergebnis existiert, direkt zur Auswertung
+      if (localStorage.getItem('pflegegrad-ergebnis')) {
+        router.push(`/${locale}/pflegegrad/ergebnis`);
+      } else {
+        router.push(`/${locale}/pflegegrad/modul1`);
+      }
     } catch {
       setError('Fehler bei der Session-Prüfung.');
     } finally {
@@ -103,7 +110,6 @@ export default function PflegegradStartPage(props: PageProps) {
     }
   };
 
-  // 🛠️ KORREKTUR: Nutzt jetzt die sichere API-Route statt des direkten RPC-Clients
   const handleCreateCase = async () => {
     setLoading(true);
     setError('');
@@ -113,19 +119,16 @@ export default function PflegegradStartPage(props: PageProps) {
         headers: { 'Content-Type': 'application/json' },
       });
 
-      if (!response.ok) {
-        throw new Error('Server-Antwort war nicht erfolgreich.');
-      }
-
+      if (!response.ok) throw new Error('Server-Antwort war nicht erfolgreich.');
       const resData = await response.json();
-
-      if (resData.error) {
-        throw new Error(resData.error);
-      }
+      if (resData.error) throw new Error(resData.error);
 
       setCaseCode(resData.caseCode);
       localStorage.setItem('case_code', resData.caseCode);
+
+      // Bereite den Wechsel zur Alters-Weiche vor
       setIsNewCase(true);
+      setShowAgeSelection(true);
       toast.success('Kostenloser Fallcode generiert!');
     } catch (err) {
       console.error(err);
@@ -163,11 +166,57 @@ export default function PflegegradStartPage(props: PageProps) {
           <span>Zurück zur Startseite</span>
         </button>
 
+        {/* Weiche nach erfolgreicher Fallcode-Erstellung */}
         {isNewCase ? (
-          <NewCaseCard
-            caseCode={caseCode}
-            onActivate={() => router.push(`/${locale}/pflegegrad/modul1`)}
-          />
+          <div className="space-y-6">
+            <NewCaseCard caseCode={caseCode} onActivate={() => setShowAgeSelection(true)} />
+
+            {showAgeSelection && (
+              <Card className="bg-slate-950 border border-white/10 text-white shadow-2xl animate-in fade-in slide-in-from-top-4 duration-300 rounded-2xl overflow-hidden">
+                <CardHeader className="bg-white/[0.02] border-b border-white/5">
+                  <CardTitle className="text-base font-bold text-[#20b2aa]">
+                    Für wen wird die Pflege-Einstufung durchgeführt?
+                  </CardTitle>
+                  <CardDescription className="text-gray-400 text-xs">
+                    Wählen Sie die Altersgruppe aus, um das rechtlich korrekte Verfahren zu laden.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Option A: Erwachsene */}
+                  <button
+                    onClick={() => {
+                      localStorage.setItem('pflege_zielgruppe', 'erwachsen');
+                      router.push(`/${locale}/pflegegrad/modul1`);
+                    }}
+                    className="p-5 bg-white/[0.02] border border-white/5 hover:border-[#20b2aa] rounded-xl text-left transition-all duration-200 hover:bg-white/5 group select-none"
+                  >
+                    <Users className="w-6 h-6 text-[#20b2aa] mb-2 group-hover:scale-105 transition-transform" />
+                    <h4 className="font-bold text-sm text-white">Erwachsene & Senioren</h4>
+                    <p className="text-[11px] text-gray-400 mt-1 leading-relaxed">
+                      Einstufung nach dem regulären Begutachtungsverfahren (NBA) für Personen ab 18
+                      Jahren.
+                    </p>
+                  </button>
+
+                  {/* Option B: Kinder */}
+                  <button
+                    onClick={() => {
+                      localStorage.setItem('pflege_zielgruppe', 'kind');
+                      router.push(`/${locale}/pflegegrad/kinder`);
+                    }}
+                    className="p-5 bg-white/[0.02] border border-white/5 hover:border-pink-500 rounded-xl text-left transition-all duration-200 hover:bg-white/5 group select-none"
+                  >
+                    <Baby className="w-6 h-6 text-pink-400 mb-2 group-hover:scale-105 transition-transform" />
+                    <h4 className="font-bold text-sm text-white">Kinder & Jugendliche</h4>
+                    <p className="text-[11px] text-gray-400 mt-1 leading-relaxed">
+                      Spezial-Assessment für Säuglinge und Kinder unter Einberechnung des
+                      natürlichen Alters-Entwicklungsstands.
+                    </p>
+                  </button>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         ) : (
           <>
             <LoadCaseCard onLoad={handleLoadCase} loading={loading} externalError={error} />

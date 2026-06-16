@@ -1,5 +1,4 @@
 // src/app/[locale]/pflegegrad/modul5/_components/KrankheitsbewaeltigungForm.tsx
-
 'use client';
 
 import { HeartPulse, HelpCircle } from 'lucide-react';
@@ -51,8 +50,12 @@ export function KrankheitsbewaeltigungForm({
                 return (
                   <div
                     key={opt.value}
-                    className="flex items-center space-x-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/5 transition-colors cursor-pointer"
                     onClick={() => onAntwort(fr.id, opt.value)}
+                    className={`flex items-center space-x-3 p-3 rounded-xl border transition-all cursor-pointer select-none ${
+                      antworten[fr.id] === opt.value
+                        ? 'border-rose-500/50 bg-rose-500/10'
+                        : 'border-white/5 bg-white/[0.01] hover:bg-white/5'
+                    }`}
                   >
                     <RadioGroupItem
                       value={opt.value}

@@ -1,13 +1,15 @@
+// src/app/[locale]/pflegegrad/modul2/page.tsx
 'use client';
 
 import { ArrowRight, ArrowLeft, Brain, Shield } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useState, useEffect, use } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
 import { KognitionForm } from '@/src/app/[locale]/pflegegrad/modul2/_components/KognitionsForm';
 import { Button } from '@/src/components/ui/button';
 import { Progress } from '@/src/components/ui/progress';
+import { logger } from '@/src/lib/logger';
 import { Frage, BewertungOption } from '@/src/types/pflegegrad';
 
 // Offizielle NBA-Kriterien für Modul 2 nach § 15 SGB XI
@@ -39,7 +41,6 @@ const KOGNITION_FRAGEN: Frage[] = [
   },
 ];
 
-// Die gesetzliche NBA-Punktematrix für kognitive Einschränkungen
 const BEWERTUNG_OPTIONEN: BewertungOption[] = [
   { value: '0', label: 'Keine Einschränkung (Selbstständig)', punkte: 0 },
   { value: '1', label: 'Leichte Einschränkung (Größtenteils selbstständig)', punkte: 1 },
@@ -47,17 +48,10 @@ const BEWERTUNG_OPTIONEN: BewertungOption[] = [
   { value: '3', label: 'Schwere Einschränkung (Unselbstständig)', punkte: 3 },
 ];
 
-interface PageProps {
-  params: Promise<{ locale: string }>;
-}
-
-export default function Modul2Page(props: PageProps) {
+export default function Modul2Page() {
   const router = useRouter();
-  const params = use(props.params);
-  const locale = params?.locale || 'de';
+  const { locale } = useParams();
 
-  // ✅ FIX 1: Initialisiere den State direkt synchron, falls wir auf dem Client sind.
-  // Das verhindert das synchrone Nachtragen innerhalb des Effects.
   const [caseCode] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('case_code');
@@ -67,15 +61,18 @@ export default function Modul2Page(props: PageProps) {
 
   const [antworten, setAntworten] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setHasMounted(true);
+
     if (!caseCode) {
       toast.error('Keine aktive Fall-Session gefunden. Bitte starten Sie neu.');
       router.push(`/${locale}/pflegegrad/start`);
       return;
     }
 
-    // Vorhandene Antworten über deine GET-Schnittstelle laden
     fetch(`/api/cases/${caseCode.toUpperCase()}/answers`)
       .then((res) => {
         if (res.ok) return res.json();
@@ -85,9 +82,10 @@ export default function Modul2Page(props: PageProps) {
         const modul2Record = data.find((r: { module_number: number }) => r.module_number === 2);
         if (modul2Record?.answers) {
           setAntworten(modul2Record.answers as Record<string, string>);
+          logger.debug({ caseCode }, 'Bestehende Antworten für Modul 2 geladen.');
         }
       })
-      .catch(() => console.log('Keine alten Antworten für Modul 2 gefunden.'));
+      .catch(() => logger.info('Keine alten Antworten für Modul 2 gefunden.'));
   }, [caseCode, locale, router]);
 
   const handleAntwortChange = (frageId: string, wert: string) => {
@@ -98,7 +96,6 @@ export default function Modul2Page(props: PageProps) {
     if (!caseCode) return;
     setLoading(true);
 
-    // SGB-konforme Rohpunkte-Ermittlung
     let gesamtRohpunkte = 0;
     KOGNITION_FRAGEN.forEach((q) => {
       const wert = antworten[q.id];
@@ -107,38 +104,45 @@ export default function Modul2Page(props: PageProps) {
     });
 
     try {
-      // Wir senden jede Frage einzeln an deine API-Route, um die answers-Struktur sauber zu synchronisieren
-      for (const [questionKey, answerValue] of Object.entries(antworten)) {
-        const response = await fetch(`/api/cases/${caseCode.toUpperCase()}/answers`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            moduleName: 'emr', // Mapped laut deiner Route auf module_number: 2
-            questionKey,
-            answerValue,
-          }),
-        });
+      // 🚀 Performanter Parallel-Save an deine API ('emr' = Modul 2)
+      await Promise.all(
+        Object.entries(antworten).map(([questionKey, answerValue]) =>
+          fetch(`/api/cases/${caseCode.toUpperCase()}/answers`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              moduleName: 'emr',
+              questionKey,
+              answerValue,
+            }),
+          }).then((res) => {
+            if (!res.ok) throw new Error('Fehler beim Speichern einer Teilantwort.');
+          })
+        )
+      );
 
-        if (!response.ok) {
-          throw new Error('Fehler beim Sichern einer Teilantwort.');
-        }
-      }
-
-      // Rohpunkte für den späteren Abgleich mit Modul 3 im Speicher sichern
       localStorage.setItem('modul2_rohpunkte', gesamtRohpunkte.toString());
-
       toast.success('Modul 2 erfolgreich gespeichert.');
       router.push(`/${locale}/pflegegrad/modul3`);
     } catch (err) {
-      console.error(err);
+      logger.error({ err }, 'Fehler beim Übertragen der Daten von Modul 2');
       toast.error('Fehler beim Übertragen der Daten an den Server.');
+      // Fallback-Weiterleitung bei Offline-Betrieb erlauben
+      router.push(`/${locale}/pflegegrad/modul3`);
     } finally {
       setLoading(false);
     }
   };
 
-  const fortschritt = (Object.keys(antworten).length / KOGNITION_FRAGEN.length) * 100;
-  const alleBeantwortet = Object.keys(antworten).length === KOGNITION_FRAGEN.length;
+  // 🛡️ Sichere inhaltsbasierte Validierung
+  const alleBeantwortet = KOGNITION_FRAGEN.every(
+    (f) => antworten[f.id] !== undefined && antworten[f.id] !== null && antworten[f.id] !== ''
+  );
+
+  const fortschritt =
+    (KOGNITION_FRAGEN.filter((f) => antworten[f.id]).length / KOGNITION_FRAGEN.length) * 100;
+
+  if (!hasMounted) return null;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl text-white">
@@ -175,11 +179,12 @@ export default function Modul2Page(props: PageProps) {
       <div className="flex justify-between mt-8 pt-6 border-t border-white/10">
         <Button
           variant="outline"
-          onClick={() => router.push(`/${locale}/pflegegrad/start`)}
+          disabled={loading}
+          onClick={() => router.push(`/${locale}/pflegegrad/modul1`)} // 🧭 Korrigierte Zurück-Weiche
           className="border-white/10 text-white hover:bg-white/5 h-12 px-6"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Zurück
+          Zurück zu Modul 1
         </Button>
         <Button
           onClick={handleWeiter}

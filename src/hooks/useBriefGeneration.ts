@@ -18,7 +18,7 @@ export function useBriefGeneration() {
     logger.info({ type: payload.type }, 'Starte Text-Vorschau-Generierung');
 
     try {
-      const res = await fetch('/api/briefe/generate', {
+      const res = await fetch('/api/briefe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

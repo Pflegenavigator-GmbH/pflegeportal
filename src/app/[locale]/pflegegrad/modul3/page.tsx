@@ -1,12 +1,14 @@
+// src/app/[locale]/pflegegrad/modul3/page.tsx
 'use client';
 
 import { ArrowRight, ArrowLeft, Heart, Shield } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useState, useEffect, use } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/src/components/ui/button';
 import { Progress } from '@/src/components/ui/progress';
+import { logger } from '@/src/lib/logger';
 import { Frage, BewertungOption } from '@/src/types/pflegegrad';
 
 import { VerhaltenForm } from './_components/VerhaltenForm';
@@ -42,16 +44,10 @@ const BEWERTUNG_OPTIONEN: BewertungOption[] = [
   { value: '3', label: 'Häufig (täglich oder mehrfach täglich)', punkte: 3 },
 ];
 
-interface PageProps {
-  params: Promise<{ locale: string }>;
-}
-
-export default function Modul3Page(props: PageProps) {
+export default function Modul3Page() {
   const router = useRouter();
-  const params = use(props.params);
-  const locale = params?.locale || 'de';
+  const { locale } = useParams();
 
-  // Lazy State Initialization zur Vermeidung von synchronen Effects und Cascading Renders
   const [caseCode] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('case_code');
@@ -61,28 +57,31 @@ export default function Modul3Page(props: PageProps) {
 
   const [antworten, setAntworten] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setHasMounted(true);
+
     if (!caseCode) {
       toast.error('Keine aktive Fall-Session gefunden. Bitte starten Sie neu.');
       router.push(`/${locale}/pflegegrad/start`);
       return;
     }
 
-    // Abrufen bereits existierender Antworten über die /answers Route
     fetch(`/api/cases/${caseCode.toUpperCase()}/answers`)
       .then((res) => {
         if (res.ok) return res.json();
         throw new Error();
       })
       .then((data) => {
-        // Modul 3 ausfindig machen (Je nach Zuordnung in deiner Route)
         const modul3Record = data.find((r: { module_number: number }) => r.module_number === 3);
         if (modul3Record?.answers) {
           setAntworten(modul3Record.answers as Record<string, string>);
+          logger.debug({ caseCode }, 'Bestehende Antworten für Modul 3 geladen.');
         }
       })
-      .catch(() => console.log('Keine alten Antworten für Modul 3 gefunden.'));
+      .catch(() => logger.info('Keine alten Antworten für Modul 3 gefunden.'));
   }, [caseCode, locale, router]);
 
   const handleAntwortChange = (frageId: string, wert: string) => {
@@ -93,7 +92,6 @@ export default function Modul3Page(props: PageProps) {
     if (!caseCode) return;
     setLoading(true);
 
-    // Summe der gesetzlichen Rohpunkte für Modul 3 ermitteln
     let gesamtRohpunkte = 0;
     VERHALTEN_FRAGEN.forEach((q) => {
       const wert = antworten[q.id];
@@ -102,38 +100,45 @@ export default function Modul3Page(props: PageProps) {
     });
 
     try {
-      // Typsicheres Sichern über die POST-Route
-      for (const [questionKey, answerValue] of Object.entries(antworten)) {
-        const response = await fetch(`/api/cases/${caseCode.toUpperCase()}/answers`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            moduleName: 'gdb', // Nutzt das Mapping deiner Route für Modul-Nummer 3
-            questionKey,
-            answerValue,
-          }),
-        });
+      // 🚀 Performanter Parallel-Save an deine API ('gdb' = Modul 3 laut deiner API-Map)
+      await Promise.all(
+        Object.entries(antworten).map(([questionKey, answerValue]) =>
+          fetch(`/api/cases/${caseCode.toUpperCase()}/answers`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              moduleName: 'gdb',
+              questionKey,
+              answerValue,
+            }),
+          }).then((res) => {
+            if (!res.ok) throw new Error('Fehler beim Sichern einer Teilantwort.');
+          })
+        )
+      );
 
-        if (!response.ok) {
-          throw new Error('Sichern der verhaltensbezogenen Teilantwort fehlgeschlagen.');
-        }
-      }
-
-      // Punkte für das spätere Fusing im Rechner ablegen
       localStorage.setItem('modul3_rohpunkte', gesamtRohpunkte.toString());
-
       toast.success('Modul 3 erfolgreich gespeichert.');
       router.push(`/${locale}/pflegegrad/modul4`);
-    } catch (err: unknown) {
-      console.error(err);
+    } catch (err) {
+      logger.error({ err }, 'Fehler beim Sichern von Modul 3');
       toast.error('Fehler beim Übertragen der Daten an den Server.');
+      // Offline-Fallback
+      router.push(`/${locale}/pflegegrad/modul4`);
     } finally {
       setLoading(false);
     }
   };
 
-  const fortschritt = (Object.keys(antworten).length / VERHALTEN_FRAGEN.length) * 100;
-  const alleBeantwortet = Object.keys(antworten).length === VERHALTEN_FRAGEN.length;
+  // 🛡️ Inhaltlich präzise Validierung gegen Geister-Daten
+  const alleBeantwortet = VERHALTEN_FRAGEN.every(
+    (f) => antworten[f.id] !== undefined && antworten[f.id] !== null && antworten[f.id] !== ''
+  );
+
+  const fortschritt =
+    (VERHALTEN_FRAGEN.filter((f) => antworten[f.id]).length / VERHALTEN_FRAGEN.length) * 100;
+
+  if (!hasMounted) return null;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl text-white">
@@ -170,6 +175,7 @@ export default function Modul3Page(props: PageProps) {
       <div className="flex justify-between mt-8 pt-6 border-t border-white/10">
         <Button
           variant="outline"
+          disabled={loading}
           onClick={() => router.push(`/${locale}/pflegegrad/modul2`)}
           className="border-white/10 text-white hover:bg-white/5 h-12 px-6"
         >

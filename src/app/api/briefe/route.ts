@@ -1,7 +1,7 @@
 // src/app/api/briefe/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
-import { BriefGeneratorFactory } from '@/src/lib/briefe/templates/generator-factory';
+import { BriefGeneratorFactory } from '@/src/lib/briefe/generator-factory';
 import { BriefPayloadSchema } from '@/src/types/briefe-schema';
 
 export async function POST(request: NextRequest) {

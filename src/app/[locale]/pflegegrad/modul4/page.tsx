@@ -1,13 +1,15 @@
+// src/app/[locale]/pflegegrad/modul4/page.tsx
 'use client';
 
 import { ArrowRight, ArrowLeft, Sparkles, Shield } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useState, useEffect, use } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
 import { SelbstversorgungForm } from '@/src/app/[locale]/pflegegrad/modul4/_component/SelbstversorgungForm';
 import { Button } from '@/src/components/ui/button';
 import { Progress } from '@/src/components/ui/progress';
+import { logger } from '@/src/lib/logger';
 import { Frage, BewertungOption } from '@/src/types/pflegegrad';
 
 const SELBSTVERSORGUNG_FRAGEN: Frage[] = [
@@ -43,7 +45,6 @@ const SELBSTVERSORGUNG_FRAGEN: Frage[] = [
   },
 ];
 
-// Die gesetzliche NBA-Skala von 0 bis 3 nach dem SGB XI
 const BEWERTUNG_OPTIONEN: BewertungOption[] = [
   { value: '0', label: 'Selbstständig (Keine Einschränkung)', punkte: 0 },
   { value: '1', label: 'Überwiegend selbstständig (Leichte Einschränkung)', punkte: 1 },
@@ -51,34 +52,18 @@ const BEWERTUNG_OPTIONEN: BewertungOption[] = [
   { value: '3', label: 'Unselbstständig (Vollständig hilfsbedürftig)', punkte: 3 },
 ];
 
-interface PageProps {
-  params: Promise<{ locale: string }>;
-}
-
-export default function Modul4Page(props: PageProps) {
+export default function Modul4Page() {
   const router = useRouter();
-  const params = use(props.params);
-  const locale = params?.locale || 'de';
-
-  // State für die Hydrations-Prüfung
+  const { locale } = useParams();
   const [hasMounted, setHasMounted] = useState(false);
-
-  const [caseCode] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('case_code');
-    }
-    return null;
-  });
-
   const [antworten, setAntworten] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
+  const caseCode = typeof window !== 'undefined' ? localStorage.getItem('case_code') : null;
+
   useEffect(() => {
-    // Sobald dieser Effect läuft, sind wir sicher auf dem Client angekommen
-    if (!hasMounted) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setHasMounted(true);
-    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setHasMounted(true);
 
     if (!caseCode) {
       toast.error('Keine aktive Fall-Session gefunden. Bitte starten Sie neu.');
@@ -95,10 +80,11 @@ export default function Modul4Page(props: PageProps) {
         const modul4Record = data.find((r: { module_number: number }) => r.module_number === 4);
         if (modul4Record?.answers) {
           setAntworten(modul4Record.answers as Record<string, string>);
+          logger.debug({ caseCode }, 'Bestehende Antworten für Modul 4 geladen.');
         }
       })
-      .catch(() => console.log('Keine alten Antworten für Modul 4 gefunden.'));
-  }, [caseCode, locale, router, hasMounted]);
+      .catch(() => logger.info('Keine alten Antworten für Modul 4 gefunden.'));
+  }, [caseCode, locale, router]);
 
   const handleAntwortChange = (frageId: string, wert: string) => {
     setAntworten((prev) => ({ ...prev, [frageId]: wert }));
@@ -108,7 +94,6 @@ export default function Modul4Page(props: PageProps) {
     if (!caseCode) return;
     setLoading(true);
 
-    // Ermittlung der gesetzlichen Rohpunkte für die spätere Rechner-Transformation
     let gesamtRohpunkte = 0;
     SELBSTVERSORGUNG_FRAGEN.forEach((q) => {
       const wert = antworten[q.id];
@@ -117,38 +102,47 @@ export default function Modul4Page(props: PageProps) {
     });
 
     try {
-      // Streamt die Antworten an deine API-Route mit korrektem Mehrzahl-Pfad /answers
-      for (const [questionKey, answerValue] of Object.entries(antworten)) {
-        const response = await fetch(`/api/cases/${caseCode.toUpperCase()}/answers`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            moduleName: 'sgb14', // Entspricht laut MODULE_NUMBER_MAP der module_number: 4
-            questionKey,
-            answerValue,
-          }),
-        });
+      // 🚀 Umstellung auf parallele Requests mittels Promise.all für atomares Sichern
+      await Promise.all(
+        Object.entries(antworten).map(([questionKey, answerValue]) =>
+          fetch(`/api/cases/${caseCode.toUpperCase()}/answers`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              moduleName: 'sgb14', // Mapped laut Server-Route auf module_number: 4
+              questionKey,
+              answerValue,
+            }),
+          }).then((res) => {
+            if (!res.ok) throw new Error('Fehler beim Sichern einer Teilantwort.');
+          })
+        )
+      );
 
-        if (!response.ok) {
-          throw new Error('Speichern der Teilantwort fehlgeschlagen.');
-        }
-      }
-
-      // Sichern im lokalen Speicher für die Zusammenfassung
       localStorage.setItem('modul4_rohpunkte', gesamtRohpunkte.toString());
-
       toast.success('Modul 4 erfolgreich gespeichert.');
       router.push(`/${locale}/pflegegrad/modul5`);
-    } catch (err: unknown) {
-      console.error(err);
+    } catch (err) {
+      logger.error({ err }, 'Fehler beim API-Transit in Modul 4');
       toast.error('Fehler beim Übertragen der Daten an den Server.');
+      // Lokales Weitergehen trotz Netzwerk-Schluckauf gestatten
+      router.push(`/${locale}/pflegegrad/modul5`);
     } finally {
       setLoading(false);
     }
   };
 
-  const fortschritt = (Object.keys(antworten).length / SELBSTVERSORGUNG_FRAGEN.length) * 100;
-  const alleBeantwortet = Object.keys(antworten).length === SELBSTVERSORGUNG_FRAGEN.length;
+  // 🛡️ Inhaltlich präzise Validierung
+  const alleBeantwortet = SELBSTVERSORGUNG_FRAGEN.every(
+    (f) => antworten[f.id] !== undefined && antworten[f.id] !== null && antworten[f.id] !== ''
+  );
+
+  const fortschritt =
+    (SELBSTVERSORGUNG_FRAGEN.filter((f) => antworten[f.id]).length /
+      SELBSTVERSORGUNG_FRAGEN.length) *
+    100;
+
+  if (!hasMounted) return null;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl text-white">
@@ -165,10 +159,7 @@ export default function Modul4Page(props: PageProps) {
               </p>
             </div>
           </div>
-
-          {/* ✅ KORREKTUR: Wir prüfen zusätzlich auf hasMounted.
-              Dadurch bleibt das Element auf dem Server leer und rendert im Browser erst nach der Hydration! */}
-          {hasMounted && caseCode && (
+          {caseCode && (
             <span className="text-xs font-mono bg-white/5 border border-white/10 px-3 py-1 rounded-full text-gray-400">
               ID: {caseCode}
             </span>
@@ -188,6 +179,7 @@ export default function Modul4Page(props: PageProps) {
       <div className="flex justify-between mt-8 pt-6 border-t border-white/10">
         <Button
           variant="outline"
+          disabled={loading}
           onClick={() => router.push(`/${locale}/pflegegrad/modul3`)}
           className="border-white/10 text-white hover:bg-white/5 h-12 px-6"
         >

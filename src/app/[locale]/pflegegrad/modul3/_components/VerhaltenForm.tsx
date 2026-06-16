@@ -1,3 +1,4 @@
+// src/app/[locale]/pflegegrad/modul3/_components/VerhaltenForm.tsx
 'use client';
 
 import { Heart, HelpCircle } from 'lucide-react';
@@ -41,13 +42,17 @@ export function VerhaltenForm({ fragen, optionen, antworten, onAntwort }: Verhal
                 return (
                   <div
                     key={opt.value}
-                    className="flex items-center space-x-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/10 transition-colors cursor-pointer"
                     onClick={() => onAntwort(frage.id, opt.value)}
+                    className={`flex items-center space-x-3 p-3 rounded-xl border transition-all cursor-pointer select-none ${
+                      antworten[frage.id] === opt.value
+                        ? 'border-pink-500/50 bg-pink-500/10'
+                        : 'border-white/5 bg-white/[0.01] hover:bg-white/5'
+                    }`}
                   >
                     <RadioGroupItem
                       value={opt.value}
                       id={optionId}
-                      className="border-white/30 text-[#20b2aa] focus:border-[#20b2aa] h-5 w-5"
+                      className="border-white/30 text-pink-500 focus:border-pink-500 h-5 w-5"
                     />
                     <Label
                       htmlFor={optionId}

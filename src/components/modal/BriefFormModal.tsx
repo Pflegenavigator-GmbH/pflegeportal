@@ -1,4 +1,3 @@
-// src/components/modal/BriefFormModal.tsx
 'use client';
 
 import { FileText, Download, Eye } from 'lucide-react';
@@ -43,15 +42,54 @@ export function BriefFormModal({ typ, isOpen, onClose }: BriefFormModalProps) {
   const [hauptteil, setHauptteil] = useState('');
   const [betreff, setBetreff] = useState(`Anliegen bezüglich ${typ}`);
 
+  // ============================================================================
+  // 🛡️ DYNAMISCHE FRONTEND-VALIDIERUNG
+  // ============================================================================
+
+  // Absender muss für das DIN-Layout immer vollständig ausgefüllt sein
+  const isAbsenderValid =
+    absender.name.trim() !== '' &&
+    absender.strasse.trim() !== '' &&
+    absender.plz.trim().length === 5 &&
+    absender.ort.trim() !== '';
+
+  // E-Mail-Format checken, es sei denn, das Feld ist komplett leer
+  const isEmailValid =
+    absender.email.trim() === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(absender.email);
+
+  // Dynamische Prüfung je nach Brief-Typ (Das "Gehirn" des Modals)
+  const isEmpfaengerValid = () => {
+    if (typ === 'antrag-pflegegrad' || typ === 'widerspruch-pflegegrad') {
+      // Bei Pflegekassen reicht der Name der Institution völlig aus!
+      return empfaenger.name.trim() !== '';
+    }
+
+    // Bei allgemeinen Briefen, Versorgungsamt oder Erbrecht fordern wir die komplette Anschrift
+    return (
+      empfaenger.name.trim() !== '' &&
+      empfaenger.strasse.trim() !== '' &&
+      empfaenger.plz.trim().length === 5 &&
+      empfaenger.ort.trim() !== ''
+    );
+  };
+
+  // Gesamte Validierungs-Kette zusammenführen
+  const isFormValid =
+    isAbsenderValid && isEmailValid && isEmpfaengerValid() && hauptteil.trim().length >= 10;
+
+  // ============================================================================
+  // 📦 PAYLOAD CONVERTER (Bereinigt leere Strings für Zod)
+  // ============================================================================
   const assemblePayload = (): BriefPayload => ({
     type: typ,
     absender: {
       ...absender,
-      plz: absender.plz,
+      // Leere optionale Felder in undefined wandeln, damit Zod.optional() greift:
+      email: absender.email.trim() || undefined,
+      telefon: absender.telefon.trim() || undefined,
     },
     empfaenger: {
       ...empfaenger,
-      ort: empfaenger.ort || '', // Absicherung für leere Felder
     },
     betreff,
     inhalt: {
@@ -117,6 +155,25 @@ export function BriefFormModal({ typ, isOpen, onClose }: BriefFormModalProps) {
                   placeholder="Musterstadt"
                 />
               </div>
+              {/* Optionale Felder für den Absender */}
+              <div className="space-y-1">
+                <Label className="text-xs text-gray-400">Telefon (Optional)</Label>
+                <Input
+                  value={absender.telefon}
+                  onChange={(e) => setAbsender({ ...absender, telefon: e.target.value })}
+                  className="bg-slate-900 border-white/10 h-10 text-sm"
+                  placeholder="0151..."
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs text-gray-400">E-Mail (Optional)</Label>
+                <Input
+                  value={absender.email}
+                  onChange={(e) => setAbsender({ ...absender, email: e.target.value })}
+                  className={`bg-slate-900 border-white/10 h-10 text-sm ${!isEmailValid ? 'border-rose-500/50 focus-visible:ring-rose-500' : ''}`}
+                  placeholder="max@mustermann.de"
+                />
+              </div>
             </div>
 
             <h3 className="text-sm font-bold text-gray-300 uppercase tracking-wide pt-2">
@@ -131,20 +188,32 @@ export function BriefFormModal({ typ, isOpen, onClose }: BriefFormModalProps) {
                   className="bg-slate-900 border-white/10 h-10 text-sm"
                 />
               </div>
-              <div className="grid grid-cols-3 gap-2">
+
+              {/* Die Adresszeilen blenden wir optisch aus oder deaktivieren sie, wenn es eine Pflegekasse ist */}
+              <div
+                className={`grid grid-cols-3 gap-2 transition-opacity duration-200 ${typ === 'antrag-pflegegrad' || typ === 'widerspruch-pflegegrad' ? 'opacity-40' : ''}`}
+              >
                 <div className="col-span-2 space-y-1">
-                  <Label className="text-xs text-gray-400">Straße</Label>
+                  <Label className="text-xs text-gray-400">
+                    Straße {typ !== 'antrag-pflegegrad' && typ !== 'widerspruch-pflegegrad' && '*'}
+                  </Label>
                   <Input
                     value={empfaenger.strasse}
                     onChange={(e) => setEmpfaenger({ ...empfaenger, strasse: e.target.value })}
+                    disabled={typ === 'antrag-pflegegrad' || typ === 'widerspruch-pflegegrad'}
+                    placeholder={typ === 'antrag-pflegegrad' ? 'Nicht benötigt' : ''}
                     className="bg-slate-900 border-white/10 h-10 text-sm"
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs text-gray-400">PLZ</Label>
+                  <Label className="text-xs text-gray-400">
+                    PLZ {typ !== 'antrag-pflegegrad' && typ !== 'widerspruch-pflegegrad' && '*'}
+                  </Label>
                   <Input
                     value={empfaenger.plz}
                     onChange={(e) => setEmpfaenger({ ...empfaenger, plz: e.target.value })}
+                    disabled={typ === 'antrag-pflegegrad' || typ === 'widerspruch-pflegegrad'}
+                    placeholder={typ === 'antrag-pflegegrad' ? '——' : ''}
                     className="bg-slate-900 border-white/10 h-10 text-sm"
                   />
                 </div>
@@ -165,7 +234,7 @@ export function BriefFormModal({ typ, isOpen, onClose }: BriefFormModalProps) {
               </div>
               <div className="space-y-1">
                 <Label className="text-xs text-gray-400">
-                  Begründung / Spezifischer Sachverhalt
+                  Begründung / Spezifischer Sachverhalt (min. 10 Zeichen)
                 </Label>
                 <Textarea
                   value={hauptteil}
@@ -180,7 +249,7 @@ export function BriefFormModal({ typ, isOpen, onClose }: BriefFormModalProps) {
             <div className="flex gap-2 pt-2">
               <Button
                 onClick={() => generatePreview(assemblePayload())}
-                disabled={loading || !absender.name}
+                disabled={loading || !isFormValid} // Gekoppelt an isFormValid
                 variant="outline"
                 className="flex-1 h-11 border-white/10 hover:bg-white/5"
               >
@@ -188,7 +257,7 @@ export function BriefFormModal({ typ, isOpen, onClose }: BriefFormModalProps) {
               </Button>
               <Button
                 onClick={() => downloadPdf(assemblePayload())}
-                disabled={loading || !absender.name}
+                disabled={loading || !isFormValid} // Gekoppelt an isFormValid
                 className="flex-1 h-11 bg-[#20b2aa] hover:bg-[#3ddbd0] text-slate-950 font-bold"
               >
                 <Download className="w-4 h-4 mr-2" /> PDF generieren

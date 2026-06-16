@@ -1,4 +1,4 @@
-// src/app/[locale]/pflegegrad/modul2/components/KognitionForm.tsx
+// src/app/[locale]/pflegegrad/modul2/_components/KognitionsForm.tsx
 'use client';
 
 import { Brain, HelpCircle } from 'lucide-react';
@@ -42,13 +42,17 @@ export function KognitionForm({ fragen, optionen, antworten, onAntwort }: Kognit
                 return (
                   <div
                     key={opt.value}
-                    className="flex items-center space-x-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/10 transition-colors cursor-pointer"
                     onClick={() => onAntwort(frage.id, opt.value)}
+                    className={`flex items-center space-x-3 p-3 rounded-xl border transition-all cursor-pointer select-none ${
+                      antworten[frage.id] === opt.value
+                        ? 'border-purple-500/50 bg-purple-500/10'
+                        : 'border-white/5 bg-white/[0.01] hover:bg-white/5'
+                    }`}
                   >
                     <RadioGroupItem
                       value={opt.value}
                       id={optionId}
-                      className="border-white/30 text-[#20b2aa] focus:border-[#20b2aa] h-5 w-5"
+                      className="border-white/30 text-purple-500 focus:border-purple-500 h-5 w-5"
                     />
                     <Label
                       htmlFor={optionId}

@@ -48,7 +48,7 @@ describe('useBriefGeneration Hook', () => {
       await result.current.generatePreview(mockPayload);
     });
 
-    expect(fetchSpy).toHaveBeenCalledWith('/api/briefe/generate', expect.any(Object));
+    expect(fetchSpy).toHaveBeenCalledWith('/api/briefe', expect.any(Object));
     expect(result.current.previewText).toBe(mockServerResponse.brief);
     expect(result.current.loading).toBe(false);
   });
