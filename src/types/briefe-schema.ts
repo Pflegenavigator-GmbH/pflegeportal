@@ -2,13 +2,15 @@
 import { z } from 'zod';
 
 export const BriefAdresseSchema = z.object({
-  name: z.string().min(1),
+  name: z.string().min(1, 'Name ist erforderlich'),
   vorname: z.string().optional(),
-  strasse: z.string().min(1),
-  plz: z.string().min(5),
-  ort: z.string().min(1),
+  // Für den Absender/Versicherten erzwingen wir diese im Frontend-Formular,
+  // aber das Schema lassen wir flexibel, damit die Kassen-Adressen leer sein dürfen:
+  strasse: z.string().default(''),
+  plz: z.string().default(''),
+  ort: z.string().default(''),
   telefon: z.string().optional(),
-  email: z.string().email().optional(),
+  email: z.string().email().optional().or(z.literal('')), // Erlaubt auch leere Strings
   sozialversicherungsnummer: z.string().optional(),
   versichertennummer: z.string().optional(),
   geburtsdatum: z.string().optional(),

@@ -4,70 +4,129 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, ArrowLeft, Accessibility } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent } from '@/src/components/ui/card';
 import { Label } from '@/src/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/src/components/ui/radio-group';
+import { logger } from '@/src/lib/logger';
 import { FRAGEN_MODUL_1, BEWERTUNGEN } from '@/src/lib/pflegegrad/fragen';
 
 export default function Modul1Page() {
   const router = useRouter();
   const { locale } = useParams();
   const [antworten, setAntworten] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  const caseCode = typeof window !== 'undefined' ? localStorage.getItem('case_code') : null;
+
+  // 📥 Bereits gespeicherte Antworten beim Laden der Seite rekonstruieren
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setHasMounted(true);
+
+    if (!caseCode) {
+      toast.error('Keine aktive Fall-Session gefunden.');
+      router.push(`/${locale}/pflegegrad/start`);
+      return;
+    }
+
+    fetch(`/api/cases/${caseCode.toUpperCase()}/answers`)
+      .then((res) => {
+        if (res.ok) return res.json();
+        throw new Error();
+      })
+      .then((data) => {
+        // Suche den Eintrag für Modul 1 (pflegegrad)
+        const modul1Record = data.find((r: { module_number: number }) => r.module_number === 1);
+        if (modul1Record?.answers) {
+          setAntworten(modul1Record.answers as Record<string, string>);
+          logger.debug({ caseCode }, 'Bestehende Antworten für Modul 1 rekonstruiert.');
+        }
+      })
+      .catch(() => logger.info('Keine Vorab-Daten für Modul 1 in der DB gefunden.'));
+  }, [caseCode, locale, router]);
 
   const handleAntwort = (frageId: string, wert: string) => {
     setAntworten((prev) => ({ ...prev, [frageId]: wert }));
   };
 
   const handleWeiter = async () => {
-    // Rohpunkte aufsummieren
+    if (!caseCode) return;
+    setLoading(true);
+
+    // 1. Rohpunkte für den lokalen schnellen Cache aufsummieren
     let rohPunkte = 0;
     Object.entries(antworten).forEach(([_, wert]) => {
       const option = BEWERTUNGEN.find((b) => b.value === wert);
       if (option) rohPunkte += option.punkte;
     });
 
-    // Lokale Zwischenspeicherung
-    localStorage.setItem('m1_score', rohPunkte.toString());
+    // Harmonisierter Key für deine Ergebnisseite
+    localStorage.setItem('modul1_rohpunkte', rohPunkte.toString());
 
-    // API-Synchronisierung mit unserer Supabase-Save-Route
+    // 2. Parallelisierte API-Übertragung an deine echte Route
     try {
-      await fetch('/api/pflegegrad/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          caseCode: localStorage.getItem('case_code') || 'PF-TEMP-1234',
-          moduleNumber: 1,
-          moduleName: 'Mobilität',
-          answers: antworten,
-        }),
-      });
-      toast.success('Fortschritt online gespeichert!');
-    } catch {
-      toast.error('Offline-Modus: Fortschritt lokal gesichert.');
-    }
+      await Promise.all(
+        Object.entries(antworten).map(([questionKey, answerValue]) =>
+          fetch(`/api/cases/${caseCode.toUpperCase()}/answers`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              moduleName: 'pflegegrad', // Mappt laut deiner API-Map auf module_number: 1
+              questionKey,
+              answerValue,
+            }),
+          }).then((res) => {
+            if (!res.ok) throw new Error('Fehler beim Speichern einer Antwortzeile.');
+          })
+        )
+      );
 
-    router.push(`/${locale}/pflegegrad/modul2`);
+      toast.success('Fortschritt online gespeichert!');
+      router.push(`/${locale}/pflegegrad/modul2`);
+    } catch (err) {
+      logger.error({ err }, 'Fehler bei der API-Synchronisierung von Modul 1');
+      toast.error('Fehler beim Speichern auf dem Server. Fortschritt nur lokal gesichert.');
+      // Trotz Server-Fehler erlauben wir das Weitergehen via LocalStorage-Fallback
+      router.push(`/${locale}/pflegegrad/modul2`);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const alleBeantwortet = Object.keys(antworten).length === FRAGEN_MODUL_1.length;
-  const fortschritt = (Object.keys(antworten).length / FRAGEN_MODUL_1.length) * 100;
+  // Gesetzlich saubere Validierung: Jede Frage muss eine zugewiesene Antwort haben
+  const alleBeantwortet = FRAGEN_MODUL_1.every(
+    (f) => antworten[f.id] !== undefined && antworten[f.id] !== null && antworten[f.id] !== ''
+  );
+
+  const fortschritt =
+    (FRAGEN_MODUL_1.filter((f) => antworten[f.id]).length / FRAGEN_MODUL_1.length) * 100;
+
+  if (!hasMounted) return null;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl text-white">
       {/* Modul-Header */}
       <div className="mb-8">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-3 bg-emerald-600/20 rounded-xl border border-emerald-500/30">
-            <Accessibility className="w-6 h-6 text-[#20b2aa]" />
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-emerald-600/20 rounded-xl border border-emerald-500/30">
+              <Accessibility className="w-6 h-6 text-[#20b2aa]" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">Modul 1: Mobilität</h1>
+              <p className="text-sm text-gray-400">Gewichtung im Gesamtverfahren: 10%</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold">Modul 1: Mobilität</h1>
-            <p className="text-sm text-gray-400">Gewichtung im Gesamtverfahren: 10%</p>
-          </div>
+          {caseCode && (
+            <span className="text-xs font-mono bg-white/5 border border-white/10 px-3 py-1 rounded-full text-gray-400">
+              ID: {caseCode}
+            </span>
+          )}
         </div>
 
         {/* Fortschrittsbalken */}
@@ -101,6 +160,7 @@ export default function Modul1Page() {
                   {BEWERTUNGEN.map((b) => (
                     <div
                       key={b.value}
+                      onClick={() => handleAntwort(frage.id, b.value)}
                       className={`flex items-center space-x-2 p-3 rounded-lg border transition-all cursor-pointer ${
                         antworten[frage.id] === b.value
                           ? 'border-[#20b2aa] bg-[#20b2aa]/10'
@@ -114,7 +174,7 @@ export default function Modul1Page() {
                       />
                       <Label
                         htmlFor={`${frage.id}-${b.value}`}
-                        className="cursor-pointer text-sm font-medium w-full"
+                        className="cursor-pointer text-sm font-medium w-full select-none"
                       >
                         {b.label}
                       </Label>
@@ -131,18 +191,19 @@ export default function Modul1Page() {
       <div className="flex justify-between mt-8">
         <Button
           variant="outline"
-          onClick={() => router.push(`/${locale}`)}
+          disabled={loading}
+          onClick={() => router.push(`/${locale}/pflegegrad/start`)}
           className="border-white/10 text-white hover:bg-white/5"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" /> Abbrechen
+          <ArrowLeft className="w-4 h-4 mr-2" /> Zurück zum Start
         </Button>
 
         <Button
           onClick={handleWeiter}
-          disabled={!alleBeantwortet}
-          className="bg-[#20b2aa] hover:bg-[#3ddbd0] text-white disabled:opacity-40"
+          disabled={!alleBeantwortet || loading}
+          className="bg-[#20b2aa] hover:bg-[#3ddbd0] text-white font-bold disabled:opacity-40"
         >
-          Weiter zu Modul 2 <ArrowRight className="w-4 h-4 ml-2" />
+          {loading ? 'Speichere...' : 'Weiter zu Modul 2'} <ArrowRight className="w-4 h-4 ml-2" />
         </Button>
       </div>
     </div>

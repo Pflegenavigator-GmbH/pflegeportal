@@ -1,13 +1,15 @@
+// src/app/[locale]/pflegegrad/modul5/page.tsx
 'use client';
 
 import { ArrowRight, ArrowLeft, HeartPulse, Shield } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useState, useEffect, use } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
-import { KrankheitsbewaeltigungForm } from '@/src/app/[locale]/pflegegrad/modul5/_component/KrankheitsbewaeltigungForm';
+import { KrankheitsbewaeltigungForm } from '@/src/app/[locale]/pflegegrad/modul5/_components/KrankheitsbewaeltigungForm';
 import { Button } from '@/src/components/ui/button';
 import { Progress } from '@/src/components/ui/progress';
+import { logger } from '@/src/lib/logger';
 import { Frage, BewertungOption } from '@/src/types/pflegegrad';
 
 const KRANKHEIT_FRAGEN: Frage[] = [
@@ -42,14 +44,9 @@ const BEWERTUNG_OPTIONEN: BewertungOption[] = [
   { value: '3', label: 'Mehrfach tägliche Unterstützung notwendig', punkte: 3 },
 ];
 
-interface PageProps {
-  params: Promise<{ locale: string }>;
-}
-
-export default function Modul5Page(props: PageProps) {
+export default function Modul5Page() {
   const router = useRouter();
-  const params = use(props.params);
-  const locale = params?.locale || 'de';
+  const { locale } = useParams();
 
   const [hasMounted, setHasMounted] = useState(false);
   const [caseCode] = useState<string | null>(() => {
@@ -63,16 +60,13 @@ export default function Modul5Page(props: PageProps) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // ✅ REPARATUR: Durch das macro-tasking entkoppeln wir den Render-Zyklus.
-    // Der ESLint-Fehler verschwindet und die Hydration bleibt geschützt.
-    const timer = setTimeout(() => {
-      setHasMounted(true);
-    }, 0);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setHasMounted(true);
 
     if (!caseCode) {
       toast.error('Keine aktive Fall-Session gefunden. Bitte starten Sie neu.');
       router.push(`/${locale}/pflegegrad/start`);
-      return () => clearTimeout(timer);
+      return;
     }
 
     fetch(`/api/cases/${caseCode.toUpperCase()}/answers`)
@@ -84,11 +78,10 @@ export default function Modul5Page(props: PageProps) {
         const modul5Record = data.find((r: { module_number: number }) => r.module_number === 5);
         if (modul5Record?.answers) {
           setAntworten(modul5Record.answers as Record<string, string>);
+          logger.debug({ caseCode }, 'Bestehende Antworten für Modul 5 geladen.');
         }
       })
-      .catch(() => console.log('Keine alten Antworten für Modul 5 gefunden.'));
-
-    return () => clearTimeout(timer);
+      .catch(() => logger.info('Keine alten Antworten für Modul 5 gefunden.'));
   }, [caseCode, locale, router]);
 
   const handleAntwortChange = (frageId: string, wert: string) => {
@@ -107,38 +100,45 @@ export default function Modul5Page(props: PageProps) {
     });
 
     try {
-      // Übertragung an deine API-Route. 'tagebuch' mapped im Key-Katalog direkt auf module_number: 5
-      for (const [questionKey, answerValue] of Object.entries(antworten)) {
-        const response = await fetch(`/api/cases/${caseCode.toUpperCase()}/answers`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            moduleName: 'tagebuch',
-            questionKey,
-            answerValue,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Fehler beim Speichern der Teilantwort.');
-        }
-      }
+      await Promise.all(
+        Object.entries(antworten).map(([questionKey, answerValue]) =>
+          fetch(`/api/cases/${caseCode.toUpperCase()}/answers`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              moduleName: 'tagebuch',
+              questionKey,
+              answerValue,
+            }),
+          }).then((res) => {
+            if (!res.ok) throw new Error('Fehler beim Speichern einer Teilantwort.');
+          })
+        )
+      );
 
       localStorage.setItem('modul5_rohpunkte', gesamtRohpunkte.toString());
       toast.success('Modul 5 erfolgreich gespeichert.');
-
-      // Weiter zu Modul 6 (Alltagsgestaltung)
       router.push(`/${locale}/pflegegrad/modul6`);
-    } catch (err: unknown) {
-      console.error(err);
+    } catch (err) {
+      logger.error({ err }, 'Fehler beim API-Transit in Modul 5');
       toast.error('Fehler beim Übertragen der Daten an den Server.');
+      router.push(`/${locale}/pflegegrad/modul6`);
     } finally {
       setLoading(false);
     }
   };
 
-  const fortschritt = (Object.keys(antworten).length / KRANKHEIT_FRAGEN.length) * 100;
-  const alleBeantwortet = Object.keys(antworten).length === KRANKHEIT_FRAGEN.length;
+  const alleBeantwortet = KRANKHEIT_FRAGEN.every(
+    (frage) =>
+      antworten[frage.id] !== undefined &&
+      antworten[frage.id] !== null &&
+      antworten[frage.id] !== ''
+  );
+
+  const fortschritt =
+    (KRANKHEIT_FRAGEN.filter((f) => antworten[f.id]).length / KRANKHEIT_FRAGEN.length) * 100;
+
+  if (!hasMounted) return null;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl text-white">
@@ -155,7 +155,7 @@ export default function Modul5Page(props: PageProps) {
               </p>
             </div>
           </div>
-          {hasMounted && caseCode && (
+          {caseCode && (
             <span className="text-xs font-mono bg-white/5 border border-white/10 px-3 py-1 rounded-full text-gray-400">
               ID: {caseCode}
             </span>
@@ -175,6 +175,7 @@ export default function Modul5Page(props: PageProps) {
       <div className="flex justify-between mt-8 pt-6 border-t border-white/10">
         <Button
           variant="outline"
+          disabled={loading}
           onClick={() => router.push(`/${locale}/pflegegrad/modul4`)}
           className="border-white/10 text-white hover:bg-white/5 h-12 px-6"
         >

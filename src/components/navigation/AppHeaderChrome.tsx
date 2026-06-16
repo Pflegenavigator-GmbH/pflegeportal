@@ -3,37 +3,37 @@
 
 import {
   ArrowLeft,
-  FolderLock,
-  Trash2,
-  Home,
-  HelpCircle,
-  Newspaper,
-  Info,
-  FileText,
-  Copy,
   BookOpen,
+  Copy,
+  FileText,
+  FolderLock,
+  HelpCircle,
+  Home,
+  Info,
   KeyRound,
+  Menu,
+  Newspaper,
   Share2,
-  Menu, // Hinzugefügt für das Mobile-Menü
+  Trash2,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
+import { validateAndStoreSession } from '@/src/app/actions/case-session';
 import LanguageSwitcher from '@/src/components/i18n/LanguageSwitcher';
 import { AccessShareModal } from '@/src/components/modal/AccessShareModal';
-
-import { Button } from '../ui/button';
+import { Button } from '@/src/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuLabel,
-} from '../ui/dropdown-menu';
-import { Input } from '../ui/input';
+} from '@/src/components/ui/dropdown-menu';
+import { Input } from '@/src/components/ui/input';
 
 interface AppHeaderChromeProps {
   locale: string;
@@ -46,14 +46,20 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
   const [inputCode, setInputCode] = useState('');
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isChecking, setIsChecking] = useState(false);
 
-  const readCaseCode = () => {
-    if (typeof window === 'undefined') return null;
-    return localStorage.getItem('case_code');
-  };
-
+  // Initialer Lese-Check
   useEffect(() => {
-    const syncCaseCode = () => setCaseCode(readCaseCode());
+    if (typeof window !== 'undefined') {
+      const savedCode = localStorage.getItem('case_code');
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCaseCode(savedCode ? savedCode.toUpperCase() : null);
+    }
+
+    const syncCaseCode = () => {
+      const savedCode = localStorage.getItem('case_code');
+      setCaseCode(savedCode ? savedCode.toUpperCase() : null);
+    };
 
     window.addEventListener('storage', syncCaseCode);
     return () => window.removeEventListener('storage', syncCaseCode);
@@ -61,12 +67,38 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
 
   const istStartseite = pathname === `/${locale}` || pathname === `/${locale}/`;
 
-  const handleSetCase = () => {
-    if (inputCode.trim()) {
-      localStorage.setItem('case_code', inputCode.trim().toUpperCase());
-      setCaseCode(inputCode.trim().toUpperCase());
-      toast.success('Fall geladen');
-      window.location.reload();
+  // ============================================================================
+  // 🔐 FALLCODE VALIDIEREN & PERSISTIEREN
+  // ============================================================================
+  const handleSetCase = async () => {
+    const cleanedCode = inputCode.trim().toUpperCase();
+    if (!cleanedCode) return;
+
+    setIsChecking(true);
+    const toastId = toast.loading('Fall-Session wird autorisiert...');
+
+    try {
+      // 1. Abgleich mit Server-Action (Supabase DB-Check & HTTP-Only Cookie)
+      const session = await validateAndStoreSession(cleanedCode);
+
+      if (session.success && session.isUnlocked) {
+        // 2. Client-seitig im LocalStorage spiegeln
+        localStorage.setItem('case_code', cleanedCode);
+        setCaseCode(cleanedCode);
+
+        toast.success('Fall erfolgreich geladen und autorisiert.', { id: toastId });
+
+        // Hard-Reload erzwingen, damit Next.js Server Components die neuen Cookies mitbekommen
+        window.location.reload();
+      } else if (session.isExpired) {
+        toast.error('Dieser Beta-Zugang ist nach 12 Monaten abgelaufen.', { id: toastId });
+      } else {
+        toast.error('Fallcode ungültig oder Zahlung ausstehend.', { id: toastId });
+      }
+    } catch (err) {
+      toast.error('Verbindungsfehler zur Authentifizierung.', { id: toastId });
+    } finally {
+      setIsChecking(false);
     }
   };
 
@@ -85,13 +117,15 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
       }
       setCaseCode(null);
       toast.success('Fall-Session erfolgreich beendet.');
+
+      // Seite neu laden, um auch das HTTP-Only Cookie serverseitig zu entwerten
       router.push(`/${locale}/pflegegrad/start`);
+      setTimeout(() => window.location.reload(), 100);
     }
   };
 
   return (
     <>
-      {/* Modal außerhalb des Headers mounten */}
       {caseCode && (
         <AccessShareModal
           caseCode={caseCode}
@@ -102,9 +136,8 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
 
       <header className="bg-[#0f2744] border-b border-white/10 py-3 sm:py-4 px-4 sticky top-0 z-40 backdrop-blur-md bg-opacity-95 text-white">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
-          {/* Linke Flanke: Logo & Mobile Burger Trigger */}
+          {/* Linke Flanke */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Mobile Burger Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="p-2 md:hidden hover:bg-white/5 rounded-xl border border-white/10 transition-colors text-gray-300"
@@ -124,7 +157,7 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
             )}
             <Link
               href={`/${locale}`}
-              className="text-base sm:text-xl font-bold tracking-tight text-white cursor-pointer select-none flex items-center gap-1.5 hover:opacity-80 transition-opacity"
+              className="text-base sm:text-xl font-bold tracking-tight text-white flex items-center gap-1.5 hover:opacity-80 transition-opacity"
             >
               <Home className="w-4 h-4 text-[#20b2aa] md:inline hidden" />
               <span>
@@ -133,7 +166,7 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
             </Link>
           </div>
 
-          {/* 🧭 MITTE: Navigationsleiste (Desktop-only) */}
+          {/* Desktop-Navigation */}
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-300">
             <Link
               href={`/${locale}/briefe`}
@@ -161,7 +194,7 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
             </Link>
           </nav>
 
-          {/* Rechte Flanke: Session & Sprache */}
+          {/* Rechte Flanke */}
           <div className="flex items-center gap-2 sm:gap-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -170,7 +203,7 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
                     className={`w-3.5 h-3.5 flex-shrink-0 ${caseCode ? 'text-[#20b2aa]' : 'text-gray-500'}`}
                   />
                   <span className="text-[11px] sm:text-xs font-mono text-gray-300 font-medium truncate">
-                    {caseCode ? caseCode.toUpperCase() : 'Laden...'}
+                    {caseCode ? caseCode.toUpperCase() : 'Kein Fall'}
                   </span>
                 </div>
               </DropdownMenuTrigger>
@@ -186,14 +219,16 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
                     <Input
                       placeholder="PF-XXXX-XXXX"
                       value={inputCode}
+                      disabled={isChecking}
                       onChange={(e) => setInputCode(e.target.value)}
                       className="bg-slate-900 border-white/10 text-sm focus-visible:ring-[#20b2aa]"
                     />
                     <Button
                       onClick={handleSetCase}
+                      disabled={isChecking || !inputCode.trim()}
                       className="w-full bg-[#20b2aa] hover:bg-[#3ddbd0] text-slate-950 font-bold h-8 text-xs"
                     >
-                      <KeyRound className="w-3 h-3 mr-2" /> Laden
+                      <KeyRound className="w-3 h-3 mr-2" /> {isChecking ? 'Prüfe...' : 'Laden'}
                     </Button>
                   </div>
                 ) : (
@@ -244,7 +279,7 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
           </div>
         </div>
 
-        {/* 📱 Mobile Navigations-Akkordeon / Drawer (Einklappbar) */}
+        {/* Mobile Navigation */}
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-white/5 mt-3 pt-3 bg-[#0f2744] animate-in fade-in slide-in-from-top-2 duration-200">
             <nav className="flex flex-col gap-1 text-sm font-medium">

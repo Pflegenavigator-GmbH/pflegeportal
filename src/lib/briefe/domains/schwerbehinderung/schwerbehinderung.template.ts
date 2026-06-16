@@ -1,4 +1,4 @@
-// src/lib/briefe/templates/templatesSchwerbehinderten.ts
+// src/lib/briefe/domains/schwerbehinderung/schwerbehinderung.template.ts
 import { SCHWERBEHINDERTEN_LEITLINIEN } from '@/src/lib/briefe/constants';
 import { BriefPayload } from '@/src/types/briefe';
 
@@ -42,9 +42,5 @@ export const generateSchwerbehindertenBriefTemplate = (
     '\n\n',
     '_______________________',
     `${data.absender.name}`,
-    '\n',
-    'Anlagen:',
-    '- Kopie Personalausweis',
-    '- Liste der behandelnden Fachärzte und Kliniken',
   ];
 };

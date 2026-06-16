@@ -1,10 +1,9 @@
-// src/
-
+// src/app/[locale]/pflegegrad/modul6/page.tsx
 'use client';
 
 import { Shield, ArrowRight, ArrowLeft, Home, AlertCircle, Info } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useState, useEffect, use } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
 import {
@@ -21,6 +20,7 @@ import {
   CardFooter,
 } from '@/src/components/ui/card';
 import { Progress } from '@/src/components/ui/progress';
+import { logger } from '@/src/lib/logger';
 
 const ALLTAGS_FRAGEN: AlltagsFrage[] = [
   {
@@ -135,28 +135,17 @@ const ALLTAGS_FRAGEN: AlltagsFrage[] = [
   },
 ];
 
-interface PageProps {
-  params: Promise<{ locale: string }>;
-}
-
-export default function Modul6Page(props: PageProps) {
+export default function Modul6Page() {
   const router = useRouter();
-  const params = use(props.params);
-  const locale = params?.locale || 'de';
+  const { locale } = useParams();
 
   const [hasMounted, setHasMounted] = useState(false);
-  const [caseCode] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('case_code');
-    }
-    return null;
-  });
-
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
+  const caseCode = typeof window !== 'undefined' ? localStorage.getItem('case_code') : null;
+
   useEffect(() => {
-    // ✅ ASYNCHRONES TIMING: Verhindert den react-hooks/set-state-in-effect Fehler komplett
     const timer = setTimeout(() => {
       setHasMounted(true);
     }, 0);
@@ -167,7 +156,6 @@ export default function Modul6Page(props: PageProps) {
       return () => clearTimeout(timer);
     }
 
-    // Altdaten über den standardisierten Mehrzahl-Endpunkt abrufen
     fetch(`/api/cases/${caseCode.toUpperCase()}/answers`)
       .then((res) => {
         if (res.ok) return res.json();
@@ -177,9 +165,10 @@ export default function Modul6Page(props: PageProps) {
         const modul6Record = data.find((r: { module_number: number }) => r.module_number === 6);
         if (modul6Record?.answers) {
           setAnswers(modul6Record.answers as Record<string, string>);
+          logger.debug({ caseCode }, 'Bestehende Antworten für Modul 6 geladen.');
         }
       })
-      .catch(() => console.log('Keine alten Antworten für Modul 6 gefunden.'));
+      .catch(() => logger.info('Keine alten Antworten für Modul 6 gefunden.'));
 
     return () => clearTimeout(timer);
   }, [caseCode, locale, router]);
@@ -188,50 +177,52 @@ export default function Modul6Page(props: PageProps) {
     setAnswers((prev) => ({ ...prev, [questionKey]: value }));
   };
 
-  const isComplete = ALLTAGS_FRAGEN.every((f) => answers[f.key]);
+  const isComplete = ALLTAGS_FRAGEN.every(
+    (f) => answers[f.key] !== undefined && answers[f.key] !== null && answers[f.key] !== ''
+  );
 
   const handleSaveAndNext = async () => {
     if (!isComplete || !caseCode) return;
     setSaving(true);
 
     try {
-      // Synchronisation mit dem Backend über deine answers-Route
-      for (const [questionKey, answerValue] of Object.entries(answers)) {
-        const response = await fetch(`/api/cases/${caseCode.toUpperCase()}/answers`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            moduleName: 'pflegegrad', // Mapped standardmäßig auf module_number: 6 laut deiner Route
-            questionKey,
-            answerValue,
-          }),
-        });
+      await Promise.all(
+        Object.entries(answers).map(([questionKey, answerValue]) =>
+          fetch(`/api/cases/${caseCode.toUpperCase()}/answers`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              moduleName: 'pflegegrad',
+              questionKey,
+              answerValue,
+            }),
+          }).then((res) => {
+            if (!res.ok) throw new Error('Fehler beim Sichern einer Teilantwort.');
+          })
+        )
+      );
 
-        if (!response.ok) {
-          throw new Error();
-        }
-      }
-
-      // Daten lokal spiegeln für die Ergebnismatrix
       localStorage.setItem('modul6_answers', JSON.stringify(answers));
       toast.success('Alltags-Profil vollständig erfasst!');
-
-      // Weiterleitung zur großen Auswertung
       router.push(`/${locale}/pflegegrad/ergebnis`);
-    } catch {
+    } catch (err) {
+      logger.error({ err }, 'Fehler beim Sichern von Modul 6');
       toast.error('Fehler beim Übermitteln des Alltags-Profils.');
-    }
-    {
+      router.push(`/${locale}/pflegegrad/ergebnis`);
+    } finally {
       setSaving(false);
     }
   };
 
-  const fortschritt = (Object.keys(answers).length / ALLTAGS_FRAGEN.length) * 100;
+  const fortschritt =
+    (ALLTAGS_FRAGEN.filter((f) => answers[f.key]).length / ALLTAGS_FRAGEN.length) * 100;
+
+  // Render-Guard gegen unvollständige Server-Rumpfdaten
+  if (!hasMounted) return null;
 
   return (
     <main className="min-h-screen bg-slate-900 py-12 px-4 text-white">
       <div className="container mx-auto max-w-2xl font-sans">
-        {/* Progress App Chrome */}
         <div className="mb-6 space-y-2">
           <div className="flex justify-between text-xs text-gray-400 font-medium">
             <span>Abschluss-Modul 6 von 6</span>
@@ -241,8 +232,9 @@ export default function Modul6Page(props: PageProps) {
         </div>
 
         <button
+          disabled={saving}
           onClick={() => router.push(`/${locale}/pflegegrad/modul5`)}
-          className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors text-sm font-medium"
+          className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors text-sm font-medium disabled:opacity-40"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Zurück zu Modul 5</span>
@@ -262,7 +254,7 @@ export default function Modul6Page(props: PageProps) {
                   </CardDescription>
                 </div>
               </div>
-              {hasMounted && caseCode && (
+              {caseCode && (
                 <span className="text-xs font-mono bg-white/5 border border-white/10 px-3 py-1 rounded-full text-gray-400">
                   {caseCode}
                 </span>
@@ -271,7 +263,6 @@ export default function Modul6Page(props: PageProps) {
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {/* Hinweis-Banner */}
             <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl flex gap-3 items-start">
               <Info className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
               <p className="text-sm text-gray-300 leading-relaxed">
@@ -281,7 +272,6 @@ export default function Modul6Page(props: PageProps) {
               </p>
             </div>
 
-            {/* Die Formular-Matrix */}
             <AlltagsgestaltungForm
               fragen={ALLTAGS_FRAGEN}
               antworten={answers}
@@ -292,8 +282,7 @@ export default function Modul6Page(props: PageProps) {
               <AlertCircle className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
               <p className="text-xs text-gray-400 leading-relaxed">
                 Mit dem Klick auf Auswertung starten werden Ihre Daten nach den Richtlinien des SGB
-                XI von 2026 berechnet und mit den länderspezifischen Entlastungsbeträgen
-                abgeglichen.
+                XI berechnet und mit den länderspezifischen Entlastungsbeträgen abgeglichen.
               </p>
             </div>
           </CardContent>
@@ -301,6 +290,7 @@ export default function Modul6Page(props: PageProps) {
           <CardFooter className="flex gap-4 border-t border-white/10 pt-6">
             <Button
               variant="outline"
+              disabled={saving}
               onClick={() => router.push(`/${locale}/pflegegrad/modul5`)}
               className="flex-1 border-white/10 text-white hover:bg-white/5 h-14 text-base"
             >

@@ -1,13 +1,9 @@
 // src/app/api/briefe/pdf/routes.ts
 import { NextRequest, NextResponse } from 'next/server';
-import puppeteer from 'puppeteer-core';
+import puppeteer from 'puppeteer';
 
-import {
-  allgemeinerBriefGenerator,
-  antragPflegegradGenerator,
-  schwerbehindertenausweisGenerator,
-} from '@/src/lib/briefe';
-import { BriefPayload } from '@/src/types/briefe';
+import { BriefGeneratorFactory } from '@/src/lib/briefe/generator-factory';
+import { BriefPayloadSchema } from '@/src/types/briefe-schema';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -23,7 +19,7 @@ const PDF_STYLES = `
       color: #000;
     }
     .din-text-body {
-      white-space: pre-wrap; /* WICHTIG: Übersetzt \\n in echte Zeilenumbrüche! */
+      white-space: pre-wrap; /* WICHTIG: Übersetzt \n in echte Zeilenumbrüche! */
       text-align: justify;
     }
   </style>
@@ -47,35 +43,35 @@ export async function POST(request: NextRequest): Promise<Response> {
   let browser;
 
   try {
-    const body: BriefPayload = await request.json();
+    const body = await request.json();
+    const data = BriefPayloadSchema.parse(body);
 
-    // 1. Text über die zentrale Library generieren
-    let rawText = '';
-    switch (body.type) {
-      case 'antrag-pflegegrad':
-        rawText = antragPflegegradGenerator.generateBrief(body);
-        break;
-      case 'schwerbehindertenausweis':
-        rawText = schwerbehindertenausweisGenerator.generateBrief(body);
-        break;
-      default:
-        rawText = allgemeinerBriefGenerator.generateBrief(body);
-        break;
-    }
-
-    // Um XSS oder Fehler durch spitze Klammern zu vermeiden
+    const generator = BriefGeneratorFactory.getGenerator(data.type);
+    const rawText = generator.generateBrief(data);
     const sanitizedText = rawText.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    const title = `Schreiben_${body.type}`;
-
-    // 2. HTML zusammensetzen
+    const title = `Schreiben_${data.type}`;
     const fullHtml = getUniversalHtml(sanitizedText, title);
 
-    // 3. Puppeteer Engine starten
-    browser = await puppeteer.launch({
-      headless: true,
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
-    });
+    // ============================================================================
+    // 🧠 DYNAMISCHER BROWSER-LAUNCH (Dev vs. Prod)
+    // ============================================================================
+    const isDev = process.env.NODE_ENV === 'development';
+
+    // Im Dev-Modus nutzen wir die lokale Installation von Puppeteer,
+    // in Prod greifen wir auf den Server-Pfad (z.B. /usr/bin/chromium) zurück.
+    const launchOptions = isDev
+      ? {
+          headless: true,
+          args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        }
+      : {
+          headless: true,
+          executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
+          args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+        };
+
+    browser = await puppeteer.launch(launchOptions);
+    // ============================================================================
 
     const page = await browser.newPage();
     await page.setContent(fullHtml, { waitUntil: 'load' });
@@ -88,7 +84,6 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     await browser.close();
 
-    // 4. PDF als Stream an den Client senden
     return new Response(Buffer.from(pdfBuffer), {
       status: 200,
       headers: {
@@ -99,13 +94,9 @@ export async function POST(request: NextRequest): Promise<Response> {
     });
   } catch (error) {
     if (browser) await browser.close();
-
     console.error('PDF Engine Fatal Error:', error);
     return NextResponse.json(
-      {
-        error: 'PDF Generierung serverseitig abgebrochen',
-        details: error instanceof Error ? error.message : 'Unbekannter Fehler',
-      },
+      { error: 'PDF Generierung serverseitig abgebrochen' },
       { status: 500 }
     );
   }

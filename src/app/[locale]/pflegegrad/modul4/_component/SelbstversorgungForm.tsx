@@ -1,4 +1,4 @@
-// src/app/[locale]/pflegegrad/modul4/_components/SelbstversorgungForm.tsx
+// src/app/[locale]/pflegegrad/modul4/_component/SelbstversorgungForm.tsx
 'use client';
 
 import { Sparkles, HelpCircle } from 'lucide-react';
@@ -50,8 +50,12 @@ export function SelbstversorgungForm({
                 return (
                   <div
                     key={opt.value}
-                    className="flex items-center space-x-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/5 transition-colors cursor-pointer"
                     onClick={() => onAntwort(frage.id, opt.value)}
+                    className={`flex items-center space-x-3 p-3 rounded-xl border transition-all cursor-pointer select-none ${
+                      antworten[frage.id] === opt.value
+                        ? 'border-emerald-500/50 bg-emerald-500/10'
+                        : 'border-white/5 bg-white/[0.01] hover:bg-white/5'
+                    }`}
                   >
                     <RadioGroupItem
                       value={opt.value}

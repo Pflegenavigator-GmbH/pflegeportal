@@ -1,4 +1,4 @@
-// src/lib/briefe/templates/allgemeinesTemplates.ts
+// src/lib/briefe/domains/allgemein/allgemein.template.ts
 import { BriefPayload } from '@/src/types/briefe';
 
 export const generateAllgemeinBriefTemplate = (data: BriefPayload, heute: string): string[] => {
