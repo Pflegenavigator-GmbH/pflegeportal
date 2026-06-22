@@ -77,7 +77,9 @@ export default async function LocaleLayout({
 
           <footer className="bg-[#0f2744] border-t border-white/10 py-8 px-4 mt-auto">
             <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-400">
-              <div>© 2026 PflegeNavigator EU gUG • Alle Angaben sind Orientierungshilfen.</div>
+              <div>
+                © 2026 PflegeNavigator EU gUG (in Gründung) • Alle Angaben sind Orientierungshilfen.
+              </div>
               <div className="flex flex-wrap gap-4 md:gap-6 justify-center">
                 <a href={`/${locale}/impressum`} className="hover:text-white transition-colors">
                   Impressum

@@ -1,8 +1,9 @@
 // src/app/[locale]/pflegegrad/start/page.tsx
 'use client';
 
-import { Shield, ArrowRight, Plus, ArrowLeft, Users, Baby } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { Shield, ArrowRight, Plus, ArrowLeft } from 'lucide-react';
+import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState, useEffect, use } from 'react';
 import { toast } from 'sonner';
 
@@ -35,17 +36,16 @@ interface PageProps {
 
 export default function PflegegradStartPage(props: PageProps) {
   const router = useRouter();
-  const params = use(props.params);
+  const { locale } = useParams();
   const searchParams = use(props.searchParams);
-  const locale = params?.locale || 'de';
+
+  // Zentrale i18n-Instanz für statische UI-Texte
+  const t = useTranslations();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [isNewCase, setIsNewCase] = useState(false);
   const [caseCode, setCaseCode] = useState('');
-
-  // Neuer State für die Altersweichen-Selektion im Frontend
-  const [showAgeSelection, setShowAgeSelection] = useState(false);
 
   const [showPaywall, setShowPaywall] = useState(false);
   const [dbProducts, setDbProducts] = useState<ProductFromDb[]>([]);
@@ -97,7 +97,6 @@ export default function PflegegradStartPage(props: PageProps) {
       }
 
       toast.success('Willkommen zurück! Daten geladen.');
-      // Fallbacks prüfen: Falls ein fertiges Ergebnis existiert, direkt zur Auswertung
       if (localStorage.getItem('pflegegrad-ergebnis')) {
         router.push(`/${locale}/pflegegrad/ergebnis`);
       } else {
@@ -126,9 +125,7 @@ export default function PflegegradStartPage(props: PageProps) {
       setCaseCode(resData.caseCode);
       localStorage.setItem('case_code', resData.caseCode);
 
-      // Bereite den Wechsel zur Alters-Weiche vor
       setIsNewCase(true);
-      setShowAgeSelection(true);
       toast.success('Kostenloser Fallcode generiert!');
     } catch (err) {
       console.error(err);
@@ -160,63 +157,14 @@ export default function PflegegradStartPage(props: PageProps) {
       <div className="container mx-auto max-w-2xl">
         <button
           onClick={() => router.push(`/${locale}`)}
-          className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
+          className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors text-sm"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Zurück zur Startseite</span>
         </button>
 
-        {/* Weiche nach erfolgreicher Fallcode-Erstellung */}
         {isNewCase ? (
-          <div className="space-y-6">
-            <NewCaseCard caseCode={caseCode} onActivate={() => setShowAgeSelection(true)} />
-
-            {showAgeSelection && (
-              <Card className="bg-slate-950 border border-white/10 text-white shadow-2xl animate-in fade-in slide-in-from-top-4 duration-300 rounded-2xl overflow-hidden">
-                <CardHeader className="bg-white/[0.02] border-b border-white/5">
-                  <CardTitle className="text-base font-bold text-[#20b2aa]">
-                    Für wen wird die Pflege-Einstufung durchgeführt?
-                  </CardTitle>
-                  <CardDescription className="text-gray-400 text-xs">
-                    Wählen Sie die Altersgruppe aus, um das rechtlich korrekte Verfahren zu laden.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Option A: Erwachsene */}
-                  <button
-                    onClick={() => {
-                      localStorage.setItem('pflege_zielgruppe', 'erwachsen');
-                      router.push(`/${locale}/pflegegrad/modul1`);
-                    }}
-                    className="p-5 bg-white/[0.02] border border-white/5 hover:border-[#20b2aa] rounded-xl text-left transition-all duration-200 hover:bg-white/5 group select-none"
-                  >
-                    <Users className="w-6 h-6 text-[#20b2aa] mb-2 group-hover:scale-105 transition-transform" />
-                    <h4 className="font-bold text-sm text-white">Erwachsene & Senioren</h4>
-                    <p className="text-[11px] text-gray-400 mt-1 leading-relaxed">
-                      Einstufung nach dem regulären Begutachtungsverfahren (NBA) für Personen ab 18
-                      Jahren.
-                    </p>
-                  </button>
-
-                  {/* Option B: Kinder */}
-                  <button
-                    onClick={() => {
-                      localStorage.setItem('pflege_zielgruppe', 'kind');
-                      router.push(`/${locale}/pflegegrad/kinder`);
-                    }}
-                    className="p-5 bg-white/[0.02] border border-white/5 hover:border-pink-500 rounded-xl text-left transition-all duration-200 hover:bg-white/5 group select-none"
-                  >
-                    <Baby className="w-6 h-6 text-pink-400 mb-2 group-hover:scale-105 transition-transform" />
-                    <h4 className="font-bold text-sm text-white">Kinder & Jugendliche</h4>
-                    <p className="text-[11px] text-gray-400 mt-1 leading-relaxed">
-                      Spezial-Assessment für Säuglinge und Kinder unter Einberechnung des
-                      natürlichen Alters-Entwicklungsstands.
-                    </p>
-                  </button>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+          <NewCaseCard caseCode={caseCode} locale={locale as string} />
         ) : (
           <>
             <LoadCaseCard onLoad={handleLoadCase} loading={loading} externalError={error} />
@@ -237,9 +185,11 @@ export default function PflegegradStartPage(props: PageProps) {
                     <Plus className="w-6 h-6 text-emerald-400" />
                   </div>
                   <div>
-                    <CardTitle className="text-white">Neuen Fall starten</CardTitle>
-                    <CardDescription className="text-gray-400">
-                      Kostenlose Pflegegrad-Einschätzung beginnen
+                    <CardTitle className="text-white">
+                      {t('title') || 'Neuen Fall starten'}
+                    </CardTitle>
+                    <CardDescription className="text-gray-400 text-xs">
+                      {t('subtitle') || 'Kostenlose Pflegegrad-Einschätzung beginnen'}
                     </CardDescription>
                   </div>
                 </div>
