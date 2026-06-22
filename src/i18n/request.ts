@@ -1,9 +1,8 @@
 // src/i18n/request.ts
+import { AbstractIntlMessages } from 'next-intl';
 import { getRequestConfig } from 'next-intl/server';
 
 import { routing } from './routing';
-
-type AbstractIntlMessages = Record<string, string | Record<string, string>>;
 
 export default getRequestConfig(async ({ requestLocale }) => {
   const resolvedLocale = await requestLocale;
@@ -13,11 +12,29 @@ export default getRequestConfig(async ({ requestLocale }) => {
       ? resolvedLocale
       : routing.defaultLocale;
 
-  const messagesModule = await import(`../../public/locales/${locale}/common.json`);
-  const messages = messagesModule.default as AbstractIntlMessages;
+  try {
+    const [commonMessages, pflegegradMessages] = await Promise.all([
+      import(`../../public/locales/${locale}/common.json`).then((m) => m.default),
+      import(`../../public/locales/${locale}/pflegegrad.json`)
+        .then((m) => m.default)
+        .catch(() => ({})),
+    ]);
 
-  return {
-    locale,
-    messages,
-  };
+    const combinedMessages = {
+      ...commonMessages,
+      ...pflegegradMessages,
+    };
+
+    return {
+      locale,
+      messages: combinedMessages as unknown as AbstractIntlMessages,
+    };
+  } catch (error) {
+    console.error(`Kritischer Fehler beim Laden der Locales für: ${locale}`, error);
+    const baseModule = await import(`../../public/locales/de/common.json`);
+    return {
+      locale: 'de',
+      messages: baseModule.default as unknown as AbstractIntlMessages,
+    };
+  }
 });

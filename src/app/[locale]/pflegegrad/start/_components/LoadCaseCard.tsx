@@ -1,8 +1,8 @@
-// src/app/[locale]/start/_components/LoadCaseCard.tsx
-
+// src/app/[locale]/pflegegrad/start/_components/LoadCaseCard.tsx
 'use client';
 
 import { KeyRound, ArrowRight } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 import { Button } from '@/src/components/ui/button';
@@ -26,6 +26,7 @@ interface LoadCaseCardProps {
 export function LoadCaseCard({ onLoad, loading, externalError }: LoadCaseCardProps) {
   const [code, setCode] = useState('');
   const [localError, setLocalError] = useState('');
+  const t = useTranslations('pflegegrad.start');
 
   const handleSubmit = () => {
     if (!code.trim()) {
@@ -44,17 +45,17 @@ export function LoadCaseCard({ onLoad, loading, externalError }: LoadCaseCardPro
             <KeyRound className="w-6 h-6 text-blue-400" />
           </div>
           <div>
-            <CardTitle className="text-white">Vorhandenen Fall laden</CardTitle>
-            <CardDescription className="text-gray-400">
-              Haben Sie bereits einen Fallcode?
+            <CardTitle className="text-white">{t('loadTitle')}</CardTitle>
+            <CardDescription className="text-gray-400 text-xs">
+              {t('loadDescription')} {/* <-- Hier übersetzt! */}
             </CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="caseCode" className="text-gray-300">
-            Fallcode eingeben
+          <Label htmlFor="caseCode" className="text-gray-300 text-sm">
+            {t('loadInputLabel')}
           </Label>
           <Input
             id="caseCode"
@@ -80,7 +81,7 @@ export function LoadCaseCard({ onLoad, loading, externalError }: LoadCaseCardPro
           size="lg"
           variant="outline"
         >
-          {loading ? 'Prüfe Status...' : 'Fall laden & prüfen'}
+          {loading ? t('loadButtonLoading') : t('loadButton')}
           <ArrowRight className="ml-2 w-4 h-4" />
         </Button>
       </CardFooter>

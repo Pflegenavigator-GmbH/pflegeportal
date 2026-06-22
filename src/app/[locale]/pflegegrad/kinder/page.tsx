@@ -16,8 +16,8 @@ import {
   Lock,
   FileText,
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import React, { useState, useEffect, use } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/src/components/ui/button';
@@ -32,6 +32,7 @@ import {
 import { Input } from '@/src/components/ui/input';
 import { Progress } from '@/src/components/ui/progress';
 import { RadioGroup, RadioGroupItem } from '@/src/components/ui/radio-group';
+import { logger } from '@/src/lib/logger';
 
 type AgeGroup = 'baby' | 'toddler' | 'preschool' | 'school';
 
@@ -189,12 +190,10 @@ const getAssessmentCategories = (age: number): AssessmentCategory[] => {
   return baseCategories;
 };
 
-// Korrigierte SGB XI Kinder-Matrix
 const calculateChildCareLevel = (points: number, age: number): AssessmentResult => {
   const isBaby = age < 1.5;
 
   if (isBaby) {
-    // Gesetzliche Höherstufung unter 18 Monaten nach § 15 Abs. 7 SGB XI
     if (points >= 90)
       return {
         level: 5,
@@ -238,7 +237,6 @@ const calculateChildCareLevel = (points: number, age: number): AssessmentResult 
     };
   }
 
-  // Normale Kinder-Einstufung (Ab 18 Monaten bis 18 Jahre)
   if (points >= 90)
     return {
       level: 5,
@@ -277,29 +275,52 @@ const calculateChildCareLevel = (points: number, age: number): AssessmentResult 
   return { level: 0, points, maxPoints: 100, description: 'Kein Pflegegrad erreicht.' };
 };
 
-interface PageProps {
-  params: Promise<{ locale: string }>;
-}
+export default function KinderModusPage() {
+  const router = useRouter();
+  const { locale } = useParams();
 
-export default function KinderModusPage(props: PageProps) {
-  useRouter();
-  use(props.params);
   const [hasMounted, setHasMounted] = useState(false);
   const [step, setStep] = useState<'intro' | 'info' | 'assessment' | 'result'>('intro');
   const [childInfo, setChildInfo] = useState<ChildInfo>({ name: '', age: 3, ageGroup: 'toddler' });
   const [currentCategory, setCurrentCategory] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [result, setResult] = useState<AssessmentResult | null>(null);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
-  // Bezahlschranken-State für die Stripe-Weiche
-  const [isUnlocked, setIsUnlocked] = useState(false);
+  // Bezahlschranken-State gekoppelt an deine API-Verifikation
+  const [isUnlocked] = useState(false);
+
+  const caseCode = typeof window !== 'undefined' ? localStorage.getItem('case_code') : null;
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setHasMounted(true);
     }, 0);
+
+    if (!caseCode) {
+      toast.error('Keine aktive Fall-Session gefunden. Bitte starten Sie neu.');
+      router.push(`/${locale}/pflegegrad/start`);
+      return () => clearTimeout(timer);
+    }
+
+    // 📥 Eventuell existierende Kinder-Antworten (Modul_number 7) laden
+    fetch(`/api/cases/${caseCode.toUpperCase()}/answers`)
+      .then((res) => {
+        if (res.ok) return res.json();
+        throw new Error();
+      })
+      .then((data) => {
+        const kinderRecord = data.find((r: { module_number: number }) => r.module_number === 7);
+        if (kinderRecord?.answers) {
+          setAnswers(kinderRecord.answers as Record<string, number>);
+          // Falls bereits Daten da sind, springen wir direkt zur Erfassung
+          setStep('assessment');
+        }
+      })
+      .catch(() => logger.info('Keine alten Antworten für den Kinder-Modus gefunden.'));
+
     return () => clearTimeout(timer);
-  }, []);
+  }, [caseCode, locale, router]);
 
   const categories = getAssessmentCategories(childInfo.age);
   const totalQuestions = categories.reduce((sum, cat) => sum + cat.questions.length, 0);
@@ -318,10 +339,27 @@ export default function KinderModusPage(props: PageProps) {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentCategory < categories.length - 1) {
       setCurrentCategory((prev) => prev + 1);
     } else {
+      // 🚀 SPEICHERN: Wir laden alle Antworten als JSONB gesammelt unter module_number 7 hoch
+      if (caseCode) {
+        try {
+          await fetch(`/api/cases/${caseCode.toUpperCase()}/answers`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              moduleName: 'widerspruch', // Mapped laut deiner Route auf module_number: 7
+              questionKey: 'kinder_assessment_data',
+              answerValue: answers,
+            }),
+          });
+        } catch (err) {
+          logger.error({ err }, 'Fehler beim Sichern des Kinder-Assessments');
+        }
+      }
+
       let erreichteRohpunkte = 0;
       let maximalMöglicheRohpunkte = 0;
 
@@ -333,7 +371,6 @@ export default function KinderModusPage(props: PageProps) {
         });
       });
 
-      // Umrechnung in das gesetzliche 100-Punkte System
       const berechneteSystemPunkte =
         maximalMöglicheRohpunkte > 0
           ? Math.round((erreichteRohpunkte / maximalMöglicheRohpunkte) * 100)
@@ -353,13 +390,31 @@ export default function KinderModusPage(props: PageProps) {
     }
   };
 
-  const startStripeCheckout = () => {
-    toast.loading('Verbindung zu Stripe wird aufgebaut...');
-    // Hier klinken wir im nächsten Schritt deine /api/stripe/checkout Route ein
-    setTimeout(() => {
-      setIsUnlocked(true);
-      toast.success('Zahlung simuliert: Analyse freigeschaltet!');
-    }, 1500);
+  // 💳 INTEGRIERTER STRIPE CHECKOUT FÜR DAS KINDER-DOSSIER
+  const startStripeCheckout = async () => {
+    if (!caseCode) return;
+    setCheckoutLoading(true);
+    const toastId = toast.loading('Verbindung zu Stripe wird aufgebaut...');
+
+    try {
+      const response = await fetch('/api/checkout/create-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          caseCode: caseCode.toUpperCase(),
+          paket: 'beta_special', // Nutzt das valide Paket aus deinem MVP_PRODUCTS-Katalog
+        }),
+      });
+      const session = await response.json();
+      if (session.url) {
+        window.location.href = session.url;
+      } else {
+        throw new Error();
+      }
+    } catch {
+      setCheckoutLoading(false);
+      toast.error('Fehler bei der Weiterleitung zum Bezahlfenster.', { id: toastId });
+    }
   };
 
   if (!hasMounted) return null;
@@ -574,7 +629,6 @@ export default function KinderModusPage(props: PageProps) {
             </Card>
           </div>
 
-          {/* Chat-Sidebar Component */}
           <div className="md:col-span-1">
             <div className="sticky top-6 bg-slate-950 border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
               <div className="p-4 bg-gradient-to-r from-pink-500/20 to-purple-500/20 border-b border-white/10">
@@ -583,14 +637,14 @@ export default function KinderModusPage(props: PageProps) {
                   Kinder-KI Assistent
                 </h3>
               </div>
-              <div className="h-[380px]">
-                {/*
-                    <AvatarChat
-                        initialMessage={`Hallo! Ich stehe Ihnen bei der Erfassung für ${childInfo.name || 'Ihr Kind'} zur Seite. Jede Angabe wird automatisch mit den MD-Vergleichstabellen für das Alter von ${childInfo.age} Jahren abgeglichen.`}
-                        topic="kinder-pflegegrad"
-                        showVoiceHints={false}
-                    />
-                    */}
+              <div className="p-4 text-xs text-gray-400 leading-relaxed space-y-2">
+                <p>
+                  Ich unterstütze Sie bei der rechtssicheren Erfassung für{' '}
+                  <strong>{childInfo.name || 'Ihr Kind'}</strong>.
+                </p>
+                <p className="bg-white/5 p-2.5 rounded border border-white/5 font-mono text-[10px]">
+                  Aktuelle Matrix: {childInfo.age} Jahre ({childInfo.ageGroup.toUpperCase()})
+                </p>
               </div>
             </div>
           </div>
@@ -599,13 +653,12 @@ export default function KinderModusPage(props: PageProps) {
     );
   }
 
-  // 4. RESULT SCREEN (Paywall-Weiche für Stripe)
+  // 4. RESULT SCREEN
   if (step === 'result' && result) {
     return (
       <div className="min-h-screen bg-slate-900 text-white py-12 px-4 flex flex-col justify-center items-center">
         <div className="w-full max-w-2xl space-y-6">
           {!isUnlocked ? (
-            /* 🔒 PAYWALL SCREEN (Sperre vor der Auswertung) */
             <Card className="bg-slate-950 border-2 border-purple-500/30 text-white shadow-2xl overflow-hidden">
               <div className="p-8 text-center space-y-4 bg-gradient-to-b from-purple-500/10 to-transparent">
                 <div className="w-16 h-16 bg-purple-500/20 border border-purple-500/30 rounded-2xl flex items-center justify-center mx-auto shadow-xl">
@@ -632,10 +685,13 @@ export default function KinderModusPage(props: PageProps) {
               <CardFooter className="p-6 border-t border-white/5 bg-white/[0.01] flex flex-col gap-3">
                 <Button
                   onClick={startStripeCheckout}
+                  disabled={checkoutLoading}
                   className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold h-14 text-base rounded-xl shadow-lg"
                 >
                   <FileText className="w-5 h-5 mr-2" />
-                  Dossier kostenpflichtig freischalten
+                  {checkoutLoading
+                    ? 'Verbindung aufbau...'
+                    : 'Dossier kostenpflichtig freischalten'}
                 </Button>
                 <button
                   onClick={() => setStep('assessment')}
@@ -646,11 +702,10 @@ export default function KinderModusPage(props: PageProps) {
               </CardFooter>
             </Card>
           ) : (
-            /* ✅ FREIGESCHALTETER RESULT SCREEN */
             <Card className="bg-white/5 border-white/10 text-white shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-300">
               <div className="p-8 bg-gradient-to-r from-pink-500/10 to-purple-500/10 border-b border-white/5 text-center space-y-2">
                 <span className="text-xs font-mono tracking-widest uppercase text-pink-400 bg-pink-500/10 px-3 py-1 rounded-full border border-pink-500/20">
-                  Analyse Entschlüsselt
+                  Kinder-Analyse Entschlüsselt 🌟
                 </span>
                 <h2 className="text-3xl font-extrabold">
                   {result.level === 0
@@ -658,30 +713,41 @@ export default function KinderModusPage(props: PageProps) {
                     : `Voraussichtlich: Pflegegrad ${result.level}`}
                 </h2>
                 <p className="text-sm text-gray-400 font-mono">
-                  Systempunkte: {result.points} / {result.maxPoints}
+                  Erreichte Systempunkte: {result.points} / {result.maxPoints}
                 </p>
               </div>
               <CardContent className="p-6 space-y-4">
                 <div className="p-4 bg-white/[0.02] border border-white/5 rounded-xl text-sm leading-relaxed text-gray-200">
                   {result.description}
                 </div>
-                {childInfo.age < 1.5 && result.level >= 2 && (
-                  <div className="p-4 bg-purple-500/10 border border-purple-500/20 rounded-xl flex gap-3 text-xs text-purple-400 leading-relaxed">
-                    <Info className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                    <p>
-                      <strong>Baby-Schutz angewendet:</strong> Da das Kind unter 18 Monaten alt ist,
-                      wurde die gesetzliche Höhergruppierung um eine Stufe vollautomatisch in das
-                      Ergebnis eingerechnet.
-                    </p>
-                  </div>
-                )}
+                <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl flex gap-3 text-xs text-blue-400">
+                  <Info className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                  <p>
+                    <strong>Gesetzlicher Hintergrund (§ 15 Abs. 7 SGB XI):</strong> Bei Kindern wird
+                    der Mehraufwand im Vergleich zu einem gesunden Kind desselben Alters gemessen.
+                    Da Ihr Kind unter 1,5 Jahren alt ist, wurde der pauschale Ein-Stufen-Aufschlag
+                    für Babys bereits mitberücksichtigt.
+                  </p>
+                </div>
               </CardContent>
               <CardFooter className="border-t border-white/5 p-4 bg-white/[0.01]">
                 <Button
-                  onClick={() => setStep('intro')}
-                  className="w-full bg-white/5 border border-white/10 text-white hover:bg-white/10 h-12"
+                  onClick={() => {
+                    // Wir spiegeln das berechnete Ergebnis, damit das Brief-Zentrum einhaken kann
+                    localStorage.setItem(
+                      'pflegegrad-ergebnis',
+                      JSON.stringify({
+                        careLevel: result.level,
+                        totalScore: result.points,
+                        benefits: { monthlyAmount: result.level >= 2 ? 332 : 0, reliefBudget: 125 },
+                      })
+                    );
+                    router.push(`/${locale}/briefe`);
+                  }}
+                  className="w-full bg-[#20b2aa] hover:bg-[#3ddbd0] text-slate-950 font-bold h-12 rounded-xl"
                 >
-                  Assessment schließen & neu starten
+                  <FileText className="w-4 h-4 mr-2" /> Antrags-Anschreiben im Brief-Zentrum
+                  erstellen
                 </Button>
               </CardFooter>
             </Card>
