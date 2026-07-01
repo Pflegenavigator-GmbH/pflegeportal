@@ -39,8 +39,9 @@ export default function PflegegradStartPage(props: PageProps) {
   const { locale } = useParams();
   const searchParams = use(props.searchParams);
 
-  // Zentrale i18n-Instanz für statische UI-Texte
-  const t = useTranslations();
+  // Namensraum-Weichen aktivieren
+  const tStart = useTranslations('pflegegrad.start');
+  const tCommon = useTranslations('common.buttons');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -160,7 +161,7 @@ export default function PflegegradStartPage(props: PageProps) {
           className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors text-sm"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Zurück zur Startseite</span>
+          <span>{tCommon('back') || 'Zurück'}</span>
         </button>
 
         {isNewCase ? (
@@ -185,21 +186,15 @@ export default function PflegegradStartPage(props: PageProps) {
                     <Plus className="w-6 h-6 text-emerald-400" />
                   </div>
                   <div>
-                    <CardTitle className="text-white">
-                      {t('title') || 'Neuen Fall starten'}
-                    </CardTitle>
+                    <CardTitle className="text-white">{tStart('newTitle')}</CardTitle>
                     <CardDescription className="text-gray-400 text-xs">
-                      {t('subtitle') || 'Kostenlose Pflegegrad-Einschätzung beginnen'}
+                      {tStart('newDescription')}
                     </CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-300 text-sm leading-relaxed">
-                  Starten Sie ein vollkommen anonymes und kostenfreies Verfahren. Es wird ein
-                  verschlüsselter Code generiert, unter dem Ihre Angaben DSGVO-konform gesichert
-                  werden.
-                </p>
+                <p className="text-gray-300 text-sm leading-relaxed">{tStart('newText')}</p>
               </CardContent>
               <CardFooter>
                 <Button
@@ -208,7 +203,7 @@ export default function PflegegradStartPage(props: PageProps) {
                   className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold"
                   size="lg"
                 >
-                  {loading ? 'Wird erstellt...' : 'Kostenlos starten'}
+                  {loading ? tStart('newButtonLoading') : tStart('newButton')}
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               </CardFooter>
