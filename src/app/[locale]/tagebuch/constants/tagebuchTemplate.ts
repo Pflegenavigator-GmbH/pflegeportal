@@ -2,21 +2,29 @@
 import { TagebuchData } from '@/src/types/tagebuch';
 
 export function generateTagebuchHtml(entries: TagebuchData, caseCode: string): string {
-    // Einträge chronologisch nach Datum sortieren
-    const sortedEntries = Object.entries(entries).sort(
-        (a, b) => new Date(a[1].date).getTime() - new Date(b[1].date).getTime()
-    );
+  // Einträge chronologisch nach Datum sortieren
+  const sortedEntries = Object.entries(entries).sort(
+    (a, b) => new Date(a[1].date).getTime() - new Date(b[1].date).getTime()
+  );
 
-    const entriesHtml = sortedEntries
-        .map(([_, entry]) => {
-            const highlights = [
-                entry.sturz ? '<span style="color:#991b1b;font-weight:bold;background:#fee2e2;padding:2px 6px;border-radius:4px;margin-right:4px;">⚠ Sturz</span>' : '',
-                entry.krankenhaus ? '<span style="color:#92400e;font-weight:bold;background:#fef3c7;padding:2px 6px;border-radius:4px;margin-right:4px;">Klinik</span>' : '',
-                entry.bettlaegerig ? '<span style="color:#6b21a8;font-weight:bold;background:#f3e8ff;padding:2px 6px;border-radius:4px;margin-right:4px;">Bettlägerig</span>' : '',
-                entry.medikamentenKontrolle ? '<span style="color:#166534;font-weight:bold;background:#dcfce7;padding:2px 6px;border-radius:4px;margin-right:4px;">Mediz. Kontrolle ✓</span>' : ''
-            ].join('');
+  const entriesHtml = sortedEntries
+    .map(([_, entry]) => {
+      const highlights = [
+        entry.sturz
+          ? '<span style="color:#991b1b;font-weight:bold;background:#fee2e2;padding:2px 6px;border-radius:4px;margin-right:4px;">⚠ Sturz</span>'
+          : '',
+        entry.krankenhaus
+          ? '<span style="color:#92400e;font-weight:bold;background:#fef3c7;padding:2px 6px;border-radius:4px;margin-right:4px;">Klinik</span>'
+          : '',
+        entry.bettlaegerig
+          ? '<span style="color:#6b21a8;font-weight:bold;background:#f3e8ff;padding:2px 6px;border-radius:4px;margin-right:4px;">Bettlägerig</span>'
+          : '',
+        entry.medikamentenKontrolle
+          ? '<span style="color:#166534;font-weight:bold;background:#dcfce7;padding:2px 6px;border-radius:4px;margin-right:4px;">Mediz. Kontrolle ✓</span>'
+          : '',
+      ].join('');
 
-            return `
+      return `
         <tr style="border-bottom: 1px solid #e2e8f0;">
           <td style="padding: 12px; font-variant-numeric: tabular-nums; font-weight: bold; color: #0f2744; vertical-align: top; width: 15%;">
             ${new Date(entry.date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}
@@ -36,10 +44,10 @@ export function generateTagebuchHtml(entries: TagebuchData, caseCode: string): s
           </td>
         </tr>
       `;
-        })
-        .join('');
+    })
+    .join('');
 
-    return `
+  return `
     <div style="font-family: Arial, sans-serif; color: #0f2744; padding: 20px; max-width: 800px; margin: 0 auto; background: #ffffff;">
       <div style="display: flex; justify-between: space-between; align-items: center; border-bottom: 3px solid #0f2744; padding-bottom: 15px; margin-bottom: 30px;">
         <div>

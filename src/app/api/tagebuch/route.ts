@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { logger } from '@/src/lib/logger';
 import { createServerSupabaseClient } from '@/src/lib/supabase/server';
+import { TagebuchData, TagebuchEintrag } from '@/src/types/tagebuch';
 
 // GET: Abrufen aller Einträge eines Falls
 export async function GET(request: NextRequest) {
@@ -18,10 +19,10 @@ export async function GET(request: NextRequest) {
 
     // 1. Hole die interne case_id über den Code
     const { data: caseData, error: caseError } = await supabase
-        .from('cases')
-        .select('id')
-        .eq('case_code', caseCode.toUpperCase())
-        .single();
+      .from('cases')
+      .select('id')
+      .eq('case_code', caseCode.toUpperCase())
+      .single();
 
     if (caseError || !caseData) {
       return NextResponse.json({ error: 'Fall nicht gefunden' }, { status: 404 });
@@ -29,11 +30,11 @@ export async function GET(request: NextRequest) {
 
     // 2. Hole den JSONB-Eintrag aus der answers-Tabelle (Modul 5 = Tagebuch)
     const { data: existingRecord, error } = await supabase
-        .from('answers')
-        .select('answers')
-        .eq('case_id', caseData.id)
-        .eq('module_number', 5)
-        .maybeSingle();
+      .from('answers')
+      .select('answers')
+      .eq('case_id', caseData.id)
+      .eq('module_number', 5)
+      .maybeSingle();
 
     if (error) throw error;
 
@@ -48,7 +49,11 @@ export async function GET(request: NextRequest) {
 // POST: Hinzufügen oder Aktualisieren eines Eintrags im JSONB-Tree
 export async function POST(request: NextRequest) {
   try {
-    const { caseCode, entryKey, payload } = await request.json();
+    const { caseCode, entryKey, payload } = (await request.json()) as {
+      caseCode: string;
+      entryKey: string | null;
+      payload: TagebuchEintrag;
+    };
 
     if (!caseCode || !payload || !payload.date) {
       return NextResponse.json({ error: 'Payload unvollständig' }, { status: 400 });
@@ -57,10 +62,10 @@ export async function POST(request: NextRequest) {
     const supabase = await createServerSupabaseClient();
 
     const { data: caseData, error: caseError } = await supabase
-        .from('cases')
-        .select('id')
-        .eq('case_code', caseCode.toUpperCase())
-        .single();
+      .from('cases')
+      .select('id')
+      .eq('case_code', caseCode.toUpperCase())
+      .single();
 
     if (caseError || !caseData) {
       return NextResponse.json({ error: 'Fall nicht gefunden' }, { status: 404 });
@@ -68,13 +73,14 @@ export async function POST(request: NextRequest) {
 
     // Hole den bestehenden Tree
     const { data: existingRecord } = await supabase
-        .from('answers')
-        .select('answers')
-        .eq('case_id', caseData.id)
-        .eq('module_number', 5)
-        .maybeSingle();
+      .from('answers')
+      .select('answers')
+      .eq('case_id', caseData.id)
+      .eq('module_number', 5)
+      .maybeSingle();
 
-    const currentAnswers = (existingRecord?.answers as Record<string, any>) || {};
+    // 🪄 REPARATUR: Typisierung als TagebuchData statt Record<string, any>
+    const currentAnswers = (existingRecord?.answers as TagebuchData) || {};
 
     // ID generieren, falls es ein neuer Eintrag ist (Key = Zeitstempel oder bestehender Key)
     const targetKey = entryKey || `entry_${Date.now()}`;
@@ -86,20 +92,18 @@ export async function POST(request: NextRequest) {
     };
 
     // Upsert in die answers-Tabelle
-    const { error: upsertError } = await supabase
-        .from('answers')
-        .upsert(
-            {
-              case_id: caseData.id,
-              module_number: 5,
-              module_name: 'tagebuch',
-              answers: currentAnswers,
-              completed_at: new Date().toISOString(),
-            },
-            {
-              onConflict: 'case_id,module_number',
-            }
-        );
+    const { error: upsertError } = await supabase.from('answers').upsert(
+      {
+        case_id: caseData.id,
+        module_number: 5,
+        module_name: 'tagebuch',
+        answers: currentAnswers,
+        completed_at: new Date().toISOString(),
+      },
+      {
+        onConflict: 'case_id,module_number',
+      }
+    );
 
     if (upsertError) throw upsertError;
 
@@ -124,42 +128,44 @@ export async function DELETE(request: NextRequest) {
     const supabase = await createServerSupabaseClient();
 
     const { data: caseData, error: caseError } = await supabase
-        .from('cases')
-        .select('id')
-        .eq('case_code', caseCode.toUpperCase())
-        .single();
+      .from('cases')
+      .select('id')
+      .eq('case_code', caseCode.toUpperCase())
+      .single();
 
     if (caseError || !caseData) {
       return NextResponse.json({ error: 'Fall nicht gefunden' }, { status: 404 });
     }
 
     const { data: existingRecord } = await supabase
-        .from('answers')
-        .select('answers')
-        .eq('case_id', caseData.id)
-        .eq('module_number', 5)
-        .maybeSingle();
+      .from('answers')
+      .select('answers')
+      .eq('case_id', caseData.id)
+      .eq('module_number', 5)
+      .maybeSingle();
 
     if (!existingRecord?.answers) {
       return NextResponse.json({ success: true });
     }
 
-    const currentAnswers = existingRecord.answers as Record<string, any>;
+    // 🪄 REPARATUR: Typisierung als TagebuchData statt Record<string, any>
+    const currentAnswers = existingRecord.answers as TagebuchData;
 
     // Den Schlüssel aus dem JSONB-Objekt löschen
     delete currentAnswers[entryKey];
 
-    const { error: updateError } = await supabase
-        .from('answers')
-        .upsert({
-          case_id: caseData.id,
-          module_number: 5,
-          module_name: 'tagebuch',
-          answers: currentAnswers,
-          completed_at: new Date().toISOString(),
-        }, {
-          onConflict: 'case_id,module_number',
-        });
+    const { error: updateError } = await supabase.from('answers').upsert(
+      {
+        case_id: caseData.id,
+        module_number: 5,
+        module_name: 'tagebuch',
+        answers: currentAnswers,
+        completed_at: new Date().toISOString(),
+      },
+      {
+        onConflict: 'case_id,module_number',
+      }
+    );
 
     if (updateError) throw updateError;
 
