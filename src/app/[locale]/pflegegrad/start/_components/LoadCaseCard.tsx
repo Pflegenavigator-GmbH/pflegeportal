@@ -47,7 +47,7 @@ export function LoadCaseCard({ onLoad, loading, externalError }: LoadCaseCardPro
           <div>
             <CardTitle className="text-white">{t('loadTitle')}</CardTitle>
             <CardDescription className="text-gray-400 text-xs">
-              {t('loadDescription')} {/* <-- Hier übersetzt! */}
+              {t('loadDescription')}
             </CardDescription>
           </div>
         </div>
