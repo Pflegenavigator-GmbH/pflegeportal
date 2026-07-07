@@ -5,55 +5,60 @@
 import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 
+import { logger } from '@/src/lib/logger';
+
 interface UseStripeCheckoutReturn {
-    triggerCheckout: (caseCode: string | null, paketId: string) => Promise<void>;
-    checkoutLoading: boolean;
+  triggerCheckout: (caseCode: string | null, paketId: string) => Promise<void>;
+  checkoutLoading: boolean;
 }
 
 /**
  * Universeller Hook zur Initiierung des Stripe-Bezahlprozesses via API-Session
  */
 export function useStripeCheckout(): UseStripeCheckoutReturn {
-    const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
-    const triggerCheckout = useCallback(async (caseCode: string | null, paketId: string) => {
-        if (!caseCode) {
-            toast.error('Kein gültiger Fallcode für den Checkout vorhanden.');
-            return;
-        }
+  const triggerCheckout = useCallback(async (caseCode: string | null, paketId: string) => {
+    if (!caseCode) {
+      logger.warn({ paketId }, 'Checkout-Versuch ohne gültigen Fallcode abgebrochen');
+      toast.error('Kein gültiger Fallcode für den Checkout vorhanden.');
+      return;
+    }
 
-        setCheckoutLoading(true);
-        const toastId = toast.loading('Sicheres Bezahlfenster von Stripe wird geladen...');
+    setCheckoutLoading(true);
+    const toastId = toast.loading('Sicheres Bezahlfenster von Stripe wird geladen...');
 
-        try {
-            const res = await fetch('/api/checkout/create-session', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    caseCode: caseCode.toUpperCase(),
-                    paket: paketId
-                })
-            });
+    try {
+      logger.info({ caseCode, paketId }, 'Initialisiere Stripe Checkout Session');
 
-            if (!res.ok) {
-                throw new Error('Server-Antwort im Checkout-Prozess fehlerhaft.');
-            }
+      const res = await fetch('/api/checkout/create-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          caseCode: caseCode.toUpperCase(),
+          paket: paketId,
+        }),
+      });
 
-            const data = await res.json();
+      if (!res.ok) {
+        throw new Error(`Server-Antwort fehlerhaft: ${res.status}`);
+      }
 
-            if (data.url) {
-                // 🚀 Weiterleitung direkt auf die verschlüsselte Stripe-Plattform
-                window.location.href = data.url;
-            } else {
-                throw new Error('Keine valide Checkout-URL empfangen.');
-            }
-        } catch (error) {
-            console.error('Stripe-Verbindungsfehler:', error);
-            toast.error('Verbindungsfehler zu Stripe. Bitte versuchen Sie es erneut.', { id: toastId });
-        } finally {
-            setCheckoutLoading(false);
-        }
-    }, []);
+      const data = await res.json();
 
-    return { triggerCheckout, checkoutLoading };
+      if (data.url) {
+        logger.info({ checkoutUrl: data.url }, 'Checkout-URL erfolgreich erhalten, leite weiter');
+        window.location.href = data.url;
+      } else {
+        throw new Error('Keine valide Checkout-URL empfangen.');
+      }
+    } catch (error) {
+      logger.error({ error, caseCode }, 'Stripe-Checkout-Fehler');
+      toast.error('Verbindungsfehler zu Stripe. Bitte versuchen Sie es erneut.', { id: toastId });
+    } finally {
+      setCheckoutLoading(false);
+    }
+  }, []);
+
+  return { triggerCheckout, checkoutLoading };
 }

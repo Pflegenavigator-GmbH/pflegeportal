@@ -1,22 +1,27 @@
 // src/app/[locale]/pflegegrad/start/page.tsx
-
 'use client';
 
-import { useState, useEffect, use } from 'react';
-import { useRouter } from 'next/navigation';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/src/components/ui/card';
-import { Button } from '@/src/components/ui/button';
 import { Shield, ArrowRight, Plus, ArrowLeft } from 'lucide-react';
-import { validateAndStoreSession } from '@/src/app/actions/case-session';
-import { createClient } from '@/src/lib/supabase/client';
+import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useState, useEffect, use } from 'react';
 import { toast } from 'sonner';
 
-// Modulare Imports aus den privaten _components
+import { validateAndStoreSession } from '@/src/app/actions/case-session';
+import { PaywallModal } from '@/src/components/modal/PaywallModal';
+import { Button } from '@/src/components/ui/button';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '@/src/components/ui/card';
+import { createClient } from '@/src/lib/supabase/client';
+
 import { LoadCaseCard } from './_components/LoadCaseCard';
 import { NewCaseCard } from './_components/NewCaseCard';
-
-// Globaler Import des wiederverwendbaren Modals
-import { PaywallModal } from '@/src/components/modal/PaywallModal';
 
 interface ProductFromDb {
   id: string;
@@ -31,9 +36,12 @@ interface PageProps {
 
 export default function PflegegradStartPage(props: PageProps) {
   const router = useRouter();
-  const params = use(props.params);
+  const { locale } = useParams();
   const searchParams = use(props.searchParams);
-  const locale = params?.locale || 'de';
+
+  // Namensraum-Weichen aktivieren
+  const tStart = useTranslations('pflegegrad.start');
+  const tCommon = useTranslations('common.buttons');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -57,10 +65,13 @@ export default function PflegegradStartPage(props: PageProps) {
       });
     }
 
-    supabase.from('products').select('id, name, price_cents').eq('is_active', true)
-        .then(({ data }) => {
-          if (data) setDbProducts(data as ProductFromDb[]);
-        });
+    supabase
+      .from('products')
+      .select('id, name, price_cents')
+      .eq('is_active', true)
+      .then(({ data }) => {
+        if (data) setDbProducts(data as ProductFromDb[]);
+      });
   }, [searchParams, locale, router, supabase]);
 
   const handleLoadCase = async (inputCode: string) => {
@@ -87,7 +98,11 @@ export default function PflegegradStartPage(props: PageProps) {
       }
 
       toast.success('Willkommen zurück! Daten geladen.');
-      router.push(`/${locale}/pflegegrad/modul1`);
+      if (localStorage.getItem('pflegegrad-ergebnis')) {
+        router.push(`/${locale}/pflegegrad/ergebnis`);
+      } else {
+        router.push(`/${locale}/pflegegrad/modul1`);
+      }
     } catch {
       setError('Fehler bei der Session-Prüfung.');
     } finally {
@@ -95,28 +110,22 @@ export default function PflegegradStartPage(props: PageProps) {
     }
   };
 
-  // 🛠️ KORREKTUR: Nutzt jetzt die sichere API-Route statt des direkten RPC-Clients
   const handleCreateCase = async () => {
     setLoading(true);
     setError('');
     try {
       const response = await fetch('/api/cases', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
       });
 
-      if (!response.ok) {
-        throw new Error('Server-Antwort war nicht erfolgreich.');
-      }
-
+      if (!response.ok) throw new Error('Server-Antwort war nicht erfolgreich.');
       const resData = await response.json();
-
-      if (resData.error) {
-        throw new Error(resData.error);
-      }
+      if (resData.error) throw new Error(resData.error);
 
       setCaseCode(resData.caseCode);
       localStorage.setItem('case_code', resData.caseCode);
+
       setIsNewCase(true);
       toast.success('Kostenloser Fallcode generiert!');
     } catch (err) {
@@ -133,7 +142,7 @@ export default function PflegegradStartPage(props: PageProps) {
       const response = await fetch('/api/checkout/create-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ caseCode, paket: paketId })
+        body: JSON.stringify({ caseCode, paket: paketId }),
       });
       const session = await response.json();
       if (session.url) router.push(session.url);
@@ -145,60 +154,84 @@ export default function PflegegradStartPage(props: PageProps) {
   };
 
   return (
-      <main className="min-h-screen bg-slate-900 py-12 px-4 text-white">
-        <div className="container mx-auto max-w-2xl">
-          <button onClick={() => router.push(`/${locale}`)} className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors">
-            <ArrowLeft className="w-4 h-4" />
-            <span>Zurück zur Startseite</span>
-          </button>
+    <main className="min-h-screen bg-slate-900 py-12 px-4 text-white">
+      <div className="container mx-auto max-w-2xl">
+        <button
+          onClick={() => router.push(`/${locale}`)}
+          className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors text-sm"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>{tCommon('back') || 'Zurück'}</span>
+        </button>
 
-          {isNewCase ? (
-              <NewCaseCard caseCode={caseCode} onActivate={() => router.push(`/${locale}/pflegegrad/modul1`)} />
-          ) : (
-              <>
-                <LoadCaseCard onLoad={handleLoadCase} loading={loading} externalError={error} />
+        {isNewCase ? (
+          <NewCaseCard caseCode={caseCode} locale={locale as string} />
+        ) : (
+          <>
+            <LoadCaseCard onLoad={handleLoadCase} loading={loading} externalError={error} />
 
-                <div className="relative py-4">
-                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10"></div></div>
-                  <div className="relative flex justify-center"><span className="bg-slate-900 px-4 text-sm text-gray-500">oder</span></div>
+            <div className="relative py-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-white/10"></div>
+              </div>
+              <div className="relative flex justify-center">
+                <span className="bg-slate-900 px-4 text-sm text-gray-500">oder</span>
+              </div>
+            </div>
+
+            <Card className="bg-white/5 border-emerald-500/20 text-white shadow-xl">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-emerald-500/20 rounded-xl border border-emerald-500/30">
+                    <Plus className="w-6 h-6 text-emerald-400" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-white">{tStart('newTitle')}</CardTitle>
+                    <CardDescription className="text-gray-400 text-xs">
+                      {tStart('newDescription')}
+                    </CardDescription>
+                  </div>
                 </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-300 text-sm leading-relaxed">{tStart('newText')}</p>
+              </CardContent>
+              <CardFooter>
+                <Button
+                  onClick={handleCreateCase}
+                  disabled={loading}
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold"
+                  size="lg"
+                >
+                  {loading ? tStart('newButtonLoading') : tStart('newButton')}
+                  <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </CardFooter>
+            </Card>
+          </>
+        )}
 
-                <Card className="bg-white/5 border-emerald-500/20 text-white shadow-xl">
-                  <CardHeader>
-                    <div className="flex items-center gap-3">
-                      <div className="p-3 bg-emerald-500/20 rounded-xl border border-emerald-500/30"><Plus className="w-6 h-6 text-emerald-400" /></div>
-                      <div>
-                        <CardTitle className="text-white">Neuen Fall starten</CardTitle>
-                        <CardDescription className="text-gray-400">Kostenlose Pflegegrad-Einschätzung beginnen</CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-300 text-sm leading-relaxed">
-                      Starten Sie ein vollkommen anonymes und kostenfreies Verfahren. Es wird ein verschlüsselter Code generiert, unter dem Ihre Angaben DSGVO-konform gesichert werden.
-                    </p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button onClick={handleCreateCase} disabled={loading} className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold" size="lg">
-                      {loading ? 'Wird erstellt...' : 'Kostenlos starten'}
-                      <ArrowRight className="ml-2 w-4 h-4" />
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </>
-          )}
+        {showPaywall && (
+          <PaywallModal
+            caseCode={caseCode}
+            isExpired={isBetaExpired}
+            products={dbProducts}
+            onCheckout={handleCheckout}
+            onClose={() => setShowPaywall(false)}
+            loading={loading}
+          />
+        )}
 
-          {showPaywall && (
-              <PaywallModal caseCode={caseCode} isExpired={isBetaExpired} products={dbProducts} onCheckout={handleCheckout} onClose={() => setShowPaywall(false)} loading={loading} />
-          )}
-
-          <div className="mt-8 pt-6 border-t border-white/10 flex items-start gap-3 text-gray-400 text-xs leading-relaxed">
-            <Shield className="w-5 h-5 flex-shrink-0 text-gray-500 mt-0.5" />
-            <p>
-              <strong>Wichtiger rechtlicher Hinweis:</strong> Dieser Pflegegrad-Rechner bietet eine mathematische Orientierungshilfe auf Basis des SGB XI. Er ersetzt keine medizinische Begutachtung oder verbindliche Rechtsberatung. Einstufungen werden rechtswirksam ausschließlich durch die zuständige Pflegekasse vorgenommen.
-            </p>
-          </div>
+        <div className="mt-8 pt-6 border-t border-white/10 flex items-start gap-3 text-gray-400 text-xs leading-relaxed">
+          <Shield className="w-5 h-5 flex-shrink-0 text-gray-500 mt-0.5" />
+          <p>
+            <strong>Wichtiger rechtlicher Hinweis:</strong> Dieser Pflegegrad-Rechner bietet eine
+            mathematische Orientierungshilfe auf Basis des SGB XI. Er ersetzt keine medizinische
+            Begutachtung oder verbindliche Rechtsberatung. Einstufungen werden rechtswirksam
+            ausschließlich durch die zuständige Pflegekasse vorgenommen.
+          </p>
         </div>
-      </main>
+      </div>
+    </main>
   );
 }

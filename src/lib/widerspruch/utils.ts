@@ -1,153 +1,238 @@
-import { addMonths, addDays, format, differenceInDays } from 'date-fns';
+// src/lib/widerspruch/utils.ts
+import { addDays, addMonths, differenceInDays, format } from 'date-fns';
+
+import { logger } from '@/src/lib/logger';
+import { ModuleScores } from '@/src/types/pflegegrad';
 
 export type WiderspruchTyp = 'pflegegrad' | 'mdk-gutachten' | 'klage';
 export type AmpelStatus = 'gruen' | 'gelb' | 'rot' | 'abgelaufen';
 
 export interface WiderspruchFrist {
-    typ: WiderspruchTyp;
-    bezeichnung: string;
-    gesetz: string;
-    fristMonate: number;
-    bescheidDatum: Date;
-    fristEnde: Date;
-    fristEndeWerktag: Date;
-    istAbgelaufen: boolean;
-    verbleibendeTage: number;
-    ampelStatus: AmpelStatus;
+  typ: WiderspruchTyp;
+  bezeichnung: string;
+  gesetz: string;
+  fristMonate: number;
+  bescheidDatum: Date;
+  fristEnde: Date;
+  fristEndeWerktag: Date;
+  istAbgelaufen: boolean;
+  verbleibendeTage: number;
+  ampelStatus: AmpelStatus;
 }
 
 export interface WiderspruchDaten {
-    id?: string;
-    caseCode?: string | null;
-    typ: WiderspruchTyp;
-    bescheidDatum: string;
-    versicherterName: string;
-    pflegekasse: string;
-    versicherungsnummer?: string;
-    strasse: string;
-    plz: string;
-    ort: string;
-    begruendung?: string;
-    erstelltAm?: string;
+  id?: string;
+  caseCode?: string | null;
+  typ: WiderspruchTyp;
+  bescheidDatum: string;
+  versicherterName: string;
+  pflegekasse: string;
+  versicherungsnummer?: string;
+  strasse: string;
+  plz: string;
+  ort: string;
+  begruendung?: string;
+  erstelltAm?: string;
 }
 
 const FEIERTAGE_DE: Record<string, string[]> = {
-    '2025': ['01-01', '04-18', '04-21', '05-01', '05-29', '06-09', '10-03', '12-25', '12-26'],
-    '2026': ['01-01', '04-03', '04-06', '05-01', '05-14', '05-25', '10-03', '12-25', '12-26'],
-    '2027': ['01-01', '03-26', '03-29', '05-01', '05-06', '05-17', '10-03', '12-25', '12-26'],
+  '2025': ['01-01', '04-18', '04-21', '05-01', '05-29', '06-09', '10-03', '12-25', '12-26'],
+  '2026': ['01-01', '04-03', '04-06', '05-01', '05-14', '05-25', '10-03', '12-25', '12-26'],
+  '2027': ['01-01', '03-26', '03-29', '05-01', '05-06', '05-17', '10-03', '12-25', '12-26'],
 };
 
-const WIDERSPRUCH_KONFIG: Record<WiderspruchTyp, { bezeichnung: string; gesetz: string; fristMonate: number }> = {
-    'pflegegrad': { bezeichnung: 'Widerspruch gegen Pflegegrad-Bescheid', gesetz: '§ 78 SGB X', fristMonate: 1 },
-    'mdk-gutachten': { bezeichnung: 'Anforderung des MDK-Gutachtens', gesetz: '§ 78 SGB X', fristMonate: 1 },
-    'klage': { bezeichnung: 'Klageerhebung beim Sozialgericht', gesetz: '§ 84 SGG', fristMonate: 1 }
+const WIDERSPRUCH_KONFIG: Record<
+  WiderspruchTyp,
+  { bezeichnung: string; gesetz: string; fristMonate: number }
+> = {
+  pflegegrad: {
+    bezeichnung: 'Widerspruch gegen Pflegegrad-Bescheid',
+    gesetz: '§ 78 SGB X',
+    fristMonate: 1,
+  },
+  'mdk-gutachten': {
+    bezeichnung: 'Anforderung des MDK-Gutachtens',
+    gesetz: '§ 78 SGB X',
+    fristMonate: 1,
+  },
+  klage: { bezeichnung: 'Klageerhebung beim Sozialgericht', gesetz: '§ 84 SGG', fristMonate: 1 },
 };
 
-export function berechneFrist(bescheidDatum: Date, typ: WiderspruchTyp = 'pflegegrad'): WiderspruchFrist {
-    const konfig = WIDERSPRUCH_KONFIG[typ];
-    const fristEnde = addMonths(bescheidDatum, konfig.fristMonate);
-    const fristEndeWerktag = naechsterWerktag(fristEnde);
+// --- FRISTEN LOGIK ---
 
-    const heute = new Date();
-    heute.setHours(0, 0, 0, 0);
+export function berechneFrist(
+  bescheidDatum: Date,
+  typ: WiderspruchTyp = 'pflegegrad'
+): WiderspruchFrist {
+  logger.debug({ bescheidDatum, typ }, 'Berechne Frist für Widerspruch');
 
-    const verbleibendeTage = differenceInDays(fristEndeWerktag, heute);
-    const istAbgelaufen = verbleibendeTage < 0;
+  const konfig = WIDERSPRUCH_KONFIG[typ];
+  const fristEnde = addMonths(bescheidDatum, konfig.fristMonate);
+  const fristEndeWerktag = naechsterWerktag(fristEnde);
 
-    let ampelStatus: AmpelStatus = 'gruen';
-    if (istAbgelaufen) ampelStatus = 'abgelaufen';
-    else if (verbleibendeTage > 14) ampelStatus = 'gruen';
-    else if (verbleibendeTage >= 7) ampelStatus = 'gelb';
-    else ampelStatus = 'rot';
+  const heute = new Date();
+  heute.setHours(0, 0, 0, 0);
 
-    return {
-        typ,
-        bezeichnung: konfig.bezeichnung,
-        gesetz: konfig.gesetz,
-        fristMonate: konfig.fristMonate,
-        bescheidDatum: new Date(bescheidDatum),
-        fristEnde,
-        fristEndeWerktag,
-        istAbgelaufen,
-        verbleibendeTage: Math.max(0, verbleibendeTage),
-        ampelStatus
-    };
+  const verbleibendeTage = differenceInDays(fristEndeWerktag, heute);
+  const istAbgelaufen = verbleibendeTage < 0;
+
+  let ampelStatus: AmpelStatus = 'gruen';
+  if (istAbgelaufen) ampelStatus = 'abgelaufen';
+  else if (verbleibendeTage > 14) ampelStatus = 'gruen';
+  else if (verbleibendeTage >= 7) ampelStatus = 'gelb';
+  else ampelStatus = 'rot';
+
+  const resultat = {
+    typ,
+    bezeichnung: konfig.bezeichnung,
+    gesetz: konfig.gesetz,
+    fristMonate: konfig.fristMonate,
+    bescheidDatum: new Date(bescheidDatum),
+    fristEnde,
+    fristEndeWerktag,
+    istAbgelaufen,
+    verbleibendeTage: Math.max(0, verbleibendeTage),
+    ampelStatus,
+  };
+
+  logger.debug({ resultat }, 'Fristberechnung abgeschlossen');
+  return resultat;
 }
 
 function istFeiertag(datum: Date): boolean {
-    const jahr = datum.getFullYear().toString();
-    const tagMonat = format(datum, 'MM-dd');
-    return (FEIERTAGE_DE[jahr] || []).includes(tagMonat);
+  const jahr = datum.getFullYear().toString();
+  return (FEIERTAGE_DE[jahr] || []).includes(format(datum, 'MM-dd'));
 }
 
 function istWochenende(datum: Date): boolean {
-    const tag = datum.getDay();
-    return tag === 0 || tag === 6;
+  const tag = datum.getDay();
+  return tag === 0 || tag === 6;
 }
 
 function naechsterWerktag(datum: Date): Date {
-    let aktuellesDatum = new Date(datum);
-    while (istWochenende(aktuellesDatum) || istFeiertag(aktuellesDatum)) {
-        aktuellesDatum = addDays(aktuellesDatum, 1);
-    }
-    return aktuellesDatum;
+  let aktuellesDatum = new Date(datum);
+  while (istWochenende(aktuellesDatum) || istFeiertag(aktuellesDatum)) {
+    aktuellesDatum = addDays(aktuellesDatum, 1);
+  }
+  return aktuellesDatum;
 }
 
 export function formatiereFristInfo(frist: WiderspruchFrist): string {
-    if (frist.istAbgelaufen) return `⚠️ FRIST ABGELAUFEN seit ${format(frist.fristEndeWerktag, 'dd.MM.yyyy')}`;
-    const emoji = frist.ampelStatus === 'gruen' ? '🟢' : frist.ampelStatus === 'gelb' ? '🟡' : '🔴';
-    return `${emoji} Noch ${frist.verbleibendeTage} Tage bis zum wirksamen Fristende am ${format(frist.fristEndeWerktag, 'dd.MM.yyyy')}`;
+  if (frist.istAbgelaufen)
+    return `⚠️ FRIST ABGELAUFEN seit ${format(frist.fristEndeWerktag, 'dd.MM.yyyy')}`;
+  const emoji = frist.ampelStatus === 'gruen' ? '🟢' : frist.ampelStatus === 'gelb' ? '🟡' : '🔴';
+  return `${emoji} Noch ${frist.verbleibendeTage} Tage bis zum wirksamen Fristende am ${format(frist.fristEndeWerktag, 'dd.MM.yyyy')}`;
 }
 
-// ✅ JETZT DYNAMISCH NACH VERFAHRENSTYP (Pflegegrad, Gutachten oder Klage)
-export function generiereWiderspruchBrief(daten: WiderspruchDaten, frist: WiderspruchFrist): string {
-    const heute = format(new Date(), 'dd.MM.yyyy');
-    const bescheidDatum = format(new Date(daten.bescheidDatum), 'dd.MM.yyyy');
+// --- TEXT GENERIERUNG ---
 
-    let betreffzeile = `Widerspruch gegen den Bescheid zur Pflegeeinstufung vom ${bescheidDatum}`;
-    let kernAnschreiben = `hiermit lege ich fristgerecht Widerspruch gegen Ihren Bescheid vom ${bescheidDatum} ein.`;
-    let kernBegruendung = daten.begruendung || 'Zur Fristwahrung lege ich diesen Widerspruch zunächst unbegründet ein. Ich fordere Sie hiermit auf, mir das vollständige medizinische Gutachten des Medizinischen Dienstes (MD) unverzüglich in Kopie zuzusenden. Nach Erhalt und Prüfung werde ich die detaillierte Begründung nachreichen.';
+export function generiereWiderspruchBrief(
+  daten: WiderspruchDaten,
+  frist: WiderspruchFrist
+): string {
+  logger.info({ typ: daten.typ, caseCode: daten.caseCode }, 'Generiere Widerspruchsbrief');
 
-    if (daten.typ === 'mdk-gutachten') {
-        betreffzeile = `Anforderung des MD-Gutachtens zum Bescheid vom ${bescheidDatum}`;
-        kernAnschreiben = `hiermit fordere ich Sie auf, mir das der Entscheidung vom ${bescheidDatum} zugrundeliegende, vollständige medizinische Gutachten des Medizinischen Dienstes (MD) gemäß § 25 SGB X zur Einsichtnahme zu übersenden.`;
-        kernBegruendung = 'Das Gutachten wird zwingend für die materielle Überprüfung der Einstufungskriterien und zur Vorbereitung einer detaillierten Begründung benötigt.';
-    } else if (daten.typ === 'klage') {
-        betreffzeile = `KLAGEGEGENSTAND: Widerspruchsbescheid vom ${bescheidDatum}`;
-        kernAnschreiben = `hiermit erhebe ich fristgerecht Klage beim zuständigen Sozialgericht gegen den Widerspruchsbescheid vom ${bescheidDatum}.`;
-        kernBegruendung = daten.begruendung || 'Der Widerspruchsbescheid vom %bescheidDatum% verkennt die tatsächliche Pflegebedürftigkeit und die Einschränkungen der Selbstständigkeit im Alltag. Eine umfassende Klagebegründung erfolgt nach Akteneinsicht durch das Gericht.';
-    }
+  const heute = format(new Date(), 'dd.MM.yyyy');
+  const bescheidDatum = format(new Date(daten.bescheidDatum), 'dd.MM.yyyy');
 
-    return `
-${daten.versicherterName}
-${daten.strasse}
-${daten.plz} ${daten.ort}
+  let betreffzeile = `Widerspruch gegen den Bescheid zur Pflegeeinstufung vom ${bescheidDatum}`;
+  let kernAnschreiben = `hiermit lege ich fristgerecht Widerspruch gegen Ihren Bescheid vom ${bescheidDatum} ein.`;
+  let kernBegruendung =
+    daten.begruendung ||
+    'Zur Fristwahrung lege ich diesen Widerspruch zunächst unbegründet ein. Ich fordere Sie hiermit auf, mir das vollständige medizinische Gutachten des Medizinischen Dienstes (MD) unverzüglich in Kopie zuzusenden. Nach Erhalt und Prüfung werde ich die detaillierte Begründung nachreichen.';
 
-An die
-${daten.pflegekasse}
-Widerspruchsstelle
-[Bitte Anschrift der Kasse ergänzen]
+  if (daten.typ === 'mdk-gutachten') {
+    betreffzeile = `Anforderung des MD-Gutachtens zum Bescheid vom ${bescheidDatum}`;
+    kernAnschreiben = `hiermit fordere ich Sie auf, mir das der Entscheidung vom ${bescheidDatum} zugrundeliegende, vollständige medizinische Gutachten des Medizinischen Dienstes (MD) gemäß § 25 SGB X zur Einsichtnahme zu übersenden.`;
+    kernBegruendung =
+      'Das Gutachten wird zwingend für die materielle Überprüfung der Einstufungskriterien und zur Vorbereitung einer detaillierten Begründung benötigt.';
+  } else if (daten.typ === 'klage') {
+    betreffzeile = `KLAGEGEGENSTAND: Widerspruchsbescheid vom ${bescheidDatum}`;
+    kernAnschreiben = `hiermit erhebe ich fristgerecht Klage beim zuständigen Sozialgericht gegen den Widerspruchsbescheid vom ${bescheidDatum}.`;
+    kernBegruendung =
+      daten.begruendung ||
+      `Der Widerspruchsbescheid vom ${bescheidDatum} verkennt die tatsächliche Pflegebedürftigkeit und die Einschränkungen der Selbstständigkeit im Alltag. Eine umfassende Klagebegründung erfolgt nach Akteneinsicht durch das Gericht.`;
+  }
 
+  return `${daten.versicherterName}\n${daten.strasse}\n${daten.plz} ${daten.ort}\n\nAn die\n${daten.pflegekasse}\nWiderspruchsstelle\n[Bitte Anschrift der Kasse ergänzen]\n\n\n${daten.ort}, den ${heute}\n\nBetreff: ${betreffzeile}\nVersicherungsnummer: ${daten.versicherungsnummer || '[BITTE EINTRAGEN]'}\nAktenzeichen Portal: ${daten.caseCode?.toUpperCase() || 'OFFLINE_CORE'}\n\nSehr geehrte Damen und Herren,\n\n${kernAnschreiben}\n\nBEGRÜNDUNG / ANTRAGSMATERIE:\n${kernBegruendung}\n\nDie gesetzliche Frist für dieses Verfahren läuft gemäß ${frist.gesetz} am ${format(frist.fristEndeWerktag, 'dd.MM.yyyy')} ab. Ich bitte um eine schriftliche Bestätigung des Eingangs.\n\nMit freundlichen Grüßen,\n\n\n___________________________\n${daten.versicherterName}`;
+}
 
-${daten.ort}, den ${heute}
+export function generateWiderspruchBegruendung(
+  currentLevel: number,
+  expectedLevel: number,
+  scores: ModuleScores,
+  userReasons?: string
+): string {
+  const lines: string[] = [
+    `Nach den NBA-Kriterien ergibt sich aus den vorliegenden Einschränkungen ein höherer Pflegebedarf als im Pflegegrad ${currentLevel} berücksichtigt.\n`,
+  ];
+  if (scores[4] > 40)
+    lines.push(
+      'Selbstversorgung (Gewichtung 40%): Deutliche Einschränkungen bei Körperpflege, An-/Auskleiden sowie Essen/Trinken erfordern tägliche Unterstützung.'
+    );
+  if (scores[2] > 15 || scores[3] > 15)
+    lines.push(
+      'Kognition/Verhalten (Gewichtung 15%): Einschränkungen in Orientierung, Entscheidungsfähigkeit oder psychische Belastungen liegen vor.'
+    );
+  if (scores[5] > 20)
+    lines.push(
+      'Krankheitsbewältigung (Gewichtung 20%): Komplexe medizinische Maßnahmen und Medikamentenmanagement sind notwendig.'
+    );
+  if (scores[1] > 10)
+    lines.push(
+      'Mobilität (Gewichtung 10%): Einschränkungen bei Aufstehen, Gehen oder Treppensteigen schränken die Teilhabe ein.'
+    );
+  lines.push(
+    '\n',
+    `Die Summe der Beeinträchtigungen entspricht dem Pflegegrad ${expectedLevel}. Die aktuelle Einstufung in Pflegegrad ${currentLevel} bildet den tatsächlichen Hilfebedarf nicht ab.`
+  );
+  if (userReasons) lines.push('\n', 'Zusätzliche Begründung:', userReasons);
+  lines.push(
+    '\n',
+    'Rechtliche Grundlage:',
+    'Gemäß § 124 SGB XI beantrage ich eine erneute Begutachtung durch den MDK.'
+  );
+  return lines.join('\n');
+}
 
-Betreff: ${betreffzeile}
-Versicherungsnummer: ${daten.versicherungsnummer || '[BITTE EINTRAGEN]'}
-Aktenzeichen Portal: ${daten.caseCode?.toUpperCase() || 'OFFLINE_CORE'}
+// --- CHANCEN & CHECKLISTEN ---
 
-Sehr geehrte Damen und Herren,
+export function calculateWiderspruchChance(
+  currentLevel: number,
+  expectedLevel: number,
+  scores: ModuleScores
+): {
+  chance: 'high' | 'medium' | 'low';
+  reason: string;
+} {
+  const scoreDiff = expectedLevel - currentLevel;
+  if (scoreDiff === 1 && scores[4] > 40)
+    return {
+      chance: 'high',
+      reason: 'Nur 1 Level Unterschied, starke Selbstversorgungs-Einschränkungen (40% Gewichtung)',
+    };
+  if (scoreDiff <= 2 && (scores[2] > 10 || scores[3] > 10))
+    return {
+      chance: 'medium',
+      reason: 'Mögliche Verbesserung durch vollständige Begutachtung aller Module',
+    };
+  return {
+    chance: 'low',
+    reason: 'Größerer Unterschied - erfolgreich wenn neue medizinische Entwicklungen vorliegen',
+  };
+}
 
-${kernAnschreiben}
-
-BEGRÜNDUNG / ANTRAGSMATERIE:
-${kernBegruendung}
-
-Die gesetzliche Frist für dieses Verfahren läuft gemäß ${frist.gesetz} am ${format(frist.fristEndeWerktag, 'dd.MM.yyyy')} ab. Ich bitte um eine schriftliche Bestätigung des Eingangs.
-
-Mit freundlichen Grüßen,
-
-
-___________________________
-${daten.versicherterName}
-  `.trim();
+export function getMDPreparationChecklist(): string[] {
+  return [
+    'Alle Medikamente bereitlegen',
+    'Ärztliche Berichte parat haben',
+    'Pflegeprotokoll/Tagebuch aktuell (letzte 4 Wochen)',
+    'Zeitaufwand dokumentiert: Wie lange dauert was?',
+    'Häufigkeiten notiert: Wie oft pro Tag?',
+    'Schlechte Tage beschreiben (nicht die guten!)',
+    'Fragen vorbereitet',
+    'Unterlagen sortiert: Arztberichte, Rezepte, Labor',
+    'Begleitung organisiert',
+    'Notizblock für eigene Notizen',
+  ];
 }

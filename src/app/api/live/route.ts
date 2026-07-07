@@ -1,10 +1,10 @@
 // src/app/live/route.ts
-import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server';
 
 interface LivenessCheck {
-  alive: boolean
-  timestamp: string
-  uptime: number
+  alive: boolean;
+  timestamp: string;
+  uptime: number;
 }
 
 /**
@@ -16,16 +16,16 @@ export async function GET() {
   const result: LivenessCheck = {
     alive: true,
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
-  }
-  
-  return NextResponse.json(result, { 
+    uptime: process.uptime(),
+  };
+
+  return NextResponse.json(result, {
     status: 200,
     headers: {
       // Prevent caching
       'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0'
-    }
-  })
+      Pragma: 'no-cache',
+      Expires: '0',
+    },
+  });
 }

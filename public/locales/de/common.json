@@ -23,166 +23,17 @@
     "title": "Pflegegrad-Rechner",
     "subtitle": "Ermitteln Sie Ihren möglichen Pflegegrad anhand des MDK-Moduls",
     "progress": "Frage {{current}} von {{total}}",
-    "module": {
-      "mobilität": {
-        "title": "1. Mobilität",
-        "description": "Fähigkeit, sich selbstständig fortzubewegen",
-        "questions": {
-          "q1": {
-            "text": "Kann die Person sich im Wohnraum selbstständig fortbewegen?",
-            "help": "Dazu zählen: Aufstehen, Gehen, Stuhl benutzen, Bett verlassen"
-          },
-          "q2": {
-            "text": "Kann die Person Treppen steigen?",
-            "help": "Mit oder ohne Hilfsmittel wie Treppenlift"
-          },
-          "q3": {
-            "text": "Benötigt die Person Hilfe beim Transfer (Bett/Stuhl)?",
-            "help": "Transfer umfasst: Lagerung, Positionierung, Hilfe beim Aufstehen"
-          },
-          "q4": {
-            "text": "Ist die Person auf Hilfsmittel angewiesen?",
-            "help": "Z.B. Rollator, Gehhilfe, Rollstuhl"
-          }
-        }
-      },
-      "kognitiveLeistungen": {
-        "title": "2. Kognitive Leistungen",
-        "description": "Geistige Fähigkeiten und Orientierung",
-        "questions": {
-          "q1": {
-            "text": "Ist die Person zeitlich, örtlich und situativ orientiert?",
-            "help": "Kann die Person Datum, Ort und aktuelle Situation erfassen?"
-          },
-          "q2": {
-            "text": "Gibt es Probleme beim Erinnern von Dingen?",
-            "help": "Vergesslichkeit im Alltag: Medikamente, Termine, Essenszeiten"
-          },
-          "q3": {
-            "text": "Kann die Person Entscheidungen treffen?",
-            "help": "Fähigkeit, Alltagsentscheidungen selbst zu treffen"
-          },
-          "q4": {
-            "text": "Gibt es Verhaltensauffälligkeiten?",
-            "help": "Z.B. Verwirrtheit, Agitiertheit, Abwehr von Hilfe"
-          }
-        }
-      },
-      "körperlichePflege": {
-        "title": "3. Körperliche Pflege",
-        "description": "Körperhygiene und persönliche Sauberkeit",
-        "questions": {
-          "q1": {
-            "text": "Kann die Person sich selbst waschen?",
-            "help": "Waschen, Duschen, Baden – welche Körperteile selbstständig?"
-          },
-          "q2": {
-            "text": "Kann die Person Zähneputzen und Haare kämmen?",
-            "help": "Mundhygiene und Haarpflege"
-          },
-          "q3": {
-            "text": "Kann die Person sich selbst rasieren/schminken?",
-            "help": "Gesichtspflege, Rasur, dekoratives Schminken"
-          },
-          "q4": {
-            "text": "Benötigt die Person Hilfe beim Toilettengang?",
-            "help": "Blasen-/Darmkontrolle, Intimpflege, Inkontinenzversorgung"
-          }
-        }
-      },
-      "behandlungspflege": {
-        "title": "4. Behandlungspflege",
-        "description": "Medizinische Versorgung und Behandlung",
-        "questions": {
-          "q1": {
-            "text": "Kann die Person Medikamente selbst einnehmen?",
-            "help": "Dosieren, Einnehmen, Kontrolle der Medikamenteneinnahme"
-          },
-          "q2": {
-            "text": "Kann die Person Wundversorgung allein durchführen?",
-            "help": "Verbandwechsel, Wundreinigung, Salbenauftrag"
-          },
-          "q3": {
-            "text": "Benötigt die Person Hilfe bei Spritzen/Medikamenten?",
-            "help": "Insulin, Injektionen, Augentropfen, Ohrentropfen"
-          },
-          "q4": {
-            "text": "Gibt es spezielle Behandlungen?",
-            "help": "Z.B. Kompressionsstrümpfe, Sauerstofftherapie, Katheter"
-          }
-        }
-      },
-      "hauswirtschaftlicheVersorgung": {
-        "title": "5. Hauswirtschaftliche Versorgung",
-        "description": "Haushaltsführung und Mahlzeiten",
-        "questions": {
-          "q1": {
-            "text": "Kann die Person Mahlzeiten zubereiten?",
-            "help": "Einkaufen, Kochen, Geschirr spülen, Aufwärmen"
-          },
-          "q2": {
-            "text": "Kann die Person den Haushalt führen?",
-            "help": "Putzen, Waschen, Bügeln, Müllentsorgung"
-          },
-          "q3": {
-            "text": "Kann die Person Einkäufe erledigen?",
-            "help": "Lebensmittel, Haushaltswaren, Medikamente"
-          },
-          "q4": {
-            "text": "Kann die Person Finanzielles regeln?",
-            "help": "Rechnungen bezahlen, Bankgeschäfte, Post"
-          }
-        }
-      },
-      "sozialeKontakte": {
-        "title": "6. Soziale Kontakte",
-        "description": "Kommunikation und Teilhabe am Leben",
-        "questions": {
-          "q1": {
-            "text": "Kann die Person aktiv kommunizieren?",
-            "help": "Sprechen, Hören, Sehen, Gestik, Mimik"
-          },
-          "q2": {
-            "text": "Kann die Person das Telefon benutzen?",
-            "help": "Anrufen tätigen/entgegennehmen, Nachrichten verstehen"
-          },
-          "q3": {
-            "text": "Kann die Person soziale Kontakte pflegen?",
-            "help": "Besuche, Gespräche, Teilnahme am Gemeindeleben"
-          },
-          "q4": {
-            "text": "Kann die Person Freizeitaktivitäten ausüben?",
-            "help": "Hobbys, Interessen, körperliche Aktivitäten"
-          }
-        }
-      }
-    },
-    "results": {
-      "title": "Ihr Ergebnis",
-      "subtitle": "Basierend auf Ihren Angaben",
-      "gradeLabel": "Möglicher Pflegegrad",
-      "gradeDescription": "Hinweis: Dies ist eine Orientierung. Die endgültige Feststellung erfolgt durch den MDK.",
-      "pointsLabel": "Punkte",
-      "recommendation": "Empfohlene nächste Schritte",
-      "downloadReport": "Bericht herunterladen",
-      "newCalculation": "Neue Berechnung",
-      "consultation": "Kostenlose Beratung buchen",
-      "grades": {
-        "0": "Kein Pflegegrad",
-        "1": "Pflegegrad 1",
-        "2": "Pflegegrad 2",
-        "3": "Pflegegrad 3",
-        "4": "Pflegegrad 4",
-        "5": "Pflegegrad 5"
-      },
-      "explanations": {
-        "0": "Es liegen keine Pflegebedürftigkeit vor.",
-        "1": "Geringe Pflegebedürftigkeit (ab 27 Punkte)",
-        "2": "Erhebliche Pflegebedürftigkeit (ab 47 Punkte)",
-        "3": "Schwere Pflegebedürftigkeit (ab 72 Punkte)",
-        "4": "Schwerste Pflegebedürftigkeit (ab 95 Punkte)",
-        "5": "Schwerste Pflegebedürftigkeit mit besonderen Anforderungen (ab 115 Punkte)"
-      }
+    "start": {
+      "loadTitle": "Vorhandenen Fall laden",
+      "loadDescription": "Haben Sie bereits einen Fallcode?",
+      "loadInputLabel": "Fallcode eingeben",
+      "loadButton": "Fall laden & prüfen",
+      "loadButtonLoading": "Prüfe Status...",
+      "newTitle": "Neuen Fall starten",
+      "newDescription": "Kostenlose Pflegegrad-Einschätzung beginnen",
+      "newText": "Starten Sie ein vollkommen anonymes und kostenfreies Verfahren. Es wird ein verschlüsselter Code generiert, unter dem Ihre Angaben DSGVO-konform gesichert werden.",
+      "newButton": "Kostenlos starten",
+      "newButtonLoading": "Wird erstellt..."
     }
   },
   "briefe": {

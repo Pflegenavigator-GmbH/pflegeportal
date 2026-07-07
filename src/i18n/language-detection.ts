@@ -3,14 +3,14 @@
 /**
  * Language detection utilities for automatic language selection
  */
-import { supportedLanguages } from './languages'
+import { supportedLanguages } from './languages';
 
 export type LanguageInfo = {
-  code: string
-  name: string
-  nativeName: string
-  rtl: boolean
-}
+  code: string;
+  name: string;
+  nativeName: string;
+  rtl: boolean;
+};
 
 const languageCodeMap: Record<string, string> = {
   de: 'de',
@@ -139,79 +139,81 @@ const languageCodeMap: Record<string, string> = {
 
   is: 'is',
   'is-is': 'is',
-}
+};
 
-const STORAGE_KEY = 'pflegenavigator-language'
+const STORAGE_KEY = 'pflegenavigator-language';
 
 export function isSupportedLanguage(code: string): boolean {
-  return supportedLanguages.some((lang) => lang.code === code.toLowerCase())
+  return supportedLanguages.some((lang) => lang.code === code.toLowerCase());
 }
 
 export function getLanguageInfo(code: string) {
-  return supportedLanguages.find((lang) => lang.code === code.toLowerCase())
+  return supportedLanguages.find((lang) => lang.code === code.toLowerCase());
 }
 
 export function detectBrowserLanguage(): string {
   if (typeof navigator === 'undefined') {
-    return 'de'
+    return 'de';
   }
 
-  const browserLanguages = navigator.languages || [navigator.language]
+  const browserLanguages = navigator.languages || [navigator.language];
 
   for (const lang of browserLanguages) {
-    const normalized = languageCodeMap[lang.toLowerCase()]
+    if (typeof lang !== 'string') continue;
+
+    const normalized = languageCodeMap[lang.toLowerCase()];
     if (normalized && isSupportedLanguage(normalized)) {
-      return normalized
+      return normalized;
     }
 
-    const baseLang = lang.split('-')[0].toLowerCase()
+    const baseLang = lang.split('-')[0].toLowerCase();
     if (isSupportedLanguage(baseLang)) {
-      return baseLang
+      return baseLang;
     }
   }
 
-  return 'de'
+  return 'de';
 }
 
 export function getFallbackChain(preferredLang: string): string[] {
-  const chain: string[] = []
+  const chain: string[] = [];
 
   if (isSupportedLanguage(preferredLang)) {
-    chain.push(preferredLang)
+    chain.push(preferredLang);
   }
 
-  if (preferredLang !== 'de') chain.push('de')
-  if (preferredLang !== 'en') chain.push('en')
+  if (preferredLang !== 'de') chain.push('de');
+  if (preferredLang !== 'en') chain.push('en');
 
-  return chain
+  return chain;
 }
 
 export function getStoredLanguage(): string | null {
   if (typeof localStorage === 'undefined') {
-    return null
+    return null;
   }
 
-  return localStorage.getItem(STORAGE_KEY)
+  return localStorage.getItem(STORAGE_KEY);
 }
 
 export function storeLanguage(code: string): void {
   if (typeof localStorage === 'undefined') {
-    return
+    return;
   }
 
-  localStorage.setItem(STORAGE_KEY, code)
+  localStorage.setItem(STORAGE_KEY, code);
 }
 
 export function detectLanguage(): string {
-  const stored = getStoredLanguage()
+  const stored = getStoredLanguage();
   if (stored && isSupportedLanguage(stored)) {
-    return stored
+    return stored;
   }
 
-  const browserLang = detectBrowserLanguage()
+  const browserLang = detectBrowserLanguage();
   if (isSupportedLanguage(browserLang)) {
-    return browserLang
+    return browserLang;
   }
 
-  return 'de'
+  return 'de';
 }

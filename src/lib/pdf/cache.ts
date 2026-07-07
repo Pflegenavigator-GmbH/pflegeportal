@@ -1,36 +1,43 @@
-interface CacheEntry {
-    buffer: Uint8Array;
-    expiresAt: number;
-}
+import { logger } from '@/src/lib/logger';
+import { CacheEntry } from '@/src/types/cache'; // Falls du es auslagerst
 
 class PdfRamCache {
-    // Streng typisierter In-Memory-Speicher
-    private cache = new Map<string, CacheEntry>();
-    // Cache-Gültigkeit: 10 Minuten reichen vollkommen für Mehrfach-Downloads
-    private TTL = 10 * 60 * 1000;
+  private cache = new Map<string, CacheEntry>();
+  private TTL = 10 * 60 * 1000;
 
-    get(caseCode: string): Uint8Array | null {
-        const entry = this.cache.get(caseCode.toUpperCase());
-        if (!entry) return null;
+  get(caseCode: string): Uint8Array | null {
+    const key = caseCode.toUpperCase();
+    const entry = this.cache.get(key);
 
-        if (Date.now() > entry.expiresAt) {
-            this.cache.delete(caseCode.toUpperCase());
-            return null;
-        }
-        return entry.buffer;
+    if (!entry) {
+      logger.debug({ caseCode: key }, 'Cache-Miss: Kein Eintrag gefunden');
+      return null;
     }
 
-    set(caseCode: string, buffer: Uint8Array): void {
-        this.cache.set(caseCode.toUpperCase(), {
-            buffer,
-            expiresAt: Date.now() + this.TTL
-        });
+    if (Date.now() > entry.expiresAt) {
+      logger.info({ caseCode: key }, 'Cache-Miss: Eintrag abgelaufen (TTL überschritten)');
+      this.cache.delete(key);
+      return null;
     }
 
-    clear(caseCode: string): void {
-        this.cache.delete(caseCode.toUpperCase());
-    }
+    logger.debug({ caseCode: key }, 'Cache-Hit: PDF aus RAM geladen');
+    return entry.buffer;
+  }
+
+  set(caseCode: string, buffer: Uint8Array): void {
+    const key = caseCode.toUpperCase();
+    this.cache.set(key, {
+      buffer,
+      expiresAt: Date.now() + this.TTL,
+    });
+    logger.debug({ caseCode: key, size: buffer.length }, 'Cache-Set: PDF in RAM gespeichert');
+  }
+
+  clear(caseCode: string): void {
+    const key = caseCode.toUpperCase();
+    this.cache.delete(key);
+    logger.info({ caseCode: key }, 'Cache-Clear: Eintrag manuell gelöscht');
+  }
 }
 
-// Export als globaler Singleton
 export const pdfRamCache = new PdfRamCache();

@@ -1,42 +1,7 @@
 // src/types/briefe.ts
-export type BriefType =
-    | 'antrag-pflegegrad'
-    | 'widerspruch-pflegegrad'
-    | 'versorgungsamt'
-    | 'em-rente'
-    | 'schwerbehindertenausweis'
-    | 'betreuungsrecht'
-    | 'erbrecht'
-    | 'allgemein';
+import { BriefPayload as GeneratedBriefPayload } from './briefe-schema';
 
-export interface BriefAdresse {
-    name: string;
-    vorname?: string;
-    strasse: string;
-    plz: string;
-    ort: string;
-    telefon?: string;
-    email?: string;
-    geburtsdatum?: string;
-    versichertennummer?: string;
-    sozialversicherungsnummer?: string;
-}
-
-export interface BriefInhalt {
-    betreff: string;
-    anrede: string;
-    einleitung?: string;
-    hauptteil: string;
-    schluss?: string;
-}
-
-export interface BriefPayload {
-    type: BriefType;
-    absender: BriefAdresse;
-    empfaenger: BriefAdresse;
-    betreff: string;
-    inhalt: BriefInhalt;
-    anlagen?: string[];
-    aktenzeichen?: string;
-    verfahrensart?: string;
-}
+export type BriefPayload = GeneratedBriefPayload;
+export type BriefAdresse = BriefPayload['absender'];
+export type BriefInhalt = BriefPayload['inhalt'];
+export type BriefType = BriefPayload['type'];

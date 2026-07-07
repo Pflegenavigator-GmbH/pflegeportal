@@ -1,217 +1,184 @@
 {
-  "title": "Pflegegrad berechnen",
-  "subtitle": "Beantworten Sie einige Fragen. Wir berechnen Ihren möglichen Pflegegrad.",
+  "title": "Pflegegrad-Leistungsanalyse",
+  "subtitle": "Orientierungsgutachten nach den offiziellen NBA-Begutachtungsrichtlinien (§ 14 SGB XI)",
   "simpleLanguage": {
     "label": "Leichte Sprache",
-    "description": "Einfache Wörter und kurze Sätze"
+    "description": "Einfache Wörter und kurze Sätze für eine barrierefreie Erfassung."
   },
   "modules": {
-    "mobilitaet": {
-      "title": "Mobilität",
-      "subtitle": "Gehen und sich bewegen",
-      "simple": "Können Sie gut laufen? Oder brauchen Sie Hilfe beim Gehen?",
+    "modul1": {
+      "title": "Modul 1: Mobilität",
+      "subtitle": "Gewichtung im Gesamtverfahren: 10%",
       "questions": {
-        "laufen": {
-          "label": "Gehen und Laufen",
-          "simple": "Können Sie alleine gehen?",
-          "options": {
-            "selbst": "Ich kann alleine gehen",
-            "hilfe": "Ich brauche manchmal Hilfe",
-            "nicht": "Ich kann nicht alleine gehen"
-          }
+        "m1_1": {
+          "label": "Positionswechsel im Bett",
+          "simple": "Können Sie sich im Bett alleine umdrehen oder aufsetzen?",
+          "hilfe": "Ermittelt die Fähigkeit, die Liegeposition selbstständig anzupassen."
         },
-        "treppen": {
-          "label": "Treppen steigen",
-          "simple": "Können Sie Treppen steigen?",
-          "options": {
-            "selbst": "Keine Probleme",
-            "teilweise": "Ich brauche Hilfe",
-            "nicht": "Geht nicht"
-          }
+        "m1_2": {
+          "label": "Halten einer stabilen Sitzposition",
+          "simple": "Können Sie sicher auf der Bettkante oder einem Stuhl sitzen?",
+          "hilfe": "Sicherheit beim Halten der Balance im Raum ohne fremde Hilfe."
         },
-        "rollstuhl": {
-          "label": "Rollstuhl",
-          "simple": "Brauchen Sie einen Rollstuhl?",
-          "options": {
-            "nein": "Nein",
-            "manchmal": "Manchmal",
-            "immer": "Immer"
-          }
+        "m1_3": {
+          "label": "Fortbewegen innerhalb des Wohnbereichs",
+          "simple": "Können Sie alleine in Ihrer Wohnung von Raum zu Raum gehen?",
+          "hilfe": "Überwinden von Strecken innerhalb der gewohnten häuslichen Umgebung."
+        },
+        "m1_4": {
+          "label": "Treppensteigen",
+          "simple": "Können Sie Stufen und Treppen steigen?",
+          "hilfe": "Überwinden von Etagen, ggf. unter Nutzung eines Handlaufs."
         }
       }
     },
-    "koerperpflege": {
-      "title": "Körperpflege",
-      "subtitle": "Waschen und Anziehen",
-      "simple": "Können Sie sich alleine waschen und anziehen?",
+    "modul2": {
+      "title": "Modul 2: Kognitive Fähigkeiten",
+      "subtitle": "Gewichtung: 15% (Höchstwertprinzip mit Modul 3)",
       "questions": {
-        "waschen": {
-          "label": "Körper waschen",
-          "simple": "Können Sie sich alleine waschen?",
-          "options": {
-            "selbst": "Ja, alleine",
-            "teilweise": "Manchmal Hilfe nötig",
-            "nicht": "Brauche immer Hilfe"
-          }
+        "m2_1": {
+          "label": "Personen aus dem näheren Umfeld erkennen",
+          "simple": "Erkennen Sie Familie, Freunde oder Nachbarn ohne Probleme?",
+          "hilfe": "Werden vertraute Personen zweifelsfrei identifiziert?"
         },
-        "zaehne": {
-          "label": "Zähne putzen",
-          "simple": "Können Sie Ihre Zähne putzen?",
-          "options": {
-            "selbst": "Ja",
-            "teilweise": "Manchmal",
-            "nicht": "Nein"
-          }
+        "m2_2": {
+          "label": "Örtliche Orientierung",
+          "simple": "Wissen Sie genau, wo Sie sind und finden Sie sich in der Wohnung zurecht?",
+          "hilfe": "Zurechtfinden in der eigenen Wohnung oder der gewohnten Umgebung."
         },
-        "anziehen": {
-          "label": "An- und Ausziehen",
-          "simple": "Können Sie sich alleine anziehen?",
-          "options": {
-            "selbst": "Ja",
-            "teilweise": "Manchmal",
-            "nicht": "Nein"
-          }
+        "m2_3": {
+          "label": "Zeitliche Orientierung",
+          "simple": "Wissen Sie, welchen Tag, welchen Monat und welches Jahr wir haben?",
+          "hilfe": "Können Tageszeit, Wochentag und Jahreszeit korrekt benannt werden?"
+        },
+        "m2_4": {
+          "label": "Erinnern an wesentliche Ereignisse",
+          "simple": "Können Sie sich wichtige Dinge oder Termine gut merken?",
+          "hilfe": "Werden wichtige Erlebnisse oder Vereinbarungen (z.B. Arztbesuche) behalten?"
+        },
+        "m2_5": {
+          "label": "Steuerung von Alltagshandlungen",
+          "simple": "Können Sie Ihren Tag normal planen und Aufgaben nacheinander erledigen?",
+          "hilfe": "Können mehrschrittige Alltagsaktivitäten selbstständig umgesetzt werden?"
         }
       }
     },
-    "ernaehrung": {
-      "title": "Ernährung",
-      "subtitle": "Essen und Trinken",
-      "simple": "Können Sie alleine essen und trinken?",
+    "modul3": {
+      "title": "Modul 3: Verhaltensweisen & Psyche",
+      "subtitle": "Gewichtung: 15% (Höchstwertprinzip mit Modul 2)",
       "questions": {
-        "essen": {
-          "label": "Essen",
-          "simple": "Können Sie alleine essen?",
-          "options": {
-            "selbst": "Ja",
-            "teilweise": "Manchmal Hilfe",
-            "nicht": "Brauche Hilfe"
-          }
+        "m3_1": {
+          "label": "Motorisch geprägte Verhaltensweisen",
+          "simple": "Laufen Sie manchmal ziellos umher oder wollen weglaufen?",
+          "hilfe": "Z.B. zielloses Herumlaufen, Aufstehen und Niedersetzen, Weglauf-Tendenzen."
         },
-        "trinken": {
-          "label": "Trinken",
-          "simple": "Können Sie alleine trinken?",
-          "options": {
-            "selbst": "Ja",
-            "teilweise": "Manchmal",
-            "nicht": "Brauche Hilfe"
-          }
-        }
-      }
-    },
-    "toilette": {
-      "title": "Toilette",
-      "subtitle": "Auf die Toilette gehen",
-      "simple": "Können Sie alleine auf die Toilette gehen?",
-      "questions": {
-        "toilette": {
-          "label": "Toilettengang",
-          "simple": "Können Sie alleine auf die Toilette?",
-          "options": {
-            "selbst": "Ja",
-            "teilweise": "Manchmal",
-            "nicht": "Brauche Hilfe"
-          }
+        "m3_2": {
+          "label": "Nächtliche Unruhe",
+          "simple": "Können Sie nachts schlecht schlafen, wandern umher oder rufen nach Hilfe?",
+          "hilfe": "Wird der Tag-Nacht-Rhythmus gestört? Nächtliches Umherwandern oder Rufen."
         },
-        "inkontinenz": {
-          "label": "Hilfe bei Inkontinenz",
-          "simple": "Brauchen Sie Windeln?",
-          "options": {
-            "nein": "Nein",
-            "manchmal": "Manchmal",
-            "immer": "Ja, immer"
-          }
+        "m3_3": {
+          "label": "Selbstschädigendes Verhalten",
+          "simple": "Tun Sie sich manchmal selbst weh oder verweigern Essen und Trinken?",
+          "hilfe": "Z.B. Kratzen, Schlagen, Verweigerung von Nahrung oder Flüssigkeit."
+        },
+        "m3_4": {
+          "label": "Abwehr von pflegerischen Maßnahmen",
+          "simple": "Wehren Sie sich manchmal, wenn man Ihnen beim Waschen oder Anziehen helfen will?",
+          "hilfe": "Gibt es verbalen oder physischen Widerstand bei der Pflege."
         }
       }
     },
-    "schlaf": {
-      "title": "Schlaf",
-      "subtitle": "Nachts aufwachen",
-      "simple": "Brauchen Sie nachts Hilfe?",
+    "modul4": {
+      "title": "Modul 4: Selbstversorgung",
+      "subtitle": "Gewichtung: 40% – Die wichtigste Kategorie im NBA-Verfahren!",
       "questions": {
-        "nacht": {
-          "label": "Nächtliche Hilfe",
-          "simple": "Wachen Sie nachts auf? Brauchen Sie dann Hilfe?",
-          "options": {
-            "nein": "Nein",
-            "manchmal": "Manchmal",
-            "oft": "Oft"
-          }
+        "m4_1": {
+          "label": "Waschen des Oberkörpers und Intimbereichs",
+          "simple": "Können Sie sich am Waschbecken oder in der Dusche alleine waschen?",
+          "hilfe": "Können Sie sich am Waschbecken oder in der Dusche selbstständig reinigen?"
+        },
+        "m4_2": {
+          "label": "Zähneputzen, Kämmen, Rasieren",
+          "simple": "Klappt die tägliche Mund-, Haar- und Gesichtspflege ohne Hilfe?",
+          "hilfe": "Können Sie die tägliche Mund- und Haarausrüstung eigenständig durchführen?"
+        },
+        "m4_3": {
+          "label": "Mundgerechtes Zubereiten & Aufnehmen von Speisen",
+          "simple": "Können Sie Ihr Brot schneiden und das Essen normal zum Mund führen?",
+          "hilfe": "Können Sie Brot schneiden, Nahrung zum Mund führen, kauen und schlucken?"
+        },
+        "m4_4": {
+          "label": "Nutzen einer Toilette",
+          "simple": "Können Sie alleine auf die Toilette gehen, sich sauber machen und die Kleidung richten?",
+          "hilfe": "Können Sie sich hinsetzen, aufstehen, die Kleidung richten und sich säubern?"
+        },
+        "m4_5": {
+          "label": "An- und Auskleiden des Oberkörpers",
+          "simple": "Können Sie Pullover, Hemden oder Jacken alleine anziehen?",
+          "hilfe": "Können Sie Hemden, Pullover oder Unterwäsche selbstständig an- und ablegen?"
+        },
+        "m4_6": {
+          "label": "An- und Auskleiden des Unterkörpers",
+          "simple": "Können Sie Hosen, Socken und Schuhe ohne fremde Hilfe anziehen?",
+          "hilfe": "Können Sie Hosen, Socken und Schuhe ohne fremde Hilfe anziehen?"
         }
       }
     },
-    "haushalt": {
-      "title": "Haushalt",
-      "subtitle": "Hausarbeit",
-      "simple": "Können Sie Hausarbeit machen?",
+    "modul5": {
+      "title": "Modul 5: Krankheitsbewältigung",
+      "subtitle": "Gewichtung: 20% – Eigenständigkeit bei medizinischen Vorgaben",
       "questions": {
+        "m5_1": {
+          "label": "Medikation",
+          "simple": "Können Sie Ihre Tabletten alleine zur richtigen Zeit einnehmen?",
+          "hilfe": "Können Medikamente rechtzeitig und in der richtigen Dosierung genommen werden?"
+        },
+        "m5_2": {
+          "label": "Injektionen, Infusionen, Absaugen",
+          "simple": "Können Sie medizinische Dinge wie Blutzuckermessen oder Spritzen alleine machen?",
+          "hilfe": "Können medizinische Maßnahmen eigenständig durchgeführt werden?"
+        },
+        "m5_3": {
+          "label": "Arzt- und Therapiebesuche",
+          "simple": "Können Sie Termine beim Arzt ausmachen und alleine dorthin kommen?",
+          "hilfe": "Können Termine koordiniert und der Weg zur Praxis bewältigt werden?"
+        },
+        "m5_4": {
+          "label": "Einhaltung von Diäten und Einschränkungen",
+          "simple": "Können Sie verordnete Diäten oder Verbote vom Arzt im Alltag alleine einhalten?",
+          "hilfe": "Können verordnete Gesundheitsvorgaben im Alltag eingehalten werden?"
+        }
+      }
+    },
+    "modul6": {
+      "title": "Modul 6: Alltagsgestaltung",
+      "subtitle": "Rechtlicher Kontext: SGB XI Widerspruchs-Sicherung",
+      "questions": {
+        "haushalt": {
+          "label": "Hauswirtschaftliche Versorgung",
+          "simple": "Wer putzt die Wohnung und wäscht die Wäsche?",
+          "hilfe": "Erledigung sämtlicher Reinigungsarbeiten im häuslichen Umfeld."
+        },
         "einkaufen": {
-          "label": "Einkaufen",
-          "simple": "Können Sie einkaufen gehen?",
-          "options": {
-            "selbst": "Ja",
-            "teilweise": "Manchmal",
-            "nicht": "Nein"
-          }
+          "label": "Einkäufe des täglichen Bedarfs",
+          "simple": "Können Sie Lebensmittel und wichtige Dinge alleine einkaufen?",
+          "hilfe": "Sucht Geschäfte eigenständig auf und transportiert Waren nach Hause."
         },
         "kochen": {
-          "label": "Kochen",
-          "simple": "Können Sie kochen?",
-          "options": {
-            "selbst": "Ja",
-            "teilweise": "Manchmal",
-            "nicht": "Nein"
-          }
-        }
-      }
-    },
-    "kognitive": {
-      "title": "Denken und Erinnern",
-      "subtitle": "Demenz und Verwirrtheit",
-      "simple": "Haben Sie Probleme mit dem Gedächtnis?",
-      "questions": {
-        "gedaechtnis": {
-          "label": "Gedächtnis",
-          "simple": "Vergessen Sie Dinge?",
-          "options": {
-            "nein": "Nein",
-            "manchmal": "Manchmal",
-            "oft": "Oft"
-          }
+          "label": "Zubereitung von Mahlzeiten",
+          "simple": "Können Sie sich selbstständig warmes oder kaltes Essen kochen?",
+          "hilfe": "Zubereitung von warmen und kalten Mahlzeiten sowie Reinigung der Küche."
         },
-        "verwirrung": {
-          "label": "Verwirrung",
-          "simple": "Sind Sie manchmal verwirrt?",
-          "options": {
-            "nein": "Nein",
-            "manchmal": "Manchmal",
-            "oft": "Oft"
-          }
-        }
-      }
-    },
-    "kommunikation": {
-      "title": "Kommunikation",
-      "subtitle": "Sprechen und Verstehen",
-      "simple": "Können Sie gut sprechen und verstehen?",
-      "questions": {
-        "sprechen": {
-          "label": "Sprechen",
-          "simple": "Können Sie gut sprechen?",
-          "options": {
-            "ja": "Ja",
-            "teilweise": "Manchmal schwierig",
-            "nein": "Nein"
-          }
+        "finanzen": {
+          "label": "Finanzielle Angelegenheiten",
+          "simple": "Regeln Sie Geldgeschäfte, Überweisungen und Post normal alleine?",
+          "hilfe": "Regelt Überweisungen, Verträge, Bargeld und Postverkehr fehlerfrei."
         },
-        "verstehen": {
-          "label": "Verstehen",
-          "simple": "Verstehen Sie andere?",
-          "options": {
-            "ja": "Ja",
-            "teilweise": "Manchmal",
-            "nein": "Nein"
-          }
+        "entscheidungen": {
+          "label": "Zukunftsrelevante Entscheidungen",
+          "simple": "Können Sie wichtige Entscheidungen für Ihr Leben noch alleine treffen?",
+          "hilfe": "Trifft medizinische und organisatorische Entscheidungen sicher selbst."
         }
       }
     }

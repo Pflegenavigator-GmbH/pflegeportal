@@ -1,5 +1,5 @@
 /** Supabase Usage Monitoring Module
- *  Monitors Free Tier limits and alerts on thresholds
+ * Monitors Free Tier limits and alerts on thresholds
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
@@ -13,12 +13,12 @@ interface SupabaseMonitorConfig {
   emailTo?: string;
   emailFrom?: string;
   quietHoursStart: number; // 23 = 11 PM
-  quietHoursEnd: number;   // 7 = 7 AM
+  quietHoursEnd: number; // 7 = 7 AM
 }
 
 interface UsageStats {
-  databaseSize: number;    // bytes
-  storageSize: number;     // bytes
+  databaseSize: number; // bytes
+  storageSize: number; // bytes
   edgeFunctionInvocations: number;
   authUsers: number;
   connections: {
@@ -76,13 +76,13 @@ export class SupabaseUsageMonitor {
       const stats = await this.fetchUsageStats();
       await this.evaluateAlerts(stats);
       this.saveAlertState();
-      
+
       console.log('[Supabase Monitor] Check completed successfully');
     } catch (error) {
       console.error('[Supabase Monitor] Error during usage check:', error);
       await this.sendAlert(
         '❌ Supabase Monitor Error',
-        `Fehler beim Abrufen der Nutzungsdaten:\n${error}`,
+        `Fehler beim Abrufen der Nutzungsdaten:\n${error instanceof Error ? error.message : String(error)}`,
         'high'
       );
     }
@@ -93,9 +93,8 @@ export class SupabaseUsageMonitor {
    */
   private async fetchUsageStats(): Promise<UsageStats> {
     // Database size query
-    const { data: dbSizeData, error: dbSizeError } = await this.supabase
-      .rpc('get_database_size');
-    
+    const { data: dbSizeData, error: dbSizeError } = await this.supabase.rpc('get_database_size');
+
     if (dbSizeError) {
       console.warn('[Supabase Monitor] Could not fetch DB size:', dbSizeError);
     }
@@ -106,10 +105,13 @@ export class SupabaseUsageMonitor {
       .select('*')
       .limit(1);
 
+    // LÖSUNG WARNING: dbSizeQueryError nutzen, damit der Linter nicht meckert
+    if (dbSizeQueryError) {
+      console.warn('[Supabase Monitor] Alternative DB size query failed:', dbSizeQueryError);
+    }
+
     // Storage usage (requires storage API)
-    const { data: storageData } = await this.supabase
-      .storage
-      .listBuckets();
+    const { data: storageData } = await this.supabase.storage.listBuckets();
 
     // Auth users count
     const { count: userCount, error: userError } = await this.supabase
@@ -121,8 +123,7 @@ export class SupabaseUsageMonitor {
     }
 
     // Connection pool info (via pg_stat_activity)
-    const { data: connectionData } = await this.supabase
-      .rpc('get_connection_stats');
+    const { data: connectionData } = await this.supabase.rpc('get_connection_stats');
 
     // Construct stats object
     const stats: UsageStats = {
@@ -147,18 +148,16 @@ export class SupabaseUsageMonitor {
   /**
    * Calculate total storage size across all buckets
    */
-  private async calculateStorageSize(buckets: any[] | null): Promise<number> {
+  // LÖSUNG ANY: Sauberes Interface definieren, das ein name-Attribut erwartet
+  private async calculateStorageSize(buckets: Array<{ name: string }> | null): Promise<number> {
     let totalSize = 0;
-    
+
     if (!buckets) return totalSize;
 
     for (const bucket of buckets) {
       try {
-        const { data: files } = await this.supabase
-          .storage
-          .from(bucket.name)
-          .list();
-        
+        const { data: files } = await this.supabase.storage.from(bucket.name).list();
+
         // This is simplified - actual size calculation would need file metadata
         totalSize += files?.length || 0;
       } catch (e) {
@@ -180,7 +179,7 @@ export class SupabaseUsageMonitor {
     if (dbSizePercent >= ALERT_THRESHOLDS.DATABASE_SIZE_PERCENT) {
       const alertKey = 'database_size_alert';
       const today = new Date().toISOString().split('T')[0];
-      
+
       if (!this.hasAlertBeenSent(alertKey, today)) {
         const message = this.formatDatabaseAlert(dbSizeMB, dbSizePercent);
         await this.sendAlert('⚠️ Supabase Database Size Warning', message, 'high');
@@ -193,7 +192,7 @@ export class SupabaseUsageMonitor {
     if (connectionPercent >= ALERT_THRESHOLDS.CONNECTION_POOL_PERCENT) {
       const alertKey = 'connection_pool_alert';
       const today = new Date().toISOString().split('T')[0];
-      
+
       if (!this.hasAlertBeenSent(alertKey, today)) {
         const message = this.formatConnectionAlert(stats.connections.active, connectionPercent);
         await this.sendAlert('⚠️ Supabase Connection Pool Warning', message, 'high');
@@ -203,14 +202,15 @@ export class SupabaseUsageMonitor {
 
     // Critical threshold (95%)
     if (dbSizePercent >= 95) {
-      const message = `🆘 **Kritischer Speicherplatz!**\n\n` +
+      const message =
+        `🆘 **Kritischer Speicherplatz!**\n\n` +
         `Datenbank: ${dbSizeMB.toFixed(2)}MB / ${FREE_TIER_LIMITS.DATABASE_SIZE_MB}MB (${dbSizePercent.toFixed(1)}%)\n\n` +
         `**Sofortige Maßnahmen erforderlich:**\n` +
         `• Alte Logs löschen\n` +
         `• Unnötige Daten archivieren\n` +
         `• Datenbank aufräumen (VACUUM)\n` +
         `• Upgrade auf Pro prüfen`;
-      
+
       await this.sendAlert('🆘 SUPABASE CRITICAL', message, 'high');
     }
 
@@ -223,14 +223,16 @@ export class SupabaseUsageMonitor {
    */
   private formatDatabaseAlert(sizeMB: number, percent: number): string {
     const remainingMB = FREE_TIER_LIMITS.DATABASE_SIZE_MB - sizeMB;
-    
-    return `Datenbank-Nutzung: ${sizeMB.toFixed(2)}MB / ${FREE_TIER_LIMITS.DATABASE_SIZE_MB}MB (${percent.toFixed(1)}%)\n\n` +
+
+    return (
+      `Datenbank-Nutzung: ${sizeMB.toFixed(2)}MB / ${FREE_TIER_LIMITS.DATABASE_SIZE_MB}MB (${percent.toFixed(1)}%)\n\n` +
       `*Verbleibend:* ${remainingMB.toFixed(2)}MB\n\n` +
       `*Empfohlene Aktionen:*\n` +
       `• Alte Logs und Events archivieren\n` +
       `• Temporäre Tabellen aufräumen\n` +
       `• Indizes optimieren (REINDEX)\n` +
-      `• Nicht benutzte Daten löschen`;
+      `• Nicht benutzte Daten löschen`
+    );
   }
 
   /**
@@ -238,14 +240,16 @@ export class SupabaseUsageMonitor {
    */
   private formatConnectionAlert(active: number, percent: number): string {
     const remaining = FREE_TIER_LIMITS.CONNECTION_POOL_SIZE - active;
-    
-    return `Connection Pool: ${active} / ${FREE_TIER_LIMITS.CONNECTION_POOL_SIZE} (${percent.toFixed(1)}%)\n\n` +
+
+    return (
+      `Connection Pool: ${active} / ${FREE_TIER_LIMITS.CONNECTION_POOL_SIZE} (${percent.toFixed(1)}%)\n\n` +
       `*Verfügbar:* ${remaining} Verbindungen\n\n` +
       `*Empfohlene Aktionen:*\n` +
       `• Connection Pooling prüfen\n` +
       `• Datenbank-Verbindungen optimieren\n` +
       `• Idle Connections schließen\n` +
-      `• Connection Timeout anpassen`;
+      `• Connection Timeout anpassen`
+    );
   }
 
   /**
@@ -253,7 +257,7 @@ export class SupabaseUsageMonitor {
    */
   private async sendDailyReport(stats: UsageStats): Promise<void> {
     const today = new Date().toISOString().split('T')[0];
-    
+
     if (this.alertState.dailyReportSent === today) {
       return; // Already sent today
     }
@@ -262,7 +266,8 @@ export class SupabaseUsageMonitor {
     const dbPercent = (dbSizeMB / FREE_TIER_LIMITS.DATABASE_SIZE_MB) * 100;
     const storageGB = stats.storageSize / (1024 * 1024 * 1024);
 
-    const message = `📊 Supabase Daily Report\n\n` +
+    const message =
+      `📊 Supabase Daily Report\n\n` +
       `*Datenbank:* ${dbSizeMB.toFixed(2)}MB / ${FREE_TIER_LIMITS.DATABASE_SIZE_MB}MB (${dbPercent.toFixed(1)}%)\n` +
       `*Storage:* ${storageGB.toFixed(2)}GB / ${FREE_TIER_LIMITS.STORAGE_SIZE_GB}GB\n` +
       `*Connections:* ${stats.connections.active} / ${FREE_TIER_LIMITS.CONNECTION_POOL_SIZE}\n` +
@@ -276,9 +281,13 @@ export class SupabaseUsageMonitor {
   /**
    * Send alert via Telegram and/or Email
    */
-  private async sendAlert(title: string, message: string, priority: 'high' | 'normal' = 'normal'): Promise<void> {
+  private async sendAlert(
+    title: string,
+    message: string,
+    priority: 'high' | 'normal' = 'normal'
+  ): Promise<void> {
     const isQuietHours = this.isQuietHours();
-    
+
     if (isQuietHours && priority !== 'high') {
       console.log(`[Supabase Monitor] Quiet hours - skipping ${priority} alert`);
       return;
@@ -302,12 +311,16 @@ export class SupabaseUsageMonitor {
   /**
    * Send Telegram alert
    */
-  private async sendTelegramAlert(title: string, message: string, priority: 'high' | 'normal'): Promise<void> {
+  private async sendTelegramAlert(
+    title: string,
+    message: string,
+    priority: 'high' | 'normal'
+  ): Promise<void> {
     const escapedTitle = title.replace(/[_*\[\]()~`>#+=|{}.!-]/g, '\\$&');
     const escapedMessage = message.replace(/[_*\[\]()~`>#+=|{}.!-]/g, '\\$&');
-    
+
     const fullMessage = `*${escapedTitle}*\n\n${escapedMessage}`;
-    
+
     const url = `https://api.telegram.org/bot${this.config.telegramBotToken}/sendMessage`;
     const response = await fetch(url, {
       method: 'POST',
@@ -331,7 +344,12 @@ export class SupabaseUsageMonitor {
    * Send Email alert (simplified - would use actual email service)
    */
   private async sendEmailAlert(title: string, message: string): Promise<void> {
-    console.log('[Supabase Monitor] Would send email:', { title, to: this.config.emailTo });
+    // LÖSUNG WARNING: message Variable genutzt
+    console.log('[Supabase Monitor] Would send email:', {
+      title,
+      message,
+      to: this.config.emailTo,
+    });
     // Implementation would use SMTP or email service
   }
 
@@ -387,7 +405,7 @@ export class SupabaseUsageMonitor {
     connections: { active: number; limit: number; percent: number };
   }> {
     const stats = await this.fetchUsageStats();
-    
+
     return {
       database: {
         used: stats.databaseSize / (1024 * 1024),
@@ -408,7 +426,8 @@ export class SupabaseUsageMonitor {
   }
 }
 
-// Usage example
+// LÖSUNG WARNING: Die ungenutzte Beispiel-main-Funktion wurde auskommentiert
+/*
 async function main() {
   const monitor = new SupabaseUsageMonitor({
     supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -421,6 +440,7 @@ async function main() {
 
   await monitor.checkUsage();
 }
+*/
 
 // Export for use in Next.js API routes or scheduled jobs
 export default SupabaseUsageMonitor;

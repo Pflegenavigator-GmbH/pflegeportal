@@ -1,7 +1,8 @@
 'use client';
 
-import * as React from "react"
-import { cn } from "@/archive/src/lib/utils"
+import * as React from 'react';
+
+import { cn } from '@/archive/src/lib/utils';
 
 interface RadioGroupProps {
   value: string;
@@ -18,7 +19,7 @@ const RadioGroupContext = React.createContext<{
 function RadioGroup({ value, onValueChange, children, className }: RadioGroupProps) {
   return (
     <RadioGroupContext.Provider value={{ value, onValueChange }}>
-      <div className={cn("space-y-2", className)}>{children}</div>
+      <div className={cn('space-y-2', className)}>{children}</div>
     </RadioGroupContext.Provider>
   );
 }
@@ -30,9 +31,9 @@ interface RadioGroupItemProps {
   className?: string;
 }
 
-function RadioGroupItem({ value, id, children, className }: RadioGroupItemProps) {
+function RadioGroupItem({ value, id, children }: RadioGroupItemProps) {
   const context = React.useContext(RadioGroupContext);
-  if (!context) throw new Error("RadioGroupItem must be used within RadioGroup");
+  if (!context) throw new Error('RadioGroupItem must be used within RadioGroup');
 
   const isSelected = context.value === value;
 
