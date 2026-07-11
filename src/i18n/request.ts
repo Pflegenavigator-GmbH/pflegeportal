@@ -1,28 +1,29 @@
 // src/i18n/request.ts
 import { AbstractIntlMessages } from 'next-intl';
 import { getRequestConfig } from 'next-intl/server';
-
 import { routing } from './routing';
 
 export default getRequestConfig(async ({ requestLocale }) => {
   const resolvedLocale = await requestLocale;
 
   const locale =
-    resolvedLocale && routing.locales.includes(resolvedLocale as string)
-      ? resolvedLocale
-      : routing.defaultLocale;
+      resolvedLocale && routing.locales.includes(resolvedLocale as string)
+          ? resolvedLocale
+          : routing.defaultLocale;
 
   try {
-    const [commonMessages, pflegegradMessages] = await Promise.all([
+    // 🪄 Erweitere das Promise.all um das neue Startseiten-Modul
+    const [commonMessages, pflegegradMessages, startseiteMessages] = await Promise.all([
       import(`../../public/locales/${locale}/common.json`).then((m) => m.default),
-      import(`../../public/locales/${locale}/pflegegrad.json`)
-        .then((m) => m.default)
-        .catch(() => ({})),
+      import(`../../public/locales/${locale}/pflegegrad.json`).then((m) => m.default).catch(() => ({})),
+      import(`../../public/locales/${locale}/startseite.json`).then((m) => m.default).catch(() => ({})),
     ]);
 
+    // Alle Namespaces sauber im Client-Provider mergen
     const combinedMessages = {
       ...commonMessages,
       ...pflegegradMessages,
+      ...startseiteMessages,
     };
 
     return {

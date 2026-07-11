@@ -1,219 +1,189 @@
-// src/app/[locale]/page.tsx
 'use client';
 
 import {
   Shield,
   Calculator,
   FileText,
-  HelpCircle,
   ArrowRight,
   Clock,
   Users,
   Stethoscope,
   FolderOpen,
+  MessageCircle,
+  BookOpen,
+  Smartphone,
+  Sparkles,
+  QrCode
 } from 'lucide-react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
-import { Button } from '@/src/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/src/components/ui/card';
+// 🪄 Punktlandung: Genau 2 Ebenen hoch bricht in src/styles/ ein
+import styles from '../../styles/page.module.css';
 
 export default function Startseite() {
   const router = useRouter();
-  const params = useParams();
-  const locale = (params?.locale as string) || 'de';
   const [hatAktiveSession, setHatAktiveSession] = useState(false);
+  const [caseCode, setCaseCode] = useState<string | null>(null);
 
   useEffect(() => {
-    // 1. Wert sicher auslesen
     const storedCode = typeof window !== 'undefined' ? localStorage.getItem('case_code') : null;
-
-    // 2. Nur State setzen, wenn ein Code da ist UND der State nicht eh schon true ist
-    if (storedCode && !hatAktiveSession) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (storedCode) {
       setHatAktiveSession(true);
+      setCaseCode(storedCode.toUpperCase());
     }
-  }, [hatAktiveSession]);
+  }, []);
 
-  const handlePflegegradKlick = () => {
-    if (hatAktiveSession) {
-      // 🚀 Automatische Übernahme: Schickt den Nutzer direkt zur bestehenden Analyse
-      router.push(`/${locale}/pflegegrad/ergebnis`);
-    } else {
-      // Kaltstart: Trichter von vorne beginnen
-      router.push(`/${locale}/pflegegrad/start`);
-    }
-  };
+  const funktionen = [
+    {
+      icon: Calculator,
+      title: 'Pflegegrad-Rechner',
+      description: 'Berechnen Sie Ihren Pflegegrad rechtssicher in 6 Modulen gemäß den echten Richtlinien des MDK.',
+      highlight: '15 Min. • Frei',
+    },
+    {
+      icon: FileText,
+      title: 'Widerspruchs-Zentrum',
+      description: 'Erstellen Sie automatisch begründete Widerspruchsschreiben mit allen gesetzlichen Pflichtklauseln.',
+      highlight: '§ 84 SGG Frist',
+    },
+    {
+      icon: MessageCircle,
+      title: 'Avatar-Begleitung „Navi“',
+      description: 'Klären Sie komplexe Fragen im barrierefreien Dialog per Text oder sanfter Audio-Ausgabe.',
+      highlight: 'Kokoro Engine',
+    },
+    {
+      icon: BookOpen,
+      title: 'Digitales Pflegetagebuch',
+      description: 'Dokumentieren Sie Pflegezeiten und Erleichterungen als lückenlosen Hauptbeweis für die MDK-Prüfung.',
+      highlight: 'Export-Fähig',
+    },
+    {
+      icon: QrCode,
+      title: 'Verschlüsseltes QR-System',
+      description: 'Teilen Sie Ihre Fall-Akte ohne Angabe von Namen sicher mit Familienangehörigen oder Ärzten.',
+      highlight: 'DSGVO Safe',
+    },
+    {
+      icon: Smartphone,
+      title: 'Integrierte Multi-Rechner',
+      description: 'GdB-Ermittlung nach VersMedV, SGB XIV Opferentschädigung und steuerliche Pauschbeträge 2026.',
+      highlight: 'Rechtsstand 2026',
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-slate-900 py-12 px-4">
-      <div className="container mx-auto max-w-4xl">
-        {/* Hero */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-[#20b2aa] to-[#3ddbd0] rounded-2xl shadow-2xl mb-6">
-            <Calculator className="w-12 h-12 text-white" />
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">PflegeNavigator EU</h1>
-          <p className="text-xl text-blue-200 max-w-2xl mx-auto">
-            Ihr Weg durch die Pflege - einfach, schnell, kostenlos
-          </p>
-          <div className="mt-6 flex items-center justify-center gap-2 text-blue-300">
-            <Clock className="w-5 h-5" />
-            <span>Nur 15 Minuten statt 2-6 Wochen Wartezeit</span>
-          </div>
-        </div>
+      <div className={styles.pageContainer}>
+        <div className={styles.mainWrapper}>
 
-        {/* 3 Haupt-Options-Karten */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <Card
-            className="bg-white/10 border-white/20 text-white hover:bg-white/20 transition-all cursor-pointer group"
-            onClick={handlePflegegradKlick}
-          >
-            <CardHeader>
-              <div className="w-16 h-16 bg-[#20b2aa] rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                {hatAktiveSession ? (
-                  <FolderOpen className="w-8 h-8 text-white" />
-                ) : (
-                  <Calculator className="w-8 h-8 text-white" />
-                )}
+          {/* 🧠 HERO: Empathischer Scope mit dem warmen Dschungel-Bild */}
+          <section className={styles.heroSection}>
+            <div className={styles.heroContent}>
+              <div className={styles.badge}>
+                <Sparkles className="w-3.5 h-3.5" /> Innovation im Sozialrecht
               </div>
-              <CardTitle className="text-2xl text-white">
-                {hatAktiveSession ? 'Analyse ansehen' : 'Pflegegrad prüfen'}
-              </CardTitle>
-              <CardDescription className="text-blue-200">
-                {hatAktiveSession
-                  ? 'Sie haben eine aktive Analyse im Speicher.'
-                  : 'Finden Sie heraus, welcher Pflegegrad möglich ist.'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button className="w-full bg-[#20b2aa] hover:bg-[#3ddbd0] text-white">
-                {hatAktiveSession ? 'Zur Analyse' : 'Jetzt starten'}{' '}
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
-              <p className="text-sm text-blue-300 mt-3">
-                {hatAktiveSession ? '✓ Laufende Session aktiv' : '✓ Kostenlos & anonym'}
-                <br />
-                ✓ Nur 10 Minuten
-                <br />✓ Mit Ergebnis-PDF
+              <h1 className={styles.heroTitle}>
+                Schluss mit dem <span>Pflege-Dschungel</span>. Wir helfen Ihnen.
+              </h1>
+              <p className={styles.heroText}>
+                Hallo. Ich bin <strong>Navi</strong>, Ihr digitaler Begleiter. Ob Erstbeantragung, Höherstufung oder plötzliche Ablehnung: Wir wandeln unübersichtliche Bürokratie in einen klaren, verständlichen Fahrplan um.
               </p>
-            </CardContent>
-          </Card>
-
-          <Card
-            className="bg-white/10 border-white/20 text-white hover:bg-white/20 transition-all cursor-pointer group flex flex-col justify-between"
-            onClick={() => router.push(`/${locale}/widerspruch`)}
-          >
-            <div>
-              <CardHeader>
-                <div className="w-16 h-16 bg-amber-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <FileText className="w-8 h-8 text-white" />
-                </div>
-                <CardTitle className="text-2xl text-white">Widerspruch einlegen</CardTitle>
-                <CardDescription className="text-blue-200">
-                  Unzufrieden mit dem Bescheid?
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button className="w-full bg-amber-500 hover:bg-amber-600 text-white">
-                  Widerspruch schreiben <ArrowRight className="ml-2 w-4 h-4" />
-                </Button>
-                <p className="text-sm text-blue-300 mt-3">
-                  ✓ Automatischer Brief
-                  <br />
-                  ✓ 1-Monats-Frist beachtet
-                  <br />✓ Erfolgschancen prüfen
-                </p>
-              </CardContent>
-            </div>
-            {/* 🚀 NEU: Hyperlink zum Brief-Zentrum (Event Propagation gestoppt!) */}
-            <div className="p-4 mt-auto border-t border-white/10 text-center">
-              <a
-                href={`/${locale}/briefe`}
-                onClick={(e) => {
-                  e.stopPropagation(); // Verhindert den Klick der äußeren Card
-                  e.preventDefault(); // Verhindert Standard-Anker
-                  router.push(`/${locale}/briefe`); // Routet sanft via Next.js
-                }}
-                className="text-xs font-medium text-amber-400 hover:text-amber-300 underline underline-offset-2 transition-colors relative z-10"
-              >
-                Oder: Zu allen Formular-Vorlagen
-              </a>
-            </div>
-          </Card>
-
-          <Card
-            className="bg-white/10 border-white/20 text-white hover:bg-white/20 transition-all cursor-pointer group"
-            onClick={() => router.push(`/${locale}/hilfe`)}
-          >
-            <CardHeader>
-              <div className="w-16 h-16 bg-purple-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <HelpCircle className="w-8 h-8 text-white" />
+              <div className={styles.heroActions}>
+                <button
+                    onClick={() => router.push(hatAktiveSession ? `./pflegegrad/ergebnis` : `./pflegegrad/start`)}
+                    className={styles.btnPrimary}
+                >
+                  {hatAktiveSession ? 'Laufende Akte öffnen' : 'Einstufung prüfen'} <ArrowRight className="w-4 h-4" />
+                </button>
+                <button onClick={() => router.push(`./widerspruch`)} className={styles.btnAccent}>
+                  Widerspruch schreiben
+                </button>
               </div>
-              <CardTitle className="text-2xl text-white">Ich weiß nicht</CardTitle>
-              <CardDescription className="text-blue-200">Lassen Sie sich beraten</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button className="w-full bg-purple-500 hover:bg-purple-600 text-white">
-                Hilfe finden <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
-              <p className="text-sm text-blue-300 mt-3">
-                ✓ Avatar-Assistent
-                <br />
-                ✓ Einfache Erklärungen
-                <br />✓ Nächste Schritte
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
 
-        {/* B2B Riegel */}
-        <div className="mb-12">
-          <Card
-            className="bg-gradient-to-r from-white/10 to-white/5 border-white/20 text-white hover:bg-white/15 transition-all cursor-pointer group"
-            onClick={() => router.push(`/${locale}/pflegekraefte`)}
-          >
-            <CardHeader>
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-[#20b2aa] to-[#3ddbd0] rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Stethoscope className="w-8 h-8 text-white" />
-                </div>
-                <div className="flex-1">
-                  <CardTitle className="text-2xl text-white">
-                    Für Pflegekräfte & Pflegedienste
-                  </CardTitle>
-                  <CardDescription className="text-blue-200">
-                    Externe Tools wie PflegeGPT, Lastprofilvorhersage und mehr
-                  </CardDescription>
-                </div>
-                <ArrowRight className="w-6 h-6 text-[#20b2aa] group-hover:translate-x-1 transition-transform" />
+            {/* 🖼️ Next.js optimiertes Bild-Handling */}
+            <div className={styles.imageWrapper}>
+              <Image
+                  src="/pflegenavigator_dschungel.png"
+                  alt="Vom bürokratischen Aktenchaos hin zur sicheren, geführten digitalen Lösung auf dem Smartphone"
+                  fill
+                  priority
+                  className={styles.heroImage}
+                  sizes="(max-w-768px) 100vw, 50vw"
+              />
+            </div>
+          </section>
+
+          {/* ⚖️ TRIAGE-RIEGEL */}
+          <div className={styles.promiseBox}>
+            <Clock className="w-5 h-5 text-[#4a90e2] flex-shrink-0" />
+            <p className={styles.promiseText}>
+              Termine im Pflegestützpunkt dauern oft <strong>2 bis 6 Wochen</strong>. Bei uns erhalten Sie eine fundierte sozialrechtliche Orientierungs-Matrix in nur <strong>15 Minuten</strong> – anonym, sicher und kostenfrei.
+            </p>
+          </div>
+
+          {/* 📦 FEATURE-GRID */}
+          <section className={styles.sectionStack}>
+            <div className={styles.sectionHeader}>
+              <h2>Was kann das Portal für Sie tun?</h2>
+              <p>Alle Werkzeuge für Ihre Pflegesituation digital gebündelt.</p>
+            </div>
+
+            <div className={styles.gridContainer}>
+              {funktionen.map((fkt, i) => (
+                  <div key={i} className={styles.triageCard}>
+                    <div className={styles.cardMeta}>
+                      <div className={styles.iconBox}>
+                        <fkt.icon className="w-5 h-5" />
+                      </div>
+                      <span className={styles.cardTag}>
+                    {fkt.highlight}
+                  </span>
+                    </div>
+                    <div className={styles.cardBody}>
+                      <h3>{fkt.title}</h3>
+                      <p>{fkt.description}</p>
+                    </div>
+                  </div>
+              ))}
+            </div>
+          </section>
+
+          {/* 🏢 B2B ACCOUNTING-RIEGEL */}
+          <div onClick={() => router.push(`./pflegekraefte`)} className={styles.b2bRow}>
+            <div className={styles.b2bMeta}>
+              <div className={styles.iconBox}>
+                <Stethoscope className="w-5 h-5" />
               </div>
-            </CardHeader>
-          </Card>
-        </div>
+              <div>
+                <h4 className={styles.b2bTitle}>Für Pflegekräfte, Berater & Pflegedienste</h4>
+                <p className={styles.b2bText}>Nutzen Sie fortgeschrittene Fall-Akteure, PflegeGPT-Schnittstellen und Lastprofil-Analysen.</p>
+              </div>
+            </div>
+            <span className={styles.b2bLink}>
+            Fach-Tools öffnen <ArrowRight className="w-3.5 h-3.5" />
+          </span>
+          </div>
 
-        {/* Qualitatives Vertrauens-Register */}
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="flex items-center gap-3 text-blue-200">
-            <Users className="w-6 h-6 text-[#20b2aa]" />
-            <span>4,9 Millionen Pflegebedürftige unterstützt</span>
+          {/* 🛡️ TRUST REGISTER */}
+          <div className={styles.footerRegister}>
+            <div className={styles.registerCard}>
+              <Users className="w-5 h-5 text-[#4a90e2] flex-shrink-0" />
+              <span><strong>4,9 Millionen</strong> verifizierte Fall-Schicksale als mathematische Berechnungsbasis.</span>
+            </div>
+            <div className={styles.registerCard}>
+              <Shield className="w-5 h-5 text-[#4a90e2] flex-shrink-0" />
+              <span><strong>100% Anonym:</strong> Keine Angabe von Klarnamen oder sensiblen Daten erzwungen.</span>
+            </div>
+            <div className={styles.registerCard}>
+              <Clock className="w-5 h-5 text-[#4a90e2] flex-shrink-0" />
+              <span><strong>Rechtssicher 2026:</strong> Ständige Aktualisierung aller Freibeträge, SGB-Sätze und Fristen.</span>
+            </div>
           </div>
-          <div className="flex items-center gap-3 text-blue-200">
-            <Shield className="w-6 h-6 text-[#20b2aa]" />
-            <span>Anonym & DSGVO-konform</span>
-          </div>
-          <div className="flex items-center gap-3 text-blue-200">
-            <Clock className="w-6 h-6 text-[#20b2aa]" />
-            <span>Sofortiges Ergebnis</span>
-          </div>
+
         </div>
       </div>
-    </div>
   );
 }

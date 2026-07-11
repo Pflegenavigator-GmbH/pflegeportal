@@ -1,0 +1,65 @@
+{
+  "startseite": {
+  "hero": {
+    "badge": "Innovation im Sozialrecht",
+    "title": "Schluss mit dem {span}. Wir helfen Ihnen.",
+    "titleSpan": "Pflege-Dschungel",
+    "text": "Hallo. Ich bin {strong}, Ihr digitaler Begleiter. Ob Erstbeantragung, Höherstufung oder plötzliche Ablehnung: Wir wandeln unübersichtliche Bürokratie in einen klaren, verständlichen Fahrplan um.",
+    "avatarName": "Navi",
+    "btnStart": "Einstufung prüfen",
+    "btnResume": "Laufende Akte öffnen",
+    "btnWiderspruch": "Widerspruch schreiben"
+  },
+  "promise": {
+    "text": "Termine im Pflegestützpunkt dauern oft {strong1}. Bei uns erhalten Sie eine fundierte sozialrechtliche Orientierungs-Matrix in nur {strong2} – anonym, sicher und kostenfrei.",
+    "timeStuetzkopf": "2 bis 6 Wochen",
+    "timePortal": "15 Minuten"
+  },
+  "features": {
+    "heading": "Was kann das Portal für Sie tun?",
+    "subheading": "Alle Werkzeuge für Ihre Pflegesituation digital gebündelt.",
+    "items": {
+      "rechner": {
+        "title": "Pflegegrad-Rechner",
+        "description": "Berechnen Sie Ihren Pflegegrad rechtssicher in 6 Modulen gemäß den echten Richtlinien des MDK.",
+        "tag": "15 Min. • Frei"
+      },
+      "widerspruch": {
+        "title": "Widerspruchs-Zentrum",
+        "description": "Erstellen Sie automatisch begründete Widerspruchsschreiben mit allen gesetzlichen Pflichtklauseln.",
+        "tag": "§ 84 SGG Frist"
+      },
+      "avatar": {
+        "title": "Avatar-Begleitung „Navi“",
+        "description": "Klären Sie komplexe Fragen im barrierefreien Dialog per Text oder sanfter Audio-Ausgabe.",
+        "tag": "Kokoro Engine"
+      },
+      "tagebuch": {
+        "title": "Digitales Pflegetagebuch",
+        "description": "Dokumentieren Sie Pflegezeiten und Erleichterungen als lückenlosen Hauptbeweis für die MDK-Prüfung.",
+        "tag": "Export-Fähig"
+      },
+      "qr": {
+        "title": "Verschlüsseltes QR-System",
+        "description": "Teilen Sie Ihre Fall-Akte ohne Angabe von Namen sicher mit Familienangehörigen oder Ärzten.",
+        "tag": "DSGVO Safe"
+      },
+      "multi": {
+        "title": "Integrierte Multi-Rechner",
+        "description": "GdB-Ermittlung nach VersMedV, SGB XIV Opferentschädigung und steuerliche Pauschbeträge 2026.",
+        "tag": "Rechtsstand 2026"
+      }
+    }
+  },
+  "b2b": {
+    "title": "Für Pflegekräfte, Berater & Pflegedienste",
+    "text": "Nutzen Sie fortgeschrittene Fall-Akteure, PflegeGPT-Schnittstellen und Lastprofil-Analysen.",
+    "link": "Fach-Tools öffnen"
+  },
+  "trust": {
+    "basis": "<strong>4,9 Millionen</strong> verifizierte Fall-Schicksale als mathematische Berechnungsbasis.",
+    "anonym": "<strong>100% Anonym:</strong> Keine Angabe von Klarnamen oder sensiblen Daten erzwungen.",
+    "rechtssicher": "<strong>Rechtssicher 2026:</strong> Ständige Aktualisierung aller Freibeträge, SGB-Sätze und Fristen."
+  }
+ }
+}
