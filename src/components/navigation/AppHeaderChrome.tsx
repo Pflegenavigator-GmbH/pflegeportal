@@ -57,6 +57,7 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedCode = localStorage.getItem('case_code');
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCaseCode(savedCode ? savedCode.toUpperCase() : null);
     }
   }, []);

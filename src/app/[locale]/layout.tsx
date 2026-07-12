@@ -9,9 +9,8 @@ import '../i18n.css';
 
 import BetaBanner from '@/src/components/BetaBanner';
 import { CookieBanner } from '@/src/components/legal/CookieBanner';
-import AppHeaderChrome from '@/src/components/navigation/AppHeaderChrome';
-// 🪄 Import der neuen Footer-Komponente
 import AppFooterChrome from '@/src/components/navigation/AppFooterChrome';
+import AppHeaderChrome from '@/src/components/navigation/AppHeaderChrome';
 import { isValidLocale } from '@/src/i18n/config';
 import { isRTL } from '@/src/i18n/rtl';
 

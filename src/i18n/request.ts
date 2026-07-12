@@ -1,8 +1,9 @@
 // src/i18n/request.ts
 import { hasLocale, type AbstractIntlMessages } from 'next-intl';
 import { getRequestConfig } from 'next-intl/server';
-import { routing } from './routing';
+
 import namespaces from './namespaces.json';
+import { routing } from './routing';
 
 /**
  * Lädt eine einzelne Namespace-Datei.
