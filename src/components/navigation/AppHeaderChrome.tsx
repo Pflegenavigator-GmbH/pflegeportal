@@ -1,3 +1,4 @@
+// src/component/navigation/AppHeaderChrome.tsx
 'use client';
 
 import {
