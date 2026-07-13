@@ -20,23 +20,6 @@
       "abmelden": "Abmelden",
       "anmelden": "Anmelden"
     },
-    "pflegegrad": {
-      "title": "Pflegegrad-Rechner",
-      "subtitle": "Ermitteln Sie Ihren möglichen Pflegegrad anhand des MDK-Moduls",
-      "progress": "Frage {current} von {total}",
-      "start": {
-        "loadTitle": "Vorhandenen Fall laden",
-        "loadDescription": "Haben Sie bereits einen Fallcode?",
-        "loadInputLabel": "Fallcode eingeben",
-        "loadButton": "Fall laden & prüfen",
-        "loadButtonLoading": "Prüfe Status...",
-        "newTitle": "Neuen Fall starten",
-        "newDescription": "Kostenlose Pflegegrad-Einschätzung beginnen",
-        "newText": "Starten Sie ein vollkommen anonymes und kostenfreies Verfahren. Es wird ein verschlüsselter Code generiert, unter dem Ihre Angaben DSGVO-konform gesichert werden.",
-        "newButton": "Kostenlos starten",
-        "newButtonLoading": "Wird erstellt..."
-      }
-    },
     "briefe": {
       "title": "Musterbriefe",
       "subtitle": "Professionelle Vorlagen für alle Pflege-Anliegen",
@@ -206,86 +189,6 @@
         "formError": "Fehler beim Senden. Bitte versuchen Sie es erneut."
       }
     },
-    "common": {
-      "buttons": {
-        "back": "Zurück",
-        "next": "Weiter",
-        "continue": "Fortfahren",
-        "start": "Starten",
-        "finish": "Abschließen",
-        "cancel": "Abbrechen",
-        "close": "Schließen",
-        "save": "Speichern",
-        "delete": "Löschen",
-        "edit": "Bearbeiten",
-        "create": "Erstellen",
-        "confirm": "Bestätigen",
-        "submit": "Absenden",
-        "loading": "Wird geladen...",
-        "retry": "Erneut versuchen",
-        "download": "Herunterladen",
-        "share": "Teilen",
-        "copy": "Kopieren",
-        "print": "Drucken"
-      },
-      "errors": {
-        "generic": "Ein Fehler ist aufgetreten",
-        "network": "Verbindungsfehler. Bitte überprüfen Sie Ihre Internetverbindung.",
-        "notFound": "Seite nicht gefunden",
-        "unauthorized": "Zugriff nicht erlaubt",
-        "validation": "Bitte überprüfen Sie Ihre Eingaben",
-        "required": "Dieses Feld ist erforderlich",
-        "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
-        "minLength": "Mindestens {count} Zeichen erforderlich",
-        "maxLength": "Maximal {count} Zeichen erlaubt",
-        "serverError": "Serverfehler. Bitte versuchen Sie es später erneut."
-      },
-      "accessibility": {
-        "skipToContent": "Zum Hauptinhalt springen",
-        "mainNavigation": "Hauptnavigation",
-        "breadcrumb": "Brotkrümelnavigation",
-        "closeMenu": "Menü schließen",
-        "openMenu": "Menü öffnen",
-        "languageSelector": "Sprache wählen",
-        "search": "Suche",
-        "formError": "Formularfehler",
-        "requiredField": "Erforderliches Feld",
-        "optionalField": "Optionales Feld",
-        "helpText": "Hilfetext",
-        "expand": "Aufklappen",
-        "collapse": "Zuklappen",
-        "modal": "Dialog",
-        "closeModal": "Dialog schließen",
-        "loading": "Wird geladen",
-        "progress": "Fortschritt",
-        "step": "Schritt"
-      },
-      "ampel": {
-        "green": "Gut - Keine Einschränkung",
-        "yellow": "Mittel - Teilweise Einschränkung",
-        "red": "Schlecht - Starke Einschränkung",
-        "notApplicable": "Nicht zutreffend",
-        "self": "Selbstständig",
-        "partial": "Teilweise Hilfe",
-        "dependent": "Hilfe benötigt"
-      },
-      "time": {
-        "today": "Heute",
-        "yesterday": "Gestern",
-        "tomorrow": "Morgen",
-        "now": "Jetzt",
-        "minutesAgo": "Vor {count} Minuten",
-        "hoursAgo": "Vor {count} Stunden",
-        "daysAgo": "Vor {count} Tagen"
-      },
-      "pagination": {
-        "previous": "Vorherige",
-        "next": "Nächste",
-        "page": "Seite",
-        "of": "von",
-        "showing": "Zeige {from}-{to} von {total}"
-      }
-    },
     "language": {
       "title": "Sprache",
       "current": "Aktuelle Sprache",
@@ -293,6 +196,84 @@
       "search": "Sprache suchen",
       "changed": "Sprache geändert zu: {language}",
       "detected": "Sprache automatisch erkannt"
+    },
+    "buttons": {
+      "back": "Zurück",
+      "next": "Weiter",
+      "continue": "Fortfahren",
+      "start": "Starten",
+      "finish": "Abschließen",
+      "cancel": "Abbrechen",
+      "close": "Schließen",
+      "save": "Speichern",
+      "delete": "Löschen",
+      "edit": "Bearbeiten",
+      "create": "Erstellen",
+      "confirm": "Bestätigen",
+      "submit": "Absenden",
+      "loading": "Wird geladen...",
+      "retry": "Erneut versuchen",
+      "download": "Herunterladen",
+      "share": "Teilen",
+      "copy": "Kopieren",
+      "print": "Drucken"
+    },
+    "errors": {
+      "generic": "Ein Fehler ist aufgetreten",
+      "network": "Verbindungsfehler. Bitte überprüfen Sie Ihre Internetverbindung.",
+      "notFound": "Seite nicht gefunden",
+      "unauthorized": "Zugriff nicht erlaubt",
+      "validation": "Bitte überprüfen Sie Ihre Eingaben",
+      "required": "Dieses Feld ist erforderlich",
+      "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+      "minLength": "Mindestens {count} Zeichen erforderlich",
+      "maxLength": "Maximal {count} Zeichen erlaubt",
+      "serverError": "Serverfehler. Bitte versuchen Sie es später erneut."
+    },
+    "accessibility": {
+      "skipToContent": "Zum Hauptinhalt springen",
+      "mainNavigation": "Hauptnavigation",
+      "breadcrumb": "Brotkrümelnavigation",
+      "closeMenu": "Menü schließen",
+      "openMenu": "Menü öffnen",
+      "languageSelector": "Sprache wählen",
+      "search": "Suche",
+      "formError": "Formularfehler",
+      "requiredField": "Erforderliches Feld",
+      "optionalField": "Optionales Feld",
+      "helpText": "Hilfetext",
+      "expand": "Aufklappen",
+      "collapse": "Zuklappen",
+      "modal": "Dialog",
+      "closeModal": "Dialog schließen",
+      "loading": "Wird geladen",
+      "progress": "Fortschritt",
+      "step": "Schritt"
+    },
+    "ampel": {
+      "green": "Gut - Keine Einschränkung",
+      "yellow": "Mittel - Teilweise Einschränkung",
+      "red": "Schlecht - Starke Einschränkung",
+      "notApplicable": "Nicht zutreffend",
+      "self": "Selbstständig",
+      "partial": "Teilweise Hilfe",
+      "dependent": "Hilfe benötigt"
+    },
+    "time": {
+      "today": "Heute",
+      "yesterday": "Gestern",
+      "tomorrow": "Morgen",
+      "now": "Jetzt",
+      "minutesAgo": "Vor {count} Minuten",
+      "hoursAgo": "Vor {count} Stunden",
+      "daysAgo": "Vor {count} Tagen"
+    },
+    "pagination": {
+      "previous": "Vorherige",
+      "next": "Nächste",
+      "page": "Seite",
+      "of": "von",
+      "showing": "Zeige {from}-{to} von {total}"
     },
     "footer": {
       "copyright": "© 2026 PflegeNavigator EU gUG (in Gründung) • Offizielle Orientierungshilfen nach SGB XI Richtlinien.",
