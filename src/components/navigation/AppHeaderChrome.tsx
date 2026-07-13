@@ -1,3 +1,4 @@
+// src/components/navigation/AppHeaderChrome.tsx
 'use client';
 
 import {
@@ -37,6 +38,12 @@ import {
   DropdownMenuTrigger,
 } from '@/src/components/ui/dropdown-menu';
 import { Input } from '@/src/components/ui/input';
+import {
+  CASE_CODE_EVENT,
+  clearCaseCode,
+  getStoredCaseCode,
+  storeCaseCode,
+} from '@/src/lib/case-storage';
 
 import styles from '../../styles/layout.module.css';
 
@@ -55,11 +62,16 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
   const [isResetting, setIsResetting] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedCode = localStorage.getItem('case_code');
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCaseCode(savedCode ? savedCode.toUpperCase() : null);
-    }
+    const syncCaseCode = () => setCaseCode(getStoredCaseCode());
+
+    syncCaseCode();
+
+    window.addEventListener('storage', syncCaseCode);
+    window.addEventListener(CASE_CODE_EVENT, syncCaseCode);
+    return () => {
+      window.removeEventListener('storage', syncCaseCode);
+      window.removeEventListener(CASE_CODE_EVENT, syncCaseCode);
+    };
   }, []);
 
   const istStartseite = pathname === `/${locale}` || pathname === `/${locale}/`;
@@ -70,9 +82,12 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
     setIsChecking(true);
     try {
       const session = await validateAndStoreSession(cleanedCode);
-      if (session.success) {
-        localStorage.setItem('case_code', cleanedCode);
-        setCaseCode(cleanedCode);
+      if (session.success && session.isExpired) {
+        toast.error('Dieser Beta-Zugang ist nach 12 Monaten abgelaufen.');
+      } else if (session.success) {
+        // Schreibt localStorage + feuert das Event → syncCaseCode aktualisiert den State
+        storeCaseCode(cleanedCode);
+        // Hard-Reload, damit Server Components das neue Cookie mitbekommen
         window.location.reload();
       } else {
         toast.error('Fallcode nicht gefunden.');
@@ -88,9 +103,8 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
     if (!confirm('Möchten Sie die aktuelle Fall-Session wirklich schließen?')) return;
     setIsResetting(true);
     try {
-      await clearCaseSession();
-      localStorage.removeItem('case_code');
-      setCaseCode(null);
+      await clearCaseSession(); // Server: HTTP-only-Cookie entwerten
+      clearCaseCode(); // Client: localStorage + Event
       window.location.assign(`/${locale}/pflegegrad/start`);
     } catch {
       toast.error('Fehler beim Beenden.');
@@ -134,9 +148,9 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
             </Link>
           </div>
 
-          {/* 🧠 Strategisch neu geordnete Desktop-Navigation: Dringlichkeit von links nach rechts */}
+          {/* 🧠 Desktop-Navigation: Dringlichkeit von links nach rechts */}
           <nav className={styles.mainNav}>
-            {/* 🛠️ 1. Für Betroffene (Dropdown): Akute digitale Assistenten */}
+            {/* 🛠️ 1. Für Betroffene (Dropdown) */}
             <DropdownMenu>
               <DropdownMenuTrigger
                 className={`${styles.navLink} ${pathname.includes('/briefe') || pathname.includes('/tagebuch') || pathname.includes('/pflegegrad') ? styles.navLinkActive : ''}`}
@@ -177,9 +191,9 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <DropdownMenuSeparator className="w-px h-4 bg-white/10 hidden md:block" />
+            <span aria-hidden className="w-px h-4 bg-white/10 hidden md:block" />
 
-            {/* 🏢 2. Für Fachkräfte (Dropdown): B2B-Zugang */}
+            {/* 🏢 2. Für Fachkräfte (Dropdown) */}
             <DropdownMenu>
               <DropdownMenuTrigger
                 className={`${styles.navLink} ${pathname.includes('/pflegekraefte') ? styles.navLinkActive : ''}`}
@@ -202,9 +216,9 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <DropdownMenuSeparator className="w-px h-4 bg-white/10 hidden md:block" />
+            <span aria-hidden className="w-px h-4 bg-white/10 hidden md:block" />
 
-            {/* ♿ 3. FAQ (Direktlink): Schnelle kognitive Entlastung ohne Barrieren */}
+            {/* ♿ 3. FAQ (Direktlink) */}
             <Link
               href={`/${locale}/faq`}
               className={`${styles.navLink} ${pathname.includes('/faq') ? styles.navLinkActive : ''}`}
@@ -212,12 +226,12 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
               <HelpCircle className="w-4 h-4" /> FAQ
             </Link>
 
-            <DropdownMenuSeparator className="w-px h-4 bg-white/10 hidden md:block" />
+            <span aria-hidden className="w-px h-4 bg-white/10 hidden md:block" />
 
-            {/* ℹ️ 4. Über uns (Dropdown): Transparenz & Hintergrund */}
+            {/* ℹ️ 4. Über uns (Dropdown) */}
             <DropdownMenu>
               <DropdownMenuTrigger
-                className={`${styles.navLink} ${pathname.includes('/ueber-uns') || pathname.includes('/presse') ? styles.navLinkActive : ''}`}
+                className={`${styles.navLink} ${pathname.includes('/ueber-uns') || pathname.includes('/philosophie') || pathname.includes('/presse') ? styles.navLinkActive : ''}`}
               >
                 <Info className="w-4 h-4" /> Über uns <ChevronDown className="w-3 h-3 opacity-70" />
               </DropdownMenuTrigger>
@@ -252,7 +266,7 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
                 <div className={styles.caseBadge}>
                   <FolderLock className="w-4 h-4 flex-shrink-0" />
                   <span className={`${styles.caseText} ${caseCode ? styles.caseTextActive : ''}`}>
-                    {caseCode ? caseCode.toUpperCase() : 'Kein Fall'}
+                    {caseCode ?? 'Kein Fall'}
                   </span>
                 </div>
               </DropdownMenuTrigger>

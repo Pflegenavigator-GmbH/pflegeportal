@@ -86,6 +86,7 @@ describe('validateAndStoreSession', () => {
     vi.setSystemTime(new Date('2026-07-12T12:00:00.000Z'));
   });
 
+  // Nach den Zeit-Tests setzen wir die Systemzeit wieder zurück
   afterEach(() => {
     vi.useRealTimers();
     vi.unstubAllEnvs();

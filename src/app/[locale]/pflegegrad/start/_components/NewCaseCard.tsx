@@ -1,9 +1,8 @@
-// src/app/[locale]/start/_components/NewCaseCard.tsx
+// src/app/[locale]/pflegegrad/start/_components/NewCaseCard.tsx
 'use client';
 
 import { KeyRound, AlertTriangle, Users, Baby } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
 
 import {
   Card,
@@ -20,7 +19,6 @@ interface NewCaseCardProps {
 
 export function NewCaseCard({ caseCode, locale }: NewCaseCardProps) {
   const router = useRouter();
-  const tModule = useTranslations('pflegegrad.module');
 
   return (
     <Card className="bg-white/5 border-emerald-500/30 text-white shadow-xl rounded-2xl overflow-hidden">
@@ -76,9 +74,7 @@ export function NewCaseCard({ caseCode, locale }: NewCaseCardProps) {
             >
               <div>
                 <Users className="w-5 h-5 text-[#20b2aa] mb-2 group-hover:scale-105 transition-transform" />
-                <h5 className="font-bold text-xs text-white">
-                  {tModule('mobilität.title') ? 'Erwachsene & Senioren' : 'Erwachsene'}
-                </h5>
+                <h5 className="font-bold text-xs text-white">Erwachsene & Senioren</h5>
                 <p className="text-[11px] text-gray-400 mt-1 leading-relaxed">
                   Reguläres Begutachtungsverfahren (NBA) für Personen ab 18 Jahren.
                 </p>

@@ -18,6 +18,7 @@ import {
   CardContent,
   CardFooter,
 } from '@/src/components/ui/card';
+import { storeCaseCode } from '@/src/lib/case-storage';
 import { createClient } from '@/src/lib/supabase/client';
 
 import { LoadCaseCard } from './_components/LoadCaseCard';
@@ -52,15 +53,25 @@ export default function PflegegradStartPage(props: PageProps) {
   const [dbProducts, setDbProducts] = useState<ProductFromDb[]>([]);
   const [isBetaExpired, setIsBetaExpired] = useState(false);
 
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   useEffect(() => {
     if (searchParams.session_id && searchParams.check_code) {
-      validateAndStoreSession(searchParams.check_code).then((status) => {
+      const checkCode = searchParams.check_code.trim().toUpperCase();
+
+      validateAndStoreSession(checkCode).then((status) => {
+        if (!status.success) return;
+
+        // localStorage + Event → AppHeaderChrome aktualisiert sich sofort
+        storeCaseCode(checkCode);
+
         if (status.isUnlocked) {
           toast.success('Premium-Optionen erfolgreich freigeschaltet!');
-          localStorage.setItem('case_code', searchParams.check_code!);
           router.push(`/${locale}/pflegegrad/modul1`);
+        } else {
+          toast.info(
+            'Zahlung wird noch verarbeitet. Ihr Fall ist geladen — Premium schaltet sich in Kürze frei.'
+          );
         }
       });
     }
@@ -88,7 +99,7 @@ export default function PflegegradStartPage(props: PageProps) {
       }
 
       setCaseCode(verifiedCode);
-      localStorage.setItem('case_code', verifiedCode);
+      storeCaseCode(verifiedCode);
 
       if (status.isExpired) {
         setIsBetaExpired(true);
@@ -126,7 +137,7 @@ export default function PflegegradStartPage(props: PageProps) {
       await validateAndStoreSession(resData.caseCode);
 
       setCaseCode(resData.caseCode);
-      localStorage.setItem('case_code', resData.caseCode);
+      storeCaseCode(resData.caseCode);
 
       setIsNewCase(true);
       toast.success('Kostenloser Fallcode generiert!');
@@ -163,7 +174,7 @@ export default function PflegegradStartPage(props: PageProps) {
           className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors text-sm"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>{tCommon('back') || 'Zurück'}</span>
+          <span>{tCommon('back')}</span>
         </button>
 
         {isNewCase ? (
