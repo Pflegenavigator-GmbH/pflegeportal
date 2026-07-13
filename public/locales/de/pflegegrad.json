@@ -5,6 +5,18 @@
     "label": "Leichte Sprache",
     "description": "Einfache Wörter und kurze Sätze für eine barrierefreie Erfassung."
   },
+  "start": {
+    "loadTitle": "Vorhandenen Fall laden",
+    "loadDescription": "Haben Sie bereits einen Fallcode?",
+    "loadInputLabel": "Fallcode eingeben",
+    "loadButton": "Fall laden & prüfen",
+    "loadButtonLoading": "Prüfe Status...",
+    "newTitle": "Neuen Fall starten",
+    "newDescription": "Kostenlose Pflegegrad-Einschätzung beginnen",
+    "newText": "Starten Sie ein vollkommen anonymes und kostenfreies Verfahren. Es wird ein verschlüsselter Code generiert, unter dem Ihre Angaben DSGVO-konform gesichert werden.",
+    "newButton": "Kostenlos starten",
+    "newButtonLoading": "Wird erstellt..."
+  },
   "modules": {
     "modul1": {
       "title": "Modul 1: Mobilität",
@@ -101,7 +113,7 @@
         "m4_2": {
           "label": "Zähneputzen, Kämmen, Rasieren",
           "simple": "Klappt die tägliche Mund-, Haar- und Gesichtspflege ohne Hilfe?",
-          "hilfe": "Können Sie die tägliche Mund- und Haarausrüstung eigenständig durchführen?"
+          "hilfe": "Können Sie die tägliche Mund- und Haarpflege eigenständig durchführen?"
         },
         "m4_3": {
           "label": "Mundgerechtes Zubereiten & Aufnehmen von Speisen",
@@ -184,7 +196,7 @@
     }
   },
   "progress": {
-    "step": "Schritt {{current}} von {{total}}",
-    "percent": "{{percent}}% fertig"
+    "step": "Schritt {current} von {total}",
+    "percent": "{percent}% fertig"
   }
 }
