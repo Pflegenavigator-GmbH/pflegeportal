@@ -1,0 +1,41 @@
+{
+  "hero": {
+    "badge": "Innovation im Sozialrecht",
+    "title": "Was ist <span>PflegeNavigator</span> EU?",
+    "text": "Ein digitales Navigationsportal, das Pflegebedürftige, Menschen mit Behinderung und Gewaltopfer barrierefrei, mehrsprachig und KI-gestützt durch komplexe sozialrechtliche Antrags- und Widerspruchsverfahren führt.",
+    "btnStart": "Jetzt Einstufung prüfen"
+  },
+  "story": {
+    "badge": "Aus eigener Betroffenheit",
+    "title": "Wie alles begann: Eine persönliche Reise",
+    "p1": "PflegeNavigator EU ist nicht am Reißbrett entstanden. Der Ausgangspunkt war die eigene Notlage unseres Gründers André Schulze. Nach einer schweren Gewalttat mit erheblichen gesundheitlichen Folgen musste er sich zeitgleich durch mehrere parallele Verfahren des deutschen Sozialrechts bewegen — Pflegeversicherung, Schwerbehinderung und Opferentschädigung.",
+    "p2": "Anträge, Widersprüche, Fristen und Gutachten stapelten sich. Um überhaupt handlungsfähig zu bleiben, begann er, KI-gestützte Werkzeuge für seine eigenen Verfahren zu nutzen: zum Ordnen der Unterlagen, zum Verstehen komplexer Bescheide und zum Vorbereiten rechtssicherer Schreiben. Diese Arbeit geschah zunächst ausschließlich aus reiner Notwendigkeit heraus.",
+    "subtitle": "Das Aha-Erlebnis",
+    "p3": "Dabei wurde schnell klar, dass das, was ihm half, Millionen anderen Menschen in derselben Lage fehlt: ein strukturierter, verständlicher, mehrsprachiger und barrierefreier Weg durch das Sozialrecht. Unterstützt durch moderne Hilfsmittel und eine hochsichere Serverinfrastruktur entstand daraus ein vollfunktionsfähiges Portal.",
+    "statusNotice": "<strong>Hinweis zum Status:</strong> Dieses Portal ist kein Beleg für volle Leistungsfähigkeit. Es ist das Ergebnis eines langen, in kleinen Schritten gegangenen Weges — entstanden aus der eigenen Betroffenheit und getragen von Hilfsmitteln, die das möglich machen, was sonst unmöglich wäre."
+  },
+  "trust": {
+    "mission": {
+      "title": "Die Mission",
+      "text": "Zugangsmangel im Sozialrecht effektiv beseitigen. Wir führen Ansprüche aus fünf Gesetzbüchern an einem einzigen, transparenten Ort digital zusammen."
+    },
+    "vision": {
+      "title": "Die Vision",
+      "text": "Eine Welt, in der administrative und sprachliche Hürden niemanden mehr daran hindern, seine gesetzlich garantierten Versorgungsansprüche geltend zu machen."
+    },
+    "partner": {
+      "title": "Validierter Pflege-Partner",
+      "text": "Fachlich und operativ abgesichert durch einen festen Kooperationsvertrag mit der <strong>Pflegedienst Lirio GmbH</strong> (Bielefeld, seit 13.04.2026).",
+      "badge": "Vertraglich verankert"
+    },
+    "expert": {
+      "title": "Sozialpsychologische Absicherung",
+      "text": "Das System und seine Triage-Auswertungen berufen sich auf die offizielle fachliche Stellungnahme von <strong>Vedat Karasu</strong> (Diplom-Sozialpädagoge, LWL-Kliniken Gütersloh).",
+      "badge": "Wissenschaftlich evaluiert"
+    }
+  },
+  "legal": {
+    "copyright": "© 2026 PflegeNavigator EU gUG (in Gründung) • André Schulze (Konzept & Inhaber) & Rodrigue Lawson (Systemarchitektur & Tech). Alle Rechte vorbehalten.",
+    "notice": "Sobald die gemeinnützige gUG notariell im Handelsregister eingetragen ist, wird der Zusatz im Zweckbetrieb angepasst."
+  }
+}
