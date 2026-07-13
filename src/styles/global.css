@@ -1,0 +1,45 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+@layer base {
+    :root {
+        color-scheme: dark;
+    }
+
+    html {
+        @apply scroll-smooth;
+    }
+
+    body {
+        /* Hintergrund: Offizielles Bund-Dunkelblau, Text: Weiß (9,3:1 Kontrast) */
+        @apply bg-bund-dunkelblau text-bund-weiß font-sans text-base antialiased selection:bg-bund-hellblau/30 selection:text-bund-weiß;
+    }
+
+    :focus-visible {
+        /* Kontraststarker Fokusring in Hellblau */
+        @apply outline-none ring-2 ring-bund-hellblau ring-offset-2 ring-offset-bund-dunkelblau transition-all;
+    }
+}
+
+@layer components {
+    /* 🔵 HAUPT-BUTTON (Dunkelblau auf Hellblau -> Kontrast 5,2:1) */
+    .btn-primary {
+        @apply h-[56px] px-6 bg-bund-hellblau text-bund-dunkelblau font-bold rounded-xl shadow-premium inline-flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+    }
+
+    /* 🟡 WARN- / AKZENT-BUTTON (Gelb auf Dunkelblau -> Kontrast 6,9:1) */
+    .btn-accent {
+        @apply h-[56px] px-6 bg-bund-gelb text-bund-dunkelblau font-bold tracking-wide rounded-xl shadow-premium inline-flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+    }
+
+    /* ⚪ OUTLINE-BUTTON (Weißer Text auf dunkelblauem Grund -> Kontrast 9,3:1) */
+    .btn-outline {
+        @apply h-[56px] px-6 bg-white/5 border border-bund-weiß/20 text-bund-weiß hover:bg-white/10 font-medium rounded-xl inline-flex items-center justify-center gap-2 transition-all active:scale-[0.98];
+    }
+
+    /* Barrierefreie Formularfelder (Eingabetext in Schwarz auf Hellgrau -> Maximaler Kontrast) */
+    .input-field {
+        @apply w-full h-11 px-4 bg-bund-hellgrau border border-white/10 rounded-xl text-bund-schwarz text-base focus-visible:ring-2 focus-visible:ring-bund-hellblau placeholder:text-gray-500 transition-all;
+    }
+}

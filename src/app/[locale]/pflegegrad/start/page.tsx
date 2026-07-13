@@ -123,6 +123,8 @@ export default function PflegegradStartPage(props: PageProps) {
       const resData = await response.json();
       if (resData.error) throw new Error(resData.error);
 
+      await validateAndStoreSession(resData.caseCode);
+
       setCaseCode(resData.caseCode);
       localStorage.setItem('case_code', resData.caseCode);
 

@@ -5,212 +5,209 @@ import {
   Shield,
   Calculator,
   FileText,
-  HelpCircle,
   ArrowRight,
   Clock,
   Users,
   Stethoscope,
-  FolderOpen,
+  MessageCircle,
+  BookOpen,
+  Smartphone,
+  Sparkles,
+  QrCode,
 } from 'lucide-react';
-import { useRouter, useParams } from 'next/navigation';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
-import { Button } from '@/src/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/src/components/ui/card';
+import dschungelBild from '@/public/megan_rexazin_conde-medical-5459633_1920.png';
+import pageStyles from '@/src/styles/page.module.css';
 
 export default function Startseite() {
   const router = useRouter();
-  const params = useParams();
-  const locale = (params?.locale as string) || 'de';
+  const t = useTranslations('startseite');
+
   const [hatAktiveSession, setHatAktiveSession] = useState(false);
+  const [caseCode, setCaseCode] = useState<string | null>(null);
 
   useEffect(() => {
-    // 1. Wert sicher auslesen
     const storedCode = typeof window !== 'undefined' ? localStorage.getItem('case_code') : null;
-
-    // 2. Nur State setzen, wenn ein Code da ist UND der State nicht eh schon true ist
-    if (storedCode && !hatAktiveSession) {
+    if (storedCode) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setHatAktiveSession(true);
+      setCaseCode(storedCode.toUpperCase());
     }
-  }, [hatAktiveSession]);
+  }, []);
 
-  const handlePflegegradKlick = () => {
-    if (hatAktiveSession) {
-      // 🚀 Automatische Übernahme: Schickt den Nutzer direkt zur bestehenden Analyse
-      router.push(`/${locale}/pflegegrad/ergebnis`);
-    } else {
-      // Kaltstart: Trichter von vorne beginnen
-      router.push(`/${locale}/pflegegrad/start`);
-    }
-  };
+  const funktionen = [
+    { id: 'rechner', icon: Calculator, path: './pflegegrad/start' },
+    { id: 'widerspruch', icon: FileText, path: './widerspruch' },
+    { id: 'avatar', icon: MessageCircle, path: './avatar' },
+    { id: 'tagebuch', icon: BookOpen, path: './tagebuch' },
+    { id: 'qr', icon: QrCode, path: '#' },
+    { id: 'multi', icon: Smartphone, path: '#' },
+  ];
 
   return (
-    <div className="min-h-screen bg-slate-900 py-12 px-4">
-      <div className="container mx-auto max-w-4xl">
-        {/* Hero */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-[#20b2aa] to-[#3ddbd0] rounded-2xl shadow-2xl mb-6">
-            <Calculator className="w-12 h-12 text-white" />
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">PflegeNavigator EU</h1>
-          <p className="text-xl text-blue-200 max-w-2xl mx-auto">
-            Ihr Weg durch die Pflege - einfach, schnell, kostenlos
-          </p>
-          <div className="mt-6 flex items-center justify-center gap-2 text-blue-300">
-            <Clock className="w-5 h-5" />
-            <span>Nur 15 Minuten statt 2-6 Wochen Wartezeit</span>
-          </div>
-        </div>
-
-        {/* 3 Haupt-Options-Karten */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <Card
-            className="bg-white/10 border-white/20 text-white hover:bg-white/20 transition-all cursor-pointer group"
-            onClick={handlePflegegradKlick}
-          >
-            <CardHeader>
-              <div className="w-16 h-16 bg-[#20b2aa] rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                {hatAktiveSession ? (
-                  <FolderOpen className="w-8 h-8 text-white" />
-                ) : (
-                  <Calculator className="w-8 h-8 text-white" />
-                )}
-              </div>
-              <CardTitle className="text-2xl text-white">
-                {hatAktiveSession ? 'Analyse ansehen' : 'Pflegegrad prüfen'}
-              </CardTitle>
-              <CardDescription className="text-blue-200">
-                {hatAktiveSession
-                  ? 'Sie haben eine aktive Analyse im Speicher.'
-                  : 'Finden Sie heraus, welcher Pflegegrad möglich ist.'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button className="w-full bg-[#20b2aa] hover:bg-[#3ddbd0] text-white">
-                {hatAktiveSession ? 'Zur Analyse' : 'Jetzt starten'}{' '}
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
-              <p className="text-sm text-blue-300 mt-3">
-                {hatAktiveSession ? '✓ Laufende Session aktiv' : '✓ Kostenlos & anonym'}
-                <br />
-                ✓ Nur 10 Minuten
-                <br />✓ Mit Ergebnis-PDF
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card
-            className="bg-white/10 border-white/20 text-white hover:bg-white/20 transition-all cursor-pointer group flex flex-col justify-between"
-            onClick={() => router.push(`/${locale}/widerspruch`)}
-          >
-            <div>
-              <CardHeader>
-                <div className="w-16 h-16 bg-amber-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <FileText className="w-8 h-8 text-white" />
-                </div>
-                <CardTitle className="text-2xl text-white">Widerspruch einlegen</CardTitle>
-                <CardDescription className="text-blue-200">
-                  Unzufrieden mit dem Bescheid?
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button className="w-full bg-amber-500 hover:bg-amber-600 text-white">
-                  Widerspruch schreiben <ArrowRight className="ml-2 w-4 h-4" />
-                </Button>
-                <p className="text-sm text-blue-300 mt-3">
-                  ✓ Automatischer Brief
-                  <br />
-                  ✓ 1-Monats-Frist beachtet
-                  <br />✓ Erfolgschancen prüfen
-                </p>
-              </CardContent>
+    <div className={pageStyles.pageContainer}>
+      {/* Haupt-Inhaltsbereich mit eindeutiger Landmarke für Screenreader nach BFSG */}
+      <div className={pageStyles.mainWrapper} role="document">
+        {/* 🧠 HERO: Einbindung des Avatars Navi & problemorientierter CTAs */}
+        <section className={pageStyles.heroSection} aria-labelledby="hero-heading">
+          <div className={pageStyles.heroContent}>
+            <div className={pageStyles.badge} role="status">
+              <Sparkles className="w-3.5 h-3.5" /> {t('hero.badge')}
             </div>
-            {/* 🚀 NEU: Hyperlink zum Brief-Zentrum (Event Propagation gestoppt!) */}
-            <div className="p-4 mt-auto border-t border-white/10 text-center">
-              <a
-                href={`/${locale}/briefe`}
-                onClick={(e) => {
-                  e.stopPropagation(); // Verhindert den Klick der äußeren Card
-                  e.preventDefault(); // Verhindert Standard-Anker
-                  router.push(`/${locale}/briefe`); // Routet sanft via Next.js
-                }}
-                className="text-xs font-medium text-amber-400 hover:text-amber-300 underline underline-offset-2 transition-colors relative z-10"
+
+            <h1 id="hero-heading" className={pageStyles.heroTitle}>
+              {t.rich('hero.title', {
+                span: (chunks) => <span className={pageStyles.highlight}>{chunks}</span>,
+              })}
+            </h1>
+
+            {/* ♿ Einfache Sprache & Kognitive Barrierefreiheit (Navi-Begrüßung) */}
+            <p className={pageStyles.heroText}>
+              {t.rich('hero.text', {
+                avatarName: t('hero.avatarName'),
+                strong: (chunks) => <strong>{chunks}</strong>,
+              })}
+            </p>
+
+            <div className={pageStyles.heroActions}>
+              {/* Session-Management: Schaltet flackerfrei basierend auf lokaler Sitzung um */}
+              <button
+                onClick={() =>
+                  router.push(hatAktiveSession ? `./pflegegrad/ergebnis` : `./pflegegrad/start`)
+                }
+                className={pageStyles.btnPrimary}
+                style={{ minHeight: '56px' }} // ♿ Akzeptanzkriterium erfüllt
+                aria-label={hatAktiveSession ? t('hero.btnResume') : t('hero.btnStart')}
               >
-                Oder: Zu allen Formular-Vorlagen
-              </a>
+                {hatAktiveSession ? t('hero.btnResume') : t('hero.btnStart')}{' '}
+                <ArrowRight className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => router.push(`./widerspruch`)}
+                className={pageStyles.btnAccent}
+                style={{ minHeight: '56px' }}
+              >
+                {t('hero.btnWiderspruch')}
+              </button>
             </div>
-          </Card>
+          </div>
 
-          <Card
-            className="bg-white/10 border-white/20 text-white hover:bg-white/20 transition-all cursor-pointer group"
-            onClick={() => router.push(`/${locale}/hilfe`)}
-          >
-            <CardHeader>
-              <div className="w-16 h-16 bg-purple-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <HelpCircle className="w-8 h-8 text-white" />
-              </div>
-              <CardTitle className="text-2xl text-white">Ich weiß nicht</CardTitle>
-              <CardDescription className="text-blue-200">Lassen Sie sich beraten</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button className="w-full bg-purple-500 hover:bg-purple-600 text-white">
-                Hilfe finden <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
-              <p className="text-sm text-blue-300 mt-3">
-                ✓ Avatar-Assistent
-                <br />
-                ✓ Einfache Erklärungen
-                <br />✓ Nächste Schritte
-              </p>
-            </CardContent>
-          </Card>
+          {/* Visuelle Unterstützung zur Beruhigung der emotionalen UX */}
+          <div className={pageStyles.imageWrapper}>
+            <Image
+              src={dschungelBild}
+              alt="Ein geborgenes Pflegeumfeld, das emotionale Sicherheit vermittelt"
+              fill={true}
+              priority={true}
+              className={pageStyles.heroImage}
+              sizes="(max-w-768px) 100vw, 50vw"
+            />
+          </div>
+        </section>
+
+        {/* ⚖️ TRIAGE-RIEGEL: Der direkte, leicht verständliche Systemvergleich */}
+        <div className={pageStyles.promiseBox} role="note" aria-label="Leistungsversprechen">
+          <Clock className="w-5 h-5 text-[#4a90e2] flex-shrink-0" />
+          <p className={pageStyles.promiseText}>
+            {t.rich('promise.text', {
+              timeStuetzkopf: t('promise.timeStuetzkopf'),
+              timePortal: t('promise.timePortal'),
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
+          </p>
         </div>
 
-        {/* B2B Riegel */}
-        <div className="mb-12">
-          <Card
-            className="bg-gradient-to-r from-white/10 to-white/5 border-white/20 text-white hover:bg-white/15 transition-all cursor-pointer group"
-            onClick={() => router.push(`/${locale}/pflegekraefte`)}
-          >
-            <CardHeader>
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-[#20b2aa] to-[#3ddbd0] rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Stethoscope className="w-8 h-8 text-white" />
+        {/* 📦 FEATURE-GRID: Problemorientierte Fragestellungen */}
+        <section className={pageStyles.sectionStack} aria-labelledby="features-heading">
+          <div className={pageStyles.sectionHeader}>
+            <h2 id="features-heading">{t('features.heading')}</h2>
+            <p>{t('features.subheading')}</p>
+          </div>
+
+          <div className={pageStyles.gridContainer}>
+            {funktionen.map((fkt) => (
+              <div
+                key={fkt.id}
+                className={pageStyles.triageCard}
+                onClick={() => fkt.path !== '#' && router.push(fkt.path)}
+                role="link"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') fkt.path !== '#' && router.push(fkt.path);
+                }}
+              >
+                <div className={pageStyles.cardMeta}>
+                  <div className={pageStyles.iconBox}>
+                    <fkt.icon className="w-5 h-5" />
+                  </div>
+                  <span className={pageStyles.cardTag}>{t(`features.items.${fkt.id}.tag`)}</span>
                 </div>
-                <div className="flex-1">
-                  <CardTitle className="text-2xl text-white">
-                    Für Pflegekräfte & Pflegedienste
-                  </CardTitle>
-                  <CardDescription className="text-blue-200">
-                    Externe Tools wie PflegeGPT, Lastprofilvorhersage und mehr
-                  </CardDescription>
+                <div className={pageStyles.cardBody}>
+                  <h3>{t(`features.items.${fkt.id}.title`)}</h3>
+                  <p>{t(`features.items.${fkt.id}.description`)}</p>
                 </div>
-                <ArrowRight className="w-6 h-6 text-[#20b2aa] group-hover:translate-x-1 transition-transform" />
               </div>
-            </CardHeader>
-          </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* 🏢 B2B RIEMEN: Für Fachkräfte */}
+        <div
+          onClick={() => router.push(`./pflegekraefte`)}
+          className={pageStyles.b2bRow}
+          role="link"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') router.push(`./pflegekraefte`);
+          }}
+        >
+          <div className={pageStyles.b2bMeta}>
+            <div className={pageStyles.iconBox}>
+              <Stethoscope className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className={pageStyles.b2bTitle}>{t('b2b.title')}</h4>
+              <p className={pageStyles.b2bText}>{t('b2b.text')}</p>
+            </div>
+          </div>
+          <span className={pageStyles.b2bLink}>
+            {t('b2b.link')} <ArrowRight className="w-3.5 h-3.5" />
+          </span>
         </div>
 
-        {/* Qualitatives Vertrauens-Register */}
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="flex items-center gap-3 text-blue-200">
-            <Users className="w-6 h-6 text-[#20b2aa]" />
-            <span>4,9 Millionen Pflegebedürftige unterstützt</span>
+        {/* 🛡️ TRUST REGISTER: Unmittelbar sichtbare Vertrauensindikatoren */}
+        <div
+          className={pageStyles.footerRegister}
+          role="region"
+          aria-label="Sicherheitszertifikate"
+        >
+          <div className={pageStyles.registerCard}>
+            <Users className="w-5 h-5 text-[#4a90e2] flex-shrink-0" />
+            <span>
+              {t.rich('trust.basis', {
+                strong: (chunks) => <strong>{chunks}</strong>,
+              })}
+            </span>
           </div>
-          <div className="flex items-center gap-3 text-blue-200">
-            <Shield className="w-6 h-6 text-[#20b2aa]" />
-            <span>Anonym & DSGVO-konform</span>
+          <div className={pageStyles.registerCard}>
+            <Shield className="w-5 h-5 text-[#4a90e2] flex-shrink-0" />
+            <span>
+              {t.rich('trust.anonym', {
+                strong: (chunks) => <strong>{chunks}</strong>,
+              })}
+            </span>
           </div>
-          <div className="flex items-center gap-3 text-blue-200">
-            <Clock className="w-6 h-6 text-[#20b2aa]" />
-            <span>Sofortiges Ergebnis</span>
+          <div className={pageStyles.registerCard}>
+            <Clock className="w-5 h-5 text-[#4a90e2] flex-shrink-0" />
+            <span>
+              {t.rich('trust.rechtssicher', {
+                strong: (chunks) => <strong>{chunks}</strong>,
+              })}
+            </span>
           </div>
         </div>
       </div>
