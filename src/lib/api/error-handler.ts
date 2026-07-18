@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 
 import { normalizeError, shouldLogError } from '@/src/lib/api/errors';
-import { createServerSupabaseClient } from '@/src/lib/supabase/server';
+import { createAdminSupabaseClient } from '@/src/lib/supabase/admin';
 
 export async function handleApiError(
   error: unknown,
@@ -21,19 +21,23 @@ export async function handleApiError(
   // Nur loggen, wenn das Log-Level nicht 'debug' ist
   if (shouldLogError(normalized)) {
     try {
-      const supabase = await createServerSupabaseClient();
+      const supabase = createAdminSupabaseClient();
 
       // Automatische Dokumentation im System-Audit-Trail (Supabase)
       await supabase.from('system_logs').insert({
         level: normalized.logLevel,
         source,
         message: normalized.message,
-        metadata: {
-          context: normalized.context,
-          code: normalized.code,
-          retryable: normalized.retryable,
-          timestamp: normalized.timestamp,
-        },
+        // JSON.parse(JSON.stringify(...)) erzwingt serialisierbare Werte —
+        // context ist ein freies Record und nicht per se Json-kompatibel
+        metadata: JSON.parse(
+          JSON.stringify({
+            context: normalized.context,
+            code: normalized.code,
+            retryable: normalized.retryable,
+            timestamp: normalized.timestamp,
+          })
+        ),
         case_code: caseCode || null,
       });
     } catch (logErr) {

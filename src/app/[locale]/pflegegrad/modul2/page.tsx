@@ -10,6 +10,11 @@ import { KognitionForm } from '@/src/app/[locale]/pflegegrad/modul2/_components/
 import { Button } from '@/src/components/ui/button';
 import { Progress } from '@/src/components/ui/progress';
 import { logger } from '@/src/lib/logger';
+import {
+  loadModuleAnswers,
+  saveModuleAnswers,
+  SessionExpiredError,
+} from '@/src/lib/pflegegrad/client-api';
 import { Frage, BewertungOption } from '@/src/types/pflegegrad';
 
 // Offizielle NBA-Kriterien für Modul 2 nach § 15 SGB XI
@@ -73,19 +78,21 @@ export default function Modul2Page() {
       return;
     }
 
-    fetch(`/api/cases/${caseCode.toUpperCase()}/answers`)
-      .then((res) => {
-        if (res.ok) return res.json();
-        throw new Error();
-      })
-      .then((data) => {
-        const modul2Record = data.find((r: { module_number: number }) => r.module_number === 2);
-        if (modul2Record?.answers) {
-          setAntworten(modul2Record.answers as Record<string, string>);
+    loadModuleAnswers(caseCode, 'modul2')
+      .then((answers) => {
+        if (answers) {
+          setAntworten(answers);
           logger.debug({ caseCode }, 'Bestehende Antworten für Modul 2 geladen.');
         }
       })
-      .catch(() => logger.info('Keine alten Antworten für Modul 2 gefunden.'));
+      .catch((err) => {
+        if (err instanceof SessionExpiredError) {
+          toast.error('Ihre Fall-Session ist abgelaufen. Bitte laden Sie Ihren Fall erneut.');
+          router.push(`/${locale}/pflegegrad/start`);
+          return;
+        }
+        logger.info('Keine alten Antworten für Modul 2 gefunden.');
+      });
   }, [caseCode, locale, router]);
 
   const handleAntwortChange = (frageId: string, wert: string) => {
@@ -104,31 +111,21 @@ export default function Modul2Page() {
     });
 
     try {
-      // 🚀 Performanter Parallel-Save an deine API ('emr' = Modul 2)
-      await Promise.all(
-        Object.entries(antworten).map(([questionKey, answerValue]) =>
-          fetch(`/api/cases/${caseCode.toUpperCase()}/answers`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              moduleName: 'emr',
-              questionKey,
-              answerValue,
-            }),
-          }).then((res) => {
-            if (!res.ok) throw new Error('Fehler beim Speichern einer Teilantwort.');
-          })
-        )
-      );
+      await saveModuleAnswers(caseCode, 'modul2', antworten);
 
       localStorage.setItem('modul2_rohpunkte', gesamtRohpunkte.toString());
       toast.success('Modul 2 erfolgreich gespeichert.');
       router.push(`/${locale}/pflegegrad/modul3`);
     } catch (err) {
+      if (err instanceof SessionExpiredError) {
+        toast.error('Ihre Fall-Session ist abgelaufen. Bitte laden Sie Ihren Fall erneut.');
+        router.push(`/${locale}/pflegegrad/start`);
+        return;
+      }
       logger.error({ err }, 'Fehler beim Übertragen der Daten von Modul 2');
-      toast.error('Fehler beim Übertragen der Daten an den Server.');
-      // Fallback-Weiterleitung bei Offline-Betrieb erlauben
-      router.push(`/${locale}/pflegegrad/modul3`);
+      toast.error(
+        'Speichern fehlgeschlagen. Ihre Eingaben bleiben erhalten — bitte erneut versuchen.'
+      );
     } finally {
       setLoading(false);
     }

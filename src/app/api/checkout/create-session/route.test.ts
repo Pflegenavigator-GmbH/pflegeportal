@@ -36,9 +36,9 @@ vi.mock('@/src/lib/stripe/server', () => ({
   },
 }));
 
-// 3. Supabase Client mocken
-vi.mock('@/src/lib/supabase/server', () => ({
-  createServerSupabaseClient: vi.fn().mockResolvedValue({
+// 3. Supabase Admin-Client mocken (synchron, kein Promise)
+vi.mock('@/src/lib/supabase/admin', () => ({
+  createAdminSupabaseClient: vi.fn().mockReturnValue({
     from: supabaseFromMock,
   }),
 }));

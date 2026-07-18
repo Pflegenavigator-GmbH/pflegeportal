@@ -10,6 +10,11 @@ import { KrankheitsbewaeltigungForm } from '@/src/app/[locale]/pflegegrad/modul5
 import { Button } from '@/src/components/ui/button';
 import { Progress } from '@/src/components/ui/progress';
 import { logger } from '@/src/lib/logger';
+import {
+  loadModuleAnswers,
+  saveModuleAnswers,
+  SessionExpiredError,
+} from '@/src/lib/pflegegrad/client-api';
 import { Frage, BewertungOption } from '@/src/types/pflegegrad';
 
 const KRANKHEIT_FRAGEN: Frage[] = [
@@ -69,19 +74,21 @@ export default function Modul5Page() {
       return;
     }
 
-    fetch(`/api/cases/${caseCode.toUpperCase()}/answers`)
-      .then((res) => {
-        if (res.ok) return res.json();
-        throw new Error();
-      })
-      .then((data) => {
-        const modul5Record = data.find((r: { module_number: number }) => r.module_number === 5);
-        if (modul5Record?.answers) {
-          setAntworten(modul5Record.answers as Record<string, string>);
+    loadModuleAnswers(caseCode, 'modul5')
+      .then((answers) => {
+        if (answers) {
+          setAntworten(answers);
           logger.debug({ caseCode }, 'Bestehende Antworten für Modul 5 geladen.');
         }
       })
-      .catch(() => logger.info('Keine alten Antworten für Modul 5 gefunden.'));
+      .catch((err) => {
+        if (err instanceof SessionExpiredError) {
+          toast.error('Ihre Fall-Session ist abgelaufen. Bitte laden Sie Ihren Fall erneut.');
+          router.push(`/${locale}/pflegegrad/start`);
+          return;
+        }
+        logger.info('Keine alten Antworten für Modul 5 gefunden.');
+      });
   }, [caseCode, locale, router]);
 
   const handleAntwortChange = (frageId: string, wert: string) => {
@@ -100,29 +107,21 @@ export default function Modul5Page() {
     });
 
     try {
-      await Promise.all(
-        Object.entries(antworten).map(([questionKey, answerValue]) =>
-          fetch(`/api/cases/${caseCode.toUpperCase()}/answers`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              moduleName: 'tagebuch',
-              questionKey,
-              answerValue,
-            }),
-          }).then((res) => {
-            if (!res.ok) throw new Error('Fehler beim Speichern einer Teilantwort.');
-          })
-        )
-      );
+      await saveModuleAnswers(caseCode, 'modul5', antworten);
 
       localStorage.setItem('modul5_rohpunkte', gesamtRohpunkte.toString());
       toast.success('Modul 5 erfolgreich gespeichert.');
       router.push(`/${locale}/pflegegrad/modul6`);
     } catch (err) {
+      if (err instanceof SessionExpiredError) {
+        toast.error('Ihre Fall-Session ist abgelaufen. Bitte laden Sie Ihren Fall erneut.');
+        router.push(`/${locale}/pflegegrad/start`);
+        return;
+      }
       logger.error({ err }, 'Fehler beim API-Transit in Modul 5');
-      toast.error('Fehler beim Übertragen der Daten an den Server.');
-      router.push(`/${locale}/pflegegrad/modul6`);
+      toast.error(
+        'Speichern fehlgeschlagen. Ihre Eingaben bleiben erhalten — bitte erneut versuchen.'
+      );
     } finally {
       setLoading(false);
     }

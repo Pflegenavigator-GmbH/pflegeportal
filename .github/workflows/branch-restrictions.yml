@@ -1,0 +1,31 @@
+# .github/workflows/branch-restrictions.yml
+# Erzwingt den Git-Flow: main erhält Merges ausschließlich aus develop,
+# und main darf nie zurück nach develop gemergt werden.
+name: Branch Merge Restrictions
+
+on:
+  pull_request:
+    branches: ["main", "develop"]
+
+# Der Job liest nur GitHub-Kontextvariablen — keinerlei Token-Rechte nötig
+permissions: {}
+
+jobs:
+  check-source-branch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Quell-Branch prüfen
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          if [ "$BASE_REF" = "main" ] && [ "$HEAD_REF" != "develop" ]; then
+            echo "❌ In 'main' darf nur aus 'develop' gemergt werden (nicht aus '$HEAD_REF')."
+            exit 1
+          fi
+          if [ "$BASE_REF" = "develop" ] && [ "$HEAD_REF" = "main" ]; then
+            echo "❌ Ein Merge von 'main' zurück nach 'develop' ist nicht erlaubt."
+            exit 1
+          fi
+          echo "✅ Branch-Regeln eingehalten ($HEAD_REF → $BASE_REF)."

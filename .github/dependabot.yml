@@ -15,3 +15,22 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
+    # Minor/Patch gebündelt in einem Sammel-PR — Major-Updates kommen einzeln
+    groups:
+      minor-und-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Hält die in den Workflows gepinnten Actions (checkout, setup-node, …) aktuell
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Berlin"
+    target-branch: "develop"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore"

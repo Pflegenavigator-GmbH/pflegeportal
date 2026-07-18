@@ -1,65 +1,131 @@
 # .github/workflows/ci.yml
-name: CI Pipeline
+name: CI
 
 on:
   push:
     branches: ["main", "develop"]
   pull_request:
     branches: ["main", "develop"]
+  workflow_dispatch:
+
+# Least privilege: kein Job braucht Schreibrechte
+permissions:
+  contents: read
+
+# Veraltete Läufe desselben PRs abbrechen — spart Minuten bei Force-Pushes.
+# Pushes auf main/develop laufen immer zu Ende.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  build-and-test:
-    name: Lint, Typecheck, Test & Build
+  quality:
+    name: Lint, Format & Typecheck
     runs-on: ubuntu-latest
-
+    timeout-minutes: 10
     steps:
-      - name: Code auschecken
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Node.js Setup
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: "npm"
 
-      # 🚀 NEU: Next.js Build-Cache (Macht die Pipeline drastisch schneller)
-      - name: Next.js Cache wiederherstellen
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.npm
-            ${{ github.workspace }}/.next/cache
-          # Erzeugt einen neuen Cache, sobald sich Abhängigkeiten oder Code ändern
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
-
-      - name: Abhängigkeiten installieren (Clean Install)
+      - name: Abhängigkeiten installieren
         run: npm ci
 
-      # 🚀 NEU: Automatischer Sicherheits-Check für NPM-Pakete
-      - name: Security Audit (NPM)
-        run: npm audit --audit-level=high || true # '|| true' verhindert, dass der Build sofort abbricht, loggt aber die Warnungen
-
-      - name: Environment Variables für CI vorbereiten
-        run: |
-          cp .env.example .env.local
-          echo "BREVO_API_KEY=ci_dummy_key_123" >> .env.local
-          echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_dummy" >> .env.local
-          echo "STRIPE_SECRET_KEY=sk_test_dummy" >> .env.local
-
-      # 🚀 TIPP: Falls du Prettier nutzt, hier einkommentieren:
-      # - name: Formatierung prüfen (Prettier)
-      #   run: npx prettier --check "src/**/*.{ts,tsx,js,jsx,json,css}"
-
-      - name: Linter prüfen
+      - name: ESLint
         run: npm run lint
 
-      - name: TypeScript prüfen
+      - name: Prettier
+        run: npm run format:check
+
+      - name: TypeScript
         run: npm run typecheck
 
-      - name: Unit Tests ausführen
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Abhängigkeiten installieren
+        run: npm ci
+
+      - name: CI-Umgebung vorbereiten (Dummy-Secrets)
+        run: |
+          cp .env.example .env.local
+          {
+            echo "BREVO_API_KEY=ci_dummy_key_123"
+            echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_dummy"
+            echo "STRIPE_SECRET_KEY=sk_test_dummy"
+          } >> .env.local
+
+      - name: Vitest
         run: npm run test -- --run
 
-      - name: Production Build prüfen
+  build:
+    name: Production Build
+    runs-on: ubuntu-latest
+    # Schutz vor hängenden Builds (lokal bereits vorgekommen) —
+    # ein Hänger darf keine 6h-Runner-Rechnung erzeugen
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Next.js Build-Cache wiederherstellen
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: nextjs-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**/*.ts', 'src/**/*.tsx') }}
+          restore-keys: |
+            nextjs-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+
+      - name: Abhängigkeiten installieren
+        run: npm ci
+
+      - name: CI-Umgebung vorbereiten (Dummy-Secrets)
+        run: |
+          cp .env.example .env.local
+          {
+            echo "BREVO_API_KEY=ci_dummy_key_123"
+            echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_dummy"
+            echo "STRIPE_SECRET_KEY=sk_test_dummy"
+          } >> .env.local
+
+      - name: Next.js Build
         run: npm run build
+
+  audit:
+    # Bewusst nicht-blockierend: npm audit schlägt oft wegen transitiv
+    # gemeldeter Advisories fehl, auf die wir keinen Einfluss haben.
+    # Als eigener Job bleibt das Ergebnis trotzdem im PR sichtbar,
+    # statt in einem grünen Log unterzugehen.
+    name: Dependency Audit (informativ)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Abhängigkeiten installieren
+        run: npm ci
+
+      - name: npm audit (Produktions-Abhängigkeiten, ab High)
+        run: npm audit --omit=dev --audit-level=high
