@@ -40,6 +40,7 @@ import {
   saveModuleAnswers,
   SessionExpiredError,
 } from '@/src/lib/pflegegrad/client-api';
+import { NBA_CONFIG } from '@/src/lib/pflegegrad/constants';
 import {
   AgeGroup,
   BABY_AGE_LIMIT_YEARS,
@@ -528,13 +529,20 @@ export default function KinderModusPage() {
               <CardFooter className="border-t border-white/5 p-4 bg-white/[0.01]">
                 <Button
                   onClick={() => {
-                    // Wir spiegeln das berechnete Ergebnis, damit das Brief-Zentrum einhaken kann
+                    // Leistungsbeträge aus der zentralen Gesetzeskonfiguration
+                    // statt hartkodiert — bleibt bei Satzänderungen konsistent
+                    const benefits = NBA_CONFIG.BENEFITS[
+                      result.level as keyof typeof NBA_CONFIG.BENEFITS
+                    ] ?? { monthly: 0, relief: 0 };
                     localStorage.setItem(
                       'pflegegrad-ergebnis',
                       JSON.stringify({
                         careLevel: result.level,
                         totalScore: result.points,
-                        benefits: { monthlyAmount: result.level >= 2 ? 332 : 0, reliefBudget: 125 },
+                        benefits: {
+                          monthlyAmount: benefits.monthly,
+                          reliefBudget: benefits.relief,
+                        },
                       })
                     );
                     router.push(`/${locale}/briefe`);

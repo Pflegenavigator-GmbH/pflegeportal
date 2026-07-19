@@ -21,7 +21,6 @@ import { toast } from 'sonner';
 
 import { HandlungsEmpfehlungen } from '@/src/app/[locale]/pflegegrad/ergebnis/_component/HandlungsEmpfehlung';
 import { ModulListe } from '@/src/app/[locale]/pflegegrad/ergebnis/_component/ModulListe';
-import { validateAndStoreSession } from '@/src/app/actions/case-session';
 import { PaywallModal } from '@/src/components/modal/PaywallModal';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
@@ -35,8 +34,8 @@ import {
 } from '@/src/components/ui/dropdown-menu';
 import { usePdfDownload } from '@/src/hooks/usePdfDownload';
 import { logger } from '@/src/lib/logger';
-import { calculatePflegegrad } from '@/src/lib/pflegegrad/rechner';
-import { ModuleScores, PflegegradErgebnis, EinstufungAmpel } from '@/src/types/pflegegrad';
+import { loadCaseResult, SessionExpiredError } from '@/src/lib/pflegegrad/client-api';
+import { PflegegradErgebnis, EinstufungAmpel } from '@/src/types/pflegegrad';
 
 import { NBA_MODULE_METADATA } from './_constants/moduleMetadata';
 
@@ -78,43 +77,32 @@ export default function ErgebnisPage(props: PageProps) {
   });
 
   useEffect(() => {
-    const timer = setTimeout(async () => {
-      setHasMounted(true);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setHasMounted(true);
 
-      if (!caseCode) {
-        logger.warn('Keine aktive Fall-Session im LocalStorage gefunden. Leite um.');
-        toast.error('Keine aktive Fall-Session gefunden.');
-        router.push(`/${locale}/pflegegrad/start`);
-        return;
-      }
+    if (!caseCode) {
+      logger.warn('Keine aktive Fall-Session gefunden. Leite um.');
+      toast.error('Keine aktive Fall-Session gefunden.');
+      router.push(`/${locale}/pflegegrad/start`);
+      return;
+    }
 
-      try {
-        const session = await validateAndStoreSession(caseCode);
-        if (!session.success || !session.isUnlocked) {
-          logger.warn({ caseCode }, 'Client-Session auf der Ergebnisseite nicht freigeschaltet');
+    // Server ist die einzige Wahrheit: Rohpunkte und Pflegegrad werden
+    // serverseitig aus den gespeicherten Antworten berechnet — kein
+    // localStorage, kein setTimeout-Lifecycle-Workaround mehr.
+    loadCaseResult(caseCode)
+      .then((berechnetesErgebnis) => {
+        setErgebnis(berechnetesErgebnis);
+      })
+      .catch((err) => {
+        if (err instanceof SessionExpiredError) {
+          toast.error('Ihre Fall-Session ist abgelaufen. Bitte laden Sie Ihren Fall erneut.');
+          router.push(`/${locale}/pflegegrad/start`);
+          return;
         }
-      } catch (sessionErr) {
-        logger.error(
-          { err: sessionErr },
-          'Fehler bei der Server-Session-Synchronisation im Frontend'
-        );
-      }
-
-      const m1 = Number(localStorage.getItem('modul1_rohpunkte') || '0');
-      const m2 = Number(localStorage.getItem('modul2_rohpunkte') || '0');
-      const m3 = Number(localStorage.getItem('modul3_rohpunkte') || '0');
-      const m4 = Number(localStorage.getItem('modul4_rohpunkte') || '0');
-      const m5 = Number(localStorage.getItem('modul5_rohpunkte') || '0');
-      const m6 = Number(localStorage.getItem('modul6_answers') ? 1 : 0);
-
-      const scores: Partial<ModuleScores> = { 1: m1, 2: m2, 3: m3, 4: m4, 5: m5, 6: m6 };
-      const berechnetesErgebnis = calculatePflegegrad(scores);
-      setErgebnis(berechnetesErgebnis);
-
-      localStorage.setItem('pflegegrad-ergebnis', JSON.stringify(berechnetesErgebnis));
-    }, 0);
-
-    return () => clearTimeout(timer);
+        logger.error({ err, caseCode }, 'Ergebnis konnte nicht geladen werden');
+        toast.error('Das Ergebnis konnte nicht berechnet werden.');
+      });
   }, [caseCode, locale, router]);
 
   const handleReEvaluateFromScratch = () => {

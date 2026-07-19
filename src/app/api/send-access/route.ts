@@ -9,6 +9,7 @@ import { checkRateLimit, getClientIp } from '@/src/lib/api/rate-limit';
 import { isValidEmail } from '@/src/lib/api/validation';
 import { BrevoClient } from '@/src/lib/brevo/client';
 import { getBaseUrl } from '@/src/lib/env';
+import { escapeHtml } from '@/src/lib/escape';
 
 interface AccessRequestBody {
   caseCode?: string;
@@ -22,15 +23,6 @@ const SEND_LIMIT = 5;
 const SEND_WINDOW_MS = 60 * 60 * 1000;
 
 const PHONE_PATTERN = /^\+?[0-9 ()/-]{6,20}$/;
-
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
 
 export async function POST(request: Request): Promise<NextResponse> {
   let caseCode: string | undefined;

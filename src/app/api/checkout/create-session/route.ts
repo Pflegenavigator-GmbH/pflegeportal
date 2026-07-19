@@ -96,29 +96,45 @@ export async function POST(req: Request) {
     };
 
     const gesuchtesInterval = intervalMapping[paket];
-    let query = supabase
-      .from('products')
-      .select('id, name')
-      .eq('is_active', true)
-      .eq('interval', gesuchtesInterval);
 
-    if (isDev) {
-      query = query.ilike('name', 'Test%');
-    } else {
-      query = query.not('name', 'ilike', 'Test%');
+    // Test- vs. Produktivkatalog wird weiterhin über das "Test"-Namenspräfix
+    // getrennt (die paket-Spalte unterscheidet das nicht).
+    const applyEnvFilter = <
+      T extends { ilike: (c: string, p: string) => T; not: (c: string, o: string, p: string) => T },
+    >(
+      q: T
+    ): T => (isDev ? q.ilike('name', 'Test%') : q.not('name', 'ilike', 'Test%'));
+
+    // 1. Bevorzugter, stabiler Weg: exakte Zuordnung über die paket-Spalte.
+    const paketQuery = applyEnvFilter(
+      supabase.from('products').select('id, name').eq('is_active', true).eq('paket', paket)
+    );
+    let { data: productDb } = await paketQuery.maybeSingle();
+
+    // 2. Fallback (solange die paket-Spalte noch nicht befüllt ist):
+    //    bisheriges Interval- + Namens-Matching.
+    if (!productDb) {
+      let nameQuery = applyEnvFilter(
+        supabase
+          .from('products')
+          .select('id, name')
+          .eq('is_active', true)
+          .eq('interval', gesuchtesInterval)
+      );
+
+      if (paket.startsWith('standard')) {
+        nameQuery = nameQuery.ilike('name', '%Standard%');
+      } else if (paket.startsWith('profi')) {
+        nameQuery = nameQuery.ilike('name', '%Profi%');
+      } else if (paket === 'beta_special') {
+        nameQuery = nameQuery.ilike('name', '%Beta%');
+      }
+
+      const fallback = await nameQuery.maybeSingle();
+      productDb = fallback.data;
     }
 
-    if (paket.startsWith('standard')) {
-      query = query.ilike('name', '%Standard%');
-    } else if (paket.startsWith('profi')) {
-      query = query.ilike('name', '%Profi%');
-    } else if (paket === 'beta_special') {
-      query = query.ilike('name', '%Beta%');
-    }
-
-    const { data: productDb, error: productError } = await query.maybeSingle();
-
-    if (productError || !productDb) {
+    if (!productDb) {
       logger.error({ paket, gesuchtesInterval, isDev }, 'Kein passendes Produkt in DB gefunden');
       throw new ValidationError(`Kein aktiver Preis für das Paket "${paket}" gefunden.`);
     }

@@ -1,6 +1,5 @@
 // src/app/[locale]/page.test.tsx
 import { render, screen, fireEvent, within } from '@testing-library/react';
-// eslint-disable-next-line import-x/no-unresolved
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
