@@ -10,6 +10,7 @@ import {
   Share2,
   ShieldAlert,
 } from 'lucide-react';
+import { useParams } from 'next/navigation';
 import { QRCodeSVG } from 'qrcode.react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -31,14 +32,16 @@ interface AccessShareModalProps {
 }
 
 export function AccessShareModal({ caseCode, open, onOpenChange }: AccessShareModalProps) {
+  const params = useParams();
+  const locale = typeof params?.locale === 'string' ? params.locale : 'de';
   const [contactType, setContactType] = useState<'email' | 'sms'>('email');
   const [contactValue, setContactValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const portalLink =
     typeof window !== 'undefined'
-      ? `${window.location.origin}/pflegegrad/start?case=${caseCode}`
-      : `https://pflegenavigatoreu.com/pflegegrad/start?case=${caseCode}`;
+      ? `${window.location.origin}/${locale}/pflegegrad/start?case=${encodeURIComponent(caseCode)}`
+      : `https://pflegenavigatoreu.com/${locale}/pflegegrad/start?case=${encodeURIComponent(caseCode)}`;
 
   const handleDownloadQR = () => {
     const svg = document.getElementById('access-qr-code');
@@ -75,7 +78,7 @@ export function AccessShareModal({ caseCode, open, onOpenChange }: AccessShareMo
       const res = await fetch('/api/send-access', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ caseCode, contact: contactValue, type: contactType }),
+        body: JSON.stringify({ caseCode, contact: contactValue, type: contactType, locale }),
       });
 
       if (!res.ok) throw new Error();

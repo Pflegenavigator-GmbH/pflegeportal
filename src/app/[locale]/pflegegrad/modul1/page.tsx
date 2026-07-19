@@ -12,6 +12,11 @@ import { Card, CardContent } from '@/src/components/ui/card';
 import { Label } from '@/src/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/src/components/ui/radio-group';
 import { logger } from '@/src/lib/logger';
+import {
+  loadModuleAnswers,
+  saveModuleAnswers,
+  SessionExpiredError,
+} from '@/src/lib/pflegegrad/client-api';
 import { FRAGEN_MODUL_1, BEWERTUNGEN } from '@/src/lib/pflegegrad/fragen';
 
 export default function Modul1Page() {
@@ -34,20 +39,21 @@ export default function Modul1Page() {
       return;
     }
 
-    fetch(`/api/cases/${caseCode.toUpperCase()}/answers`)
-      .then((res) => {
-        if (res.ok) return res.json();
-        throw new Error();
-      })
-      .then((data) => {
-        // Suche den Eintrag für Modul 1 (pflegegrad)
-        const modul1Record = data.find((r: { module_number: number }) => r.module_number === 1);
-        if (modul1Record?.answers) {
-          setAntworten(modul1Record.answers as Record<string, string>);
+    loadModuleAnswers(caseCode, 'modul1')
+      .then((answers) => {
+        if (answers) {
+          setAntworten(answers);
           logger.debug({ caseCode }, 'Bestehende Antworten für Modul 1 rekonstruiert.');
         }
       })
-      .catch(() => logger.info('Keine Vorab-Daten für Modul 1 in der DB gefunden.'));
+      .catch((err) => {
+        if (err instanceof SessionExpiredError) {
+          toast.error('Ihre Fall-Session ist abgelaufen. Bitte laden Sie Ihren Fall erneut.');
+          router.push(`/${locale}/pflegegrad/start`);
+          return;
+        }
+        logger.info('Keine Vorab-Daten für Modul 1 in der DB gefunden.');
+      });
   }, [caseCode, locale, router]);
 
   const handleAntwort = (frageId: string, wert: string) => {
@@ -65,34 +71,23 @@ export default function Modul1Page() {
       if (option) rohPunkte += option.punkte;
     });
 
-    // Harmonisierter Key für deine Ergebnisseite
-    localStorage.setItem('modul1_rohpunkte', rohPunkte.toString());
-
-    // 2. Parallelisierte API-Übertragung an deine echte Route
+    // 2. Ein atomarer Bulk-Save — bei Fehler bleibt die Seite erhalten
     try {
-      await Promise.all(
-        Object.entries(antworten).map(([questionKey, answerValue]) =>
-          fetch(`/api/cases/${caseCode.toUpperCase()}/answers`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              moduleName: 'pflegegrad', // Mappt laut deiner API-Map auf module_number: 1
-              questionKey,
-              answerValue,
-            }),
-          }).then((res) => {
-            if (!res.ok) throw new Error('Fehler beim Speichern einer Antwortzeile.');
-          })
-        )
-      );
+      await saveModuleAnswers(caseCode, 'modul1', antworten);
 
+      localStorage.setItem('modul1_rohpunkte', rohPunkte.toString());
       toast.success('Fortschritt online gespeichert!');
       router.push(`/${locale}/pflegegrad/modul2`);
     } catch (err) {
+      if (err instanceof SessionExpiredError) {
+        toast.error('Ihre Fall-Session ist abgelaufen. Bitte laden Sie Ihren Fall erneut.');
+        router.push(`/${locale}/pflegegrad/start`);
+        return;
+      }
       logger.error({ err }, 'Fehler bei der API-Synchronisierung von Modul 1');
-      toast.error('Fehler beim Speichern auf dem Server. Fortschritt nur lokal gesichert.');
-      // Trotz Server-Fehler erlauben wir das Weitergehen via LocalStorage-Fallback
-      router.push(`/${locale}/pflegegrad/modul2`);
+      toast.error(
+        'Speichern fehlgeschlagen. Ihre Eingaben bleiben erhalten — bitte erneut versuchen.'
+      );
     } finally {
       setLoading(false);
     }

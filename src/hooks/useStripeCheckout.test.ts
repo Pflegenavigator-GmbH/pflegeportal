@@ -13,6 +13,11 @@ vi.mock('sonner', () => ({
   },
 }));
 
+// Der Hook liest die Locale aus der Route
+vi.mock('next/navigation', () => ({
+  useParams: vi.fn(() => ({ locale: 'de' })),
+}));
+
 describe('useStripeCheckout Hook', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -46,7 +51,7 @@ describe('useStripeCheckout Hook', () => {
       '/api/checkout/create-session',
       expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ caseCode: 'FALL123', paket: 'paket_basic' }),
+        body: JSON.stringify({ caseCode: 'FALL123', paket: 'paket_basic', locale: 'de' }),
       })
     );
 

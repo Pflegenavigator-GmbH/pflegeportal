@@ -10,14 +10,18 @@ const withNextIntl = createNextIntlPlugin(
 let withAnalyzer: (config: NextConfig) => NextConfig = (config) => config;
 
 if (process.env.ANALYZE === "true") {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const withBundleAnalyzer = require("@next/bundle-analyzer")({ enabled: true });
     withAnalyzer = withBundleAnalyzer;
 }
 
 // CSP-Konfiguration
+// 'unsafe-eval' braucht nur der Dev-Server (React Refresh) — in Produktion raus.
+const isDev = process.env.NODE_ENV === "development";
+const scriptSrcExtra = isDev ? " 'unsafe-eval'" : "";
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' https://analytics.umami.is;
+  script-src 'self'${scriptSrcExtra} 'unsafe-inline' https://analytics.umami.is;
   script-src-elem 'self' 'unsafe-inline' https://analytics.umami.is;
   style-src 'self' 'unsafe-inline';
   img-src 'self' blob: data: https://*.supabase.co https://images.unsplash.com;
@@ -40,7 +44,6 @@ const securityHeaders = [
     { key: "X-DNS-Prefetch-Control", value: "on" },
     { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
     { key: "Permissions-Policy", value: "camera=(), microphone=(self), geolocation=(), interest-cohort=()" },
-    { key: "X-XSS-Protection", value: "1; mode=block" },
 ];
 
 const nextConfig: NextConfig = {
@@ -55,15 +58,15 @@ const nextConfig: NextConfig = {
         dangerouslyAllowSVG: true,
     },
 
-    typescript: {
-        ignoreBuildErrors: true, // Hilfreich während der Migration des Altcodes
-    },
+    // typescript.ignoreBuildErrors war während der Altcode-Migration aktiv und
+    // hat die strikte tsconfig im Produktions-Build neutralisiert — entfernt.
 
     async headers() {
         return [{ source: "/:path*", headers: securityHeaders }];
     },
 
     experimental: {
+        globalNotFound: true,
         optimizePackageImports: [
             "lucide-react",
             "@radix-ui/react-separator",

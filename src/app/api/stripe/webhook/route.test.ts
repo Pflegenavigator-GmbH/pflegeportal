@@ -22,9 +22,9 @@ vi.mock('@/src/lib/stripe/server', () => ({
   },
 }));
 
-// 3. Supabase Fluent-API mocken
-vi.mock('@/src/lib/supabase/server', () => ({
-  createServerSupabaseClient: vi.fn().mockResolvedValue({
+// 3. Supabase Admin-Client mocken (synchron, kein Promise)
+vi.mock('@/src/lib/supabase/admin', () => ({
+  createAdminSupabaseClient: vi.fn().mockReturnValue({
     from: supabaseFromMock,
   }),
 }));
@@ -118,7 +118,16 @@ describe('Stripe Webhook API Route', () => {
           update: supabaseUpdateMock.mockReturnThis(),
         } as unknown as ReturnType<typeof supabaseFromMock>;
       }
-      if (table === 'payments' || table === 'system_logs') {
+      if (table === 'payments') {
+        // Idempotenz-Check (select → eq → maybeSingle: kein Treffer) + Insert
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+          insert: supabaseInsertMock.mockResolvedValue({ error: null }),
+        } as unknown as ReturnType<typeof supabaseFromMock>;
+      }
+      if (table === 'system_logs') {
         return {
           insert: supabaseInsertMock.mockResolvedValue({ error: null }),
         } as unknown as ReturnType<typeof supabaseFromMock>;

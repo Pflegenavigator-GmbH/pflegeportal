@@ -1,9 +1,18 @@
 // src/app/api/tagebuch/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
-import { logger } from '@/src/lib/logger';
-import { createServerSupabaseClient } from '@/src/lib/supabase/server';
+import { requireCaseSession } from '@/src/lib/api/case-auth';
+import { handleApiError } from '@/src/lib/api/error-handler';
+import { ValidationError } from '@/src/lib/api/errors';
+import { isValidTagebuchEntryKey, withKey, withoutKey } from '@/src/lib/api/validation';
+import { TAGEBUCH_MODULE_NUMBER } from '@/src/lib/pflegegrad/assessment-modules';
+import { createAdminSupabaseClient } from '@/src/lib/supabase/admin';
+import { Json } from '@/src/types/supabase';
 import { TagebuchData, TagebuchEintrag } from '@/src/types/tagebuch';
+
+// ⚠️ Historisch lag das Tagebuch unter module_number 5 und kollidierte mit den
+// Antworten von Pflegegrad-Modul 5 (beide haben sich gegenseitig überschrieben).
+// Neuer, kollisionsfreier Namespace: TAGEBUCH_MODULE_NUMBER (10).
 
 // GET: Abrufen aller Einträge eines Falls
 export async function GET(request: NextRequest) {
@@ -15,89 +24,78 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const supabase = await createServerSupabaseClient();
+    const session = await requireCaseSession(caseCode);
+    const supabase = createAdminSupabaseClient();
 
-    // 1. Hole die interne case_id über den Code
-    const { data: caseData, error: caseError } = await supabase
-      .from('cases')
-      .select('id')
-      .eq('case_code', caseCode.toUpperCase())
-      .single();
-
-    if (caseError || !caseData) {
-      return NextResponse.json({ error: 'Fall nicht gefunden' }, { status: 404 });
-    }
-
-    // 2. Hole den JSONB-Eintrag aus der answers-Tabelle (Modul 5 = Tagebuch)
     const { data: existingRecord, error } = await supabase
       .from('answers')
       .select('answers')
-      .eq('case_id', caseData.id)
-      .eq('module_number', 5)
+      .eq('case_id', session.caseId)
+      .eq('module_number', TAGEBUCH_MODULE_NUMBER)
       .maybeSingle();
 
     if (error) throw error;
 
-    // Liefert das Dictionary zurück oder ein leeres Objekt
     return NextResponse.json(existingRecord?.answers || {});
   } catch (err) {
-    logger.error({ err, caseCode }, 'Fehler in GET /api/tagebuch');
-    return NextResponse.json({ error: 'Serverfehler beim Laden' }, { status: 500 });
+    return handleApiError(err, 'api.tagebuch.get', caseCode);
   }
 }
 
 // POST: Hinzufügen oder Aktualisieren eines Eintrags im JSONB-Tree
 export async function POST(request: NextRequest) {
+  let caseCode: string | undefined;
   try {
-    const { caseCode, entryKey, payload } = (await request.json()) as {
-      caseCode: string;
-      entryKey: string | null;
-      payload: TagebuchEintrag;
+    const body = (await request.json()) as {
+      caseCode?: string;
+      entryKey?: string | null;
+      payload?: TagebuchEintrag;
     };
+    caseCode = body.caseCode;
+    const { entryKey, payload } = body;
 
     if (!caseCode || !payload || !payload.date) {
-      return NextResponse.json({ error: 'Payload unvollständig' }, { status: 400 });
+      throw new ValidationError('Payload unvollständig.');
     }
 
-    const supabase = await createServerSupabaseClient();
-
-    const { data: caseData, error: caseError } = await supabase
-      .from('cases')
-      .select('id')
-      .eq('case_code', caseCode.toUpperCase())
-      .single();
-
-    if (caseError || !caseData) {
-      return NextResponse.json({ error: 'Fall nicht gefunden' }, { status: 404 });
-    }
+    const session = await requireCaseSession(caseCode);
+    const supabase = createAdminSupabaseClient();
 
     // Hole den bestehenden Tree
     const { data: existingRecord } = await supabase
       .from('answers')
       .select('answers')
-      .eq('case_id', caseData.id)
-      .eq('module_number', 5)
+      .eq('case_id', session.caseId)
+      .eq('module_number', TAGEBUCH_MODULE_NUMBER)
       .maybeSingle();
 
-    // 🪄 REPARATUR: Typisierung als TagebuchData statt Record<string, any>
-    const currentAnswers = (existingRecord?.answers as TagebuchData) || {};
+    // 🛡️ Nutzer-Schlüssel strikt validieren (Schutz vor Prototype Pollution):
+    // erlaubt ist ausschließlich das selbst vergebene Format entry_<Zeitstempel>
+    if (entryKey && !isValidTagebuchEntryKey(entryKey)) {
+      throw new ValidationError('Ungültiger Eintrags-Schlüssel.');
+    }
+
+    const currentAnswers = (existingRecord?.answers as unknown as TagebuchData) || {};
 
     // ID generieren, falls es ein neuer Eintrag ist (Key = Zeitstempel oder bestehender Key)
     const targetKey = entryKey || `entry_${Date.now()}`;
 
-    // Neuen Eintrag hinzufügen oder bestehenden überschreiben
-    currentAnswers[targetKey] = {
-      ...payload,
-      created_at: currentAnswers[targetKey]?.created_at || new Date().toISOString(),
-    };
+    const existingCreatedAt = Object.prototype.hasOwnProperty.call(currentAnswers, targetKey)
+      ? currentAnswers[targetKey]?.created_at
+      : undefined;
 
-    // Upsert in die answers-Tabelle
+    // Kein dynamischer Property-Write: Aktualisierung läuft über eine Map
+    const updatedAnswers = withKey(currentAnswers, targetKey, {
+      ...payload,
+      created_at: existingCreatedAt || new Date().toISOString(),
+    });
+
     const { error: upsertError } = await supabase.from('answers').upsert(
       {
-        case_id: caseData.id,
-        module_number: 5,
+        case_id: session.caseId,
+        module_number: TAGEBUCH_MODULE_NUMBER,
         module_name: 'tagebuch',
-        answers: currentAnswers,
+        answers: updatedAnswers as unknown as Json,
         completed_at: new Date().toISOString(),
       },
       {
@@ -109,8 +107,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    logger.error({ err }, 'Fehler in POST /api/tagebuch');
-    return NextResponse.json({ error: 'Serverfehler beim Speichern' }, { status: 500 });
+    return handleApiError(err, 'api.tagebuch.post', caseCode);
   }
 }
 
@@ -125,41 +122,35 @@ export async function DELETE(request: NextRequest) {
   }
 
   try {
-    const supabase = await createServerSupabaseClient();
-
-    const { data: caseData, error: caseError } = await supabase
-      .from('cases')
-      .select('id')
-      .eq('case_code', caseCode.toUpperCase())
-      .single();
-
-    if (caseError || !caseData) {
-      return NextResponse.json({ error: 'Fall nicht gefunden' }, { status: 404 });
+    // 🛡️ Schutz vor Prototype Pollution: nur das eigene Schlüsselformat zulassen
+    if (!isValidTagebuchEntryKey(entryKey)) {
+      throw new ValidationError('Ungültiger Eintrags-Schlüssel.');
     }
+
+    const session = await requireCaseSession(caseCode);
+    const supabase = createAdminSupabaseClient();
 
     const { data: existingRecord } = await supabase
       .from('answers')
       .select('answers')
-      .eq('case_id', caseData.id)
-      .eq('module_number', 5)
+      .eq('case_id', session.caseId)
+      .eq('module_number', TAGEBUCH_MODULE_NUMBER)
       .maybeSingle();
 
     if (!existingRecord?.answers) {
       return NextResponse.json({ success: true });
     }
 
-    // 🪄 REPARATUR: Typisierung als TagebuchData statt Record<string, any>
-    const currentAnswers = existingRecord.answers as TagebuchData;
-
-    // Den Schlüssel aus dem JSONB-Objekt löschen
-    delete currentAnswers[entryKey];
+    const currentAnswers = existingRecord.answers as unknown as TagebuchData;
+    // Kein dynamischer Property-Delete: Entfernen läuft über eine Map
+    const updatedAnswers = withoutKey(currentAnswers, entryKey);
 
     const { error: updateError } = await supabase.from('answers').upsert(
       {
-        case_id: caseData.id,
-        module_number: 5,
+        case_id: session.caseId,
+        module_number: TAGEBUCH_MODULE_NUMBER,
         module_name: 'tagebuch',
-        answers: currentAnswers,
+        answers: updatedAnswers as unknown as Json,
         completed_at: new Date().toISOString(),
       },
       {
@@ -171,7 +162,6 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    logger.error({ err }, 'Fehler in DELETE /api/tagebuch');
-    return NextResponse.json({ error: 'Serverfehler beim Löschen' }, { status: 500 });
+    return handleApiError(err, 'api.tagebuch.delete', caseCode);
   }
 }

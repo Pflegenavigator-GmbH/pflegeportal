@@ -4,10 +4,11 @@
 import { cookies } from 'next/headers';
 
 import { logger } from '@/src/lib/logger';
-import { createServerSupabaseClient } from '@/src/lib/supabase/server';
+import { createAdminSupabaseClient } from '@/src/lib/supabase/admin';
 
 const CASE_COOKIE = 'pf_case_code';
 const BETA_ACCESS_MONTHS = 12;
+const CASE_CODE_PATTERN = /^[A-Z0-9][A-Z0-9_-]{3,63}$/;
 
 interface SessionStatus {
   /** Fall existiert in der DB und ist nicht abgelaufen → Session gültig */
@@ -32,9 +33,14 @@ export async function validateAndStoreSession(caseCode: string): Promise<Session
     caseCode: null,
   });
 
+  if (!CASE_CODE_PATTERN.test(cleanedCode)) {
+    logger.warn({ caseCode: cleanedCode }, 'Fallcode mit ungültigem Format abgelehnt');
+    return denied('invalid_format');
+  }
+
   try {
     const cookieStore = await cookies();
-    const supabase = await createServerSupabaseClient();
+    const supabase = createAdminSupabaseClient();
 
     const { data: currentCase, error } = await supabase
       .from('cases')

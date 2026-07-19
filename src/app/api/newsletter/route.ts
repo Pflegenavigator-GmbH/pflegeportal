@@ -1,6 +1,8 @@
 // src/app/api/newsletter/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
+import { isValidEmail } from '@/src/lib/api/validation';
+
 interface NewsletterSignup {
   email: string;
   language: string;
@@ -16,7 +18,8 @@ export async function POST(request: NextRequest) {
   try {
     const data: NewsletterSignup = await request.json();
 
-    if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+    // Längenlimit + lineares Muster — kein ReDoS-anfälliges Backtracking
+    if (!data.email || typeof data.email !== 'string' || !isValidEmail(data.email)) {
       return NextResponse.json({ error: 'Ungueltige E-Mail-Adresse' }, { status: 400 });
     }
 

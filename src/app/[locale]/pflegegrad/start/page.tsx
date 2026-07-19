@@ -32,7 +32,12 @@ interface ProductFromDb {
 
 interface PageProps {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ session_id?: string; check_code?: string; error?: string }>;
+  searchParams: Promise<{
+    session_id?: string;
+    check_code?: string;
+    error?: string;
+    case?: string;
+  }>;
 }
 
 export default function PflegegradStartPage(props: PageProps) {
@@ -73,6 +78,27 @@ export default function PflegegradStartPage(props: PageProps) {
             'Zahlung wird noch verarbeitet. Ihr Fall ist geladen — Premium schaltet sich in Kürze frei.'
           );
         }
+      });
+    } else if (searchParams.case) {
+      // Geteilte Links (QR-Code, E-Mail, SMS) laden den Fall direkt
+      const sharedCode = searchParams.case.trim().toUpperCase();
+
+      validateAndStoreSession(sharedCode).then((status) => {
+        if (!status.success) {
+          setError('Der geteilte Fallcode ist ungültig oder abgelaufen.');
+          return;
+        }
+
+        setCaseCode(sharedCode);
+        storeCaseCode(sharedCode);
+
+        if (status.isExpired) {
+          setIsBetaExpired(true);
+          setShowPaywall(true);
+          return;
+        }
+
+        toast.success('Fall über geteilten Link geladen.');
       });
     }
 
@@ -155,7 +181,7 @@ export default function PflegegradStartPage(props: PageProps) {
       const response = await fetch('/api/checkout/create-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ caseCode, paket: paketId }),
+        body: JSON.stringify({ caseCode, paket: paketId, locale }),
       });
       const session = await response.json();
       if (session.url) router.push(session.url);

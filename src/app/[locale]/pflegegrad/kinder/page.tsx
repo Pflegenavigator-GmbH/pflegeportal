@@ -15,6 +15,8 @@ import {
   Gamepad2,
   Lock,
   FileText,
+  HeartPulse,
+  Home,
 } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
@@ -33,8 +35,19 @@ import { Input } from '@/src/components/ui/input';
 import { Progress } from '@/src/components/ui/progress';
 import { RadioGroup, RadioGroupItem } from '@/src/components/ui/radio-group';
 import { logger } from '@/src/lib/logger';
-
-type AgeGroup = 'baby' | 'toddler' | 'preschool' | 'school';
+import {
+  loadModuleAnswers,
+  saveModuleAnswers,
+  SessionExpiredError,
+} from '@/src/lib/pflegegrad/client-api';
+import {
+  AgeGroup,
+  BABY_AGE_LIMIT_YEARS,
+  calculateChildAssessment,
+  getAgeGroup,
+  getAssessmentCategories,
+  KinderAssessmentResult,
+} from '@/src/lib/pflegegrad/kinder';
 
 interface ChildInfo {
   name: string;
@@ -42,237 +55,21 @@ interface ChildInfo {
   ageGroup: AgeGroup;
 }
 
-interface QuestionOption {
-  value: number;
-  label: string;
-  simpleLabel: string;
-}
-
-interface Question {
-  id: string;
-  text: string;
-  simpleText: string;
-  options: QuestionOption[];
-}
-
-interface AssessmentCategory {
-  id: string;
-  name: string;
-  icon: React.ReactNode;
-  color: string;
-  questions: Question[];
-}
-
-interface AssessmentResult {
-  level: number;
-  points: number;
-  maxPoints: number;
-  description: string;
-}
-
-const getAgeGroup = (age: number): AgeGroup => {
-  if (age < 1.5) return 'baby';
-  if (age < 3) return 'toddler';
-  if (age < 6) return 'preschool';
-  return 'school';
-};
-
-const getAssessmentCategories = (age: number): AssessmentCategory[] => {
-  const ageGroup = getAgeGroup(age);
-
-  const baseCategories: AssessmentCategory[] = [
-    {
-      id: 'mobility',
-      name: 'Bewegung & Motorik',
-      icon: <Activity className="w-6 h-6" />,
-      color: 'from-pink-500 to-rose-600',
-      questions: [
-        {
-          id: 'k_mob_1',
-          text: 'Kann das Kind sich im Raum altersentsprechend fortbewegen (Kriechen, Laufen, Drehen)?',
-          simpleText: 'Wie klappt die Fortbewegung im Haus?',
-          options: [
-            {
-              value: 0,
-              label: 'Altersgerecht selbstständig',
-              simpleLabel: '😊 Altersgerecht - keine Hilfe nötig',
-            },
-            {
-              value: 1,
-              label: 'Leichte Verzögerung',
-              simpleLabel: '😐 Manchmal Unterstützung oder Halten nötig',
-            },
-            {
-              value: 2,
-              label: 'Deutliche Einschränkung',
-              simpleLabel: '😕 Häufiges Tragen/Hilfe erforderlich',
-            },
-            {
-              value: 3,
-              label: 'Vollständig unselbstständig',
-              simpleLabel: '😟 Kann sich nicht allein fortbewegen',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: 'cognitive',
-      name: 'Denken & Verstehen',
-      icon: <Puzzle className="w-6 h-6" />,
-      color: 'from-purple-500 to-indigo-600',
-      questions: [
-        {
-          id: 'k_cog_1',
-          text: 'Kann das Kind Gefahren erkennen oder altersentsprechend Spielzeugen folgen?',
-          simpleText: 'Wie aufmerksam ist Ihr Kind beim Spielen?',
-          options: [
-            { value: 0, label: 'Keine Auffälligkeiten', simpleLabel: '😊 Ganz normal altersgemäß' },
-            {
-              value: 1,
-              label: 'Muss oft abgelenkt/erinnert werden',
-              simpleLabel: '😐 Erfordert erhöhte Aufmerksamkeit',
-            },
-            {
-              value: 2,
-              label: 'Gefahrenbewusstsein fehlt stark',
-              simpleLabel: '😕 Ständige Überwachung nötig',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: 'selfcare',
-      name: 'Ernährung & Pflege',
-      icon: <Utensils className="w-6 h-6" />,
-      color: 'from-emerald-500 to-teal-600',
-      questions: [
-        {
-          id: 'k_sel_1',
-          text: 'Bestehen erhebliche Probleme bei der Nahrungsaufnahme (Schluckstörungen, verweigern)?',
-          simpleText: 'Wie klappt das Essen und Trinken?',
-          options: [
-            {
-              value: 0,
-              label: 'Altersentsprechend',
-              simpleLabel: '😊 Ohne medizinische Besonderheiten',
-            },
-            {
-              value: 2,
-              label: 'Erhöhter Zeitaufwand beim Füttern',
-              simpleLabel: '😐 Essen dauert sehr lange / Hilfsmittel',
-            },
-            {
-              value: 3,
-              label: 'Sondenernährung / Schwere Störung',
-              simpleLabel: '😟 Aufwendige Unterstützung bei jeder Mahlzeit',
-            },
-          ],
-        },
-      ],
-    },
-  ];
-
-  if (ageGroup === 'baby') {
-    return baseCategories.map((cat) => ({
-      ...cat,
-      questions: cat.questions.map((q) => ({
-        ...q,
-        options: q.options.map((o) => ({
-          ...o,
-          label: o.label.replace('selbstständig', 'entwicklungskonform'),
-        })),
-      })),
-    }));
-  }
-
-  return baseCategories;
-};
-
-const calculateChildCareLevel = (points: number, age: number): AssessmentResult => {
-  const isBaby = age < 1.5;
-
-  if (isBaby) {
-    if (points >= 90)
-      return {
-        level: 5,
-        points,
-        maxPoints: 100,
-        description: 'Pflegegrad 5 (Schwerstpflegebedürftig mit besonderen Anforderungen)',
-      };
-    if (points >= 70)
-      return {
-        level: 5,
-        points,
-        maxPoints: 100,
-        description: 'Pflegegrad 5 (Aufgrund gesetzlicher Baby-Höherstufung aus PG 4)',
-      };
-    if (points >= 47.5)
-      return {
-        level: 4,
-        points,
-        maxPoints: 100,
-        description: 'Pflegegrad 4 (Aufgrund gesetzlicher Baby-Höherstufung aus PG 3)',
-      };
-    if (points >= 27)
-      return {
-        level: 3,
-        points,
-        maxPoints: 100,
-        description: 'Pflegegrad 3 (Aufgrund gesetzlicher Baby-Höherstufung aus PG 2)',
-      };
-    if (points >= 12.5)
-      return {
-        level: 2,
-        points,
-        maxPoints: 100,
-        description: 'Pflegegrad 2 (Einstiegsstufe für Babys unter 18 Monaten mit Einschränkungen)',
-      };
-    return {
-      level: 0,
-      points,
-      maxPoints: 100,
-      description: 'Kein Pflegegrad nachweisbar. Entwicklungsstand engmaschig dokumentieren.',
-    };
-  }
-
-  if (points >= 90)
-    return {
-      level: 5,
-      points,
-      maxPoints: 100,
-      description: 'Pflegegrad 5 - Schwerste Beeinträchtigungen der Selbstständigkeit.',
-    };
-  if (points >= 70)
-    return {
-      level: 4,
-      points,
-      maxPoints: 100,
-      description: 'Pflegegrad 4 - Schwerste Beeinträchtigungen.',
-    };
-  if (points >= 47.5)
-    return {
-      level: 3,
-      points,
-      maxPoints: 100,
-      description: 'Pflegegrad 3 - Schwere Beeinträchtigungen.',
-    };
-  if (points >= 27)
-    return {
-      level: 2,
-      points,
-      maxPoints: 100,
-      description: 'Pflegegrad 2 - Erhebliche Beeinträchtigungen.',
-    };
-  if (points >= 12.5)
-    return {
-      level: 1,
-      points,
-      maxPoints: 100,
-      description: 'Pflegegrad 1 - Geringe Beeinträchtigungen.',
-    };
-  return { level: 0, points, maxPoints: 100, description: 'Kein Pflegegrad erreicht.' };
+// UI-Dekoration der fachlichen Kategorien — die Fachlogik (Fragen, Bewertung,
+// Baby-Sonderregel) liegt vollständig in src/lib/pflegegrad/kinder.ts
+const CATEGORY_STYLES: Record<string, { icon: React.ReactNode; color: string }> = {
+  mobilitaet: { icon: <Activity className="w-6 h-6" />, color: 'from-pink-500 to-rose-600' },
+  kognition: { icon: <Puzzle className="w-6 h-6" />, color: 'from-purple-500 to-indigo-600' },
+  verhalten: { icon: <Sparkles className="w-6 h-6" />, color: 'from-amber-500 to-orange-600' },
+  selbstversorgung: {
+    icon: <Utensils className="w-6 h-6" />,
+    color: 'from-emerald-500 to-teal-600',
+  },
+  krankheitsbewaeltigung: {
+    icon: <HeartPulse className="w-6 h-6" />,
+    color: 'from-rose-500 to-red-600',
+  },
+  alltag: { icon: <Home className="w-6 h-6" />, color: 'from-sky-500 to-blue-600' },
 };
 
 export default function KinderModusPage() {
@@ -284,7 +81,7 @@ export default function KinderModusPage() {
   const [childInfo, setChildInfo] = useState<ChildInfo>({ name: '', age: 3, ageGroup: 'toddler' });
   const [currentCategory, setCurrentCategory] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
-  const [result, setResult] = useState<AssessmentResult | null>(null);
+  const [result, setResult] = useState<KinderAssessmentResult | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   // Bezahlschranken-State gekoppelt an deine API-Verifikation
@@ -303,28 +100,36 @@ export default function KinderModusPage() {
       return () => clearTimeout(timer);
     }
 
-    // 📥 Eventuell existierende Kinder-Antworten (Modul_number 7) laden
-    fetch(`/api/cases/${caseCode.toUpperCase()}/answers`)
-      .then((res) => {
-        if (res.ok) return res.json();
-        throw new Error();
-      })
-      .then((data) => {
-        const kinderRecord = data.find((r: { module_number: number }) => r.module_number === 7);
-        if (kinderRecord?.answers) {
-          setAnswers(kinderRecord.answers as Record<string, number>);
+    // 📥 Eventuell existierende Kinder-Antworten laden
+    loadModuleAnswers<Record<string, number>>(caseCode, 'kinder')
+      .then((kinderAnswers) => {
+        if (kinderAnswers && Object.keys(kinderAnswers).length > 0) {
+          setAnswers(kinderAnswers);
           // Falls bereits Daten da sind, springen wir direkt zur Erfassung
           setStep('assessment');
         }
       })
-      .catch(() => logger.info('Keine alten Antworten für den Kinder-Modus gefunden.'));
+      .catch((err) => {
+        if (err instanceof SessionExpiredError) {
+          toast.error('Ihre Fall-Session ist abgelaufen. Bitte laden Sie Ihren Fall erneut.');
+          router.push(`/${locale}/pflegegrad/start`);
+          return;
+        }
+        logger.info('Keine alten Antworten für den Kinder-Modus gefunden.');
+      });
 
     return () => clearTimeout(timer);
   }, [caseCode, locale, router]);
 
   const categories = getAssessmentCategories(childInfo.age);
   const totalQuestions = categories.reduce((sum, cat) => sum + cat.questions.length, 0);
-  const progress = totalQuestions > 0 ? (Object.keys(answers).length / totalQuestions) * 100 : 0;
+  // Nur Antworten auf aktuell relevante Fragen zählen — nach einem Alterswechsel
+  // können sonst verwaiste Antwort-Keys den Fortschritt verfälschen
+  const answeredCount = categories.reduce(
+    (sum, cat) => sum + cat.questions.filter((q) => answers[q.id] !== undefined).length,
+    0
+  );
+  const progress = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
 
   const handleAgeChange = (age: number) => {
     const safeAge = isNaN(age) ? 0 : age;
@@ -343,40 +148,24 @@ export default function KinderModusPage() {
     if (currentCategory < categories.length - 1) {
       setCurrentCategory((prev) => prev + 1);
     } else {
-      // 🚀 SPEICHERN: Wir laden alle Antworten als JSONB gesammelt unter module_number 7 hoch
+      // 🚀 SPEICHERN: kompletter Kinder-Antwortstand in einem atomaren Request
       if (caseCode) {
         try {
-          await fetch(`/api/cases/${caseCode.toUpperCase()}/answers`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              moduleName: 'widerspruch', // Mapped laut deiner Route auf module_number: 7
-              questionKey: 'kinder_assessment_data',
-              answerValue: answers,
-            }),
-          });
+          await saveModuleAnswers(caseCode, 'kinder', answers);
         } catch (err) {
+          if (err instanceof SessionExpiredError) {
+            toast.error('Ihre Fall-Session ist abgelaufen. Bitte laden Sie Ihren Fall erneut.');
+            router.push(`/${locale}/pflegegrad/start`);
+            return;
+          }
           logger.error({ err }, 'Fehler beim Sichern des Kinder-Assessments');
+          toast.error('Speichern fehlgeschlagen. Das Ergebnis wird nur lokal berechnet.');
         }
       }
 
-      let erreichteRohpunkte = 0;
-      let maximalMöglicheRohpunkte = 0;
-
-      categories.forEach((cat) => {
-        cat.questions.forEach((q) => {
-          erreichteRohpunkte += answers[q.id] || 0;
-          const maxOpt = Math.max(...q.options.map((o) => o.value));
-          maximalMöglicheRohpunkte += maxOpt;
-        });
-      });
-
-      const berechneteSystemPunkte =
-        maximalMöglicheRohpunkte > 0
-          ? Math.round((erreichteRohpunkte / maximalMöglicheRohpunkte) * 100)
-          : 0;
-
-      const calculatedResult = calculateChildCareLevel(berechneteSystemPunkte, childInfo.age);
+      // NBA-Bewertung inkl. Modulgewichtung, Höchstwertprinzip M2/M3 und
+      // Baby-Sonderregel (§ 15 Abs. 7 SGB XI) — vollständig in der Fachlogik
+      const calculatedResult = calculateChildAssessment(answers, childInfo.age);
       setResult(calculatedResult);
       setStep('result');
     }
@@ -403,6 +192,7 @@ export default function KinderModusPage() {
         body: JSON.stringify({
           caseCode: caseCode.toUpperCase(),
           paket: 'beta_special', // Nutzt das valide Paket aus deinem MVP_PRODUCTS-Katalog
+          locale,
         }),
       });
       const session = await response.json();
@@ -498,7 +288,7 @@ export default function KinderModusPage() {
               />
             </div>
 
-            {childInfo.age < 1.5 && (
+            {childInfo.age < BABY_AGE_LIMIT_YEARS && (
               <div className="p-3 bg-pink-500/10 border border-pink-500/20 rounded-xl flex gap-2 text-xs text-pink-400">
                 <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                 <span>
@@ -531,7 +321,10 @@ export default function KinderModusPage() {
 
   // 3. ASSESSMENT SCREEN
   if (step === 'assessment') {
-    const currentCat = categories[currentCategory];
+    // Index klemmen: Ein Alterswechsel (z.B. auf < 18 Monate) kann die
+    // Kategorienanzahl reduzieren, während currentCategory noch höher steht
+    const safeCategoryIndex = Math.min(currentCategory, categories.length - 1);
+    const currentCat = categories[safeCategoryIndex];
     const currentQuestions = currentCat?.questions || [];
 
     return (
@@ -541,7 +334,7 @@ export default function KinderModusPage() {
             <div className="space-y-2">
               <div className="flex justify-between text-xs text-gray-400 font-mono">
                 <span>
-                  Bereich {currentCategory + 1} von {categories.length}
+                  Bereich {safeCategoryIndex + 1} von {categories.length}
                 </span>
                 <span>{Math.round(progress)}% vollständig</span>
               </div>
@@ -552,9 +345,9 @@ export default function KinderModusPage() {
               <CardHeader className="border-b border-white/5 pb-4">
                 <div className="flex items-center gap-3">
                   <div
-                    className={`p-3 rounded-xl bg-gradient-to-r ${currentCat.color} text-white shadow-lg`}
+                    className={`p-3 rounded-xl bg-gradient-to-r ${CATEGORY_STYLES[currentCat.id]?.color ?? 'from-pink-500 to-rose-600'} text-white shadow-lg`}
                   >
-                    {currentCat.icon}
+                    {CATEGORY_STYLES[currentCat.id]?.icon ?? <Star className="w-6 h-6" />}
                   </div>
                   <div>
                     <CardTitle className="text-xl">{currentCat.name}</CardTitle>
@@ -723,10 +516,12 @@ export default function KinderModusPage() {
                 <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl flex gap-3 text-xs text-blue-400">
                   <Info className="w-5 h-5 flex-shrink-0 mt-0.5" />
                   <p>
-                    <strong>Gesetzlicher Hintergrund (§ 15 Abs. 7 SGB XI):</strong> Bei Kindern wird
-                    der Mehraufwand im Vergleich zu einem gesunden Kind desselben Alters gemessen.
-                    Da Ihr Kind unter 1,5 Jahren alt ist, wurde der pauschale Ein-Stufen-Aufschlag
-                    für Babys bereits mitberücksichtigt.
+                    <strong>Gesetzlicher Hintergrund (§ 15 Abs. 6/7 SGB XI):</strong> Bei Kindern
+                    wird der Mehraufwand im Vergleich zu einem gesunden Kind desselben Alters
+                    gemessen.{' '}
+                    {result.babyRuleApplied
+                      ? 'Da Ihr Kind unter 18 Monaten alt ist, wurden nur die altersunabhängigen Bereiche bewertet und der pauschale Ein-Stufen-Aufschlag bereits mitberücksichtigt.'
+                      : 'Bewertet wurden alle sechs gesetzlichen Lebensbereiche mit den amtlichen Modulgewichtungen.'}
                   </p>
                 </div>
               </CardContent>

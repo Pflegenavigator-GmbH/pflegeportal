@@ -130,7 +130,7 @@ export default function ErgebnisPage(props: PageProps) {
       }
       localStorage.removeItem('pflegegrad-ergebnis');
       toast.success('Evaluierung zurückgesetzt.');
-      router.push(`/${locale}/pflegegrad/fragen/modul1`);
+      router.push(`/${locale}/pflegegrad/modul1`);
     }
   };
 
@@ -147,6 +147,7 @@ export default function ErgebnisPage(props: PageProps) {
         body: JSON.stringify({
           caseCode: caseCode.toUpperCase(),
           paket: paketId,
+          locale,
         }),
       });
 
@@ -171,18 +172,13 @@ export default function ErgebnisPage(props: PageProps) {
     const verificationToast = toast.loading('Verifiziere aktive Lizenzrechte für Zusatzmodule...');
 
     try {
-      const checkRes = await fetch('/api/pdf/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      // Leichtgewichtige Statusabfrage — kein Puppeteer, kein Cache-Eintrag
+      const checkRes = await fetch(`/api/cases/${caseCode.toUpperCase()}/access`, {
         credentials: 'include',
-        body: JSON.stringify({
-          caseCode: caseCode.toUpperCase(),
-          html: '<li>Lizenzprüfung GdB</li>',
-          title: 'CHECK',
-        }),
       });
+      const accessData = checkRes.ok ? await checkRes.json() : null;
 
-      if (checkRes.status === 402) {
+      if (checkRes.status === 402 || (accessData && !accessData.isUnlocked)) {
         logger.info({ caseCode }, 'Lizenz fehlt für GdB-Zusatzmodul. Zeige Paywall.');
         toast.dismiss(verificationToast);
         setShowPaywall(true);

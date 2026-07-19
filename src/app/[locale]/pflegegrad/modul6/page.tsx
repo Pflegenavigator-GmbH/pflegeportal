@@ -21,6 +21,11 @@ import {
 } from '@/src/components/ui/card';
 import { Progress } from '@/src/components/ui/progress';
 import { logger } from '@/src/lib/logger';
+import {
+  loadModuleAnswers,
+  saveModuleAnswers,
+  SessionExpiredError,
+} from '@/src/lib/pflegegrad/client-api';
 
 const ALLTAGS_FRAGEN: AlltagsFrage[] = [
   {
@@ -156,19 +161,21 @@ export default function Modul6Page() {
       return () => clearTimeout(timer);
     }
 
-    fetch(`/api/cases/${caseCode.toUpperCase()}/answers`)
-      .then((res) => {
-        if (res.ok) return res.json();
-        throw new Error();
-      })
-      .then((data) => {
-        const modul6Record = data.find((r: { module_number: number }) => r.module_number === 6);
-        if (modul6Record?.answers) {
-          setAnswers(modul6Record.answers as Record<string, string>);
+    loadModuleAnswers(caseCode, 'modul6')
+      .then((moduleAnswers) => {
+        if (moduleAnswers) {
+          setAnswers(moduleAnswers);
           logger.debug({ caseCode }, 'Bestehende Antworten für Modul 6 geladen.');
         }
       })
-      .catch(() => logger.info('Keine alten Antworten für Modul 6 gefunden.'));
+      .catch((err) => {
+        if (err instanceof SessionExpiredError) {
+          toast.error('Ihre Fall-Session ist abgelaufen. Bitte laden Sie Ihren Fall erneut.');
+          router.push(`/${locale}/pflegegrad/start`);
+          return;
+        }
+        logger.info('Keine alten Antworten für Modul 6 gefunden.');
+      });
 
     return () => clearTimeout(timer);
   }, [caseCode, locale, router]);
@@ -186,29 +193,21 @@ export default function Modul6Page() {
     setSaving(true);
 
     try {
-      await Promise.all(
-        Object.entries(answers).map(([questionKey, answerValue]) =>
-          fetch(`/api/cases/${caseCode.toUpperCase()}/answers`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              moduleName: 'pflegegrad',
-              questionKey,
-              answerValue,
-            }),
-          }).then((res) => {
-            if (!res.ok) throw new Error('Fehler beim Sichern einer Teilantwort.');
-          })
-        )
-      );
+      await saveModuleAnswers(caseCode, 'modul6', answers);
 
       localStorage.setItem('modul6_answers', JSON.stringify(answers));
       toast.success('Alltags-Profil vollständig erfasst!');
       router.push(`/${locale}/pflegegrad/ergebnis`);
     } catch (err) {
+      if (err instanceof SessionExpiredError) {
+        toast.error('Ihre Fall-Session ist abgelaufen. Bitte laden Sie Ihren Fall erneut.');
+        router.push(`/${locale}/pflegegrad/start`);
+        return;
+      }
       logger.error({ err }, 'Fehler beim Sichern von Modul 6');
-      toast.error('Fehler beim Übermitteln des Alltags-Profils.');
-      router.push(`/${locale}/pflegegrad/ergebnis`);
+      toast.error(
+        'Speichern fehlgeschlagen. Ihre Eingaben bleiben erhalten — bitte erneut versuchen.'
+      );
     } finally {
       setSaving(false);
     }

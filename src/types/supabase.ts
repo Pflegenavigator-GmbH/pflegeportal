@@ -18,7 +18,7 @@ export interface Database {
           care_level_guess: number | null;
           total_score: number;
           traffic_light: 'gruen' | 'gelb' | 'rot' | null;
-          billing_status: 'pending' | 'paid' | 'free' | 'failed';
+          billing_status: 'pending' | 'paid' | 'free' | 'failed' | 'expired';
           stripe_session_id: string | null;
           product_tier: 'beta' | 'standard' | 'profi';
           access_unlocked_at: string | null;
@@ -38,7 +38,7 @@ export interface Database {
           care_level_guess?: number | null;
           total_score?: number;
           traffic_light?: 'gruen' | 'gelb' | 'rot' | null;
-          billing_status?: 'pending' | 'paid' | 'free' | 'failed';
+          billing_status?: 'pending' | 'paid' | 'free' | 'failed' | 'expired';
           stripe_session_id?: string | null;
           product_tier?: 'beta' | 'standard' | 'profi';
           access_unlocked_at?: string | null;
@@ -58,12 +58,13 @@ export interface Database {
           care_level_guess?: number | null;
           total_score?: number;
           traffic_light?: 'gruen' | 'gelb' | 'rot' | null;
-          billing_status?: 'pending' | 'paid' | 'free' | 'failed';
+          billing_status?: 'pending' | 'paid' | 'free' | 'failed' | 'expired';
           stripe_session_id?: string | null;
           product_tier?: 'beta' | 'standard' | 'profi';
           access_unlocked_at?: string | null;
           access_activated_at?: string | null;
         };
+        Relationships: [];
       };
       answers: {
         Row: {
@@ -93,6 +94,7 @@ export interface Database {
           completed_at?: string;
           created_at?: string;
         };
+        Relationships: [];
       };
       documents: {
         Row: {
@@ -131,6 +133,7 @@ export interface Database {
           uploaded_at?: string;
           expires_at?: string;
         };
+        Relationships: [];
       };
       feedback: {
         Row: {
@@ -163,6 +166,7 @@ export interface Database {
           umgesetzt?: boolean;
           created_at?: string;
         };
+        Relationships: [];
       };
       payments: {
         Row: {
@@ -195,6 +199,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       products: {
         Row: {
@@ -221,6 +226,7 @@ export interface Database {
           interval?: 'one_time' | 'monthly' | 'yearly';
           is_active?: boolean;
         };
+        Relationships: [];
       };
       system_logs: {
         Row: {
@@ -253,6 +259,7 @@ export interface Database {
           created_at?: string;
           expires_at?: string;
         };
+        Relationships: [];
       };
       // Ergänzung innerhalb von Database['public']['Tables']
       pflegedienste: {
@@ -286,6 +293,7 @@ export interface Database {
           bewertung?: number;
           created_at?: string;
         };
+        Relationships: [];
       };
       pflegestuetzpunkte: {
         Row: {
@@ -312,7 +320,25 @@ export interface Database {
           telefon?: string | null;
           created_at?: string;
         };
+        Relationships: [];
       };
+    };
+    // Views/Functions/Enums sind Pflichtfelder des GenericSchema von
+    // supabase-js v2 — ohne sie kollabieren alle Tabellen-Typen zu `never`.
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      create_case: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
     };
   };
 }
