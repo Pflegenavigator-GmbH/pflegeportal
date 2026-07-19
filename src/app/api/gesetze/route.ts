@@ -144,6 +144,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json(response, { status: 200, headers: getCorsHeaders() });
   } catch (error) {
+    // runtime = 'edge': console ist hier die passende (Node-freie) Log-Senke
     console.error('Gesetze LIST error:', error);
     return NextResponse.json(
       { error: 'Interner Serverfehler' },

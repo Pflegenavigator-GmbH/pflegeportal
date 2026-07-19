@@ -33,6 +33,7 @@ import {
   DropdownMenuTrigger,
 } from '@/src/components/ui/dropdown-menu';
 import { usePdfDownload } from '@/src/hooks/usePdfDownload';
+import { useStripeCheckout } from '@/src/hooks/useStripeCheckout';
 import { logger } from '@/src/lib/logger';
 import { loadCaseResult, SessionExpiredError } from '@/src/lib/pflegegrad/client-api';
 import { PflegegradErgebnis, EinstufungAmpel } from '@/src/types/pflegegrad';
@@ -56,7 +57,7 @@ export default function ErgebnisPage(props: PageProps) {
 
   const [hasMounted, setHasMounted] = useState(false);
   const [ergebnis, setErgebnis] = useState<PflegegradErgebnis | null>(null);
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const { triggerCheckout, checkoutLoading } = useStripeCheckout();
   const [isVerifyingGdb, setIsVerifyingGdb] = useState(false);
 
   const [caseCode] = useState<string | null>(() => {
@@ -122,36 +123,7 @@ export default function ErgebnisPage(props: PageProps) {
     }
   };
 
-  const handleCheckoutSubmit = async (paketId: string) => {
-    if (!caseCode) return;
-    setCheckoutLoading(true);
-    logger.info({ caseCode, paketId }, 'Starte Stripe Checkout Erstellung aus der Paywall heraus');
-    const toastId = toast.loading('Sicheres Bezahlfenster wird geladen...');
-
-    try {
-      const res = await fetch('/api/checkout/create-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          caseCode: caseCode.toUpperCase(),
-          paket: paketId,
-          locale,
-        }),
-      });
-
-      if (!res.ok) throw new Error();
-      const data = await res.json();
-
-      if (data.url) {
-        window.location.href = data.url;
-      }
-    } catch (err) {
-      logger.error({ err, caseCode }, 'Stripe Session-Erstellung serverseitig fehlgeschlagen');
-      toast.error('Verbindungsfehler zu Stripe.', { id: toastId });
-    } finally {
-      setCheckoutLoading(false);
-    }
-  };
+  const handleCheckoutSubmit = (paketId: string) => triggerCheckout(caseCode, paketId);
 
   const handleGdbNavigation = async () => {
     if (!caseCode) return;

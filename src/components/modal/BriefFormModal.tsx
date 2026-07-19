@@ -17,8 +17,8 @@ interface BriefFormModalProps {
   onClose: () => void;
 }
 
-function DialogTitle(props: { className: string; children: ReactNode }) {
-  return null;
+function DialogTitle({ className, children }: { className: string; children: ReactNode }) {
+  return <h2 className={className}>{children}</h2>;
 }
 
 export function BriefFormModal({ typ, isOpen, onClose }: BriefFormModalProps) {

@@ -86,7 +86,7 @@ export function AccessShareModal({ caseCode, open, onOpenChange }: AccessShareMo
       toast.success(`Link erfolgreich per ${contactType === 'email' ? 'E-Mail' : 'SMS'} gesendet!`);
       onOpenChange(false);
       setContactValue('');
-    } catch (error) {
+    } catch {
       toast.error('Versand fehlgeschlagen. Bitte versuchen Sie es später erneut.');
     } finally {
       setIsLoading(false);

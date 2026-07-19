@@ -66,7 +66,7 @@ export default function Modul1Page() {
 
     // 1. Rohpunkte für den lokalen schnellen Cache aufsummieren
     let rohPunkte = 0;
-    Object.entries(antworten).forEach(([_, wert]) => {
+    Object.values(antworten).forEach((wert) => {
       const option = BEWERTUNGEN.find((b) => b.value === wert);
       if (option) rohPunkte += option.punkte;
     });

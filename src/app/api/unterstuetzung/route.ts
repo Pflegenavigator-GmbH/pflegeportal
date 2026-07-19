@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { createServerSupabaseClient } from '@/src/lib/supabase/server';
+import { logger } from '@/src/lib/logger';
+import { createAdminSupabaseClient } from '@/src/lib/supabase/admin';
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,8 +12,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json([]);
     }
 
-    // Server-seitigen Supabase Client für sichere Abfragen initiieren
-    const supabase = await createServerSupabaseClient();
+    // Öffentliches Verzeichnis (pflegedienste): Admin-Client, damit die Abfrage
+    // auch bei aktivierter RLS ohne anon-Policy funktioniert
+    const supabase = createAdminSupabaseClient();
 
     // Suche filtert über PostgreSQL ILIKE parallel nach Postleitzahl oder Stadtname
     const { data, error } = await supabase
@@ -28,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('API-Fehler bei Pflegedienst-Suche:', error);
+    logger.error({ err: error }, 'API-Fehler bei Pflegedienst-Suche');
     return NextResponse.json(
       { error: 'Die Suche konnte serverseitig nicht verarbeitet werden.' },
       { status: 500 }

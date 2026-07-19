@@ -28,14 +28,12 @@ export default function Startseite() {
   const t = useTranslations('startseite');
 
   const [hatAktiveSession, setHatAktiveSession] = useState(false);
-  const [caseCode, setCaseCode] = useState<string | null>(null);
 
   useEffect(() => {
     const storedCode = typeof window !== 'undefined' ? localStorage.getItem('case_code') : null;
     if (storedCode) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setHatAktiveSession(true);
-      setCaseCode(storedCode.toUpperCase());
     }
   }, []);
 
@@ -137,7 +135,7 @@ export default function Startseite() {
                 role="link"
                 tabIndex={0}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') fkt.path !== '#' && router.push(fkt.path);
+                  if (e.key === 'Enter' && fkt.path !== '#') router.push(fkt.path);
                 }}
               >
                 <div className={pageStyles.cardMeta}>

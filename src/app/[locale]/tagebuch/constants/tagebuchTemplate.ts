@@ -8,7 +8,7 @@ export function generateTagebuchHtml(entries: TagebuchData, caseCode: string): s
   );
 
   const entriesHtml = sortedEntries
-    .map(([_, entry]) => {
+    .map(([, entry]) => {
       const highlights = [
         entry.sturz
           ? '<span style="color:#991b1b;font-weight:bold;background:#fee2e2;padding:2px 6px;border-radius:4px;margin-right:4px;">⚠ Sturz</span>'

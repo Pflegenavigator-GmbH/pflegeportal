@@ -34,6 +34,7 @@ import {
 import { Input } from '@/src/components/ui/input';
 import { Progress } from '@/src/components/ui/progress';
 import { RadioGroup, RadioGroupItem } from '@/src/components/ui/radio-group';
+import { useStripeCheckout } from '@/src/hooks/useStripeCheckout';
 import { logger } from '@/src/lib/logger';
 import {
   loadModuleAnswers,
@@ -83,7 +84,7 @@ export default function KinderModusPage() {
   const [currentCategory, setCurrentCategory] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [result, setResult] = useState<KinderAssessmentResult | null>(null);
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const { triggerCheckout, checkoutLoading } = useStripeCheckout();
 
   // Bezahlschranken-State gekoppelt an deine API-Verifikation
   const [isUnlocked] = useState(false);
@@ -180,33 +181,8 @@ export default function KinderModusPage() {
     }
   };
 
-  // 💳 INTEGRIERTER STRIPE CHECKOUT FÜR DAS KINDER-DOSSIER
-  const startStripeCheckout = async () => {
-    if (!caseCode) return;
-    setCheckoutLoading(true);
-    const toastId = toast.loading('Verbindung zu Stripe wird aufgebaut...');
-
-    try {
-      const response = await fetch('/api/checkout/create-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          caseCode: caseCode.toUpperCase(),
-          paket: 'beta_special', // Nutzt das valide Paket aus deinem MVP_PRODUCTS-Katalog
-          locale,
-        }),
-      });
-      const session = await response.json();
-      if (session.url) {
-        window.location.href = session.url;
-      } else {
-        throw new Error();
-      }
-    } catch {
-      setCheckoutLoading(false);
-      toast.error('Fehler bei der Weiterleitung zum Bezahlfenster.', { id: toastId });
-    }
-  };
+  // 💳 Kinder-Dossier: zentraler Checkout-Hook (Beta-Paket)
+  const startStripeCheckout = () => triggerCheckout(caseCode, 'beta_special');
 
   if (!hasMounted) return null;
 
