@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireCaseSession } from '@/src/lib/api/case-auth';
 import { handleApiError } from '@/src/lib/api/error-handler';
 import { ValidationError } from '@/src/lib/api/errors';
-import { isValidTagebuchEntryKey, safeAssign, safeDelete } from '@/src/lib/api/validation';
+import { isValidTagebuchEntryKey, withKey, withoutKey } from '@/src/lib/api/validation';
 import { TAGEBUCH_MODULE_NUMBER } from '@/src/lib/pflegegrad/assessment-modules';
 import { createAdminSupabaseClient } from '@/src/lib/supabase/admin';
 import { Json } from '@/src/types/supabase';
@@ -75,11 +75,7 @@ export async function POST(request: NextRequest) {
       throw new ValidationError('Ungültiger Eintrags-Schlüssel.');
     }
 
-    // Prototyploses Objekt: Es gibt kein __proto__, das verschmutzt werden könnte
-    const currentAnswers: TagebuchData = Object.assign(
-      Object.create(null),
-      (existingRecord?.answers as unknown as TagebuchData) || {}
-    );
+    const currentAnswers = (existingRecord?.answers as unknown as TagebuchData) || {};
 
     // ID generieren, falls es ein neuer Eintrag ist (Key = Zeitstempel oder bestehender Key)
     const targetKey = entryKey || `entry_${Date.now()}`;
@@ -88,7 +84,8 @@ export async function POST(request: NextRequest) {
       ? currentAnswers[targetKey]?.created_at
       : undefined;
 
-    safeAssign(currentAnswers, targetKey, {
+    // Kein dynamischer Property-Write: Aktualisierung läuft über eine Map
+    const updatedAnswers = withKey(currentAnswers, targetKey, {
       ...payload,
       created_at: existingCreatedAt || new Date().toISOString(),
     });
@@ -98,7 +95,7 @@ export async function POST(request: NextRequest) {
         case_id: session.caseId,
         module_number: TAGEBUCH_MODULE_NUMBER,
         module_name: 'tagebuch',
-        answers: currentAnswers as unknown as Json,
+        answers: updatedAnswers as unknown as Json,
         completed_at: new Date().toISOString(),
       },
       {
@@ -144,19 +141,16 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
-    const currentAnswers: TagebuchData = Object.assign(
-      Object.create(null),
-      existingRecord.answers as unknown as TagebuchData
-    );
-    // Löscht nur eigene, ungefährliche Schlüssel (Prototype-Pollution-Sperre inline)
-    safeDelete(currentAnswers, entryKey);
+    const currentAnswers = existingRecord.answers as unknown as TagebuchData;
+    // Kein dynamischer Property-Delete: Entfernen läuft über eine Map
+    const updatedAnswers = withoutKey(currentAnswers, entryKey);
 
     const { error: updateError } = await supabase.from('answers').upsert(
       {
         case_id: session.caseId,
         module_number: TAGEBUCH_MODULE_NUMBER,
         module_name: 'tagebuch',
-        answers: currentAnswers as unknown as Json,
+        answers: updatedAnswers as unknown as Json,
         completed_at: new Date().toISOString(),
       },
       {

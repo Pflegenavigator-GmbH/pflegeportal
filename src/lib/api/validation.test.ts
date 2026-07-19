@@ -6,8 +6,8 @@ import {
   isValidEmail,
   isValidQuestionKey,
   isValidTagebuchEntryKey,
-  safeAssign,
-  safeDelete,
+  withKey,
+  withoutKey,
 } from './validation';
 
 describe('isSafeObjectKey', () => {
@@ -52,29 +52,36 @@ describe('isValidTagebuchEntryKey', () => {
   });
 });
 
-describe('safeAssign', () => {
-  it('setzt normale Schlüssel', () => {
-    const obj: Record<string, number> = Object.create(null);
-    safeAssign(obj, 'entry_1', 42);
-    expect(obj.entry_1).toBe(42);
+describe('withKey', () => {
+  it('fügt einen Schlüssel hinzu und lässt die Quelle unverändert', () => {
+    const source = { a: 1 };
+    const result = withKey(source, 'entry_1', 42);
+    expect(result).toEqual({ a: 1, entry_1: 42 });
+    expect(source).toEqual({ a: 1 }); // unverändert
   });
 
-  it('wirft bei Prototype-Pollution-Schlüsseln und verschmutzt den Prototyp nicht', () => {
-    const obj: Record<string, unknown> = Object.create(null);
-    for (const key of ['__proto__', 'constructor', 'prototype']) {
-      expect(() => safeAssign(obj, key, { polluted: true })).toThrow();
-    }
+  it('überschreibt einen bestehenden Schlüssel', () => {
+    expect(withKey({ a: 1 }, 'a', 9)).toEqual({ a: 9 });
+  });
+
+  it('verschmutzt bei gefährlichem Schlüssel niemals den Prototyp', () => {
+    const result = withKey<unknown>({}, '__proto__', { polluted: true });
+    // __proto__ wird als eigene Eigenschaft angelegt (Object.fromEntries), nicht im Prototyp
     expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+    expect(Object.getPrototypeOf(result)).toBe(Object.prototype);
   });
 });
 
-describe('safeDelete', () => {
-  it('löscht eigene Schlüssel und ignoriert gefährliche/fehlende', () => {
-    const obj: Record<string, number> = Object.assign(Object.create(null), { entry_1: 1 });
-    safeDelete(obj, 'entry_1');
-    expect('entry_1' in obj).toBe(false);
-    expect(() => safeDelete(obj, '__proto__')).not.toThrow();
-    expect(() => safeDelete(obj, 'entry_missing')).not.toThrow();
+describe('withoutKey', () => {
+  it('entfernt einen Schlüssel und lässt die Quelle unverändert', () => {
+    const source = { a: 1, b: 2 };
+    expect(withoutKey(source, 'a')).toEqual({ b: 2 });
+    expect(source).toEqual({ a: 1, b: 2 });
+  });
+
+  it('ist unkritisch bei fehlenden oder gefährlichen Schlüsseln', () => {
+    expect(withoutKey({ a: 1 }, 'missing')).toEqual({ a: 1 });
+    expect(() => withoutKey({ a: 1 }, '__proto__')).not.toThrow();
   });
 });
 

@@ -10,26 +10,26 @@ export function isSafeObjectKey(key: string): boolean {
 }
 
 /**
- * Setzt einen dynamischen, potenziell nutzerkontrollierten Schlüssel sicher.
- * Die inline-Sperre der drei gefährlichen Namen wird von CodeQL als Barriere
- * gegen js/remote-property-injection erkannt (die Regex-Validierung allein
- * folgt der Datenflussanalyse nicht).
+ * Setzt einen dynamischen, potenziell nutzerkontrollierten Schlüssel in einem
+ * JSONB-artigen Dictionary — ohne dynamischen Property-Write.
+ *
+ * Der gesamte Vorgang läuft über eine `Map`: `Map.set` kann den Prototyp nicht
+ * verschmutzen, und `Object.fromEntries` verwendet defineProperty-Semantik
+ * (auch ein Schlüssel `__proto__` würde nur eine eigene Eigenschaft anlegen).
+ * Damit existiert kein Property-Injection-Sink mehr
+ * (CodeQL: js/remote-property-injection).
  */
-export function safeAssign<T>(target: Record<string, T>, key: string, value: T): void {
-  if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
-    throw new Error('Unzulässiger Objekt-Schlüssel.');
-  }
-  target[key] = value;
+export function withKey<T>(source: Record<string, T>, key: string, value: T): Record<string, T> {
+  const map = new Map<string, T>(Object.entries(source));
+  map.set(key, value);
+  return Object.fromEntries(map) as Record<string, T>;
 }
 
-/** Löscht einen dynamischen Schlüssel mit derselben Prototype-Pollution-Sperre. */
-export function safeDelete<T>(target: Record<string, T>, key: string): void {
-  if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
-    return;
-  }
-  if (Object.prototype.hasOwnProperty.call(target, key)) {
-    delete target[key];
-  }
+/** Entfernt einen dynamischen Schlüssel über denselben Map-Weg. */
+export function withoutKey<T>(source: Record<string, T>, key: string): Record<string, T> {
+  const map = new Map<string, T>(Object.entries(source));
+  map.delete(key);
+  return Object.fromEntries(map) as Record<string, T>;
 }
 
 /** Frageschlüssel in answers-JSONB: alphanumerisch plus _ . - */
