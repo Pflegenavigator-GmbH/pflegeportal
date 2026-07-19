@@ -1,6 +1,10 @@
 // src/lib/pflegegrad/rechner.ts
 import { NBA_CONFIG } from '@/src/lib/pflegegrad/constants';
+import { careLevelFromScore, weightedModulePoints } from '@/src/lib/pflegegrad/nba';
 import { ModuleScores, PflegegradErgebnis } from '@/src/types/pflegegrad';
+
+// Untergrenze je Pflegegrad — für die Puffer-/Ampelberechnung
+const PFLEGEGRAD_MIN: Record<number, number> = { 1: 12.5, 2: 27, 3: 47.5, 4: 70, 5: 90 };
 
 export function calculatePflegegrad(scores: Partial<ModuleScores>): PflegegradErgebnis {
   const fullScores: ModuleScores = {
@@ -12,24 +16,24 @@ export function calculatePflegegrad(scores: Partial<ModuleScores>): PflegegradEr
     6: scores[6] ?? 0,
   };
 
-  // 1. Rohpunkte mittels der gesetzlichen Matrix in gewichtete Punkte umwandeln
-  const w1 = NBA_CONFIG.MATRIX.modul1(fullScores[1]);
-  const w2 = NBA_CONFIG.MATRIX.modul2(fullScores[2]);
-  const w3 = NBA_CONFIG.MATRIX.modul3(fullScores[3]);
-  const w4 = NBA_CONFIG.MATRIX.modul4(fullScores[4]);
-  const w5 = NBA_CONFIG.MATRIX.modul5(fullScores[5]);
-  const w6 = NBA_CONFIG.MATRIX.modul6(fullScores[6]);
+  // 1. Rohpunkte je Modul in gewichtete Punkte umrechnen (Schweregrad-Modell)
+  const w1 = weightedModulePoints(1, fullScores[1]);
+  const w2 = weightedModulePoints(2, fullScores[2]);
+  const w3 = weightedModulePoints(3, fullScores[3]);
+  const w4 = weightedModulePoints(4, fullScores[4]);
+  const w5 = weightedModulePoints(5, fullScores[5]);
+  const w6 = weightedModulePoints(6, fullScores[6]);
 
-  // 2. Höchstwertprinzip für die Blöcke Kognition (M2) und Verhalten (M3) anwenden
+  // 2. Höchstwertprinzip für Kognition (M2) und Verhalten (M3)
   const maxOf23 = Math.max(w2, w3);
 
-  // 3. Gesamtsumme addieren (Maximal 100 Punkte möglich)
+  // 3. Gesamtsumme (max. 100 Punkte)
   const totalScore = Math.round((w1 + maxOf23 + w4 + w5 + w6) * 10) / 10;
 
-  const levelMatch = NBA_CONFIG.THRESHOLDS.find((t) => totalScore >= t.min) || { level: 0, min: 0 };
-  const careLevel = levelMatch.level;
+  const careLevel = careLevelFromScore(totalScore);
 
-  const buffer = totalScore - levelMatch.min;
+  const levelMin = careLevel > 0 ? (PFLEGEGRAD_MIN[careLevel] ?? 0) : 0;
+  const buffer = totalScore - levelMin;
   const trafficLight =
     careLevel === 0 ? 'rot' : buffer <= 2 ? 'rot' : buffer <= 5 ? 'gelb' : 'gruen';
 

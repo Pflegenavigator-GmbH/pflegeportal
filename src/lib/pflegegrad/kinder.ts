@@ -15,6 +15,12 @@
 // 40/20/15) und das Höchstwertprinzip M2/M3 entsprechen dem NBA; die
 // Schweregrad-Einstufung je Modul wird aus dem Rohpunkte-Anteil abgeleitet.
 
+import {
+  careLevelFromScore as careLevelRegular,
+  MODULE_WEIGHTS,
+  severityFraction,
+} from '@/src/lib/pflegegrad/nba';
+
 export type AgeGroup = 'baby' | 'toddler' | 'preschool' | 'school';
 
 /** § 15 Abs. 7 SGB XI: Grenze der Baby-Sonderregel (18 Monate) */
@@ -331,32 +337,6 @@ export function getAssessmentCategories(age: number): KinderCategory[] {
     .filter((cat) => cat.questions.length > 0);
 }
 
-// NBA-Modulgewichte (§ 15 Abs. 3 SGB XI)
-const MODULE_WEIGHTS: Record<number, number> = { 1: 10, 2: 15, 3: 15, 4: 40, 5: 20, 6: 15 };
-
-/**
- * Rohpunkte-Anteil → Schweregrad-Anteil (0 … 1) in fünf Stufen, analog zu den
- * fünf NBA-Schweregraden (keine/geringe/erhebliche/schwere/schwerste
- * Beeinträchtigung). Orientierungs-Approximation der amtlichen Punkttabellen.
- */
-function severityFraction(raw: number, maxRaw: number): number {
-  if (maxRaw <= 0 || raw <= 0) return 0;
-  const ratio = raw / maxRaw;
-  if (ratio <= 0.25) return 0.25;
-  if (ratio <= 0.5) return 0.5;
-  if (ratio <= 0.75) return 0.75;
-  return 1;
-}
-
-/** Schwellen § 15 Abs. 3 SGB XI (Regelfall ab 18 Monaten) */
-const THRESHOLDS_REGULAR = [
-  { level: 5, min: 90 },
-  { level: 4, min: 70 },
-  { level: 3, min: 47.5 },
-  { level: 2, min: 27 },
-  { level: 1, min: 12.5 },
-];
-
 /** Schwellen § 15 Abs. 7 SGB XI (< 18 Monate): ein Grad höher, kein PG 1 */
 const THRESHOLDS_BABY = [
   { level: 5, min: 70 },
@@ -367,8 +347,11 @@ const THRESHOLDS_BABY = [
 
 /** Reine Schwellenwert-Einstufung — separat exportiert für Tests und Wiederverwendung */
 export function careLevelFromScore(points: number, age: number): number {
-  const thresholds = age < BABY_AGE_LIMIT_YEARS ? THRESHOLDS_BABY : THRESHOLDS_REGULAR;
-  return thresholds.find((t) => points >= t.min)?.level ?? 0;
+  if (age < BABY_AGE_LIMIT_YEARS) {
+    return THRESHOLDS_BABY.find((t) => points >= t.min)?.level ?? 0;
+  }
+  // Regelfall: gemeinsame amtliche Schwellen aus dem NBA-Kernmodell
+  return careLevelRegular(points);
 }
 
 function describeResult(level: number, babyRuleApplied: boolean): string {
