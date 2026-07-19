@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireCaseSession } from '@/src/lib/api/case-auth';
 import { handleApiError } from '@/src/lib/api/error-handler';
 import { ValidationError } from '@/src/lib/api/errors';
-import { isValidQuestionKey } from '@/src/lib/api/validation';
+import { isValidQuestionKey, safeAssign } from '@/src/lib/api/validation';
 import {
   ASSESSMENT_MODULES,
   isAssessmentModuleName,
@@ -42,25 +42,20 @@ function parseAnswersObject(input: unknown): Record<string, AnswerValue> {
     throw new ValidationError('Zu viele Antworten in einem Modul.');
   }
 
-  const result: Record<string, AnswerValue> = {};
+  const result: Record<string, AnswerValue> = Object.create(null);
   for (const [key, value] of entries) {
     if (key.length === 0 || key.length > MAX_KEY_LENGTH) {
       throw new ValidationError(`Ungültiger Frageschlüssel: ${key.slice(0, 40)}`);
     }
     // 🛡️ Schutz vor Prototype Pollution (js/remote-property-injection):
     // striktes Muster plus explizite Sperre der gefährlichen Schlüsselnamen
-    if (
-      key === '__proto__' ||
-      key === 'constructor' ||
-      key === 'prototype' ||
-      !isValidQuestionKey(key)
-    ) {
+    if (!isValidQuestionKey(key)) {
       throw new ValidationError(`Unzulässiger Frageschlüssel: ${key.slice(0, 40)}`);
     }
     if (!isAnswerValue(value)) {
       throw new ValidationError(`Ungültiger Antwortwert für Schlüssel "${key}".`);
     }
-    result[key] = value;
+    safeAssign(result, key, value);
   }
   return result;
 }
@@ -151,10 +146,11 @@ export async function POST(
         .eq('module_number', moduleNumber)
         .maybeSingle();
 
-      updatedAnswers = {
-        ...((existingRecord?.answers as Record<string, AnswerValue>) || {}),
-        [body.questionKey]: body.answerValue,
-      };
+      updatedAnswers = Object.assign(
+        Object.create(null),
+        (existingRecord?.answers as Record<string, AnswerValue>) || {}
+      );
+      safeAssign(updatedAnswers, body.questionKey, body.answerValue);
     }
 
     const { data, error } = await supabase

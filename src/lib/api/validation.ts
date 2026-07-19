@@ -9,6 +9,29 @@ export function isSafeObjectKey(key: string): boolean {
   return key !== '__proto__' && key !== 'constructor' && key !== 'prototype';
 }
 
+/**
+ * Setzt einen dynamischen, potenziell nutzerkontrollierten Schlüssel sicher.
+ * Die inline-Sperre der drei gefährlichen Namen wird von CodeQL als Barriere
+ * gegen js/remote-property-injection erkannt (die Regex-Validierung allein
+ * folgt der Datenflussanalyse nicht).
+ */
+export function safeAssign<T>(target: Record<string, T>, key: string, value: T): void {
+  if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+    throw new Error('Unzulässiger Objekt-Schlüssel.');
+  }
+  target[key] = value;
+}
+
+/** Löscht einen dynamischen Schlüssel mit derselben Prototype-Pollution-Sperre. */
+export function safeDelete<T>(target: Record<string, T>, key: string): void {
+  if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+    return;
+  }
+  if (Object.prototype.hasOwnProperty.call(target, key)) {
+    delete target[key];
+  }
+}
+
 /** Frageschlüssel in answers-JSONB: alphanumerisch plus _ . - */
 const QUESTION_KEY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_.-]{0,99}$/;
 

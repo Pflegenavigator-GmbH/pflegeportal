@@ -6,6 +6,8 @@ import {
   isValidEmail,
   isValidQuestionKey,
   isValidTagebuchEntryKey,
+  safeAssign,
+  safeDelete,
 } from './validation';
 
 describe('isSafeObjectKey', () => {
@@ -47,6 +49,32 @@ describe('isValidTagebuchEntryKey', () => {
     expect(isValidTagebuchEntryKey('entry_abc')).toBe(false);
     expect(isValidTagebuchEntryKey('__proto__')).toBe(false);
     expect(isValidTagebuchEntryKey('constructor')).toBe(false);
+  });
+});
+
+describe('safeAssign', () => {
+  it('setzt normale Schlüssel', () => {
+    const obj: Record<string, number> = Object.create(null);
+    safeAssign(obj, 'entry_1', 42);
+    expect(obj.entry_1).toBe(42);
+  });
+
+  it('wirft bei Prototype-Pollution-Schlüsseln und verschmutzt den Prototyp nicht', () => {
+    const obj: Record<string, unknown> = Object.create(null);
+    for (const key of ['__proto__', 'constructor', 'prototype']) {
+      expect(() => safeAssign(obj, key, { polluted: true })).toThrow();
+    }
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+  });
+});
+
+describe('safeDelete', () => {
+  it('löscht eigene Schlüssel und ignoriert gefährliche/fehlende', () => {
+    const obj: Record<string, number> = Object.assign(Object.create(null), { entry_1: 1 });
+    safeDelete(obj, 'entry_1');
+    expect('entry_1' in obj).toBe(false);
+    expect(() => safeDelete(obj, '__proto__')).not.toThrow();
+    expect(() => safeDelete(obj, 'entry_missing')).not.toThrow();
   });
 });
 

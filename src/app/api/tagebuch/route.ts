@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireCaseSession } from '@/src/lib/api/case-auth';
 import { handleApiError } from '@/src/lib/api/error-handler';
 import { ValidationError } from '@/src/lib/api/errors';
-import { isValidTagebuchEntryKey } from '@/src/lib/api/validation';
+import { isValidTagebuchEntryKey, safeAssign, safeDelete } from '@/src/lib/api/validation';
 import { TAGEBUCH_MODULE_NUMBER } from '@/src/lib/pflegegrad/assessment-modules';
 import { createAdminSupabaseClient } from '@/src/lib/supabase/admin';
 import { Json } from '@/src/types/supabase';
@@ -75,7 +75,11 @@ export async function POST(request: NextRequest) {
       throw new ValidationError('Ungültiger Eintrags-Schlüssel.');
     }
 
-    const currentAnswers = (existingRecord?.answers as unknown as TagebuchData) || {};
+    // Prototyploses Objekt: Es gibt kein __proto__, das verschmutzt werden könnte
+    const currentAnswers: TagebuchData = Object.assign(
+      Object.create(null),
+      (existingRecord?.answers as unknown as TagebuchData) || {}
+    );
 
     // ID generieren, falls es ein neuer Eintrag ist (Key = Zeitstempel oder bestehender Key)
     const targetKey = entryKey || `entry_${Date.now()}`;
@@ -84,10 +88,10 @@ export async function POST(request: NextRequest) {
       ? currentAnswers[targetKey]?.created_at
       : undefined;
 
-    currentAnswers[targetKey] = {
+    safeAssign(currentAnswers, targetKey, {
       ...payload,
       created_at: existingCreatedAt || new Date().toISOString(),
-    };
+    });
 
     const { error: upsertError } = await supabase.from('answers').upsert(
       {
@@ -140,11 +144,12 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
-    const currentAnswers = existingRecord.answers as unknown as TagebuchData;
-    // Nur eigene Properties löschen — nie Werte aus der Prototypkette
-    if (Object.prototype.hasOwnProperty.call(currentAnswers, entryKey)) {
-      delete currentAnswers[entryKey];
-    }
+    const currentAnswers: TagebuchData = Object.assign(
+      Object.create(null),
+      existingRecord.answers as unknown as TagebuchData
+    );
+    // Löscht nur eigene, ungefährliche Schlüssel (Prototype-Pollution-Sperre inline)
+    safeDelete(currentAnswers, entryKey);
 
     const { error: updateError } = await supabase.from('answers').upsert(
       {
