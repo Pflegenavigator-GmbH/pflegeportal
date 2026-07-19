@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireCaseSession } from '@/src/lib/api/case-auth';
 import { handleApiError } from '@/src/lib/api/error-handler';
 import { ValidationError } from '@/src/lib/api/errors';
+import { isValidQuestionKey } from '@/src/lib/api/validation';
 import {
   ASSESSMENT_MODULES,
   isAssessmentModuleName,
@@ -45,6 +46,16 @@ function parseAnswersObject(input: unknown): Record<string, AnswerValue> {
   for (const [key, value] of entries) {
     if (key.length === 0 || key.length > MAX_KEY_LENGTH) {
       throw new ValidationError(`Ungültiger Frageschlüssel: ${key.slice(0, 40)}`);
+    }
+    // 🛡️ Schutz vor Prototype Pollution (js/remote-property-injection):
+    // striktes Muster plus explizite Sperre der gefährlichen Schlüsselnamen
+    if (
+      key === '__proto__' ||
+      key === 'constructor' ||
+      key === 'prototype' ||
+      !isValidQuestionKey(key)
+    ) {
+      throw new ValidationError(`Unzulässiger Frageschlüssel: ${key.slice(0, 40)}`);
     }
     if (!isAnswerValue(value)) {
       throw new ValidationError(`Ungültiger Antwortwert für Schlüssel "${key}".`);
@@ -127,6 +138,10 @@ export async function POST(
       // neue Clients sollten den Bulk-Vertrag verwenden.
       if (typeof body.questionKey !== 'string' || !isAnswerValue(body.answerValue)) {
         throw new ValidationError('Erwartet: answers-Objekt oder questionKey/answerValue.');
+      }
+      // 🛡️ Gleicher Prototype-Pollution-Schutz wie im Bulk-Pfad
+      if (!isValidQuestionKey(body.questionKey)) {
+        throw new ValidationError('Unzulässiger Frageschlüssel.');
       }
 
       const { data: existingRecord } = await supabase

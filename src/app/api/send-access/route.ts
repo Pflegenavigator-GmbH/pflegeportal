@@ -6,6 +6,7 @@ import { requireCaseSession } from '@/src/lib/api/case-auth';
 import { handleApiError } from '@/src/lib/api/error-handler';
 import { RateLimitError, ValidationError } from '@/src/lib/api/errors';
 import { checkRateLimit, getClientIp } from '@/src/lib/api/rate-limit';
+import { isValidEmail } from '@/src/lib/api/validation';
 import { BrevoClient } from '@/src/lib/brevo/client';
 import { getBaseUrl } from '@/src/lib/env';
 
@@ -20,7 +21,6 @@ interface AccessRequestBody {
 const SEND_LIMIT = 5;
 const SEND_WINDOW_MS = 60 * 60 * 1000;
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const PHONE_PATTERN = /^\+?[0-9 ()/-]{6,20}$/;
 
 function escapeHtml(value: string): string {
@@ -62,7 +62,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     const brevo = BrevoClient.getInstance();
 
     if (type === 'email') {
-      if (!EMAIL_PATTERN.test(contact)) {
+      if (!isValidEmail(contact)) {
         throw new ValidationError('Ungültige E-Mail-Adresse.');
       }
       await brevo.sendEmail({

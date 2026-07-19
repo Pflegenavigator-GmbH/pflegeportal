@@ -36,6 +36,11 @@ jobs:
           languages: javascript-typescript
           build-mode: none
           queries: security-extended
+          # archive/ ist toter Altcode (in tsconfig.json excluded, wird nicht
+          # gebaut) — Alerts dort sind nicht actionable
+          config: |
+            paths-ignore:
+              - archive
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
