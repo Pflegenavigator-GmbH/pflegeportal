@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { validateAndStoreSession } from '@/src/app/actions/case-session';
 import { PaywallModal } from '@/src/components/modal/PaywallModal';
 import { TagebuchPreviewModal } from '@/src/components/modal/TagebuchPreviewModal';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/ui';
 import { useStripeCheckout } from '@/src/hooks/useStripeCheckout';
 import { TagebuchData, TagebuchEintrag } from '@/src/types/tagebuch';
 

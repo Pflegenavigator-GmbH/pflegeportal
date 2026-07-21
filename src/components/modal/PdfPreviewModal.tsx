@@ -4,15 +4,15 @@
 
 import { Printer, X, ShieldAlert, Building2 } from 'lucide-react';
 
-import { Button } from '@/src/components/ui/button';
 import {
+  Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardFooter,
   CardDescription,
-} from '@/src/components/ui/card';
+} from '@/src/components/ui';
 
 interface PdfPreviewModalProps {
   isOpen: boolean;

@@ -22,16 +22,19 @@ import { toast } from 'sonner';
 import { HandlungsEmpfehlungen } from '@/src/app/[locale]/pflegegrad/ergebnis/_component/HandlungsEmpfehlung';
 import { ModulListe } from '@/src/app/[locale]/pflegegrad/ergebnis/_component/ModulListe';
 import { PaywallModal } from '@/src/components/modal/PaywallModal';
-import { Button } from '@/src/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/src/components/ui/dropdown-menu';
+} from '@/src/components/ui';
 import { usePdfDownload } from '@/src/hooks/usePdfDownload';
 import { useStripeCheckout } from '@/src/hooks/useStripeCheckout';
 import { logger } from '@/src/lib/logger';
@@ -157,10 +160,10 @@ export default function ErgebnisPage(props: PageProps) {
 
   if (!ergebnis) {
     return (
-      <div className="container mx-auto px-4 py-12 text-center text-white bg-slate-900 min-h-screen flex flex-col justify-center items-center">
+      <div className="container mx-auto px-4 py-12 text-center text-white bg-[var(--color-surface)] min-h-screen flex flex-col justify-center items-center">
         <AlertCircle className="w-16 h-16 text-orange-400 mb-4 animate-pulse" />
         <h1 className="text-2xl font-bold mb-2">Berechne Auswertungs-Matrix...</h1>
-        <p className="text-gray-400 max-w-sm">
+        <p className="text-[var(--color-text-muted)] max-w-sm">
           Die SGB XI Schwellenwerte werden mit Ihren Angaben abgeglichen.
         </p>
       </div>
@@ -209,13 +212,13 @@ export default function ErgebnisPage(props: PageProps) {
   };
 
   return (
-    <main className="min-h-screen bg-slate-900 py-12 px-4 text-white font-sans">
+    <main className="min-h-screen bg-[var(--color-surface)] py-12 px-4 text-white font-sans">
       <div id="nba-analysis-content" className="container mx-auto max-w-3xl space-y-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Ihre NBA-Leistungsanalyse</h1>
-            <p className="text-sm text-gray-400 mt-1">
+            <p className="text-sm text-[var(--color-text-muted)] mt-1">
               Ermittelt nach den Begutachtungs-Richtlinien
             </p>
           </div>
@@ -225,20 +228,20 @@ export default function ErgebnisPage(props: PageProps) {
             {hasMounted && caseCode && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <div className="text-xs font-mono bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1.5 rounded-full text-gray-300 flex items-center gap-2 cursor-pointer transition-colors select-none">
-                    <FolderLock className="w-3.5 h-3.5 text-[#20b2aa]" />
+                  <div className="text-xs font-mono bg-[var(--surface-1)] hover:bg-white/10 border border-[var(--border-subtle)] px-3 py-1.5 rounded-full text-[var(--color-text-subtle)] flex items-center gap-2 cursor-pointer transition-colors select-none">
+                    <FolderLock className="w-3.5 h-3.5 text-[var(--color-accent)]" />
                     <span>Akte: {caseCode.toUpperCase()}</span>
-                    <ChevronDown className="w-3 h-3 text-gray-500" />
+                    <ChevronDown className="w-3 h-3 text-[var(--color-text-faint)]" />
                   </div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
-                  className="bg-slate-900 border-white/10 text-white w-56"
+                  className="bg-[var(--color-surface)] border-[var(--border-subtle)] text-white w-56"
                   align="end"
                 >
-                  <DropdownMenuLabel className="text-xs text-gray-400">
+                  <DropdownMenuLabel className="text-xs text-[var(--color-text-muted)]">
                     Akten-Optionen
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-white/5" />
+                  <DropdownMenuSeparator className="bg-[var(--surface-1)]" />
                   <DropdownMenuItem
                     onClick={handleReEvaluateFromScratch}
                     className="text-rose-400 focus:text-rose-400 focus:bg-rose-500/10 cursor-pointer"
@@ -252,7 +255,9 @@ export default function ErgebnisPage(props: PageProps) {
         </div>
 
         {/* Ampel-Card */}
-        <Card className={`bg-white/5 border-2 ${aktuelleAmpel.border} text-white shadow-2xl`}>
+        <Card
+          className={`bg-[var(--surface-1)] border-2 ${aktuelleAmpel.border} text-white shadow-2xl`}
+        >
           <div className="p-8 sm:p-10 flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="space-y-3 text-center sm:text-left">
               <span
@@ -263,7 +268,7 @@ export default function ErgebnisPage(props: PageProps) {
               <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight">
                 {ergebnis.careLevel === 0 ? 'Kein Pflegegrad' : `Pflegegrad ${ergebnis.careLevel}`}
               </h2>
-              <p className="text-sm text-gray-400 max-w-md">
+              <p className="text-sm text-[var(--color-text-muted)] max-w-md">
                 Punktwert: {ergebnis.totalScore.toFixed(1)} von 100.
               </p>
             </div>
@@ -276,14 +281,14 @@ export default function ErgebnisPage(props: PageProps) {
         </Card>
 
         {/* ℹ️ BARRIEREFREIE PARAGRAPHEN-ERKLÄRUNG FÜR SENIOREN */}
-        <Card className="bg-white/[0.02] border border-white/5 text-white shadow-md p-5 rounded-2xl">
+        <Card className="bg-[var(--surface-hairline)] border border-[var(--border-faint)] text-white shadow-md p-5 rounded-2xl">
           <div className="flex gap-3">
-            <Info className="w-5 h-5 text-[#20b2aa] flex-shrink-0 mt-0.5" />
+            <Info className="w-5 h-5 text-[var(--color-accent)] flex-shrink-0 mt-0.5" />
             <div className="space-y-1">
               <h4 className="text-sm font-bold text-gray-200">
                 Wie kommt mein Pflegegrad zustande? (Einfach erklärt)
               </h4>
-              <p className="text-xs text-gray-400 leading-relaxed">
+              <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
                 Ein Pflegegrad wird im Gesetz nicht nach Minuten oder Stunden bemessen, sondern rein
                 nach Ihrer verbleibenden
                 <strong> Eigenständigkeit im Alltag</strong>. Das Begutachtungssystem verteilt
@@ -301,25 +306,30 @@ export default function ErgebnisPage(props: PageProps) {
 
         {/* ZUSTAND A: KLASSISCHE KOMBINATIONSPFLEGE (Pflegegrad 2 bis 5) */}
         {ergebnis.careLevel >= 2 && (
-          <Card className="bg-white/5 border-white/10 text-white shadow-xl">
-            <CardHeader className="border-b border-white/5 pb-4">
+          <Card className="bg-[var(--surface-1)] border-[var(--border-subtle)] text-white shadow-xl">
+            <CardHeader className="border-b border-[var(--border-faint)] pb-4">
               <CardTitle className="text-lg font-bold flex items-center gap-2">
-                <Coins className="w-5 h-5 text-[#20b2aa]" /> Leistungsansprüche & Kombinationspflege
+                <Coins className="w-5 h-5 text-[var(--color-accent)]" /> Leistungsansprüche &
+                Kombinationspflege
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <div className="grid gap-4 sm:grid-cols-2 mb-4">
-                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-xl">
-                  <span className="text-xs text-gray-400">Pflegegeld (SGB XI § 37)</span>
+                <div className="p-4 bg-[var(--surface-hairline)] border border-[var(--border-faint)] rounded-xl">
+                  <span className="text-xs text-[var(--color-text-muted)]">
+                    Pflegegeld (SGB XI § 37)
+                  </span>
                   <p className="text-2xl font-bold">{ergebnis.benefits.monthlyAmount} €</p>
-                  <p className="text-[10px] text-gray-500 mt-1">
+                  <p className="text-[10px] text-[var(--color-text-faint)] mt-1">
                     Bei privater Pflege durch Angehörige
                   </p>
                 </div>
-                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-xl">
-                  <span className="text-xs text-gray-400">Entlastungsbetrag (SGB XI § 45b)</span>
+                <div className="p-4 bg-[var(--surface-hairline)] border border-[var(--border-faint)] rounded-xl">
+                  <span className="text-xs text-[var(--color-text-muted)]">
+                    Entlastungsbetrag (SGB XI § 45b)
+                  </span>
                   <p className="text-2xl font-bold">{ergebnis.benefits.reliefBudget} €</p>
-                  <p className="text-[10px] text-gray-500 mt-1">
+                  <p className="text-[10px] text-[var(--color-text-faint)] mt-1">
                     Zweckgebunden für Betreuungsdienste
                   </p>
                 </div>
@@ -339,19 +349,19 @@ export default function ErgebnisPage(props: PageProps) {
 
         {/* ZUSTAND B: SONDERFALL PFLEGEGRAD 1 (Kein Kombi-Budget vorhanden) */}
         {ergebnis.careLevel === 1 && (
-          <Card className="bg-white/5 border-white/10 text-white shadow-xl">
-            <CardHeader className="border-b border-white/5 pb-4">
+          <Card className="bg-[var(--surface-1)] border-[var(--border-subtle)] text-white shadow-xl">
+            <CardHeader className="border-b border-[var(--border-faint)] pb-4">
               <CardTitle className="text-lg font-bold flex items-center gap-2 text-amber-400">
                 <Info className="w-5 h-5" /> Ihre Ansprüche bei Pflegegrad 1
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
-              <div className="p-4 bg-white/[0.02] border border-white/5 rounded-xl">
-                <span className="text-xs text-gray-400">
+              <div className="p-4 bg-[var(--surface-hairline)] border border-[var(--border-faint)] rounded-xl">
+                <span className="text-xs text-[var(--color-text-muted)]">
                   Monatlicher Entlastungsbetrag (§ 45b SGB XI)
                 </span>
                 <p className="text-2xl font-bold text-white">{ergebnis.benefits.reliefBudget} €</p>
-                <p className="text-[11px] text-gray-400 mt-1.5 leading-relaxed">
+                <p className="text-[11px] text-[var(--color-text-muted)] mt-1.5 leading-relaxed">
                   Bei Pflegegrad 1 zahlt die Kasse noch kein direktes Pflegegeld aus. Sie erhalten
                   jedoch den vollen Entlastungsbetrag. Dieser ist zweckgebunden und kann für
                   zugelassene Alltagsbegleiter, Haushaltshilfen oder Tagespflege erstattet werden.
@@ -367,7 +377,7 @@ export default function ErgebnisPage(props: PageProps) {
             <AlertCircle className="w-6 h-6 text-rose-400 flex-shrink-0 mt-0.5" />
             <div className="space-y-1">
               <h4 className="font-bold text-sm text-rose-400">Hinweis zum aktuellen Punktestand</h4>
-              <p className="text-xs text-gray-400 leading-relaxed">
+              <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
                 Mit Ihrem errechneten Wert von {ergebnis.totalScore} Punkten wird die gesetzliche
                 Mindesthürde von 12,5 Punkten für eine Einstufung aktuell unterschritten. Sollte
                 sich der Zustand im Alltag verschlechtern, empfiehlt es sich, die Evaluierung
@@ -380,10 +390,10 @@ export default function ErgebnisPage(props: PageProps) {
         {/* Modul-Liste */}
         <div className="space-y-3">
           <div className="flex justify-between items-center px-1">
-            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">
+            <h3 className="text-sm font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
               Modul-Einstufung anpassen
             </h3>
-            <span className="text-xs text-[#20b2aa]">Klicken zum Editieren</span>
+            <span className="text-xs text-[var(--color-accent)]">Klicken zum Editieren</span>
           </div>
           <ModulListe metadata={NBA_MODULE_METADATA} ergebnis={ergebnis} locale={locale} />
         </div>
@@ -393,16 +403,16 @@ export default function ErgebnisPage(props: PageProps) {
         {/* Zusatzleistungen anzeigen (Wohnraum, Hilfsmittel), falls im Rechner-Ergebnis vorhanden */}
         {ergebnis.benefits.additionalBenefits.length > 0 && (
           <div className="space-y-2">
-            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider px-1">
+            <h4 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider px-1">
               Zusätzliche gesetzliche Hilfen
             </h4>
             <div className="grid gap-2 sm:grid-cols-2">
               {ergebnis.benefits.additionalBenefits.map((benefit, idx) => (
                 <div
                   key={idx}
-                  className="p-3 bg-white/[0.02] border border-white/5 rounded-xl text-xs text-gray-300 flex items-center gap-2"
+                  className="p-3 bg-[var(--surface-hairline)] border border-[var(--border-faint)] rounded-xl text-xs text-[var(--color-text-subtle)] flex items-center gap-2"
                 >
-                  <CheckCircle2 className="w-4 h-4 text-[#20b2aa] flex-shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-[var(--color-accent)] flex-shrink-0" />
                   <span>{benefit}</span>
                 </div>
               ))}
@@ -416,40 +426,41 @@ export default function ErgebnisPage(props: PageProps) {
             variant="outline"
             onClick={downloadPdf}
             disabled={loadingPdf}
-            className="h-14 border-white/10 text-white hover:bg-white/5 shadow-md"
+            className="h-14 border-[var(--border-subtle)] text-white hover:bg-[var(--surface-1)] shadow-md"
           >
             <Download className="w-4 h-4 mr-2" /> PDF
           </Button>
           <Button
             variant="outline"
             onClick={shareErgebnis}
-            className="h-14 border-white/10 text-white hover:bg-white/5 shadow-md"
+            className="h-14 border-[var(--border-subtle)] text-white hover:bg-[var(--surface-1)] shadow-md"
           >
             <Share2 className="w-4 h-4 mr-2" /> Teilen
           </Button>
           <Button
             onClick={() => router.push(`/${locale}/briefe`)}
-            className="h-14 bg-[#20b2aa] hover:bg-[#3ddbd0] text-white font-bold shadow-xl"
+            className="h-14 bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[var(--color-on-accent)] font-bold shadow-xl"
           >
             <FileText className="w-4 h-4 mr-2" /> Briefe
           </Button>
         </div>
 
         {/* GdB-Weiche */}
-        <Card className="bg-gradient-to-r from-white/5 to-transparent border-white/10 text-white p-5 rounded-xl shadow-xl">
+        <Card className="bg-gradient-to-r from-white/5 to-transparent border-[var(--border-subtle)] text-white p-5 rounded-xl shadow-xl">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-center sm:text-left">
               <h4 className="font-bold text-sm flex items-center gap-2">
-                <Accessibility className="w-4 h-4 text-[#20b2aa]" /> Grad der Behinderung prüfen?
+                <Accessibility className="w-4 h-4 text-[var(--color-accent)]" /> Grad der
+                Behinderung prüfen?
               </h4>
-              <p className="text-gray-400 text-xs">
+              <p className="text-[var(--color-text-muted)] text-xs">
                 Erhalten Sie Steuerfreibeträge und Zusatzurlaub.
               </p>
             </div>
             <Button
               onClick={handleGdbNavigation}
               disabled={isVerifyingGdb}
-              className="bg-[#20b2aa] hover:bg-[#3ddbd0] text-slate-950 font-bold text-xs h-10 rounded-xl"
+              className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[var(--color-on-accent)] font-bold text-xs h-10 rounded-xl"
             >
               {isVerifyingGdb ? 'Prüfe...' : 'GdB-Rechner'}
             </Button>

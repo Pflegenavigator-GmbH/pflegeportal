@@ -1,9 +1,8 @@
-// src
-
+// src/app/[locale]/pflegegrad/modul6/_component/AlltagsgestaltungForm.tsx
 'use client';
 
-import { Label } from '@/src/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/src/components/ui/radio-group';
+import { Label, RadioGroup, RadioGroupItem } from '@/src/components/ui';
+import styles from '@/src/styles/pflegegrad.module.css';
 
 export interface AlltagsFrage {
   id: string;
@@ -22,40 +21,49 @@ interface AlltagsgestaltungFormProps {
   onAntwort: (key: string, value: string) => void;
 }
 
+/**
+ * Modul-6-Formular: wie das Standard-Formular, aber mit zweizeiligen Optionen
+ * (Titel + erläuternder Untertext). Nutzt dieselben Token-basierten Klassen.
+ */
 export function AlltagsgestaltungForm({
   fragen,
   antworten,
   onAntwort,
 }: AlltagsgestaltungFormProps) {
   return (
-    <div className="space-y-6">
+    <div className={styles.questionList}>
       {fragen.map((fr) => (
-        <div key={fr.id} className="space-y-3 bg-white/[0.02] border border-white/5 p-5 rounded-xl">
-          <h3 className="font-semibold text-white text-base leading-snug">{fr.text}</h3>
+        <div key={fr.id} className={styles.questionCard}>
+          <h3 className={styles.questionTitle}>{fr.text}</h3>
           <RadioGroup
             value={antworten[fr.key] || ''}
             onValueChange={(v) => onAntwort(fr.key, v)}
-            className="grid gap-2"
+            className={styles.optionsFlush}
           >
             {fr.optionen.map((opt) => {
               const optionId = `${fr.id}-${opt.value}`;
+              const selected = antworten[fr.key] === opt.value;
               return (
                 <div
                   key={opt.value}
-                  className="flex items-start space-x-3 p-3 rounded-xl bg-white/[0.01] border border-white/5 hover:bg-white/5 transition-colors cursor-pointer"
+                  className={`${styles.optionRow} ${selected ? styles.optionRowSelected : ''}`}
+                  style={{ alignItems: 'flex-start' }}
                   onClick={() => onAntwort(fr.key, opt.value)}
                 >
-                  <RadioGroupItem
-                    value={opt.value}
-                    id={optionId}
-                    className="border-white/30 text-[#20b2aa] focus:border-[#20b2aa] h-5 w-5 mt-0.5 flex-shrink-0"
-                  />
-                  <Label
-                    htmlFor={optionId}
-                    className="text-gray-200 cursor-pointer flex flex-col flex-grow select-none"
-                  >
-                    <span className="font-semibold text-base text-white">{opt.title}</span>
-                    <span className="text-sm text-gray-400 font-normal mt-0.5">{opt.sub}</span>
+                  <RadioGroupItem value={opt.value} id={optionId} className="h-5 w-5 mt-0.5" />
+                  <Label htmlFor={optionId} className={styles.optionLabel}>
+                    <span style={{ display: 'block', fontWeight: 600 }}>{opt.title}</span>
+                    <span
+                      style={{
+                        display: 'block',
+                        fontSize: '0.875rem',
+                        fontWeight: 400,
+                        color: 'var(--color-text-muted)',
+                        marginTop: '0.125rem',
+                      }}
+                    >
+                      {opt.sub}
+                    </span>
                   </Label>
                 </div>
               );

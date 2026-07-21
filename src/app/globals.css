@@ -14,6 +14,51 @@
   --hc-border: #000000;
   --hc-text: #000000;
   --hc-bg: #ffffff;
+
+  /* ============================================================
+     DESIGN-TOKENS (zentrale Quelle für die CSS-Module)
+     Werte identisch zur bisherigen Bund-Farbmatrix — die Module
+     lesen ab jetzt hier, damit High-Contrast/Theme zentral greift.
+     ============================================================ */
+
+  /* Bund-Basisfarben (kontrastgeprüft) */
+  --bund-dunkelblau: #0a1c3a;
+  --bund-hellblau: #4a90e2;
+  --bund-gelb: #f59e0b;
+  --bund-weiss: #ffffff;
+
+  /* Semantische Farb-Tokens */
+  --color-surface: var(--bund-dunkelblau);
+  --color-on-surface: var(--bund-weiss);
+  --color-accent: var(--bund-hellblau);
+  --color-accent-hover: #6aa8e8; /* helleres Hellblau für Hover */
+  --color-on-accent: var(--bund-dunkelblau);
+  --color-accent-warm: var(--bund-gelb);
+
+  /* Textstufen (Sekundär-/Tertiärtext) */
+  --color-text-bright: #e2e8f0;
+  --color-text-subtle: #cbd5e1;
+  --color-text-muted: #94a3b8;
+  --color-text-faint: #64748b;
+
+  /* Flächen & Ränder (weiß-transparent auf dunklem Grund) */
+  --surface-1: rgba(255, 255, 255, 0.05);
+  --surface-2: rgba(255, 255, 255, 0.07);
+  --surface-hairline: rgba(255, 255, 255, 0.03);
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --border-faint: rgba(255, 255, 255, 0.05);
+
+  /* Dunkle Overlays */
+  --overlay-dark-1: rgba(0, 0, 0, 0.1);
+  --overlay-dark-2: rgba(0, 0, 0, 0.2);
+  --overlay-dark-3: rgba(0, 0, 0, 0.3);
+  --overlay-dark-5: rgba(0, 0, 0, 0.5);
+
+  /* Akzent-Tönungen */
+  --accent-tint-soft: rgba(74, 144, 226, 0.05);
+  --accent-tint: rgba(74, 144, 226, 0.1);
+  --accent-border: rgba(74, 144, 226, 0.2);
+  --accent-border-strong: rgba(74, 144, 226, 0.3);
 }
 
 @theme inline {
@@ -21,6 +66,19 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Semantische Bund-Palette als echte Tailwind-Utilities:
+     bg-surface, text-on-surface, bg-accent, text-on-accent, text-muted, …
+     Referenzieren die Runtime-Vars → High-Contrast-Overrides greifen mit. */
+  --color-surface: var(--bund-dunkelblau);
+  --color-on-surface: var(--bund-weiss);
+  --color-accent: var(--bund-hellblau);
+  --color-accent-hover: #6aa8e8;
+  --color-on-accent: var(--bund-dunkelblau);
+  --color-accent-warm: var(--bund-gelb);
+  --color-muted: var(--color-text-muted);
+  --color-subtle: var(--color-text-subtle);
+  --color-faint: var(--color-text-faint);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -55,6 +113,16 @@
   :root {
     --background: #ffffff;
     --foreground: #000000;
+
+    /* Sekundärtexte auf vollen Kontrast heben — greift zentral in allen
+       Modulen, die die Tokens nutzen (das war vorher wegen harter Hex-Werte
+       nicht möglich). */
+    --color-text-bright: #ffffff;
+    --color-text-subtle: #ffffff;
+    --color-text-muted: #ffffff;
+    --color-text-faint: #e2e8f0;
+    --border-subtle: rgba(255, 255, 255, 0.4);
+    --border-faint: rgba(255, 255, 255, 0.3);
   }
 
   button, a {

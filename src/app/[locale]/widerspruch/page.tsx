@@ -7,26 +7,27 @@ import { toast } from 'sonner';
 
 import { PaywallModal } from '@/src/components/modal/PaywallModal';
 import { PdfPreviewModal } from '@/src/components/modal/PdfPreviewModal';
-import { Button } from '@/src/components/ui/button';
 import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
-import { Input } from '@/src/components/ui/input';
-import { Label } from '@/src/components/ui/label';
-import {
+  Input,
+  Label,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
-import { Textarea } from '@/src/components/ui/textarea';
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  Textarea,
+} from '@/src/components/ui';
 import { usePdfDownload } from '@/src/hooks/usePdfDownload';
 import { useStripeCheckout } from '@/src/hooks/useStripeCheckout';
 import {

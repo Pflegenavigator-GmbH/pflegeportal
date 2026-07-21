@@ -22,18 +22,19 @@ import { useRouter, useParams } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
-import { Button } from '@/src/components/ui/button';
 import {
+  Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
   CardFooter,
-} from '@/src/components/ui/card';
-import { Input } from '@/src/components/ui/input';
-import { Progress } from '@/src/components/ui/progress';
-import { RadioGroup, RadioGroupItem } from '@/src/components/ui/radio-group';
+  Input,
+  Progress,
+  RadioGroup,
+  RadioGroupItem,
+} from '@/src/components/ui';
 import { useStripeCheckout } from '@/src/hooks/useStripeCheckout';
 import { logger } from '@/src/lib/logger';
 import {

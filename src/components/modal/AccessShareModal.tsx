@@ -15,15 +15,15 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-import { Button } from '@/src/components/ui/button';
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/src/components/ui/dialog';
-import { Input } from '@/src/components/ui/input';
+  Input,
+} from '@/src/components/ui';
 
 interface AccessShareModalProps {
   caseCode: string;

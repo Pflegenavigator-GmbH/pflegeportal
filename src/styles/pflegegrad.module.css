@@ -1,0 +1,182 @@
+/* src/styles/pflegegrad.module.css
+   Geteilte visuelle Muster für den Pflegegrad-Workflow.
+   Farben ausschließlich über die zentralen Tokens (globals.css);
+   die modulspezifische Akzentfarbe kommt über --module-accent, das die
+   Modulseite als Inline-Style setzt. So bleibt Wayfinding erhalten, ohne
+   Farbwerte in den Komponenten zu hardcoden. */
+
+.page {
+  max-width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 2rem 1rem;
+  color: var(--color-on-surface);
+}
+
+/* ---- Kopfbereich ---- */
+.header {
+  margin-bottom: 1.5rem;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.headerBrand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.iconBox {
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  flex-shrink: 0;
+  color: var(--module-accent, var(--color-accent));
+  background: color-mix(in srgb, var(--module-accent, var(--color-accent)) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--module-accent, var(--color-accent)) 30%, transparent);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.weight {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  margin-top: 0.125rem;
+}
+
+.idBadge {
+  font-size: 0.75rem;
+  font-family: monospace;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* ---- Fragenliste ---- */
+.questionList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.questionCard {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.questionTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.35;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.questionIcon {
+  color: var(--module-accent, var(--color-accent));
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
+.help {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding-left: 1.75rem;
+}
+
+.options {
+  display: grid;
+  gap: 0.5rem;
+  padding-left: 1.75rem;
+}
+
+/* Variante ohne linken Einzug (z.B. Modul 6, dessen Fragen kein Icon haben) */
+.optionsFlush {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.optionRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-faint);
+  background: var(--surface-hairline);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.optionRow:hover {
+  background: var(--surface-1);
+}
+
+.optionRowSelected {
+  border-color: color-mix(in srgb, var(--module-accent, var(--color-accent)) 55%, transparent);
+  background: color-mix(in srgb, var(--module-accent, var(--color-accent)) 12%, transparent);
+}
+
+.optionLabel {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-on-surface);
+  cursor: pointer;
+  flex-grow: 1;
+  padding: 0.25rem 0;
+}
+
+/* ---- Navigation ---- */
+.navBar {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-subtle);
+  gap: 1rem;
+}
+
+/* ---- Rechtshinweis ---- */
+.legalNote {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+.legalIcon {
+  color: var(--color-text-faint);
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}

@@ -3,15 +3,15 @@
 
 import { CreditCard } from 'lucide-react';
 
-import { Button } from '@/src/components/ui/button';
 import {
+  Button,
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
   CardFooter,
-} from '@/src/components/ui/card';
+} from '@/src/components/ui';
 
 interface Product {
   id: string;

@@ -3,7 +3,7 @@
 import { AlertCircle } from 'lucide-react';
 import { Component, ReactNode } from 'react';
 
-import { Button } from './button';
+import { Button } from '../atoms/button';
 
 interface Props {
   children: ReactNode;
@@ -39,8 +39,8 @@ export class ErrorBoundary extends Component<Props, State> {
         <div className="min-h-[400px] flex items-center justify-center p-4">
           <div className="text-center max-w-md">
             <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-slate-900 mb-2">Ein Fehler ist aufgetreten</h2>
-            <p className="text-slate-600 mb-4">
+            <h2 className="text-xl font-bold text-on-surface mb-2">Ein Fehler ist aufgetreten</h2>
+            <p className="text-muted mb-4">
               Bitte laden Sie die Seite neu oder versuchen Sie es später erneut.
             </p>
             <Button onClick={() => window.location.reload()}>Seite neu laden</Button>

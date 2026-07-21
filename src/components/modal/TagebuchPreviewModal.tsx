@@ -4,7 +4,7 @@
 import { X, FileDown, ShieldAlert } from 'lucide-react';
 
 import { generateTagebuchHtml } from '@/src/app/[locale]/tagebuch/constants/tagebuchTemplate';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/ui';
 import { TagebuchData } from '@/src/types/tagebuch';
 
 interface TagebuchPreviewModalProps {

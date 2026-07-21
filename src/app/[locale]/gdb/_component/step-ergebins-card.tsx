@@ -3,14 +3,14 @@
 import { ArrowLeft, ArrowRight, Check, FileText, Percent, Shield } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-import { Button } from '@/src/components/ui/button';
 import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/ui';
 
 interface Ergebnis {
   gdb: number;

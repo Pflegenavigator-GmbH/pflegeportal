@@ -13,16 +13,18 @@ import {
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-import { Button } from '@/src/components/ui/button';
 import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
-import { Input } from '@/src/components/ui/input';
-import { Tabs, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
+  Input,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from '@/src/components/ui';
 
 interface FAQ {
   id: string;

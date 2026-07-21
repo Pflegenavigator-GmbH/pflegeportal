@@ -28,16 +28,16 @@ import { toast } from 'sonner';
 
 import { clearCaseSession, validateAndStoreSession } from '@/src/app/actions/case-session';
 import LanguageSwitcher from '@/src/components/i18n/LanguageSwitcher';
-import { Button } from '@/src/components/ui/button';
 import {
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/src/components/ui/dropdown-menu';
-import { Input } from '@/src/components/ui/input';
+  Input,
+} from '@/src/components/ui';
 import {
   CASE_CODE_EVENT,
   clearCaseCode,

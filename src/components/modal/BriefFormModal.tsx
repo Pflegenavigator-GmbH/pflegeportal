@@ -3,11 +3,16 @@
 import { FileText, Download, Eye } from 'lucide-react';
 import { ReactNode, useState } from 'react';
 
-import { Button } from '@/src/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogDescription } from '@/src/components/ui/dialog';
-import { Input } from '@/src/components/ui/input';
-import { Label } from '@/src/components/ui/label';
-import { Textarea } from '@/src/components/ui/textarea';
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogDescription,
+  Input,
+  Label,
+  Textarea,
+} from '@/src/components/ui';
 import { useBriefGeneration } from '@/src/hooks/useBriefGeneration';
 import { BriefType, BriefPayload } from '@/src/types/briefe';
 

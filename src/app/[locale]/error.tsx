@@ -6,7 +6,7 @@
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { useEffect } from 'react';
 
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/ui';
 import { logger } from '@/src/lib/logger';
 
 export default function LocaleError({

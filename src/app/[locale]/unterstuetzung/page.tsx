@@ -19,15 +19,15 @@ import { useRouter } from 'next/navigation';
 import { useState, Suspense, lazy, use } from 'react';
 import { toast } from 'sonner';
 
-import { Button } from '@/src/components/ui/button';
 import {
+  Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from '@/src/components/ui/card';
-import { Input } from '@/src/components/ui/input';
+  Input,
+} from '@/src/components/ui';
 
 const AvatarChat = lazy(() => import('@/src/components/AvatarChat'));
 

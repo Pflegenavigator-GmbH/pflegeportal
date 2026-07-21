@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 
-import { cn } from '@/archive/src/lib/utils';
+import { cn } from '@/src/lib/utils';
 
 interface RadioGroupProps {
   value: string;
@@ -45,7 +45,7 @@ function RadioGroupItem({ value, id, children }: RadioGroupItemProps) {
         value={value}
         checked={isSelected}
         onChange={() => context.onValueChange(value)}
-        className="w-4 h-4 text-emerald-600 border-slate-300 focus:ring-emerald-500"
+        className="w-4 h-4 text-accent border-[var(--border-subtle)] focus:ring-emerald-500"
       />
       {children && <span className="flex-1">{children}</span>}
     </>

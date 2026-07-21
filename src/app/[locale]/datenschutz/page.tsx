@@ -16,8 +16,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { use } from 'react';
 
-import { Button } from '@/src/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { Button, Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui';
 
 interface PageProps {
   params: Promise<{ locale: string }>;

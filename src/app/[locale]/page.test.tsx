@@ -21,6 +21,7 @@ vi.mock('next/navigation', () => ({
 
 // next/image auf ein simples <img> reduzieren (fill/priority sind keine DOM-Attribute)
 vi.mock('next/image', () => ({
+  // eslint-disable-next-line @next/next/no-img-element
   default: ({ alt }: { alt: string }) => <img alt={alt} src="test-bild.png" />,
 }));
 

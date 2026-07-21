@@ -4,7 +4,7 @@
 import { BookOpen, PlusCircle } from 'lucide-react';
 import { useState, useEffect, useCallback, useSyncExternalStore } from 'react';
 
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/ui';
 import { TagebuchData, TagebuchEintrag } from '@/src/types/tagebuch';
 
 import { TagebuchForm } from './_component/TagebuchForm';

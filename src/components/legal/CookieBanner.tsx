@@ -4,7 +4,7 @@
 import { Check, ChevronDown, ChevronUp, ShieldCheck } from 'lucide-react';
 import { useState, useSyncExternalStore } from 'react';
 
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/ui';
 
 interface ConsentState {
   essential: boolean;

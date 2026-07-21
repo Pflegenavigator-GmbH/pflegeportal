@@ -5,7 +5,7 @@ import { X } from 'lucide-react';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import { cn } from '@/archive/src/lib/utils';
+import { cn } from '@/src/lib/utils';
 
 type DialogContextValue = {
   open: boolean;
@@ -93,7 +93,7 @@ const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
           role="dialog"
           aria-modal="true"
           className={cn(
-            'relative z-10 w-full max-w-lg rounded-2xl border border-white/10 bg-slate-950 text-white shadow-2xl outline-none',
+            'relative z-10 w-full max-w-lg rounded-2xl border border-[var(--border-subtle)] bg-slate-950 text-white shadow-2xl outline-none',
             className
           )}
           {...props}
@@ -102,7 +102,7 @@ const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="absolute right-4 top-4 rounded-md p-2 text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
+              className="absolute right-4 top-4 rounded-md p-2 text-[var(--color-text-muted)] transition-colors hover:bg-white/5 hover:text-white"
               aria-label="Dialog schließen"
             >
               <X className="h-4 w-4" />
@@ -143,7 +143,7 @@ type DialogDescriptionProps = React.HTMLAttributes<HTMLParagraphElement>;
 
 const DialogDescription = React.forwardRef<HTMLParagraphElement, DialogDescriptionProps>(
   ({ className, ...props }, ref) => (
-    <p ref={ref} className={cn('text-sm text-gray-400', className)} {...props} />
+    <p ref={ref} className={cn('text-sm text-[var(--color-text-muted)]', className)} {...props} />
   )
 );
 DialogDescription.displayName = 'DialogDescription';
