@@ -108,31 +108,62 @@
   }
 }
 
-/* High Contrast Mode */
-@media (prefers-contrast: high) {
-  :root {
-    --background: #ffffff;
-    --foreground: #000000;
+/* ============================================================
+   BARRIEREFREIHEIT — nutzergesteuert über data-Attribute auf <html>
+   (gesetzt vom No-FOUC-Init-Script + useAccessibility-Hook).
+   Feature später einbinden = hier ein paar Zeilen ergänzen.
+   ============================================================ */
 
-    /* Sekundärtexte auf vollen Kontrast heben — greift zentral in allen
-       Modulen, die die Tokens nutzen (das war vorher wegen harter Hex-Werte
-       nicht möglich). */
+/* High-Contrast: die eigentlichen Token-Anhebungen (dunkles Theme bleibt,
+   Sekundärtexte + Ränder auf vollen Kontrast). Als @mixin-Ersatz bewusst an
+   zwei Stellen referenziert (System-Präferenz UND Nutzerwahl). */
+:root[data-contrast='high'],
+:root[data-contrast='auto'] {
+  --color-text-bright: #ffffff;
+  --color-text-subtle: #ffffff;
+  --color-text-muted: #ffffff;
+  --color-text-faint: #e2e8f0;
+  --border-subtle: rgba(255, 255, 255, 0.45);
+  --border-faint: rgba(255, 255, 255, 0.3);
+}
+
+:root[data-contrast='high'] :focus-visible,
+:root[data-contrast='auto'] :focus-visible {
+  outline: 4px solid var(--focus-ring) !important;
+  outline-offset: 2px !important;
+}
+
+/* System-Präferenz greift, solange der Nutzer nichts Abweichendes gewählt hat.
+   Das Init-Script setzt data-contrast='auto' bei Systempräferenz; dieser Block
+   ist der No-JS-Fallback. */
+@media (prefers-contrast: high) {
+  :root:not([data-contrast='normal']):not([data-contrast='high']) {
     --color-text-bright: #ffffff;
     --color-text-subtle: #ffffff;
     --color-text-muted: #ffffff;
     --color-text-faint: #e2e8f0;
-    --border-subtle: rgba(255, 255, 255, 0.4);
+    --border-subtle: rgba(255, 255, 255, 0.45);
     --border-faint: rgba(255, 255, 255, 0.3);
   }
+}
 
-  button, a {
-    border: 2px solid var(--hc-border) !important;
-  }
+/* Schriftgröße: skaliert die Wurzel — alle rem-basierten Größen (Tailwind,
+   CSS-Module) folgen automatisch. */
+:root[data-font-size='large'] {
+  font-size: 112.5%; /* ~18px Basis */
+}
+:root[data-font-size='xlarge'] {
+  font-size: 125%; /* ~20px Basis */
+}
 
-  :focus-visible {
-    outline: 4px solid #000000 !important;
-    outline-offset: 2px !important;
-  }
+/* Reduzierte Bewegung: nutzergewählt (ergänzt die System-Media-Query oben). */
+:root[data-motion='reduced'] *,
+:root[data-motion='reduced'] *::before,
+:root[data-motion='reduced'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
 }
 
 /* Verbesserte Fokus-Indikatoren für Accessibility */
