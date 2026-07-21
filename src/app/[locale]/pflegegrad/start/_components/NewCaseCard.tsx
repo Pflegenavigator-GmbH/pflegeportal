@@ -4,13 +4,7 @@
 import { KeyRound, AlertTriangle, Users, Baby } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from '@/src/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/src/components/ui';
 
 interface NewCaseCardProps {
   caseCode: string;

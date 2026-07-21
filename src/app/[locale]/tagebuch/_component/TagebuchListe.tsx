@@ -2,14 +2,14 @@
 'use client';
 
 import { ChevronDown, ChevronRight, Trash2, FileDown, AlertTriangle, Calendar } from 'lucide-react';
-import { useParams } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { validateAndStoreSession } from '@/src/app/actions/case-session';
 import { PaywallModal } from '@/src/components/modal/PaywallModal';
 import { TagebuchPreviewModal } from '@/src/components/modal/TagebuchPreviewModal';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/ui';
+import { useStripeCheckout } from '@/src/hooks/useStripeCheckout';
 import { TagebuchData, TagebuchEintrag } from '@/src/types/tagebuch';
 
 interface GroupedEntries {
@@ -29,8 +29,7 @@ export function TagebuchListe({
   onRefresh: () => void;
   onSelect: (key: string, data: TagebuchEintrag) => void;
 }) {
-  const params = useParams();
-  const locale = typeof params?.locale === 'string' ? params.locale : 'de';
+  const { triggerCheckout } = useStripeCheckout();
   const [openMonths, setOpenMonths] = useState<string[]>([]);
   const [isExporting, setIsExporting] = useState(false);
 
@@ -107,19 +106,7 @@ export function TagebuchListe({
     }
   };
 
-  const handleCheckoutSubmit = async (paketId: string) => {
-    try {
-      const res = await fetch('/api/checkout/create-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ caseCode: caseCode.toUpperCase(), paket: paketId, locale }),
-      });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-    } catch {
-      toast.error('Stripe-Verbindungsfehler.');
-    }
-  };
+  const handleCheckoutSubmit = (paketId: string) => triggerCheckout(caseCode, paketId);
 
   return (
     <div className="space-y-3">

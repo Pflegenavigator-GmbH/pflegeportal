@@ -5,13 +5,7 @@ import { Calculator, ArrowLeft, ArrowRight, Info } from 'lucide-react';
 import Link from 'next/link';
 import { useState, use } from 'react';
 
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from '@/src/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/src/components/ui';
 
 const pflegegrade = [
   { pg: 2, pflegegeld: 332, sachleistung: 761, bezeichnung: 'Pflegegrad 2' },

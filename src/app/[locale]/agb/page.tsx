@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;

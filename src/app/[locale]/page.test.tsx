@@ -1,6 +1,5 @@
 // src/app/[locale]/page.test.tsx
 import { render, screen, fireEvent, within } from '@testing-library/react';
-// eslint-disable-next-line import-x/no-unresolved
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -22,6 +21,7 @@ vi.mock('next/navigation', () => ({
 
 // next/image auf ein simples <img> reduzieren (fill/priority sind keine DOM-Attribute)
 vi.mock('next/image', () => ({
+  // eslint-disable-next-line @next/next/no-img-element
   default: ({ alt }: { alt: string }) => <img alt={alt} src="test-bild.png" />,
 }));
 

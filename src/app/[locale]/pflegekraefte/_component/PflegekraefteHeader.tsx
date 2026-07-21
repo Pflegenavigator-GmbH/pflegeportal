@@ -3,7 +3,7 @@
 
 import { ArrowLeft, Stethoscope } from 'lucide-react';
 
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/ui';
 
 type Props = {
   locale: string;

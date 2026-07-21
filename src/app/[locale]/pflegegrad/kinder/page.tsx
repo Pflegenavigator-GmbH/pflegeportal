@@ -22,24 +22,27 @@ import { useRouter, useParams } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
-import { Button } from '@/src/components/ui/button';
 import {
+  Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
   CardFooter,
-} from '@/src/components/ui/card';
-import { Input } from '@/src/components/ui/input';
-import { Progress } from '@/src/components/ui/progress';
-import { RadioGroup, RadioGroupItem } from '@/src/components/ui/radio-group';
+  Input,
+  Progress,
+  RadioGroup,
+  RadioGroupItem,
+} from '@/src/components/ui';
+import { useStripeCheckout } from '@/src/hooks/useStripeCheckout';
 import { logger } from '@/src/lib/logger';
 import {
   loadModuleAnswers,
   saveModuleAnswers,
   SessionExpiredError,
 } from '@/src/lib/pflegegrad/client-api';
+import { NBA_CONFIG } from '@/src/lib/pflegegrad/constants';
 import {
   AgeGroup,
   BABY_AGE_LIMIT_YEARS,
@@ -82,7 +85,7 @@ export default function KinderModusPage() {
   const [currentCategory, setCurrentCategory] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [result, setResult] = useState<KinderAssessmentResult | null>(null);
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const { triggerCheckout, checkoutLoading } = useStripeCheckout();
 
   // Bezahlschranken-State gekoppelt an deine API-Verifikation
   const [isUnlocked] = useState(false);
@@ -179,33 +182,8 @@ export default function KinderModusPage() {
     }
   };
 
-  // 💳 INTEGRIERTER STRIPE CHECKOUT FÜR DAS KINDER-DOSSIER
-  const startStripeCheckout = async () => {
-    if (!caseCode) return;
-    setCheckoutLoading(true);
-    const toastId = toast.loading('Verbindung zu Stripe wird aufgebaut...');
-
-    try {
-      const response = await fetch('/api/checkout/create-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          caseCode: caseCode.toUpperCase(),
-          paket: 'beta_special', // Nutzt das valide Paket aus deinem MVP_PRODUCTS-Katalog
-          locale,
-        }),
-      });
-      const session = await response.json();
-      if (session.url) {
-        window.location.href = session.url;
-      } else {
-        throw new Error();
-      }
-    } catch {
-      setCheckoutLoading(false);
-      toast.error('Fehler bei der Weiterleitung zum Bezahlfenster.', { id: toastId });
-    }
-  };
+  // 💳 Kinder-Dossier: zentraler Checkout-Hook (Beta-Paket)
+  const startStripeCheckout = () => triggerCheckout(caseCode, 'beta_special');
 
   if (!hasMounted) return null;
 
@@ -528,13 +506,20 @@ export default function KinderModusPage() {
               <CardFooter className="border-t border-white/5 p-4 bg-white/[0.01]">
                 <Button
                   onClick={() => {
-                    // Wir spiegeln das berechnete Ergebnis, damit das Brief-Zentrum einhaken kann
+                    // Leistungsbeträge aus der zentralen Gesetzeskonfiguration
+                    // statt hartkodiert — bleibt bei Satzänderungen konsistent
+                    const benefits = NBA_CONFIG.BENEFITS[
+                      result.level as keyof typeof NBA_CONFIG.BENEFITS
+                    ] ?? { monthly: 0, relief: 0 };
                     localStorage.setItem(
                       'pflegegrad-ergebnis',
                       JSON.stringify({
                         careLevel: result.level,
                         totalScore: result.points,
-                        benefits: { monthlyAmount: result.level >= 2 ? 332 : 0, reliefBudget: 125 },
+                        benefits: {
+                          monthlyAmount: benefits.monthly,
+                          reliefBudget: benefits.relief,
+                        },
                       })
                     );
                     router.push(`/${locale}/briefe`);

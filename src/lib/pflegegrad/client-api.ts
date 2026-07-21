@@ -2,6 +2,7 @@
 // Gemeinsamer Client-Zugriff auf die Answers-API — ersetzt die in Modul 1–6
 // und im Kinder-Assessment kopierten fetch-Blöcke.
 import { ASSESSMENT_MODULES, AssessmentModuleName } from '@/src/lib/pflegegrad/assessment-modules';
+import { PflegegradErgebnis } from '@/src/types/pflegegrad';
 
 /** Die HTTP-only-Session (pf_case_code) fehlt oder passt nicht zum Fall. */
 export class SessionExpiredError extends Error {
@@ -41,4 +42,17 @@ export async function saveModuleAnswers(
   });
   if (res.status === 401) throw new SessionExpiredError();
   if (!res.ok) throw new Error('Speichern der Modulantworten fehlgeschlagen.');
+}
+
+/**
+ * Holt das serverseitig berechnete Pflegegrad-Ergebnis. Der Server ist die
+ * einzige Wahrheit — es wird nichts mehr aus localStorage rekonstruiert.
+ */
+export async function loadCaseResult(caseCode: string): Promise<PflegegradErgebnis> {
+  const res = await fetch(`/api/cases/${caseCode.toUpperCase()}/result`);
+  if (res.status === 401) throw new SessionExpiredError();
+  if (!res.ok) throw new Error('Ergebnis konnte nicht berechnet werden.');
+
+  const data = (await res.json()) as { ergebnis: PflegegradErgebnis };
+  return data.ergebnis;
 }

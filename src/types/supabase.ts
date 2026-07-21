@@ -209,6 +209,7 @@ export interface Database {
           currency: string;
           interval: 'one_time' | 'monthly' | 'yearly';
           is_active: boolean;
+          paket: 'beta_special' | 'standard_monthly' | 'standard_yearly' | 'profi_monthly' | null;
         };
         Insert: {
           id: string;
@@ -217,6 +218,7 @@ export interface Database {
           currency?: string;
           interval?: 'one_time' | 'monthly' | 'yearly';
           is_active?: boolean;
+          paket?: 'beta_special' | 'standard_monthly' | 'standard_yearly' | 'profi_monthly' | null;
         };
         Update: {
           id?: string;
@@ -225,6 +227,7 @@ export interface Database {
           currency?: string;
           interval?: 'one_time' | 'monthly' | 'yearly';
           is_active?: boolean;
+          paket?: 'beta_special' | 'standard_monthly' | 'standard_yearly' | 'profi_monthly' | null;
         };
         Relationships: [];
       };

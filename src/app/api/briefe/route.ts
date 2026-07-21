@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { BriefGeneratorFactory } from '@/src/lib/briefe/generator-factory';
+import { logger } from '@/src/lib/logger';
 import { BriefPayloadSchema } from '@/src/types/briefe-schema';
 
 export async function POST(request: NextRequest) {
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     // Wenn Zod einen Fehler wirft, siehst du hier genau, WELCHES Feld falsch ist
-    console.error('Brief-Generierungs-Fehler:', error);
+    logger.error({ err: error }, 'Brief-Generierungs-Fehler');
     return NextResponse.json(
       { error: 'Validierungsfehler: Bitte prüfen Sie Ihre Eingabedaten.' },
       { status: 400 }

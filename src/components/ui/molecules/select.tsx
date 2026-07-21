@@ -14,7 +14,7 @@ import {
   ReactNode,
 } from 'react';
 
-import { cn } from '@/archive/src/lib/utils';
+import { cn } from '@/src/lib/utils';
 
 // Context for Select
 interface SelectContextValue {

@@ -11,8 +11,8 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/src/components/ui/dropdown-menu';
-import { Input } from '@/src/components/ui/input';
+  Input,
+} from '@/src/components/ui';
 import { supportedLanguages } from '@/src/i18n/languages';
 import { useLanguageChange } from '@/src/i18n/useLanguageChange';
 

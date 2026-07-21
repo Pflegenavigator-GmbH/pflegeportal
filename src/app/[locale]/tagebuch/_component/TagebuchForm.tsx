@@ -5,10 +5,15 @@ import { Save, Sparkles, X, Mic } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-import { Button } from '@/src/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { Input } from '@/src/components/ui/input';
-import { Textarea } from '@/src/components/ui/textarea';
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Input,
+  Textarea,
+} from '@/src/components/ui';
 import { TagebuchEintrag, PflegeHelfer, SchlafQualitaet } from '@/src/types/tagebuch';
 
 export interface TagebuchFormProps {

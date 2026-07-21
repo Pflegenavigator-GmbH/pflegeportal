@@ -14,15 +14,15 @@ import {
 import { useRouter } from 'next/navigation';
 import { useState, use } from 'react';
 
-import { Button } from '@/src/components/ui/button';
 import {
+  Button,
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
-} from '@/src/components/ui/card';
-import { Input } from '@/src/components/ui/input';
+  Input,
+} from '@/src/components/ui';
 
 interface PageProps {
   params: Promise<{ locale: string }>;

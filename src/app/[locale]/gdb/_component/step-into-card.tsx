@@ -1,7 +1,6 @@
 import { ArrowRight, Info } from 'lucide-react';
 
-import { Button } from '@/src/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { Button, Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui';
 
 interface Props {
   onNext: () => void;

@@ -1,6 +1,12 @@
 // src/app/api/widerspruch/pdf/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import puppeteer from 'puppeteer-core';
+import { NextRequest } from 'next/server';
+
+import { requireCaseSession } from '@/src/lib/api/case-auth';
+import { handleApiError } from '@/src/lib/api/error-handler';
+import { ValidationError } from '@/src/lib/api/errors';
+import { escapeHtml, escapeHtmlWithBreaks } from '@/src/lib/escape';
+import { sanitizeFilename } from '@/src/lib/pdf/puppeteer';
+import { renderHtmlToPdf } from '@/src/lib/pdf/service';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -40,7 +46,15 @@ interface WiderspruchData {
   ort?: string;
 }
 
-const WIDERSPRUCH_TEMPLATE = (data: WiderspruchData) => `
+// Alle nutzergelieferten Werte werden über escapeHtml/escapeHtmlWithBreaks
+// interpoliert — kein Roh-HTML aus dem Request landet im Dokument.
+const WIDERSPRUCH_TEMPLATE = (data: WiderspruchData): string => {
+  const a = data.antragsteller;
+  const k = data.pflegekasse;
+  const v = data.versicherter;
+  const b = data.bescheidDaten;
+
+  return `
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -48,102 +62,73 @@ const WIDERSPRUCH_TEMPLATE = (data: WiderspruchData) => `
   <title>Widerspruch - Pflegegradbescheid</title>
   <style>
     @page { margin: 25mm 20mm 30mm 20mm; }
-    body { 
-      font-family: 'DejaVu Sans', Arial, sans-serif; 
-      font-size: 11pt; 
-      line-height: 1.6;
-      color: #000;
-    }
-    .header { margin-bottom: 20pt; }
+    body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 11pt; line-height: 1.6; color: #000; }
     .absender { font-size: 9pt; color: #666; margin-bottom: 20pt; }
     .empfaenger { margin-bottom: 30pt; }
     .datum-ort { text-align: right; margin-bottom: 20pt; }
     .betreff { font-weight: bold; margin-bottom: 15pt; }
     .anrede { margin-bottom: 10pt; }
     .text-block { margin-bottom: 12pt; text-align: justify; }
-    .begruendung-box { 
-      border: 1px solid #333; 
-      padding: 12pt; 
-      margin: 15pt 0;
-      background-color: #f9f9f9;
-    }
+    .begruendung-box { border: 1px solid #333; padding: 12pt; margin: 15pt 0; background-color: #f9f9f9; }
     .begruendung-label { font-weight: bold; margin-bottom: 8pt; }
     .beilagen { margin-top: 20pt; }
     .beilagen-list { margin-left: 20pt; }
     .schluss { margin-top: 30pt; }
     .unterschrift { margin-top: 40pt; }
-    .hinweis { 
-      font-size: 9pt; 
-      border-top: 1px solid #ccc; 
-      margin-top: 30pt; 
-      padding-top: 10pt;
-      color: #444;
-    }
-    .case-code { 
-      font-size: 8pt; 
-      color: #999; 
-      text-align: right;
-      margin-top: 5pt;
-    }
+    .hinweis { font-size: 9pt; border-top: 1px solid #ccc; margin-top: 30pt; padding-top: 10pt; color: #444; }
+    .case-code { font-size: 8pt; color: #999; text-align: right; margin-top: 5pt; }
   </style>
 </head>
 <body>
-  <div class="case-code">Referenz: ${data.caseCode}</div>
-  
+  <div class="case-code">Referenz: ${escapeHtml(data.caseCode)}</div>
+
   <div class="absender">
-    ${data.antragsteller.name}, ${data.antragsteller.vorname}<br>
-    ${data.antragsteller.strasse}<br>
-    ${data.antragsteller.plz} ${data.antragsteller.ort}
-    ${data.antragsteller.telefon ? `<br>Tel: ${data.antragsteller.telefon}` : ''}
-    ${data.antragsteller.email ? `<br>E-Mail: ${data.antragsteller.email}` : ''}
+    ${escapeHtml(a.name)}, ${escapeHtml(a.vorname)}<br>
+    ${escapeHtml(a.strasse)}<br>
+    ${escapeHtml(a.plz)} ${escapeHtml(a.ort)}
+    ${a.telefon ? `<br>Tel: ${escapeHtml(a.telefon)}` : ''}
+    ${a.email ? `<br>E-Mail: ${escapeHtml(a.email)}` : ''}
   </div>
 
   <div class="empfaenger">
-    ${data.pflegekasse.name}<br>
-    ${data.pflegekasse.strasse ? `${data.pflegekasse.strasse}<br>` : ''}
-    ${data.pflegekasse.plz && data.pflegekasse.ort ? `${data.pflegekasse.plz} ${data.pflegekasse.ort}<br>` : ''}
+    ${escapeHtml(k.name)}<br>
+    ${k.strasse ? `${escapeHtml(k.strasse)}<br>` : ''}
+    ${k.plz && k.ort ? `${escapeHtml(k.plz)} ${escapeHtml(k.ort)}<br>` : ''}
   </div>
 
   <div class="datum-ort">
-    ${data.ort || data.antragsteller.ort}, den ${data.datum || new Date().toLocaleDateString('de-DE')}
+    ${escapeHtml(data.ort || a.ort)}, den ${escapeHtml(data.datum || new Date().toLocaleDateString('de-DE'))}
   </div>
 
   <div class="betreff">
-    Widerspruch gegen den Bescheid vom ${data.bescheidDaten.datum}<br>
-    ${data.versicherter?.versicherungsnummer ? `Versicherten-Nr.: ${data.versicherter.versicherungsnummer}` : ''}
+    Widerspruch gegen den Bescheid vom ${escapeHtml(b.datum)}<br>
+    ${v?.versicherungsnummer ? `Versicherten-Nr.: ${escapeHtml(v.versicherungsnummer)}` : ''}
   </div>
 
-  <div class="anrede">
-    Sehr geehrte Damen und Herren,
-  </div>
+  <div class="anrede">Sehr geehrte Damen und Herren,</div>
 
   <div class="text-block">
-    hiermit lege ich Widerspruch gegen den Bescheid vom <strong>${data.bescheidDaten.datum}</strong> ein,
-    ${data.versicherter?.name ? `betreffend ${data.versicherter.vorname} ${data.versicherter.name}` : 'betreffend meinen Pflegegrad'}.
+    hiermit lege ich Widerspruch gegen den Bescheid vom <strong>${escapeHtml(b.datum)}</strong> ein,
+    ${v?.name ? `betreffend ${escapeHtml(v.vorname)} ${escapeHtml(v.name)}` : 'betreffend meinen Pflegegrad'}.
   </div>
 
   <div class="text-block">
     ${
-      data.bescheidDaten.pflegegradAktuell !== null
-        ? `Mein aktueller Pflegegrad ${data.bescheidDaten.pflegegradAktuell} wurde nicht angehoben, obwohl ich beantragt habe, in Pflegegrad ${data.bescheidDaten.pflegegradBeantragt} eingestuft zu werden.`
-        : `Ich wurde nicht in den beantragten Pflegegrad ${data.bescheidDaten.pflegegradBeantragt} eingestuft.`
+      b.pflegegradAktuell !== null
+        ? `Mein aktueller Pflegegrad ${escapeHtml(b.pflegegradAktuell)} wurde nicht angehoben, obwohl ich beantragt habe, in Pflegegrad ${escapeHtml(b.pflegegradBeantragt)} eingestuft zu werden.`
+        : `Ich wurde nicht in den beantragten Pflegegrad ${escapeHtml(b.pflegegradBeantragt)} eingestuft.`
     }
     Diese Entscheidung halte ich für nicht nachvollziehbar.
   </div>
 
   <div class="begruendung-box">
     <div class="begruendung-label">Begründung des Widerspruchs:</div>
-    <div>${data.widerspruchsBegruendung.replace(/\n/g, '<br>')}</div>
+    <div>${escapeHtmlWithBreaks(data.widerspruchsBegruendung)}</div>
   </div>
 
   ${
-    data.bescheidDaten.begruendung
-      ? `
-  <div class="text-block">
-    <strong>Zur Begründung des Bescheids:</strong><br>
-    ${data.bescheidDaten.begruendung}
-  </div>
-  `
+    b.begruendung
+      ? `<div class="text-block"><strong>Zur Begründung des Bescheids:</strong><br>${escapeHtmlWithBreaks(b.begruendung)}</div>`
       : ''
   }
 
@@ -154,127 +139,63 @@ const WIDERSPRUCH_TEMPLATE = (data: WiderspruchData) => `
 
   ${
     data.beilagen && data.beilagen.length > 0
-      ? `
-  <div class="beilagen">
-    <strong>Anlagen:</strong>
-    <ul class="beilagen-list">
-      ${data.beilagen.map((beilage) => `<li>${beilage}</li>`).join('')}
-    </ul>
-  </div>
-  `
+      ? `<div class="beilagen"><strong>Anlagen:</strong><ul class="beilagen-list">${data.beilagen
+          .map((beilage) => `<li>${escapeHtml(beilage)}</li>`)
+          .join('')}</ul></div>`
       : ''
   }
 
-  <div class="schluss">
-    Mit freundlichen Grüßen
-  </div>
+  <div class="schluss">Mit freundlichen Grüßen</div>
 
   <div class="unterschrift">
     _________________________________<br>
-    ${data.antragsteller.vorname} ${data.antragsteller.name}
+    ${escapeHtml(a.vorname)} ${escapeHtml(a.name)}
   </div>
 
   <div class="hinweis">
-    <strong>Hinweis:</strong> Der Widerspruch muss innerhalb eines Monats nach Zustellung des Bescheids 
-    schriftlich oder zur Niederschrift bei der Pflegekasse eingelegt werden (§ 44 SGB X). 
-    Die Einlegung des Widerspruchs hat keine aufschiebende Wirkung. Die Pflegekasse wird über 
-    den Widerspruch entscheiden oder diesen mit Zustimmung des Versicherten der zuständigen 
+    <strong>Hinweis:</strong> Der Widerspruch muss innerhalb eines Monats nach Zustellung des Bescheids
+    schriftlich oder zur Niederschrift bei der Pflegekasse eingelegt werden (§ 44 SGB X).
+    Die Einlegung des Widerspruchs hat keine aufschiebende Wirkung. Die Pflegekasse wird über
+    den Widerspruch entscheiden oder diesen mit Zustimmung des Versicherten der zuständigen
     Widerspruchsstelle vorlegen (§ 88 SGB X).
   </div>
 </body>
 </html>
 `;
+};
 
 export async function POST(request: NextRequest): Promise<Response> {
-  let browser;
-
+  let caseCode: string | undefined;
   try {
-    const body: WiderspruchData = await request.json();
-    const { caseCode, antragsteller, pflegekasse, bescheidDaten, widerspruchsBegruendung } = body;
+    const body = (await request.json()) as WiderspruchData;
+    caseCode = body.caseCode;
+    const { antragsteller, pflegekasse, bescheidDaten, widerspruchsBegruendung } = body;
 
-    // Validierung der Pflichtfelder
     if (!caseCode || !antragsteller || !pflegekasse || !bescheidDaten || !widerspruchsBegruendung) {
-      return NextResponse.json(
-        {
-          error: 'Fehlende Pflichtfelder',
-          required: [
-            'caseCode',
-            'antragsteller',
-            'pflegekasse',
-            'bescheidDaten',
-            'widerspruchsBegruendung',
-          ],
-        },
-        { status: 400, headers: getCorsHeaders() }
-      );
+      throw new ValidationError('Pflichtfelder fehlen.');
     }
-
     if (!antragsteller.name || !antragsteller.strasse || !antragsteller.plz || !antragsteller.ort) {
-      return NextResponse.json(
-        { error: 'Antragsteller-Adresse unvollständig' },
-        { status: 400, headers: getCorsHeaders() }
-      );
+      throw new ValidationError('Antragsteller-Adresse unvollständig.');
     }
 
-    // PDF generieren
+    // 🛡️ Session-Pflicht: kein offener, cross-origin erreichbarer PII-Endpunkt mehr
+    await requireCaseSession(caseCode);
+
     const html = WIDERSPRUCH_TEMPLATE(body);
-
-    browser = await puppeteer.launch({
-      headless: true,
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
-    });
-
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'domcontentloaded' });
-
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      printBackground: true,
+    const pdfBuffer = await renderHtmlToPdf(html, {
+      showFooter: false,
       margin: { top: '25mm', right: '20mm', bottom: '30mm', left: '20mm' },
     });
-
-    await browser.close();
 
     return new Response(Buffer.from(pdfBuffer), {
       status: 200,
       headers: {
-        ...getCorsHeaders(),
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="Widerspruch_${sanitizeFilename(antragsteller.name)}_${caseCode}.pdf"`,
+        'Content-Disposition': `attachment; filename="Widerspruch_${sanitizeFilename(antragsteller.name)}_${sanitizeFilename(caseCode)}.pdf"`,
         'Content-Length': pdfBuffer.length.toString(),
-        'X-Case-Code': caseCode,
       },
     });
   } catch (error) {
-    if (browser) await browser.close();
-
-    console.error('Widerspruch PDF error:', error);
-    return NextResponse.json(
-      {
-        error: 'PDF Generierung fehlgeschlagen',
-        details: error instanceof Error ? error.message : 'Unbekannter Fehler',
-      },
-      { status: 500, headers: getCorsHeaders() }
-    );
+    return handleApiError(error, 'api.widerspruch.pdf', caseCode);
   }
-}
-
-export async function OPTIONS(): Promise<NextResponse> {
-  return new NextResponse(null, {
-    status: 204,
-    headers: getCorsHeaders(),
-  });
-}
-
-function sanitizeFilename(name: string): string {
-  return name.replace(/[^a-z0-9äöüß\-]/gi, '_').substring(0, 30);
-}
-
-function getCorsHeaders(): Record<string, string> {
-  return {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  };
 }

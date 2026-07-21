@@ -15,15 +15,15 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-import { Button } from '@/src/components/ui/button';
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/src/components/ui/dialog';
-import { Input } from '@/src/components/ui/input';
+  Input,
+} from '@/src/components/ui';
 
 interface AccessShareModalProps {
   caseCode: string;
@@ -86,7 +86,7 @@ export function AccessShareModal({ caseCode, open, onOpenChange }: AccessShareMo
       toast.success(`Link erfolgreich per ${contactType === 'email' ? 'E-Mail' : 'SMS'} gesendet!`);
       onOpenChange(false);
       setContactValue('');
-    } catch (error) {
+    } catch {
       toast.error('Versand fehlgeschlagen. Bitte versuchen Sie es später erneut.');
     } finally {
       setIsLoading(false);

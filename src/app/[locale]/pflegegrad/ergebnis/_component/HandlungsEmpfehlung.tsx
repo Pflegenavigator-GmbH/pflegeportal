@@ -3,7 +3,7 @@
 
 import { CheckCircle, AlertCircle, Lightbulb } from 'lucide-react';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui';
 import { PflegegradErgebnis } from '@/src/types/pflegegrad';
 
 interface HandlungsEmpfehlungenProps {

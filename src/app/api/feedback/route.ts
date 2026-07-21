@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { logger } from '@/src/lib/logger';
+
 interface FeedbackData {
   type: 'bug' | 'feature' | 'praise' | 'other';
   rating: number;
@@ -36,13 +38,15 @@ export async function POST(request: NextRequest) {
       ip: request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown',
     };
 
-    console.log('Feedback received:', {
-      type: feedbackEntry.type,
-      rating: feedbackEntry.rating,
-      messageLength: feedbackEntry.message.length,
-      hasEmail: !!feedbackEntry.email,
-      timestamp: feedbackEntry.timestamp,
-    });
+    logger.info(
+      {
+        type: feedbackEntry.type,
+        rating: feedbackEntry.rating,
+        messageLength: feedbackEntry.message.length,
+        hasEmail: !!feedbackEntry.email,
+      },
+      'Feedback erhalten'
+    );
 
     // Optional: Sende E-Mail Benachrichtigung
     if (process.env.FEEDBACK_EMAIL) {
@@ -56,7 +60,7 @@ export async function POST(request: NextRequest) {
       id: `feedback-${Date.now()}`,
     });
   } catch (error) {
-    console.error('Feedback error:', error);
+    logger.error({ err: error }, 'Fehler beim Verarbeiten des Feedbacks');
     return NextResponse.json({ error: 'Fehler beim Verarbeiten des Feedbacks' }, { status: 500 });
   }
 }

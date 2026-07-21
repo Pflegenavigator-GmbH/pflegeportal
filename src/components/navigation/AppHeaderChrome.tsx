@@ -20,6 +20,7 @@ import {
   Users,
   Calculator,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -27,17 +28,16 @@ import { toast } from 'sonner';
 
 import { clearCaseSession, validateAndStoreSession } from '@/src/app/actions/case-session';
 import LanguageSwitcher from '@/src/components/i18n/LanguageSwitcher';
-import { AccessShareModal } from '@/src/components/modal/AccessShareModal';
-import { Button } from '@/src/components/ui/button';
 import {
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/src/components/ui/dropdown-menu';
-import { Input } from '@/src/components/ui/input';
+  Input,
+} from '@/src/components/ui';
 import {
   CASE_CODE_EVENT,
   clearCaseCode,
@@ -46,6 +46,13 @@ import {
 } from '@/src/lib/case-storage';
 
 import styles from '../../styles/layout.module.css';
+
+// Dynamisch geladen: zieht qrcode.react erst ins Bundle, wenn das Modal
+// tatsächlich geöffnet wird — nicht in jeden Seiten-Chunk über den Header.
+const AccessShareModal = dynamic(
+  () => import('@/src/components/modal/AccessShareModal').then((m) => m.AccessShareModal),
+  { ssr: false }
+);
 
 interface AppHeaderChromeProps {
   locale: string;

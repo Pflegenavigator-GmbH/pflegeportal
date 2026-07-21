@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       message: 'Bitte bestaetigen Sie Ihre E-Mail-Adresse',
       requiresConfirmation: true,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Fehler bei der Anmeldung' }, { status: 500 });
   }
 }

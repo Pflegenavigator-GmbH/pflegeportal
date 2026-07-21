@@ -3,7 +3,7 @@
 
 import { createContext, useContext, useState, useCallback, forwardRef, ReactNode } from 'react';
 
-import { cn } from '@/archive/src/lib/utils';
+import { cn } from '@/src/lib/utils';
 
 interface TabsContextValue {
   value: string;

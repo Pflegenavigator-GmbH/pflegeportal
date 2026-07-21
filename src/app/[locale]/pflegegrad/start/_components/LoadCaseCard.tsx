@@ -5,17 +5,17 @@ import { KeyRound, ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
-import { Button } from '@/src/components/ui/button';
 import {
+  Button,
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
   CardFooter,
-} from '@/src/components/ui/card';
-import { Input } from '@/src/components/ui/input';
-import { Label } from '@/src/components/ui/label';
+  Input,
+  Label,
+} from '@/src/components/ui';
 
 interface LoadCaseCardProps {
   onLoad: (code: string) => Promise<void>;

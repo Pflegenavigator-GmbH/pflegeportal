@@ -3,19 +3,22 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 
-import { cn } from '@/archive/src/lib/utils';
+import { cn } from '@/src/lib/utils';
 
+// Token-basiert (Bund-Palette) und dark-korrekt. Alle Varianten bleiben per
+// className überschreibbar (Tailwind-Utilities → tailwind-merge gewinnt).
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
-        default: 'bg-emerald-600 text-white hover:bg-emerald-700',
-        destructive: 'bg-red-500 text-white hover:bg-red-600',
-        outline: 'border border-slate-200 bg-white hover:bg-slate-100 hover:text-slate-900',
-        secondary: 'bg-slate-100 text-slate-900 hover:bg-slate-200',
-        ghost: 'hover:bg-slate-100 hover:text-slate-900',
-        link: 'text-emerald-600 underline-offset-4 hover:underline',
+        default: 'bg-accent text-on-accent hover:bg-accent-hover',
+        destructive: 'bg-red-600 text-white hover:bg-red-700',
+        outline:
+          'border border-[var(--border-subtle)] bg-transparent text-on-surface hover:bg-[var(--surface-1)]',
+        secondary: 'bg-[var(--surface-1)] text-on-surface hover:bg-[var(--surface-2)]',
+        ghost: 'text-on-surface hover:bg-[var(--surface-1)]',
+        link: 'text-accent underline-offset-4 hover:underline',
       },
       size: {
         default: 'h-10 px-4 py-2',

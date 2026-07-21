@@ -9,16 +9,18 @@ import { toast } from 'sonner';
 
 import { validateAndStoreSession } from '@/src/app/actions/case-session';
 import { PaywallModal } from '@/src/components/modal/PaywallModal';
-import { Button } from '@/src/components/ui/button';
 import {
+  Button,
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
   CardFooter,
-} from '@/src/components/ui/card';
+} from '@/src/components/ui';
+import { useStripeCheckout } from '@/src/hooks/useStripeCheckout';
 import { storeCaseCode } from '@/src/lib/case-storage';
+import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/client';
 
 import { LoadCaseCard } from './_components/LoadCaseCard';
@@ -59,6 +61,7 @@ export default function PflegegradStartPage(props: PageProps) {
   const [isBetaExpired, setIsBetaExpired] = useState(false);
 
   const [supabase] = useState(() => createClient());
+  const { triggerCheckout, checkoutLoading } = useStripeCheckout();
 
   useEffect(() => {
     if (searchParams.session_id && searchParams.check_code) {
@@ -168,29 +171,14 @@ export default function PflegegradStartPage(props: PageProps) {
       setIsNewCase(true);
       toast.success('Kostenloser Fallcode generiert!');
     } catch (err) {
-      console.error(err);
+      logger.error({ err }, 'Fehler beim Initialisieren des neuen Falls über die API');
       setError('Fehler beim Initialisieren des neuen Falls über die API.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCheckout = async (paketId: string) => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/checkout/create-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ caseCode, paket: paketId, locale }),
-      });
-      const session = await response.json();
-      if (session.url) router.push(session.url);
-    } catch {
-      toast.error('Fehler bei der Stripe-Weiterleitung.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleCheckout = (paketId: string) => triggerCheckout(caseCode, paketId);
 
   return (
     <main className="min-h-screen bg-slate-900 py-12 px-4 text-white">
@@ -257,7 +245,7 @@ export default function PflegegradStartPage(props: PageProps) {
             products={dbProducts}
             onCheckout={handleCheckout}
             onClose={() => setShowPaywall(false)}
-            loading={loading}
+            loading={checkoutLoading}
           />
         )}
 
