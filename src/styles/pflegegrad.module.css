@@ -22,14 +22,17 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 0.5rem 1rem;
   margin-bottom: 1rem;
+  /* Reflow bei großer Schrift statt horizontalem Scroll (WCAG 1.4.10) */
+  flex-wrap: wrap;
 }
 
 .headerBrand {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  min-width: 0;
 }
 
 .iconBox {
@@ -49,6 +52,7 @@
   font-size: 1.5rem;
   font-weight: 700;
   line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 .weight {
