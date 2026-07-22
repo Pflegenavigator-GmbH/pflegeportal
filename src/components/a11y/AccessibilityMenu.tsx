@@ -63,13 +63,18 @@ export function AccessibilityMenu() {
     }`;
 
   return (
-    <div ref={rootRef} className="fixed bottom-4 right-4 z-50">
+    <div
+      ref={rootRef}
+      className="fixed bottom-4 right-4 left-4 z-50 flex flex-col items-end pointer-events-none"
+    >
       {open && (
         <div
           id={panelId}
           role="dialog"
           aria-label="Barrierefreiheit-Einstellungen"
-          className="mb-3 w-72 rounded-2xl border border-[var(--border-subtle)] bg-surface p-4 shadow-2xl"
+          // Breite/Höhe viewport-fest, damit das Panel auch bei großer Schrift
+          // und auf schmalen Handys nicht aus dem Rahmen läuft.
+          className="pointer-events-auto mb-3 w-72 max-w-[calc(100vw-2rem)] max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-2xl border border-[var(--border-subtle)] bg-surface p-4 shadow-2xl"
         >
           <h2 className="text-base font-bold text-on-surface mb-3">Darstellung</h2>
 
@@ -136,7 +141,7 @@ export function AccessibilityMenu() {
         aria-controls={open ? panelId : undefined}
         aria-label="Barrierefreiheit-Einstellungen öffnen"
         onClick={() => setOpen((v) => !v)}
-        className="flex h-14 w-14 items-center justify-center rounded-full border border-[var(--border-subtle)] bg-accent text-on-accent shadow-2xl transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+        className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full border border-[var(--border-subtle)] bg-accent text-on-accent shadow-2xl transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
       >
         <Accessibility className="h-7 w-7" />
       </button>
