@@ -74,6 +74,8 @@
     "@swc/core@1.15.43": true,
     "puppeteer@25.3.0": true,
     "sharp@0.35.3": true,
-    "unrs-resolver@1.12.2": true
+    "unrs-resolver@1.12.2": true,
+    "@parcel/watcher": true,
+    "@swc/core": true
   }
 }
