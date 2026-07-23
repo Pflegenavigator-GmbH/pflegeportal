@@ -5,6 +5,7 @@ import { requireCaseSession } from '@/src/lib/api/case-auth';
 import { handleApiError } from '@/src/lib/api/error-handler';
 import { ValidationError } from '@/src/lib/api/errors';
 import { isValidQuestionKey, withKey } from '@/src/lib/api/validation';
+import { logger } from '@/src/lib/logger';
 import {
   ASSESSMENT_MODULES,
   isAssessmentModuleName,
@@ -175,5 +176,52 @@ export async function POST(
     return NextResponse.json({ success: true, data }, { status: 201 });
   } catch (err) {
     return handleApiError(err, 'api.cases.answers.post', code);
+  }
+}
+
+/**
+ * Setzt die Begutachtung zurück: löscht alle Modulantworten des Falls und
+ * verwirft die daraus berechneten Werte.
+ *
+ * Notwendig, weil die Antworten serverseitig liegen — ein Leeren des
+ * localStorage im Browser setzt nichts zurück, die Module würden ihre alten
+ * Antworten beim nächsten Aufruf wieder vom Server laden.
+ *
+ * Bewusst unangetastet bleiben Zahlstatus, Produkt-Tier und Freischaltung:
+ * Eine neue Begutachtung darf einen bezahlten Zugang nicht entwerten. Auch
+ * das Bescheiddatum bleibt erhalten — es ist eine Tatsache aus der realen
+ * Welt und hängt nicht an der Selbsteinschätzung.
+ */
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ code: string }> }
+) {
+  const { code } = await params;
+
+  try {
+    const session = await requireCaseSession(code);
+    const supabase = createAdminSupabaseClient();
+
+    const { error: loeschFehler } = await supabase
+      .from('answers')
+      .delete()
+      .eq('case_id', session.caseId);
+
+    if (loeschFehler) throw loeschFehler;
+
+    // Die abgeleiteten Werte am Fall würden sonst ein Ergebnis anzeigen,
+    // zu dem es keine Antworten mehr gibt.
+    const { error: resetFehler } = await supabase
+      .from('cases')
+      .update({ care_level_guess: null, total_score: 0, traffic_light: null })
+      .eq('id', session.caseId);
+
+    if (resetFehler) throw resetFehler;
+
+    logger.info({ caseCode: code }, 'Begutachtung zurückgesetzt: Antworten gelöscht');
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    return handleApiError(err, 'api.cases.answers.delete', code);
   }
 }

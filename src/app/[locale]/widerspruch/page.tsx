@@ -1,10 +1,11 @@
 'use client';
 
-import { ArrowLeft, Bell, Clock, Eye, FileText, Info, Mail, Save, Trash2 } from 'lucide-react';
+import { ArrowLeft, Bell, Clock, FileText, Info, Lock, Mail, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, use } from 'react';
+import { useEffect, useMemo, useState, use } from 'react';
 import { toast } from 'sonner';
 
+import { FristenMonitor } from '@/src/components/fristen';
 import { PaywallModal } from '@/src/components/modal/PaywallModal';
 import { PdfPreviewModal } from '@/src/components/modal/PdfPreviewModal';
 import {
@@ -28,15 +29,18 @@ import {
   TabsTrigger,
   Textarea,
 } from '@/src/components/ui';
+import { useBescheidDatum } from '@/src/hooks/useBescheidDatum';
 import { usePdfDownload } from '@/src/hooks/usePdfDownload';
 import { useStripeCheckout } from '@/src/hooks/useStripeCheckout';
+import { ladeFreischaltung, verwerfeFreischaltung } from '@/src/lib/billing/entitlement';
+import { heuteAlsIso } from '@/src/lib/widerspruch/bescheid-datum';
+import { berechneFristen } from '@/src/lib/widerspruch/fristen';
 import {
   WiderspruchDaten,
   WiderspruchFrist,
   WiderspruchTyp,
   berechneFrist,
   generiereWiderspruchBrief,
-  formatiereFristInfo,
 } from '@/src/lib/widerspruch/utils';
 
 interface PageProps {
@@ -70,6 +74,13 @@ export default function WiderspruchPage(props: PageProps) {
   const [ort, setOrt] = useState('');
   const [begruendung, setBegruendung] = useState('');
 
+  // Verfahrensverlauf — je Datum kommt eine weitere Frist in den Monitor.
+  // Jede Frist hat ihr eigenes auslösendes Ereignis (die Klagefrist läuft ab
+  // dem Widerspruchsbescheid, nicht ab dem Ausgangsbescheid).
+  const [antragDatum, setAntragDatum] = useState('');
+  const [widerspruchEingelegtAm, setWiderspruchEingelegtAm] = useState('');
+  const [widerspruchsbescheidDatum, setWiderspruchsbescheidDatum] = useState('');
+
   // Ergebnis-States
   const [frist, setFrist] = useState<WiderspruchFrist | null>(null);
   const [briefText, setBriefText] = useState('');
@@ -82,8 +93,21 @@ export default function WiderspruchPage(props: PageProps) {
     return null;
   });
 
+  const { bescheidDatum: gespeichertesBescheidDatum } = useBescheidDatum(caseCode);
+
+  // Auf der Ergebnisseite erfasstes Datum übernehmen, damit es nicht zweimal
+  // eingegeben werden muss. Anpassung während des Renderns statt im Effekt
+  // (React: „You Might Not Need an Effect") — das spart einen sichtbaren
+  // Zwischenzustand mit leerem Feld. Greift genau einmal; danach hat der
+  // Nutzer die Hoheit über das Feld.
+  const [datumUebernommen, setDatumUebernommen] = useState(false);
+  if (!datumUebernommen && gespeichertesBescheidDatum && bescheidDatum === '') {
+    setDatumUebernommen(true);
+    setBescheidDatum(gespeichertesBescheidDatum);
+  }
+
   // 🚀 DATUMS-VALIDIERUNG: Ermittelt das heutige Datum für den max-Wert (Zukunftsschutz)
-  const heuteISO = new Date().toISOString().split('T')[0];
+  const heuteISO = heuteAlsIso();
 
   // Prüft, ob das Datum logisch valide ist (nicht leer, existiert und ist <= heute)
   const isDatumGueltig =
@@ -91,6 +115,20 @@ export default function WiderspruchPage(props: PageProps) {
 
   // Zeigt den Fehler nur an, wenn der Nutzer etwas eingetippt hat, das aber ungültig ist
   const zeigeDatumFehler = bescheidDatum !== '' && !isDatumGueltig;
+
+  // Fristen-Monitor rechnet live mit: Sobald ein Datum erfasst ist, sieht der
+  // Nutzer den Status — Fristversäumnis ist irreversibel und darf nicht erst
+  // nach dem Erzeugen des Anschreibens sichtbar werden.
+  const fristenUebersicht = useMemo(
+    () =>
+      berechneFristen({
+        bescheidDatum: isDatumGueltig ? bescheidDatum : null,
+        antragDatum,
+        widerspruchEingelegtAm,
+        widerspruchsbescheidDatum,
+      }),
+    [bescheidDatum, isDatumGueltig, antragDatum, widerspruchEingelegtAm, widerspruchsbescheidDatum]
+  );
 
   // 🚀 SAUBERE VALIDIERUNG: Prüft, ob alle Strings wirklich Text enthalten UND das Datum stimmt
   const isFormValid = Boolean(
@@ -129,60 +167,62 @@ export default function WiderspruchPage(props: PageProps) {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleKalkulation = async () => {
+  /**
+   * Brieftext und Fristen sind bewusst frei zugänglich: Musterschreiben für
+   * einen Widerspruch sind allgemein verfügbar, und eine versäumte Frist ist
+   * nicht heilbar. Kostenpflichtig sind die weiterführenden Funktionen
+   * (Entwurf sichern, Gutachten-Vorschau, PDF-Download).
+   */
+  const handleKalkulation = () => {
     if (!isFormValid) {
       toast.error('Bitte füllen Sie alle markierten Pflichtfelder korrekt aus.');
       return;
     }
 
+    const zielFrist = berechneFrist(bescheidDatum, typ);
+    setFrist(zielFrist);
+
+    const daten: WiderspruchDaten = {
+      caseCode,
+      typ,
+      bescheidDatum,
+      versicherterName,
+      pflegekasse,
+      versicherungsnummer,
+      strasse,
+      plz,
+      ort,
+      begruendung,
+    };
+
+    setBriefText(generiereWiderspruchBrief(daten, zielFrist));
+    setShowErgebnis(true);
+    toast.success('Anschreiben wurde erfolgreich generiert.');
+  };
+
+  /**
+   * Führt eine kostenpflichtige Aktion nur bei freigeschaltetem Fall aus.
+   *
+   * Die Prüfung ist reine Anzeigelogik — die eigentliche Durchsetzung liegt
+   * serverseitig in den API-Routen. Ein Netzfehler führt deshalb weder zur
+   * Freigabe noch zur Paywall, sondern zu einer ehrlichen Fehlermeldung.
+   */
+  const mitFreischaltung = async (aktion: () => void) => {
     setIsVerifying(true);
-    const verificationToast = toast.loading('Verifiziere aktive Lizenzrechte...');
-
     try {
-      const checkRes = await fetch('/api/pdf/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          caseCode: (caseCode || 'OFFLINE_WD').toUpperCase(),
-          html: '<li>Lizenzprüfung</li>',
-          title: 'CHECK',
-        }),
-      });
+      const freischaltung = await ladeFreischaltung(caseCode);
 
-      if (checkRes.status === 402) {
-        toast.dismiss(verificationToast);
-        setShowPaywall(true);
-        setShowErgebnis(false);
+      if (freischaltung.status === 'freigeschaltet') {
+        aktion();
         return;
       }
 
-      toast.dismiss(verificationToast);
+      if (freischaltung.status === 'gesperrt') {
+        setShowPaywall(true);
+        return;
+      }
 
-      // Freigabe: Daten berechnen und rendern
-      const zielFrist = berechneFrist(new Date(bescheidDatum), typ);
-      setFrist(zielFrist);
-
-      const daten: WiderspruchDaten = {
-        caseCode,
-        typ,
-        bescheidDatum,
-        versicherterName,
-        pflegekasse,
-        versicherungsnummer,
-        strasse,
-        plz,
-        ort,
-        begruendung,
-      };
-
-      setBriefText(generiereWiderspruchBrief(daten, zielFrist));
-      setShowErgebnis(true);
-      toast.success('Anschreiben wurde erfolgreich generiert.');
-    } catch {
-      toast.error('Die Lizenzprüfung ist fehlgeschlagen. Bitte prüfen Sie Ihre Verbindung.', {
-        id: verificationToast,
-      });
+      toast.error('Die Lizenzprüfung ist fehlgeschlagen. Bitte prüfen Sie Ihre Verbindung.');
     } finally {
       setIsVerifying(false);
     }
@@ -266,7 +306,7 @@ export default function WiderspruchPage(props: PageProps) {
                       const neuerTyp = v as WiderspruchTyp;
                       setTyp(neuerTyp);
                       if (bescheidDatum && isDatumGueltig) {
-                        const zielFrist = berechneFrist(new Date(bescheidDatum), neuerTyp);
+                        const zielFrist = berechneFrist(bescheidDatum, neuerTyp);
                         setFrist(zielFrist);
                         const daten: WiderspruchDaten = {
                           caseCode,
@@ -288,11 +328,15 @@ export default function WiderspruchPage(props: PageProps) {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-950 border-white/10 text-white">
-                      <SelectItem value="pflegegrad">Pflegegrad-Bescheid (§ 78 SGB X)</SelectItem>
-                      <SelectItem value="mdk-gutachten">
-                        MDK-Gutachten Anforderung (§ 78 SGB X)
+                      <SelectItem value="pflegegrad">
+                        Pflegegrad-Bescheid (§ 84 Abs. 1 SGG)
                       </SelectItem>
-                      <SelectItem value="klage">Klage beim Sozialgericht (§ 84 SGG)</SelectItem>
+                      <SelectItem value="mdk-gutachten">
+                        MD-Gutachten anfordern (§ 25 SGB X)
+                      </SelectItem>
+                      <SelectItem value="klage">
+                        Klage beim Sozialgericht (§ 87 Abs. 1 SGG)
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -323,6 +367,69 @@ export default function WiderspruchPage(props: PageProps) {
                     </p>
                   )}
                 </div>
+
+                {/* Verfahrensverlauf: jedes Datum schaltet eine weitere Frist
+                    im Monitor frei. Optional, weil die Fristen unterschiedliche
+                    auslösende Ereignisse haben. */}
+                <fieldset className="space-y-3 rounded-xl border border-white/10 bg-slate-950/30 p-4">
+                  <legend className="px-1 text-xs font-semibold text-gray-300">
+                    Verfahrensverlauf (optional)
+                  </legend>
+                  <p className="text-[11px] leading-relaxed text-gray-400">
+                    Ergänzen Sie, was bereits geschehen ist — der Fristen-Monitor berechnet daraus
+                    zusätzlich die Klagefrist und die Wartezeiten für eine Untätigkeitsklage.
+                  </p>
+
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="antragDatum" className="text-xs text-gray-300 font-medium">
+                        Antrag gestellt am
+                      </Label>
+                      <Input
+                        id="antragDatum"
+                        type="date"
+                        max={heuteISO}
+                        value={antragDatum}
+                        onChange={(e) => setAntragDatum(e.target.value)}
+                        className="bg-slate-950/50 border-white/10 h-11 text-white"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label
+                        htmlFor="widerspruchEingelegtAm"
+                        className="text-xs text-gray-300 font-medium"
+                      >
+                        Widerspruch eingelegt am
+                      </Label>
+                      <Input
+                        id="widerspruchEingelegtAm"
+                        type="date"
+                        max={heuteISO}
+                        value={widerspruchEingelegtAm}
+                        onChange={(e) => setWiderspruchEingelegtAm(e.target.value)}
+                        className="bg-slate-950/50 border-white/10 h-11 text-white"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label
+                        htmlFor="widerspruchsbescheidDatum"
+                        className="text-xs text-gray-300 font-medium"
+                      >
+                        Widerspruchsbescheid vom
+                      </Label>
+                      <Input
+                        id="widerspruchsbescheidDatum"
+                        type="date"
+                        max={heuteISO}
+                        value={widerspruchsbescheidDatum}
+                        onChange={(e) => setWiderspruchsbescheidDatum(e.target.value)}
+                        className="bg-slate-950/50 border-white/10 h-11 text-white"
+                      />
+                    </div>
+                  </div>
+                </fieldset>
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
@@ -424,41 +531,41 @@ export default function WiderspruchPage(props: PageProps) {
 
                 <Button
                   onClick={handleKalkulation}
-                  disabled={!isFormValid || isVerifying}
+                  disabled={!isFormValid}
                   className="w-full h-12 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-base shadow-lg rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Clock className="mr-2 w-4 h-4" />
-                  {isVerifying ? 'Überprüfe...' : 'Brief entwerfen & Frist ermitteln'}
+                  Brief entwerfen &amp; Frist ermitteln
                 </Button>
+              </CardContent>
+            </Card>
+
+            {/* Fristen-Monitor: unabhängig vom Anschreiben sichtbar, sobald ein
+                Datum erfasst ist. Eine versäumte Frist ist nicht heilbar. */}
+            <Card className="bg-white/5 border-white/10 text-white shadow-xl">
+              <CardHeader>
+                <CardTitle className="text-lg font-bold flex items-center gap-2">
+                  <Bell className="w-5 h-5 text-amber-400" /> Fristen-Monitor
+                </CardTitle>
+                <CardDescription className="text-xs text-gray-400">
+                  Sozialrechtliche Fristen nach SGG — Wochenenden und bundesweite Feiertage sind
+                  berücksichtigt (§ 64 Abs. 3 SGG).
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <FristenMonitor uebersicht={fristenUebersicht} />
               </CardContent>
             </Card>
 
             {showErgebnis && frist && (
               <>
-                <Card
-                  className={`bg-white/5 border-l-4 text-white shadow-md ${
-                    frist.ampelStatus === 'gruen'
-                      ? 'border-l-emerald-500'
-                      : frist.ampelStatus === 'gelb'
-                        ? 'border-l-amber-500'
-                        : 'border-l-rose-500'
-                  }`}
-                >
-                  <CardHeader>
-                    <CardTitle className="text-sm font-bold flex items-center gap-2">
-                      <Bell className="w-4 h-4 text-amber-400" /> Fristen-Monitor Info
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2 text-xs">
-                    <p className="font-mono bg-slate-950/40 p-3 rounded-xl border border-white/5 text-gray-200">
-                      {formatiereFristInfo(frist)}
-                    </p>
-                  </CardContent>
-                </Card>
-
                 <Card className="bg-white/5 border-white/10 text-white shadow-xl">
                   <CardHeader>
                     <CardTitle className="text-base font-bold">Vorschau des Anschreibens</CardTitle>
+                    <CardDescription className="text-xs text-gray-400">
+                      Text und Fristberechnung sind kostenfrei. Sie können das Schreiben abtippen
+                      oder herauskopieren und selbst versenden.
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div
@@ -468,19 +575,25 @@ export default function WiderspruchPage(props: PageProps) {
                       {briefText}
                     </div>
                   </CardContent>
+                  {/* Kostenpflichtige Aktionen — das Schloss macht die Schranke vorab
+                      sichtbar, statt den Nutzer erst nach dem Klick zu überraschen. */}
                   <CardFooter className="flex flex-col sm:flex-row gap-3 pt-0">
                     <Button
-                      onClick={() => setIsPreviewOpen(true)}
-                      className="flex-1 h-12 bg-[#20b2aa] hover:bg-[#3ddbd0] text-white font-bold rounded-xl shadow-md"
+                      onClick={() => mitFreischaltung(() => setIsPreviewOpen(true))}
+                      disabled={isVerifying}
+                      className="flex-1 h-12 bg-[#20b2aa] hover:bg-[#3ddbd0] text-white font-bold rounded-xl shadow-md disabled:opacity-60"
                     >
-                      <Eye className="mr-2 w-4 h-4" /> Gutachten-Vorschau öffnen
+                      <Lock className="mr-2 w-4 h-4" aria-hidden="true" />
+                      {isVerifying ? 'Prüfe…' : 'Gutachten-Vorschau öffnen'}
                     </Button>
                     <Button
-                      onClick={handleSpeichern}
+                      onClick={() => mitFreischaltung(handleSpeichern)}
+                      disabled={isVerifying}
                       variant="outline"
-                      className="flex-1 h-12 border-white/10 text-white hover:bg-white/5 rounded-xl"
+                      className="flex-1 h-12 border-white/10 text-white hover:bg-white/5 rounded-xl disabled:opacity-60"
                     >
-                      <Save className="mr-2 w-4 h-4" /> Entwurf sichern
+                      <Lock className="mr-2 w-4 h-4" aria-hidden="true" />
+                      {isVerifying ? 'Prüfe…' : 'Entwurf sichern'}
                     </Button>
                   </CardFooter>
                 </Card>
@@ -527,8 +640,17 @@ export default function WiderspruchPage(props: PageProps) {
             caseCode={caseCode || 'WIDERSPRUCH'}
             isExpired={false}
             products={MVP_PRODUCTS}
-            onCheckout={(paketId) => triggerCheckout(caseCode, paketId)}
-            onClose={() => setShowPaywall(false)}
+            onCheckout={(paketId) => {
+              // Vor dem Wechsel zu Stripe verwerfen, damit ein zwischenzeitlich
+              // bezahlter Fall nach der Rückkehr nicht am alten Cache hängt.
+              verwerfeFreischaltung(caseCode);
+              return triggerCheckout(caseCode, paketId);
+            }}
+            onClose={() => {
+              // Der Kauf kann auch in einem anderen Tab erfolgt sein.
+              verwerfeFreischaltung(caseCode);
+              setShowPaywall(false);
+            }}
             loading={checkoutLoading}
           />
         )}

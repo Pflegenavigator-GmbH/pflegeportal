@@ -23,6 +23,7 @@ export interface Database {
           product_tier: 'beta' | 'standard' | 'profi';
           access_unlocked_at: string | null;
           access_activated_at: string | null;
+          bescheid_datum: string | null;
         };
         Insert: {
           id?: string;
@@ -43,6 +44,7 @@ export interface Database {
           product_tier?: 'beta' | 'standard' | 'profi';
           access_unlocked_at?: string | null;
           access_activated_at?: string | null;
+          bescheid_datum?: string | null;
         };
         Update: {
           id?: string;
@@ -63,6 +65,7 @@ export interface Database {
           product_tier?: 'beta' | 'standard' | 'profi';
           access_unlocked_at?: string | null;
           access_activated_at?: string | null;
+          bescheid_datum?: string | null;
         };
         Relationships: [];
       };

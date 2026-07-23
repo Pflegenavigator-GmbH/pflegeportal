@@ -1,0 +1,369 @@
+/* src/styles/fristen.module.css
+   Fristen-Monitor & Ampel.
+
+   Farben ausschließlich über die zentralen Status-Tokens (globals.css).
+   Die Statusklassen setzen nur die lokalen --ampel-*-Variablen; alle
+   Bausteine lesen daraus. So existiert das Layout einmal, und High-Contrast
+   greift automatisch mit, weil die Tokens zur Laufzeit überschrieben werden.
+
+   Farbe ist nie alleiniger Bedeutungsträger (WCAG 1.4.1) — die Komponenten
+   liefern zusätzlich Icon und Klartext. */
+
+.monitor {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ---- Statusvarianten: setzen nur die lokalen Variablen ---- */
+.statusGruen {
+  --ampel-farbe: var(--status-gruen);
+  --ampel-tint: var(--status-gruen-tint);
+  --ampel-rand: var(--status-gruen-border);
+}
+
+.statusGelb {
+  --ampel-farbe: var(--status-gelb);
+  --ampel-tint: var(--status-gelb-tint);
+  --ampel-rand: var(--status-gelb-border);
+}
+
+.statusRot {
+  --ampel-farbe: var(--status-rot);
+  --ampel-tint: var(--status-rot-tint);
+  --ampel-rand: var(--status-rot-border);
+}
+
+.statusWartend,
+.statusAbgelaufen {
+  --ampel-farbe: var(--status-neutral);
+  --ampel-tint: var(--status-neutral-tint);
+  --ampel-rand: var(--status-neutral-border);
+}
+
+/* ---- Ampel-Plakette ---- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 9999px;
+  border: 1px solid var(--ampel-rand);
+  background: var(--ampel-tint);
+  color: var(--ampel-farbe);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.3;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.badgeIcon {
+  flex-shrink: 0;
+}
+
+/* ---- Fristen-Liste ---- */
+.liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.karte {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  /* Farbiger Anker links — verstärkt die Ampel, ohne sie zu ersetzen. */
+  border-left: 4px solid var(--ampel-farbe);
+}
+
+.kartenKopf {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  /* Bei großer Schrift umbrechen statt horizontal scrollen (WCAG 1.4.10) */
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+}
+
+.kartenTitel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.bezeichnung {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--color-on-surface);
+  overflow-wrap: anywhere;
+}
+
+.gesetz {
+  font-size: 0.75rem;
+  font-family: monospace;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+/* ---- Datumsangaben ---- */
+.daten {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.5rem 1rem;
+  margin: 0;
+}
+
+.datenPaar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.datenLabel {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-faint);
+  overflow-wrap: anywhere;
+}
+
+.datenWert {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-subtle);
+  overflow-wrap: anywhere;
+}
+
+.datenWertBetont {
+  color: var(--ampel-farbe);
+}
+
+.hinweis {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+/* ---- Prominenter Warnhinweis bei kritischer Frist ---- */
+.warnung {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: var(--status-rot-tint);
+  border: 2px solid var(--status-rot-border);
+  /* Kein Blinken/Pulsieren: Die Zielgruppe umfasst Menschen mit
+     kognitiven Einschränkungen; Dringlichkeit trägt der Text. */
+}
+
+.warnungIcon {
+  color: var(--status-rot);
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.warnungInhalt {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.warnungTitel {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  line-height: 1.35;
+  color: var(--status-rot);
+  overflow-wrap: anywhere;
+}
+
+.warnungText {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--color-text-subtle);
+  overflow-wrap: anywhere;
+}
+
+.rechtsgrundlagen {
+  list-style: none;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.rechtsgrundlage {
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--border-subtle);
+  overflow-wrap: anywhere;
+}
+
+.paragraf {
+  display: block;
+  font-family: monospace;
+  font-weight: 700;
+  color: var(--color-text-subtle);
+}
+
+/* ---- Datumsabfrage (Schnellauswahl) ----
+   Bewusst ohne vorbelegtes Datum: Ein Default auf „heute" könnte die
+   Restfrist nur überschätzen (ein Bescheid liegt immer in der Vergangenheit)
+   und würde damit genau in das Fristversäumnis hineinberuhigen. */
+.abfrage {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  margin: 0;
+  min-width: 0;
+}
+
+.abfrageFrage {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--color-on-surface);
+  padding: 0;
+  overflow-wrap: anywhere;
+}
+
+.abfrageHinweis {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.schnellwahl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.schnellwahlKnopf {
+  flex: 1 1 auto;
+  min-height: 44px; /* Mindest-Zielgröße für Touch */
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-hairline);
+  color: var(--color-on-surface);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  overflow-wrap: anywhere;
+}
+
+.schnellwahlKnopf:hover {
+  background: var(--surface-2);
+}
+
+.schnellwahlKnopfAktiv {
+  border-color: var(--color-accent);
+  background: var(--accent-tint);
+  color: var(--color-accent);
+}
+
+.datumsZeile {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.datumsFeld {
+  flex: 1 1 12rem;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-subtle);
+  background: var(--overlay-dark-3);
+  color: var(--color-on-surface);
+  font-size: 0.9375rem;
+}
+
+.datumsFeldFehler {
+  border-color: var(--status-rot);
+}
+
+.fehlerText {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--status-rot);
+  overflow-wrap: anywhere;
+}
+
+.bestaetigt {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--color-text-subtle);
+  overflow-wrap: anywhere;
+}
+
+.aendernKnopf {
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--color-accent);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.aendernKnopf:hover {
+  background: var(--surface-1);
+}
+
+/* ---- Leerzustand ---- */
+.leer {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: var(--surface-hairline);
+  border: 1px dashed var(--border-subtle);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+.leerIcon {
+  color: var(--color-text-faint);
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
