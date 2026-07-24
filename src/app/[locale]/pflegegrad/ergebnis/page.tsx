@@ -14,13 +14,16 @@ import {
   ChevronDown,
   Info,
   CheckCircle2,
+  CalendarClock,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, use } from 'react';
+import { useEffect, useMemo, useState, use } from 'react';
 import { toast } from 'sonner';
 
 import { HandlungsEmpfehlungen } from '@/src/app/[locale]/pflegegrad/ergebnis/_component/HandlungsEmpfehlung';
 import { ModulListe } from '@/src/app/[locale]/pflegegrad/ergebnis/_component/ModulListe';
+import { BescheidDatumAbfrage, FristenMonitor } from '@/src/components/fristen';
+import { BestaetigungsDialog } from '@/src/components/modal/BestaetigungsDialog';
 import { PaywallModal } from '@/src/components/modal/PaywallModal';
 import {
   Button,
@@ -35,10 +38,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/src/components/ui';
+import { useBescheidDatum } from '@/src/hooks/useBescheidDatum';
 import { usePdfDownload } from '@/src/hooks/usePdfDownload';
 import { useStripeCheckout } from '@/src/hooks/useStripeCheckout';
 import { logger } from '@/src/lib/logger';
 import { loadCaseResult, SessionExpiredError } from '@/src/lib/pflegegrad/client-api';
+import { berechneFristen } from '@/src/lib/widerspruch/fristen';
 import { PflegegradErgebnis, EinstufungAmpel } from '@/src/types/pflegegrad';
 
 import { NBA_MODULE_METADATA } from './_constants/moduleMetadata';
@@ -62,6 +67,8 @@ export default function ErgebnisPage(props: PageProps) {
   const [ergebnis, setErgebnis] = useState<PflegegradErgebnis | null>(null);
   const { triggerCheckout, checkoutLoading } = useStripeCheckout();
   const [isVerifyingGdb, setIsVerifyingGdb] = useState(false);
+  const [resetDialogOffen, setResetDialogOffen] = useState(false);
+  const [resetLaeuft, setResetLaeuft] = useState(false);
 
   const [caseCode] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
@@ -69,6 +76,16 @@ export default function ErgebnisPage(props: PageProps) {
     }
     return null;
   });
+
+  const {
+    bescheidDatum,
+    speichereBescheidDatum,
+    speichert: speichertDatum,
+  } = useBescheidDatum(caseCode);
+
+  // Fristen ergeben sich rein rechnerisch aus dem Bescheiddatum — kein
+  // Serveraufruf nötig, die Anzeige folgt der Eingabe unmittelbar.
+  const fristenUebersicht = useMemo(() => berechneFristen({ bescheidDatum }), [bescheidDatum]);
 
   const { downloadPdf, loadingPdf, showPaywall, setShowPaywall } = usePdfDownload({
     caseCode,
@@ -109,20 +126,43 @@ export default function ErgebnisPage(props: PageProps) {
       });
   }, [caseCode, locale, router]);
 
-  const handleReEvaluateFromScratch = () => {
-    if (
-      confirm(
-        'Möchten Sie die aktuelle Einstufung wirklich zurücksetzen und alle Fragen von vorne beantworten? Ihre bisherigen Modul-Antworten werden überschrieben.'
-      )
-    ) {
-      logger.info({ caseCode }, 'Trigger Re-Evaluation: Säubere lokalen Cache und starte neu');
+  /**
+   * Setzt die Begutachtung zurück.
+   *
+   * Der Löschauftrag geht an den Server: Die Antworten liegen in der
+   * `answers`-Tabelle, nicht im Browser. Ein reines Leeren des localStorage
+   * (so lief es früher) hat nichts zurückgesetzt — die Module luden ihre
+   * alten Antworten anschließend wieder vom Server.
+   */
+  const handleReEvaluateFromScratch = async () => {
+    if (!caseCode) return;
+
+    setResetLaeuft(true);
+    try {
+      const antwort = await fetch(`/api/cases/${caseCode.toUpperCase()}/answers`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (!antwort.ok) throw new Error(`Status ${antwort.status}`);
+
+      // Zwischenstände früherer Versionen mit aufräumen
       for (let i = 1; i <= 6; i++) {
         localStorage.removeItem(`modul${i}_rohpunkte`);
         localStorage.removeItem(`modul${i}_answers`);
       }
       localStorage.removeItem('pflegegrad-ergebnis');
-      toast.success('Evaluierung zurückgesetzt.');
+
+      logger.info({ caseCode }, 'Begutachtung zurückgesetzt, starte neu bei Modul 1');
+      toast.success('Begutachtung zurückgesetzt.');
+
+      // Ladezustand bewusst aktiv lassen — die Navigation folgt unmittelbar.
       router.push(`/${locale}/pflegegrad/modul1`);
+    } catch (error) {
+      logger.error({ error, caseCode }, 'Begutachtung konnte nicht zurückgesetzt werden');
+      toast.error('Die Begutachtung konnte nicht zurückgesetzt werden. Bitte erneut versuchen.');
+      setResetLaeuft(false);
+      setResetDialogOffen(false);
     }
   };
 
@@ -243,7 +283,7 @@ export default function ErgebnisPage(props: PageProps) {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-[var(--surface-1)]" />
                   <DropdownMenuItem
-                    onClick={handleReEvaluateFromScratch}
+                    onClick={() => setResetDialogOffen(true)}
                     className="text-rose-400 focus:text-rose-400 focus:bg-rose-500/10 cursor-pointer"
                   >
                     <RefreshCw className="w-3.5 h-3.5 mr-2" /> Neu evaluieren
@@ -400,6 +440,25 @@ export default function ErgebnisPage(props: PageProps) {
 
         <HandlungsEmpfehlungen ergebnis={ergebnis} />
 
+        {/* Fristen-Monitor: Nach dem Ergebnis entscheidet sich, ob widersprochen
+            wird — hier ist die Widerspruchsfrist relevant, nicht erst im
+            Widerspruchs-Zentrum. Das Datum wird bewusst erfragt, nie geraten. */}
+        <Card className="bg-white/5 border-white/10 text-white shadow-xl">
+          <CardHeader>
+            <CardTitle className="text-base font-bold flex items-center gap-2">
+              <CalendarClock className="w-5 h-5 text-[var(--color-accent)]" /> Ihre Fristen
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <BescheidDatumAbfrage
+              wert={bescheidDatum}
+              onChange={speichereBescheidDatum}
+              gespeichertWird={speichertDatum}
+            />
+            <FristenMonitor uebersicht={fristenUebersicht} />
+          </CardContent>
+        </Card>
+
         {/* Zusatzleistungen anzeigen (Wohnraum, Hilfsmittel), falls im Rechner-Ergebnis vorhanden */}
         {ergebnis.benefits.additionalBenefits.length > 0 && (
           <div className="space-y-2">
@@ -477,6 +536,24 @@ export default function ErgebnisPage(props: PageProps) {
             loading={checkoutLoading}
           />
         )}
+
+        <BestaetigungsDialog
+          offen={resetDialogOffen}
+          onAbbrechen={() => setResetDialogOffen(false)}
+          onBestaetigen={handleReEvaluateFromScratch}
+          destruktiv
+          titel="Begutachtung neu beginnen?"
+          beschreibung="Sie beantworten alle Fragen der sechs Module noch einmal von vorne. Ihre bisherigen Antworten werden dabei endgültig gelöscht und lassen sich nicht wiederherstellen."
+          folgen={[
+            'Alle Antworten aus den Modulen 1 bis 6 werden gelöscht.',
+            'Das errechnete Ergebnis wird verworfen.',
+            'Ihr Fallcode und ein bereits gekaufter Zugang bleiben erhalten.',
+          ]}
+          bestaetigenText="Ja, neu beginnen"
+          abbrechenText="Abbrechen"
+          laeuft={resetLaeuft}
+          laeuftText="Antworten werden gelöscht…"
+        />
       </div>
     </main>
   );

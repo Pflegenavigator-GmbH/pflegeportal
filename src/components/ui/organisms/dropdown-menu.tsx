@@ -8,7 +8,23 @@ type DropdownMenuContextValue = {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   rootRef: React.RefObject<HTMLDivElement | null>;
+  /** Für die Fokusrückgabe beim Schließen (WAI-ARIA Menu Button). */
+  triggerRef: React.RefObject<HTMLElement | null>;
+  contentRef: React.RefObject<HTMLDivElement | null>;
+  schliesseUndFokussiereTrigger: () => void;
 };
+
+/**
+ * Aktivierbare Einträge in Dokumentreihenfolge.
+ * Wird bei jeder Tastenbewegung frisch gelesen, damit bedingt gerenderte
+ * Einträge nicht zu Sprüngen ins Leere führen.
+ */
+function menueEintraege(container: HTMLElement | null): HTMLElement[] {
+  if (!container) return [];
+  return [...container.querySelectorAll<HTMLElement>('[role="menuitem"]')].filter(
+    (el) => el.getAttribute('aria-disabled') !== 'true' && !el.hasAttribute('data-disabled')
+  );
+}
 
 const DropdownMenuContext = React.createContext<DropdownMenuContextValue | undefined>(undefined);
 
@@ -28,6 +44,15 @@ interface DropdownMenuProps {
 const DropdownMenu: React.FC<DropdownMenuProps> = ({ children, className }) => {
   const [open, setOpen] = React.useState(false);
   const rootRef = React.useRef<HTMLDivElement | null>(null);
+  const triggerRef = React.useRef<HTMLElement | null>(null);
+  const contentRef = React.useRef<HTMLDivElement | null>(null);
+
+  // Schließen per Tastatur muss den Fokus zurückgeben — sonst landet er am
+  // Dokumentanfang und die Tastaturnutzung beginnt von vorne.
+  const schliesseUndFokussiereTrigger = React.useCallback(() => {
+    setOpen(false);
+    triggerRef.current?.focus();
+  }, []);
 
   React.useEffect(() => {
     const onPointerDown = (event: MouseEvent) => {
@@ -40,8 +65,8 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ children, className }) => {
     };
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setOpen(false);
+      if (event.key === 'Escape' && open) {
+        schliesseUndFokussiereTrigger();
       }
     };
 
@@ -52,10 +77,12 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ children, className }) => {
       document.removeEventListener('mousedown', onPointerDown);
       document.removeEventListener('keydown', onKeyDown);
     };
-  }, [open]);
+  }, [open, schliesseUndFokussiereTrigger]);
 
   return (
-    <DropdownMenuContext.Provider value={{ open, setOpen, rootRef }}>
+    <DropdownMenuContext.Provider
+      value={{ open, setOpen, rootRef, triggerRef, contentRef, schliesseUndFokussiereTrigger }}
+    >
       <div ref={rootRef} className={cn('relative inline-block', className)}>
         {children}
       </div>
@@ -71,6 +98,8 @@ interface TriggerChildProps {
   tabIndex?: number;
   'aria-expanded'?: boolean;
   'aria-haspopup'?: 'menu' | boolean;
+  // React 19: ref ist eine reguläre Prop und lässt sich über cloneElement setzen.
+  ref?: React.Ref<HTMLElement>;
 }
 
 interface DropdownMenuTriggerProps {
@@ -81,14 +110,37 @@ interface DropdownMenuTriggerProps {
 
 const DropdownMenuTrigger = React.forwardRef<HTMLButtonElement, DropdownMenuTriggerProps>(
   ({ children, asChild = false, className }, _ref) => {
-    const { open, setOpen } = useDropdownMenu();
+    const { open, setOpen, triggerRef } = useDropdownMenu();
 
     const toggleOpen = () => setOpen((prev) => !prev);
+
+    /**
+     * Tastenbelegung nach WAI-ARIA Menu Button: Enter und Leertaste schalten
+     * um, Pfeil-runter/-hoch öffnen. Das Fokussieren des ersten Eintrags
+     * übernimmt anschließend der Inhalt.
+     */
+    const onTastendruck = (event: React.KeyboardEvent<HTMLElement>) => {
+      if (event.defaultPrevented) return;
+
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        toggleOpen();
+        return;
+      }
+
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        setOpen(true);
+      }
+    };
 
     if (asChild && React.isValidElement<TriggerChildProps>(children)) {
       const child = children;
 
       return React.cloneElement(child, {
+        ref: (knoten: HTMLElement | null) => {
+          triggerRef.current = knoten;
+        },
         onClick: (event: React.MouseEvent<HTMLElement>) => {
           child.props.onClick?.(event);
           if (!event.defaultPrevented) {
@@ -97,13 +149,7 @@ const DropdownMenuTrigger = React.forwardRef<HTMLButtonElement, DropdownMenuTrig
         },
         onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => {
           child.props.onKeyDown?.(event);
-
-          if (event.defaultPrevented) return;
-
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            toggleOpen();
-          }
+          onTastendruck(event);
         },
         role: child.props.role ?? 'button',
         tabIndex: child.props.tabIndex ?? 0,
@@ -115,9 +161,14 @@ const DropdownMenuTrigger = React.forwardRef<HTMLButtonElement, DropdownMenuTrig
 
     return (
       <button
-        ref={_ref}
+        ref={(knoten) => {
+          triggerRef.current = knoten;
+          if (typeof _ref === 'function') _ref(knoten);
+          else if (_ref) _ref.current = knoten;
+        }}
         type="button"
         onClick={toggleOpen}
+        onKeyDown={onTastendruck}
         className={className}
         aria-expanded={open}
         aria-haspopup="menu"
@@ -135,15 +186,66 @@ interface DropdownMenuContentProps extends React.HTMLAttributes<HTMLDivElement> 
 }
 
 const DropdownMenuContent = React.forwardRef<HTMLDivElement, DropdownMenuContentProps>(
-  ({ className, align = 'end', sideOffset = 8, children, style, ...props }, ref) => {
-    const { open } = useDropdownMenu();
+  ({ className, align = 'end', sideOffset = 8, children, style, onKeyDown, ...props }, ref) => {
+    const { open, contentRef, schliesseUndFokussiereTrigger, setOpen } = useDropdownMenu();
+
+    // Beim Öffnen den ersten Eintrag fokussieren: Ohne das bliebe der Fokus
+    // am Trigger, und Screenreader-Nutzer stünden vor einem angekündigten,
+    // aber unerreichbaren Menü.
+    React.useEffect(() => {
+      if (!open) return;
+      menueEintraege(contentRef.current)[0]?.focus();
+    }, [open, contentRef]);
 
     if (!open) return null;
 
+    const bewegeFokus = (richtung: 1 | -1 | 'erster' | 'letzter') => {
+      const eintraege = menueEintraege(contentRef.current);
+      if (eintraege.length === 0) return;
+
+      if (richtung === 'erster') return eintraege[0].focus();
+      if (richtung === 'letzter') return eintraege[eintraege.length - 1].focus();
+
+      const aktuell = eintraege.indexOf(document.activeElement as HTMLElement);
+      // Umlauf: Vom letzten Eintrag geht es zurück zum ersten.
+      const naechster = (aktuell + richtung + eintraege.length) % eintraege.length;
+      eintraege[naechster].focus();
+    };
+
     return (
       <div
-        ref={ref}
+        ref={(knoten) => {
+          contentRef.current = knoten;
+          if (typeof ref === 'function') ref(knoten);
+          else if (ref) ref.current = knoten;
+        }}
         role="menu"
+        onKeyDown={(event) => {
+          onKeyDown?.(event);
+          if (event.defaultPrevented) return;
+
+          switch (event.key) {
+            case 'ArrowDown':
+              event.preventDefault();
+              return bewegeFokus(1);
+            case 'ArrowUp':
+              event.preventDefault();
+              return bewegeFokus(-1);
+            case 'Home':
+              event.preventDefault();
+              return bewegeFokus('erster');
+            case 'End':
+              event.preventDefault();
+              return bewegeFokus('letzter');
+            case 'Escape':
+              event.preventDefault();
+              return schliesseUndFokussiereTrigger();
+            case 'Tab':
+              // Tab verlässt das Menü — schließen, aber den Fokus seinen
+              // natürlichen Weg gehen lassen (kein preventDefault).
+              return setOpen(false);
+          }
+        }}
         className={cn(
           'absolute z-50 mt-2 min-w-56 rounded-xl border bg-slate-950 p-1 text-white shadow-xl outline-none',
           align === 'end' ? 'right-0' : 'left-0',
@@ -191,6 +293,17 @@ const DropdownMenuItem = React.forwardRef<HTMLDivElement, DropdownMenuItemProps>
       setOpen(false);
     };
 
+    // Ein <div role="menuitem"> löst bei Enter/Leertaste — anders als ein
+    // <button> — kein Click-Event aus. Ohne das hier wäre der Eintrag
+    // fokussierbar, aber per Tastatur nicht auslösbar.
+    const handleKey = (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (disabled) return;
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        (event.currentTarget as HTMLElement).click();
+      }
+    };
+
     if (asChild && React.isValidElement<ItemChildProps>(children)) {
       const child = children;
 
@@ -203,7 +316,9 @@ const DropdownMenuItem = React.forwardRef<HTMLDivElement, DropdownMenuItemProps>
         },
         className: cn(child.props.className, baseClassName),
         role: child.props.role ?? 'menuitem',
-        tabIndex: child.props.tabIndex ?? 0,
+        // Roving Tabindex: Das Menü steuert den Fokus per Pfeiltasten selbst,
+        // die Einträge sind deshalb keine eigenen Tabstopps.
+        tabIndex: child.props.tabIndex ?? -1,
         ...props,
       });
     }
@@ -212,8 +327,10 @@ const DropdownMenuItem = React.forwardRef<HTMLDivElement, DropdownMenuItemProps>
       <div
         ref={ref}
         role="menuitem"
-        tabIndex={disabled ? -1 : 0}
+        tabIndex={-1}
+        aria-disabled={disabled || undefined}
         onClick={handleSelect}
+        onKeyDown={handleKey}
         className={baseClassName}
         {...props}
       >

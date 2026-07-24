@@ -1,11 +1,20 @@
 // src/lib/widerspruch/utils.ts
-import { addDays, addMonths, differenceInDays, format } from 'date-fns';
+import { addMonths, differenceInDays, format } from 'date-fns';
 
 import { logger } from '@/src/lib/logger';
+import {
+  ampelStatusFuerTage,
+  naechsterWerktag,
+  zuLokalemTagesbeginn,
+  type AmpelStatus,
+} from '@/src/lib/widerspruch/fristen';
 import { ModuleScores } from '@/src/types/pflegegrad';
 
+// Fristen-Domäne liegt in ./fristen.ts; hier re-exportiert, damit der
+// Widerspruch-Bereich eine Import-Adresse behält.
+export * from '@/src/lib/widerspruch/fristen';
+
 export type WiderspruchTyp = 'pflegegrad' | 'mdk-gutachten' | 'klage';
-export type AmpelStatus = 'gruen' | 'gelb' | 'rot' | 'abgelaufen';
 
 export interface WiderspruchFrist {
   typ: WiderspruchTyp;
@@ -35,93 +44,88 @@ export interface WiderspruchDaten {
   erstelltAm?: string;
 }
 
-const FEIERTAGE_DE: Record<string, string[]> = {
-  '2025': ['01-01', '04-18', '04-21', '05-01', '05-29', '06-09', '10-03', '12-25', '12-26'],
-  '2026': ['01-01', '04-03', '04-06', '05-01', '05-14', '05-25', '10-03', '12-25', '12-26'],
-  '2027': ['01-01', '03-26', '03-29', '05-01', '05-06', '05-17', '10-03', '12-25', '12-26'],
-};
-
+/**
+ * Schreiben-spezifische Konfiguration: bestimmt Betreff und zitierte
+ * Rechtsgrundlage des erzeugten Anschreibens. Die Fristberechnung selbst
+ * kommt aus ./fristen.ts, damit Schwellen und Werktagsregel nur einmal
+ * existieren.
+ */
 const WIDERSPRUCH_KONFIG: Record<
   WiderspruchTyp,
   { bezeichnung: string; gesetz: string; fristMonate: number }
 > = {
   pflegegrad: {
     bezeichnung: 'Widerspruch gegen Pflegegrad-Bescheid',
-    gesetz: '§ 78 SGB X',
+    gesetz: '§ 84 Abs. 1 SGG',
     fristMonate: 1,
   },
   'mdk-gutachten': {
-    bezeichnung: 'Anforderung des MDK-Gutachtens',
-    gesetz: '§ 78 SGB X',
+    // Akteneinsicht ist an die laufende Widerspruchsfrist gekoppelt.
+    bezeichnung: 'Anforderung des MD-Gutachtens',
+    gesetz: '§ 25 SGB X',
     fristMonate: 1,
   },
-  klage: { bezeichnung: 'Klageerhebung beim Sozialgericht', gesetz: '§ 84 SGG', fristMonate: 1 },
+  klage: {
+    bezeichnung: 'Klageerhebung beim Sozialgericht',
+    gesetz: '§ 87 Abs. 1 SGG',
+    fristMonate: 1,
+  },
 };
 
 // --- FRISTEN LOGIK ---
 
+/**
+ * Frist für das konkrete Anschreiben. Für die Gesamtübersicht aller
+ * Verfahrensfristen siehe `berechneFristen` in ./fristen.ts.
+ */
 export function berechneFrist(
-  bescheidDatum: Date,
-  typ: WiderspruchTyp = 'pflegegrad'
+  bescheidDatum: Date | string,
+  typ: WiderspruchTyp = 'pflegegrad',
+  referenzDatum: Date = new Date()
 ): WiderspruchFrist {
   logger.debug({ bescheidDatum, typ }, 'Berechne Frist für Widerspruch');
 
   const konfig = WIDERSPRUCH_KONFIG[typ];
-  const fristEnde = addMonths(bescheidDatum, konfig.fristMonate);
+  const start = zuLokalemTagesbeginn(bescheidDatum);
+  if (!start) {
+    throw new Error(`Ungültiges Bescheiddatum für die Fristberechnung: ${String(bescheidDatum)}`);
+  }
+
+  const heute = zuLokalemTagesbeginn(referenzDatum) ?? new Date();
+  const fristEnde = addMonths(start, konfig.fristMonate);
   const fristEndeWerktag = naechsterWerktag(fristEnde);
-
-  const heute = new Date();
-  heute.setHours(0, 0, 0, 0);
-
   const verbleibendeTage = differenceInDays(fristEndeWerktag, heute);
-  const istAbgelaufen = verbleibendeTage < 0;
 
-  let ampelStatus: AmpelStatus = 'gruen';
-  if (istAbgelaufen) ampelStatus = 'abgelaufen';
-  else if (verbleibendeTage > 14) ampelStatus = 'gruen';
-  else if (verbleibendeTage >= 7) ampelStatus = 'gelb';
-  else ampelStatus = 'rot';
-
-  const resultat = {
+  const resultat: WiderspruchFrist = {
     typ,
     bezeichnung: konfig.bezeichnung,
     gesetz: konfig.gesetz,
     fristMonate: konfig.fristMonate,
-    bescheidDatum: new Date(bescheidDatum),
+    bescheidDatum: start,
     fristEnde,
     fristEndeWerktag,
-    istAbgelaufen,
-    verbleibendeTage: Math.max(0, verbleibendeTage),
-    ampelStatus,
+    istAbgelaufen: verbleibendeTage < 0,
+    verbleibendeTage,
+    ampelStatus: ampelStatusFuerTage(verbleibendeTage),
   };
 
   logger.debug({ resultat }, 'Fristberechnung abgeschlossen');
   return resultat;
 }
 
-function istFeiertag(datum: Date): boolean {
-  const jahr = datum.getFullYear().toString();
-  return (FEIERTAGE_DE[jahr] || []).includes(format(datum, 'MM-dd'));
-}
+const AMPEL_SYMBOL: Record<AmpelStatus, string> = {
+  gruen: '🟢',
+  gelb: '🟡',
+  rot: '🔴',
+  wartend: '⏳',
+  abgelaufen: '⚠️',
+};
 
-function istWochenende(datum: Date): boolean {
-  const tag = datum.getDay();
-  return tag === 0 || tag === 6;
-}
-
-function naechsterWerktag(datum: Date): Date {
-  let aktuellesDatum = new Date(datum);
-  while (istWochenende(aktuellesDatum) || istFeiertag(aktuellesDatum)) {
-    aktuellesDatum = addDays(aktuellesDatum, 1);
-  }
-  return aktuellesDatum;
-}
-
+/** Einzeilige Textfassung — für PDF-/Briefausgaben ohne Markup. */
 export function formatiereFristInfo(frist: WiderspruchFrist): string {
   if (frist.istAbgelaufen)
     return `⚠️ FRIST ABGELAUFEN seit ${format(frist.fristEndeWerktag, 'dd.MM.yyyy')}`;
-  const emoji = frist.ampelStatus === 'gruen' ? '🟢' : frist.ampelStatus === 'gelb' ? '🟡' : '🔴';
-  return `${emoji} Noch ${frist.verbleibendeTage} Tage bis zum wirksamen Fristende am ${format(frist.fristEndeWerktag, 'dd.MM.yyyy')}`;
+  return `${AMPEL_SYMBOL[frist.ampelStatus]} Noch ${frist.verbleibendeTage} Tage bis zum wirksamen Fristende am ${format(frist.fristEndeWerktag, 'dd.MM.yyyy')}`;
 }
 
 // --- TEXT GENERIERUNG ---

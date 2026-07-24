@@ -59,6 +59,25 @@
   --accent-tint: rgba(74, 144, 226, 0.1);
   --accent-border: rgba(74, 144, 226, 0.2);
   --accent-border-strong: rgba(74, 144, 226, 0.3);
+
+  /* Status-/Ampelfarben (Fristen-Monitor, Validierung, Hinweise).
+     Alle Werte auf --bund-dunkelblau kontrastgeprüft (>= 4.5:1, WCAG AA).
+     Farbe ist nie alleiniger Bedeutungsträger — die Komponenten setzen
+     zusätzlich Icon + Klartext (WCAG 1.4.1). */
+  --status-gruen: #34d399;
+  --status-gelb: #fbbf24;
+  --status-rot: #fb7185;
+  --status-neutral: #94a3b8;
+
+  --status-gruen-tint: rgba(52, 211, 153, 0.12);
+  --status-gelb-tint: rgba(251, 191, 36, 0.12);
+  --status-rot-tint: rgba(251, 113, 133, 0.14);
+  --status-neutral-tint: rgba(148, 163, 184, 0.1);
+
+  --status-gruen-border: rgba(52, 211, 153, 0.4);
+  --status-gelb-border: rgba(251, 191, 36, 0.4);
+  --status-rot-border: rgba(251, 113, 133, 0.45);
+  --status-neutral-border: rgba(148, 163, 184, 0.3);
 }
 
 @theme inline {
@@ -79,6 +98,12 @@
   --color-muted: var(--color-text-muted);
   --color-subtle: var(--color-text-subtle);
   --color-faint: var(--color-text-faint);
+
+  /* Ampel als Utilities: text-status-gruen, border-status-rot, … */
+  --color-status-gruen: var(--status-gruen);
+  --color-status-gelb: var(--status-gelb);
+  --color-status-rot: var(--status-rot);
+  --color-status-neutral: var(--status-neutral);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -125,6 +150,17 @@
   --color-text-faint: #e2e8f0;
   --border-subtle: rgba(255, 255, 255, 0.45);
   --border-faint: rgba(255, 255, 255, 0.3);
+
+  /* Ampel heller + Ränder kräftiger, damit der Status auch bei
+     Kontrastschwäche eindeutig bleibt. */
+  --status-gruen: #6ee7b7;
+  --status-gelb: #fcd34d;
+  --status-rot: #fda4af;
+  --status-neutral: #e2e8f0;
+  --status-gruen-border: rgba(110, 231, 183, 0.75);
+  --status-gelb-border: rgba(252, 211, 77, 0.75);
+  --status-rot-border: rgba(253, 164, 175, 0.8);
+  --status-neutral-border: rgba(226, 232, 240, 0.6);
 }
 
 :root[data-contrast='high'] :focus-visible,
@@ -144,6 +180,15 @@
     --color-text-faint: #e2e8f0;
     --border-subtle: rgba(255, 255, 255, 0.45);
     --border-faint: rgba(255, 255, 255, 0.3);
+
+    --status-gruen: #6ee7b7;
+    --status-gelb: #fcd34d;
+    --status-rot: #fda4af;
+    --status-neutral: #e2e8f0;
+    --status-gruen-border: rgba(110, 231, 183, 0.75);
+    --status-gelb-border: rgba(252, 211, 77, 0.75);
+    --status-rot-border: rgba(253, 164, 175, 0.8);
+    --status-neutral-border: rgba(226, 232, 240, 0.6);
   }
 }
 
