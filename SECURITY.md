@@ -33,12 +33,23 @@ bewusst akzeptierte Finding ist unten dokumentiert.
   False-Positive. Die reale Angriffsfläche wäre ohnehin nur ein
   Linter-Speicherverbrauch bei lokal ausgeführten, bösartig konstruierten
   Glob-Mustern.
-- **Warum nicht „gefixt":** Ein `overrides`-Zwang auf `brace-expansion@5.x`
-  bricht `minimatch@3` (unter `eslint@9`) — API-inkompatibler Major-Sprung,
-  ESLint schlägt dann fehl (getestet). `npm audit fix --force` würde
-  `eslint@10` (Breaking Major) installieren.
-- **Auflösung:** entfällt automatisch, sobald `eslint-config-next` seine
-  `minimatch`-Kette aktualisiert, oder mit der geplanten ESLint-10-Migration.
+- **Warum nicht „gefixt":** Zwei Wege wurden geprüft und beide verworfen:
+  1. `overrides` auf `brace-expansion@5.x` bricht `minimatch@3` (unter
+     `eslint@9`) — API-inkompatibler Major-Sprung, ESLint schlägt fehl
+     (getestet, wieder zurückgerollt).
+  2. `eslint@10` (der Weg von `npm audit fix --force`) **crasht** mit dem
+     aktuellen `eslint-config-next`: dessen gebündeltes
+     `eslint-plugin-react` ruft `context.getFilename()` auf — eine in
+     ESLint 10 entfernte API (`TypeError: contextOrFilename.getFilename is
+     not a function`). Zudem verschiebt ESLint 10 die
+     `brace-expansion`-Kette nur nach `eslint-config-next/node_modules`,
+     statt sie zu beseitigen. Beide Ziele (Lint lauffähig, Audit sauber)
+     verfehlt — getestet und zurückgerollt.
+- **Auflösung:** entfällt automatisch, sobald `eslint-config-next` ein
+  ESLint-10-kompatibles `eslint-plugin-react` (und aktualisiertes `minimatch`)
+  ausliefert. Bis dahin bleibt ESLint 9 die einzige lauffähige Version.
+  Dependabot-PR für `eslint@10` daher **nicht mergen**, bis der Upstream-Fix
+  vorliegt.
 
 ## Ein Sicherheitsproblem melden
 
