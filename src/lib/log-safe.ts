@@ -18,9 +18,7 @@ export function sauberFuerLog(wert: unknown, maxLaenge = 200): string {
 
   // CR und LF sind die eigentliche Injection-Gefahr; der zweite Durchlauf
   // neutralisiert Tabs und übrige C0-Steuerzeichen sowie DEL.
-  const bereinigt = text
-    .replace(/[\r\n]+/g, ' ')
-    .replace(/[\x00-\x1F\x7F]/g, ' ');
+  const bereinigt = text.replace(/[\r\n]+/g, ' ').replace(/[\x00-\x1F\x7F]/g, ' ');
 
   return bereinigt.length > maxLaenge ? `${bereinigt.slice(0, maxLaenge)}…` : bereinigt;
 }
