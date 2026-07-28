@@ -15,6 +15,8 @@
  * bedient (spart die Function-Invocation), der Eintrag aber von der Route
  * geschrieben.
  */
+import { sauberFuerLog } from '@/src/lib/log-safe';
+
 import { redis } from './client';
 
 interface CacheRegel {
@@ -76,7 +78,7 @@ export async function leseCache(key: string): Promise<GecachteAntwort | null> {
   } catch (error) {
     // Sichtbar machen statt still schlucken: signalisiert eine Redis-Störung.
     // console statt pino (Edge-Runtime). Fällt auf "kein Treffer" zurück.
-    console.error('[edge-cache] Lesen fehlgeschlagen:', key, error);
+    console.error('[edge-cache] Lesen fehlgeschlagen:', sauberFuerLog(key), error);
     return null;
   }
 }
@@ -97,6 +99,6 @@ export async function schreibeCache(
   } catch (error) {
     // Best effort, aber nicht lautlos — eine anhaltende Redis-Störung soll
     // in den Logs auffallen. console statt pino (Edge-Runtime).
-    console.error('[edge-cache] Schreiben fehlgeschlagen:', key, error);
+    console.error('[edge-cache] Schreiben fehlgeschlagen:', sauberFuerLog(key), error);
   }
 }

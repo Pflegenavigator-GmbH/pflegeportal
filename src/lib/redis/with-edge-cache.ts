@@ -1,6 +1,8 @@
 // src/lib/redis/with-edge-cache.ts
 import { NextRequest, NextResponse } from 'next/server';
 
+import { sauberFuerLog } from '@/src/lib/log-safe';
+
 import { cacheSchluessel, istCachebar, schreibeCache } from './edge-cache';
 
 type RouteHandler<Ctx> = (request: NextRequest, context: Ctx) => Promise<NextResponse>;
@@ -44,7 +46,11 @@ export function withEdgeCache<Ctx>(handler: RouteHandler<Ctx>): RouteHandler<Ctx
       return new NextResponse(body, { status: 200, headers });
     } catch (error) {
       // console statt pino: Wrapper läuft in Edge-Routen (pino ist Node-only).
-      console.error('[edge-cache] Antwort konnte nicht gecacht werden:', pathname, error);
+      console.error(
+        '[edge-cache] Antwort konnte nicht gecacht werden:',
+        sauberFuerLog(pathname),
+        error
+      );
       return antwort;
     }
   };
