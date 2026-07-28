@@ -1,6 +1,8 @@
 // src/app/api/gesetze/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
+import { withEdgeCache } from '@/src/lib/redis/with-edge-cache';
+
 export const runtime = 'edge';
 
 interface GesetzInfo {
@@ -115,7 +117,7 @@ const SUCH_INDEX = [
 /**
  * GET: Liste aller verfügbaren Gesetze
  */
-export async function GET(request: NextRequest): Promise<NextResponse> {
+async function handleGet(request: NextRequest): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url);
     const detail = searchParams.get('detail');
@@ -152,6 +154,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     );
   }
 }
+
+// Öffentlicher, für alle identischer Gesetzestext → über den Edge-Cache
+// ausgeliefert. Der Wrapper schreibt bei einem Miss in Redis und setzt
+// X-Cache: MISS; den HIT bedient die Middleware.
+export const GET = withEdgeCache(handleGet);
 
 /**
  * POST: Suche in Gesetzen

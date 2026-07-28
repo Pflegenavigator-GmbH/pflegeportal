@@ -1,20 +1,36 @@
-// src/proxy
-import { NextRequest } from 'next/server';
+// src/proxy.ts
+// Globale Middleware: API-Sicherheit (Rate-Limit) + öffentlicher Edge-Cache
+// für /api/*, mehrsprachiges Routing (next-intl) für alle Seiten.
+//
+// Sicherheits-Header werden bewusst NICHT hier gesetzt, sondern zentral in
+// next.config.ts (headers() für '/:path*', inkl. CSP, HSTS, X-Frame-Options,
+// nosniff, Referrer-Policy). Eine Doppelung würde nur Konflikte riskieren.
+import { NextRequest, NextResponse } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 
 import { routing } from '@/src/i18n/routing';
+import { handleApiRequest } from '@/src/lib/redis/middleware-api';
 
 const intlMiddleware = createMiddleware(routing);
 
-export default function proxy(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
+  // API-Routen: Rate-Limit + Cache, kein Sprach-Routing.
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    try {
+      return await handleApiRequest(request);
+    } catch (error) {
+      console.error('[middleware] API-Pipeline fehlgeschlagen, lasse Anfrage durch:', error);
+      return NextResponse.next();
+    }
+  }
+
+  // Alle übrigen Seiten: next-intl-Locale-Routing.
   return intlMiddleware(request);
 }
 
 export const config = {
   matcher: [
-    // 🚀 KORREKTUR: "api" ist jetzt wieder im negativen Lookahead (?!api|...)
-    // Damit greift die Middleware für /api/... überhaupt nicht mehr ein!
-    '/((?!api|_next|assets|icons|screenshots|favicon.ico|manifest.json|sw.js|offline.html|vercel.svg|globe.svg|file.svg|window.svg|locales).*)',
+    '/((?!_next|assets|icons|screenshots|favicon.ico|manifest.json|sw.js|offline.html|vercel.svg|globe.svg|file.svg|window.svg|locales).*)',
     '/',
   ],
 };
