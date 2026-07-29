@@ -1,0 +1,47 @@
+{
+  "hero": {
+    "titel": "Presseportal & Blog",
+    "untertitel": "Aktuelle Einblicke in die Pflegepolitik, neue Features und Ressourcen für Journalisten."
+  },
+  "suche": {
+    "platzhalter": "Artikel suchen…",
+    "label": "Pressemeldungen durchsuchen"
+  },
+  "filter": {
+    "alle": "Alle"
+  },
+  "kategorie": {
+    "produktlaunch": "Produktlaunch",
+    "recht": "Recht",
+    "statistik": "Statistik",
+    "migration": "Migration"
+  },
+  "artikel": {
+    "lesen": "Ganzen Artikel lesen"
+  },
+  "treffer": {
+    "eine": "1 Meldung",
+    "mehrere": "{anzahl} Meldungen"
+  },
+  "leer": {
+    "titel": "Keine Ergebnisse gefunden",
+    "text": "Versuchen Sie einen anderen Suchbegriff oder eine andere Kategorie."
+  },
+  "kontakt": {
+    "titel": "Pressekontakt",
+    "beschreibung": "Für Interviewanfragen und Bildmaterial stehen wir Journalisten gerne zur Verfügung.",
+    "stelle": "Pressestelle PflegeNavigator",
+    "nachricht": "Nachricht schreiben"
+  },
+  "mediakit": {
+    "titel": "Media Kit",
+    "text": "Laden Sie unser offizielles Pressepaket mit Logos in hoher Auflösung, Gründerfotos und dem aktuellen Factsheet herunter.",
+    "logos": "Logos (.zip)",
+    "factsheet": "Factsheet 2026 (.pdf)"
+  },
+  "social": {
+    "titel": "Social Media",
+    "link": "Folgen Sie uns auf LinkedIn"
+  },
+  "zurueck": "Zurück zur Startseite"
+}

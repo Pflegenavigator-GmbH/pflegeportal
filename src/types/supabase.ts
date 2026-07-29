@@ -301,6 +301,57 @@ export interface Database {
         };
         Relationships: [];
       };
+      posts: {
+        Row: {
+          id: string;
+          locale: string;
+          title: string;
+          slug: string;
+          subtitle: string | null;
+          summary: string | null;
+          content: Json | null;
+          content_html: string | null;
+          category: 'produktlaunch' | 'recht' | 'statistik' | 'migration';
+          seo_meta: Json | null;
+          status: 'draft' | 'review' | 'published' | 'archived';
+          published_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          locale?: string;
+          title: string;
+          slug: string;
+          subtitle?: string | null;
+          summary?: string | null;
+          content?: Json | null;
+          content_html?: string | null;
+          category: 'produktlaunch' | 'recht' | 'statistik' | 'migration';
+          seo_meta?: Json | null;
+          status?: 'draft' | 'review' | 'published' | 'archived';
+          published_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          locale?: string;
+          title?: string;
+          slug?: string;
+          subtitle?: string | null;
+          summary?: string | null;
+          content?: Json | null;
+          content_html?: string | null;
+          category?: 'produktlaunch' | 'recht' | 'statistik' | 'migration';
+          seo_meta?: Json | null;
+          status?: 'draft' | 'review' | 'published' | 'archived';
+          published_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       pflegestuetzpunkte: {
         Row: {
           id: number;

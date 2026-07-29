@@ -1,0 +1,47 @@
+{
+  "hero": {
+    "titel": "Press & Blog",
+    "untertitel": "Current insights into care policy, new features and resources for journalists."
+  },
+  "suche": {
+    "platzhalter": "Search articles…",
+    "label": "Search press releases"
+  },
+  "filter": {
+    "alle": "All"
+  },
+  "kategorie": {
+    "produktlaunch": "Product launch",
+    "recht": "Law",
+    "statistik": "Statistics",
+    "migration": "Migration"
+  },
+  "artikel": {
+    "lesen": "Read full article"
+  },
+  "treffer": {
+    "eine": "1 release",
+    "mehrere": "{anzahl} releases"
+  },
+  "leer": {
+    "titel": "No results found",
+    "text": "Try a different search term or category."
+  },
+  "kontakt": {
+    "titel": "Press contact",
+    "beschreibung": "For interview requests and imagery we are happy to assist journalists.",
+    "stelle": "PflegeNavigator Press Office",
+    "nachricht": "Write a message"
+  },
+  "mediakit": {
+    "titel": "Media kit",
+    "text": "Download our official press package with high-resolution logos, founder photos and the current factsheet.",
+    "logos": "Logos (.zip)",
+    "factsheet": "Factsheet 2026 (.pdf)"
+  },
+  "social": {
+    "titel": "Social media",
+    "link": "Follow us on LinkedIn"
+  },
+  "zurueck": "Back to home"
+}
