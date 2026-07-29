@@ -1,10 +1,6 @@
 // src/proxy.ts
 // Globale Middleware: API-Sicherheit (Rate-Limit) + öffentlicher Edge-Cache
 // für /api/*, mehrsprachiges Routing (next-intl) für alle Seiten.
-//
-// Sicherheits-Header werden bewusst NICHT hier gesetzt, sondern zentral in
-// next.config.ts (headers() für '/:path*', inkl. CSP, HSTS, X-Frame-Options,
-// nosniff, Referrer-Policy). Eine Doppelung würde nur Konflikte riskieren.
 import { NextRequest, NextResponse } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 

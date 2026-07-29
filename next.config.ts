@@ -65,6 +65,12 @@ const nextConfig: NextConfig = {
         return [{ source: "/:path*", headers: securityHeaders }];
     },
 
+    // @sparticuz/chromium löst seinen Binary-Pfad über relative Pfade auf; ein
+    // Bundling durch Webpack/Turbopack zerbricht das. Beide Puppeteer-Pakete
+    // bleiben deshalb als externe Server-Pakete unangetastet — sonst schlägt
+    // die PDF-Erzeugung auf Vercel fehl.
+    serverExternalPackages: ["@sparticuz/chromium", "puppeteer-core"],
+
     experimental: {
         globalNotFound: true,
         optimizePackageImports: [
