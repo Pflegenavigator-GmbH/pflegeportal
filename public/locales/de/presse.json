@@ -41,7 +41,7 @@
   },
   "social": {
     "titel": "Social Media",
-    "link": "Folgen Sie uns auf LinkedIn"
+    "folgen": "Auf {netzwerk} folgen"
   },
   "zurueck": "Zurück zur Startseite",
   "zurueckListe": "Zurück zur Übersicht"

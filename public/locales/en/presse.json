@@ -41,7 +41,7 @@
   },
   "social": {
     "titel": "Social media",
-    "link": "Follow us on LinkedIn"
+    "folgen": "Follow us on {netzwerk}"
   },
   "zurueck": "Back to home",
   "zurueckListe": "Back to overview"

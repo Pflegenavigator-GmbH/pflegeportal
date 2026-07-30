@@ -1,9 +1,10 @@
 // src/app/[locale]/presse/page.tsx
-import { ArrowLeft, Download, ExternalLink, FileText, Globe, Mail, Newspaper } from 'lucide-react';
+import { ArrowLeft, Download, FileText, Mail, Newspaper } from 'lucide-react';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
 import { ladeMeldungen } from '@/src/lib/presse/queries';
+import { SOCIAL_LINKS } from '@/src/lib/social-links';
 import styles from '@/src/styles/presse.module.css';
 
 import { PresseClient } from './_components/PresseClient';
@@ -56,22 +57,23 @@ export default async function PressePage({ params }: PageProps) {
       </section>
 
       <section className={styles.seitenkarte}>
-        <div className={styles.socialZeile}>
-          <Globe size={28} aria-hidden="true" style={{ color: '#94a3b8', flexShrink: 0 }} />
-          <div>
-            <p className={styles.seitenTitelHell} style={{ fontSize: '0.875rem', fontWeight: 600 }}>
-              {t('social.titel')}
-            </p>
-            <a
-              href="https://www.linkedin.com"
-              className={styles.socialLink}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {t('social.link')} <ExternalLink size={12} aria-hidden="true" />
-            </a>
-          </div>
-        </div>
+        <h2 className={`${styles.seitenTitel} ${styles.seitenTitelHell}`}>{t('social.titel')}</h2>
+        <ul className={styles.socialListe}>
+          {SOCIAL_LINKS.map(({ name, url, icon: Icon }) => (
+            <li key={name}>
+              <a
+                href={url}
+                className={styles.socialItem}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={t('social.folgen', { netzwerk: name })}
+              >
+                <Icon size={20} className={styles.socialIcon} />
+                <span>{name}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
       </section>
     </aside>
   );
