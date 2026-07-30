@@ -34,14 +34,40 @@ Im Supabase-Dashboard einen `posts`-Eintrag anlegen bzw. `status` auf
 | Datei | Zweck |
 | --- | --- |
 | `src/lib/supabase/public.ts` | cookie-freier Anon-Client (ISR-tauglich, RLS-gebunden) |
-| `queries.ts` | `ladeMeldungen()` — published, Locale-Fallback, Volltext, Filter |
+| `queries.ts` | `ladeMeldungen()` (Liste), `ladeMeldung()` (Detail), `ladeVeroeffentlichteSlugs()` |
 | `kategorien.ts` | Kategorie-Schlüssel + Validierung |
 | `src/app/api/presse/route.ts` | öffentliche GET-Such-API für die Live-Suche |
-| `src/app/[locale]/presse/page.tsx` | Server-Component (ISR), Erststand + Hero + Sidebar |
+| `src/app/[locale]/presse/page.tsx` | Listen-Seite: Server-Component (ISR), Hero + Sidebar |
 | `…/presse/_components/PresseClient.tsx` | Client: Live-Suche + Kategoriefilter |
+| `…/presse/[slug]/page.tsx` | Detailseite: Artikel, SEO-Metadaten, 404, ISR |
+| `src/styles/presse.module.css` | ausgelagertes Design (kontrastgeprüft, reduced-motion) |
 
 Der Server rendert den Erststand (SEO/ISR); jede Interaktion fragt
-`/api/presse` ab (Postgres-Volltextsuche über `search_vector`).
+`/api/presse` ab (Postgres-Volltextsuche über `search_vector`). Die
+Detailseiten werden per `generateStaticParams` vorab statisch erzeugt.
+
+## Design & Barrierefreiheit
+
+- Das Styling liegt in `src/styles/presse.module.css` (kein Inline-Hex im JSX).
+- Redaktionelles Light-Design; Farben lokal als Custom Properties.
+- **Kontrast:** Das frühere Teal `#20b2aa` failt auf Weiß (2.85:1); für Text
+  wird deshalb `#0f766e` genutzt (AA-tauglich). Alle Text-Elemente ≥ 4.5:1.
+- **Animationen** (Karten-Auftritt, Hover) stecken vollständig hinter
+  `@media (prefers-reduced-motion: reduce)`.
+- Semantische Landmarks, Fokus-Indikatoren, Touch-Ziele ≥ 44px.
+
+## Langtext & Sicherheit (`content_html`)
+
+Die Detailseite rendert `content_html` via `dangerouslySetInnerHTML`.
+**Vertrauensgrenze:** Der Inhalt stammt ausschließlich aus dem
+Supabase-Dashboard — die RLS-Policy lässt öffentlich nur `SELECT` auf
+`published` zu, kein öffentliches Schreiben. Solange nur interne Redakteure
+schreiben, ist das vertretbar.
+
+⚠️ **Wenn künftig Editor-Rechte an Dritte delegiert werden**, sollte
+`content_html` serverseitig sanitisiert werden (z.B. `sanitize-html`), sonst
+entsteht ein Stored-XSS-Vektor. Bis dahin bewusst nicht eingebaut (keine
+zusätzliche Abhängigkeit ohne Bedarf).
 
 ## Caching & ISR
 

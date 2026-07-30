@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createPublicSupabaseClient } from '@/src/lib/supabase/public';
 
-import { ladeMeldungen } from './queries';
+import { ladeMeldung, ladeMeldungen } from './queries';
 
 // 'server-only' wirft in der jsdom-Testumgebung (Client-Kontext); neutralisieren.
 vi.mock('server-only', () => ({}));
@@ -134,5 +134,58 @@ describe('ladeMeldungen', () => {
     createClientMock.mockReturnValue(fehlerClient);
 
     await expect(ladeMeldungen({ locale: 'de' })).resolves.toEqual([]);
+  });
+});
+
+/** Detail-Query terminiert mit `.maybeSingle()` (ein Objekt oder null). */
+function fakeDetailClient(nachSchluessel: Record<string, Zeile | null>) {
+  const builder = {
+    _locale: undefined as string | undefined,
+    _slug: undefined as string | undefined,
+    select() {
+      return this;
+    },
+    eq(spalte: string, wert: string) {
+      if (spalte === 'locale') this._locale = wert;
+      if (spalte === 'slug') this._slug = wert;
+      return this;
+    },
+    maybeSingle() {
+      return Promise.resolve({
+        data: nachSchluessel[`${this._locale}:${this._slug}`] ?? null,
+        error: null,
+      });
+    },
+  };
+  return { from: () => builder } as unknown as ReturnType<typeof createPublicSupabaseClient>;
+}
+
+describe('ladeMeldung (Detail)', () => {
+  beforeEach(() => createClientMock.mockReset());
+
+  it('liefert die Meldung der angefragten Sprache', async () => {
+    createClientMock.mockImplementation(() =>
+      fakeDetailClient({ 'de:mein-slug': zeile({ id: 'de-1', slug: 'mein-slug' }) })
+    );
+
+    const meldung = await ladeMeldung('mein-slug', 'de');
+    expect(meldung?.id).toBe('de-1');
+  });
+
+  it('fällt auf Deutsch zurück, wenn die Sprache den Slug nicht hat', async () => {
+    createClientMock.mockImplementation(() =>
+      fakeDetailClient({
+        'tr:mein-slug': null,
+        'de:mein-slug': zeile({ id: 'de-1', slug: 'mein-slug' }),
+      })
+    );
+
+    const meldung = await ladeMeldung('mein-slug', 'tr');
+    expect(meldung?.id).toBe('de-1');
+  });
+
+  it('liefert null, wenn der Slug auch auf Deutsch fehlt', async () => {
+    createClientMock.mockImplementation(() => fakeDetailClient({}));
+    await expect(ladeMeldung('gibt-es-nicht', 'de')).resolves.toBeNull();
   });
 });
