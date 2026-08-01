@@ -27,14 +27,21 @@ if (process.env.ANALYZE === "true") {
 // Drittanbieter-Abruf (Google-CDN) nötig ist — siehe AvatarWidget.tsx.
 const isDev = process.env.NODE_ENV === "development";
 const scriptSrcExtra = isDev ? " 'unsafe-eval'" : "";
+
+// Umami-Cloud: `eu.umami.is` ist die EU-Region (dort liegt unser Konto),
+// `analytics.umami.is` die globale. Beide stehen hier, damit ein Regionswechsel
+// nicht zu einer stillen CSP-Blockade führt. Wer Umami selbst hostet, ergänzt
+// den eigenen Host — sonst lädt das Skript nicht.
+const UMAMI = "https://eu.umami.is https://analytics.umami.is";
+
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self'${scriptSrcExtra} 'wasm-unsafe-eval' 'unsafe-inline' https://analytics.umami.is;
-  script-src-elem 'self' 'unsafe-inline' https://analytics.umami.is;
+  script-src 'self'${scriptSrcExtra} 'wasm-unsafe-eval' 'unsafe-inline' ${UMAMI};
+  script-src-elem 'self' 'unsafe-inline' ${UMAMI};
   style-src 'self' 'unsafe-inline';
   img-src 'self' blob: data: https://*.supabase.co https://images.unsplash.com;
   font-src 'self';
-  connect-src 'self' blob: https://*.supabase.co wss://*.supabase.co https://api.openai.com https://analytics.umami.is;
+  connect-src 'self' blob: https://*.supabase.co wss://*.supabase.co https://api.openai.com ${UMAMI};
   media-src 'self' blob:;
   object-src 'none';
   base-uri 'self';

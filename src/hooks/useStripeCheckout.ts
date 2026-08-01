@@ -6,6 +6,8 @@ import { useParams } from 'next/navigation';
 import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 
+import { EREIGNISSE } from '@/src/lib/analytics/events';
+import { verfolge } from '@/src/lib/analytics/track';
 import { logger } from '@/src/lib/logger';
 
 interface UseStripeCheckoutReturn {
@@ -53,6 +55,13 @@ export function useStripeCheckout(): UseStripeCheckoutReturn {
 
         if (data.url) {
           logger.info({ checkoutUrl: data.url }, 'Checkout-URL erfolgreich erhalten, leite weiter');
+
+          // Erst hier, nicht beim Klick: Gezählt wird der Übergang zu Stripe,
+          // nicht der Versuch. Ein fehlgeschlagener Session-Aufbau würde die
+          // Conversion-Rate sonst künstlich drücken. Nur der Produktschlüssel
+          // wird übergeben — niemals der Fallcode.
+          verfolge(EREIGNISSE.checkoutAufgerufen, { paket: paketId });
+
           window.location.href = data.url;
         } else {
           throw new Error('Keine valide Checkout-URL empfangen.');
