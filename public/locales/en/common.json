@@ -432,6 +432,11 @@
       "page": "Page",
       "of": "of",
       "showing": "Showing {{from}}-{{to}} of {{total}}"
+    },
+    "footer": {
+      "links": {
+        "cookies": "Cookie settings"
+      }
     }
   },
   "language": {

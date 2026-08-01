@@ -19,6 +19,8 @@ import {
   CardFooter,
 } from '@/src/components/ui';
 import { useStripeCheckout } from '@/src/hooks/useStripeCheckout';
+import { EREIGNISSE } from '@/src/lib/analytics/events';
+import { verfolge, verfolgeEinmalig } from '@/src/lib/analytics/track';
 import { storeCaseCode } from '@/src/lib/case-storage';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/client';
@@ -73,6 +75,13 @@ export default function PflegegradStartPage(props: PageProps) {
         // localStorage + Event → AppHeaderChrome aktualisiert sich sofort
         storeCaseCode(checkCode);
 
+        // Einmalig je Stripe-Sitzung: Ohne diesen Riegel zählt ein Reload den
+        // Kauf erneut, denn session_id bleibt in der URL stehen, solange die
+        // Freischaltung noch aussteht.
+        verfolgeEinmalig(EREIGNISSE.kaufErfolgreich, searchParams.session_id ?? 'unbekannt', {
+          freigeschaltet: Boolean(status.isUnlocked),
+        });
+
         if (status.isUnlocked) {
           toast.success('Premium-Optionen erfolgreich freigeschaltet!');
           router.push(`/${locale}/pflegegrad/modul1`);
@@ -101,6 +110,7 @@ export default function PflegegradStartPage(props: PageProps) {
           return;
         }
 
+        verfolge(EREIGNISSE.rechnerGestartet, { einstieg: 'geteilt' });
         toast.success('Fall über geteilten Link geladen.');
       });
     }
@@ -137,6 +147,8 @@ export default function PflegegradStartPage(props: PageProps) {
         return;
       }
 
+      verfolge(EREIGNISSE.rechnerGestartet, { einstieg: 'geladen' });
+
       toast.success('Willkommen zurück! Daten geladen.');
       if (localStorage.getItem('pflegegrad-ergebnis')) {
         router.push(`/${locale}/pflegegrad/ergebnis`);
@@ -169,6 +181,7 @@ export default function PflegegradStartPage(props: PageProps) {
       storeCaseCode(resData.caseCode);
 
       setIsNewCase(true);
+      verfolge(EREIGNISSE.rechnerGestartet, { einstieg: 'neu' });
       toast.success('Kostenloser Fallcode generiert!');
     } catch (err) {
       logger.error({ err }, 'Fehler beim Initialisieren des neuen Falls über die API');

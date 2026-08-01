@@ -18,6 +18,7 @@ die Widerspruchsfristen und erzeugt fertige Dokumente zum Einreichen.
 | **Pflegetagebuch** | Dokumentation des Hilfebedarfs als Nachweis gegenüber dem MD |
 | **PDF-Erzeugung** | Serverseitig via Puppeteer, auf Vercel mit `@sparticuz/chromium` |
 | **Presseportal** | Redaktionelles CMS auf PostgreSQL mit Volltextsuche, ISR und On-Demand-Revalidierung |
+| **Reichweitenmessung** | Umami (EU, cookiefrei) — lädt ausschließlich nach Einwilligung, Widerruf wirkt sofort |
 | **Barrierefreiheit** | Kontrastmodus, Schriftgrößen, Bewegungsreduktion; WCAG 2.2 AA als Zielmaß |
 
 ## Technischer Stack
@@ -85,6 +86,7 @@ src/
 ├── app/api/           Route Handler
 ├── components/        UI, nach Domäne gegliedert
 ├── lib/               Fachlogik, frei von React
+│   ├── analytics/     Reichweitenmessung    → README.md
 │   ├── billing/       Freischaltung & Stripe-Anbindung
 │   ├── pdf/           PDF-Erzeugung        → README.md
 │   ├── presse/        Presse-CMS           → README.md
