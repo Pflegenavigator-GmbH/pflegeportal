@@ -26,7 +26,12 @@ export default async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next|assets|icons|screenshots|favicon.ico|manifest.json|sw.js|offline.html|vercel.svg|globe.svg|file.svg|window.svg|locales).*)',
+    // Ausgenommen: Next-Interna, statische Verzeichnisse und ALLE Dateien mit
+    // Endung (`.*\..*`). Die frühere Aufzählung einzelner Dateinamen war
+    // fragil: Neue Assets (z.B. /models/robot.glb) liefen ungewollt durch das
+    // Locale-Routing und wurden auf /de/... umgeleitet → 404.
+    // /api/* bleibt bewusst eingeschlossen (Rate-Limit + Cache).
+    '/((?!_next|_vercel|assets|icons|screenshots|locales|models|.*\\..*).*)',
     '/',
   ],
 };

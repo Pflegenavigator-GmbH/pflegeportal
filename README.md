@@ -1,36 +1,142 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PflegeNavigator EU
 
-## Getting Started
+Digitaler Begleiter durch die Pflegebegutachtung nach SGB XI. Die Plattform
+führt Betroffene und Angehörige durch die sechs Begutachtungsmodule des
+Medizinischen Dienstes, ermittelt den voraussichtlichen Pflegegrad, überwacht
+die Widerspruchsfristen und erzeugt fertige Dokumente zum Einreichen.
 
-First, run the development server:
+> **Status:** Beta. Die Anwendung ersetzt keine Rechts- oder Pflegeberatung;
+> alle Ergebnisse sind Einschätzungen auf Basis der Begutachtungs-Richtlinie.
+
+## Funktionsumfang
+
+| Bereich | Beschreibung |
+| --- | --- |
+| **Pflegegrad-Ermittlung** | Module 1–6 inkl. Kinder-Sonderregeln, gewichtete Punkteberechnung, serverseitig als Single Source of Truth |
+| **Fristen-Monitor** | Widerspruchs- und Wartefristen mit visueller Ampel, Feiertagsberechnung, Eilantrags-Hinweis (§ 84 Abs. 1 SGG, § 87 Abs. 1 SGG, § 25 SGB X) |
+| **Widerspruch** | Begründeter Schreibentwurf; Vorschau frei zugänglich, Speichern/Gutachten-Vorschau/Download hinter der Bezahlschranke |
+| **Pflegetagebuch** | Dokumentation des Hilfebedarfs als Nachweis gegenüber dem MD |
+| **PDF-Erzeugung** | Serverseitig via Puppeteer, auf Vercel mit `@sparticuz/chromium` |
+| **Presseportal** | Redaktionelles CMS auf PostgreSQL mit Volltextsuche, ISR und On-Demand-Revalidierung |
+| **Barrierefreiheit** | Kontrastmodus, Schriftgrößen, Bewegungsreduktion; WCAG 2.2 AA als Zielmaß |
+
+## Technischer Stack
+
+- **Next.js 16** (App Router, React Server Components) · **TypeScript** (strict)
+- **Supabase** (PostgreSQL, Row Level Security) · **Stripe** (Zahlungen)
+- **next-intl** (Mehrsprachigkeit DE/EN) · **Tailwind CSS 4** + CSS-Module
+- **Upstash Redis** (Edge-Rate-Limit und öffentlicher Cache)
+- **Vitest** (Unit) · **Playwright** (E2E)
+
+> ⚠️ **Diese Next.js-Version weicht von älteren Konventionen ab.** Die
+> Middleware liegt in `src/proxy.ts` statt `middleware.ts`. Vor Änderungen an
+> Framework-APIs bitte `node_modules/next/dist/docs/` konsultieren — siehe
+> `AGENTS.md`.
+
+## Schnellstart
 
 ```bash
+npm ci
+cp .env.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Die Anwendung läuft anschließend auf http://localhost:3000 und leitet auf die
+Standardsprache (`/de`) um.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Umgebungsvariablen
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Alle Variablen sind in `.env.example` dokumentiert. Pflicht sind Supabase,
+Stripe und Brevo; Upstash, der Puppeteer-Pfad und `REVALIDATE_SECRET` sind
+optional und degradieren sauber, wenn sie fehlen.
 
-## Learn More
+🔐 **`SUPABASE_SERVICE_ROLE_KEY` umgeht die Row Level Security und darf
+ausschließlich serverseitig verwendet werden** — niemals mit `NEXT_PUBLIC_`
+präfixen, nie in Client Components importieren.
 
-To learn more about Next.js, take a look at the following resources:
+### Datenbank
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Die Schemata liegen als SQL im Repository und werden im Supabase-SQL-Editor
+ausgeführt:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Datei | Inhalt |
+| --- | --- |
+| `src/lib/presse/schema.sql` | `posts`-Tabelle, RLS-Policies, `tsvector`-Suchindex |
+| `src/lib/widerspruch/bescheid-datum.sql` | Spalte `bescheid_datum` an `cases` |
+| `src/lib/monitoring/supabase-monitoring-functions.sql` | Monitoring-Funktionen |
 
-## Deploy on Vercel
+## Skripte
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run dev            # Entwicklungsserver
+npm run build          # Produktions-Build
+npm run typecheck      # tsc --noEmit
+npm run lint           # ESLint
+npm run format:check   # Prettier prüfen (format:fix korrigiert)
+npm test               # Vitest
+npm run test:e2e       # Playwright
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Projektstruktur
+
+```
+src/
+├── app/[locale]/      Seiten (App Router, mehrsprachig)
+├── app/api/           Route Handler
+├── components/        UI, nach Domäne gegliedert
+├── lib/               Fachlogik, frei von React
+│   ├── billing/       Freischaltung & Stripe-Anbindung
+│   ├── pdf/           PDF-Erzeugung        → README.md
+│   ├── presse/        Presse-CMS           → README.md
+│   ├── redis/         Edge-Cache & Limits  → README.md
+│   └── widerspruch/   Fristen & Schreiben
+├── styles/            CSS-Module
+├── i18n/              next-intl-Konfiguration
+└── proxy.ts           Middleware (Rate-Limit, Cache, Locale-Routing)
+```
+
+Fachlogik gehört nach `src/lib/` und bleibt dort frei von React-Abhängigkeiten
+— das hält sie testbar und wiederverwendbar. Die oben markierten Unterordner
+haben eigene READMEs mit Details und Betriebshinweisen.
+
+## Qualitätssicherung
+
+Jeder Pull Request auf `main` oder `develop` durchläuft `.github/workflows/`:
+
+| Workflow | Prüfung |
+| --- | --- |
+| **CI → Lint, Format & Typecheck** | ESLint, Prettier, TypeScript |
+| **CI → Tests** | Vitest |
+| **CI → Build** | Produktions-Build |
+| **CI → Security** | Snyk Open Source (Abhängigkeiten) + Snyk Code (statische Code-Analyse), blockierend ab High; `npm audit` als Gegenprobe |
+| **CodeQL** | Statische Analyse — **non-blocking**, greift erst wieder mit GitHub Advanced Security (siehe unten) |
+| **Branch-Restrictions** | Schutz der Zielbranches |
+
+Der Security-Job benötigt das Repository-Secret **`SNYK_TOKEN`**
+(Snyk → Account Settings → Auth Token).
+
+Da dieses Repository privat ist, setzt CodeQL Code Scanning **GitHub Advanced
+Security** voraus. Der Workflow bleibt deshalb liegen, ist aber auf
+`continue-on-error` gestellt und blockiert keine Pull Requests; aktives
+SAST-Gate ist Snyk Code. Wird GHAS aktiviert, greift CodeQL sofort wieder —
+dann sollte der Snyk-Code-Schritt entfallen, um doppelte Befunde zu vermeiden.
+
+Die Sicherheitslage, bewusst akzeptierte Befunde und deren Begründung stehen in
+[`SECURITY.md`](SECURITY.md).
+
+## Deployment
+
+Ziel ist **Vercel**. Der Build läuft als `output: "standalone"`; Chromium wird
+in der Serverless-Umgebung automatisch über `@sparticuz/chromium` aufgelöst
+(siehe `src/lib/pdf/README.md`). Sicherheits-Header samt Content Security
+Policy setzt `next.config.ts`.
+
+Einmalig einzurichten:
+
+1. Umgebungsvariablen in Vercel hinterlegen (siehe `.env.example`).
+2. Stripe-Webhook auf `/api/stripe/webhook` zeigen lassen.
+3. Supabase Database Webhook auf `posts` → `/api/revalidate` (Presseportal).
+
+## Lizenz
+
+Proprietär. Alle Rechte vorbehalten.

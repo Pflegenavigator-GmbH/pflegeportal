@@ -1,16 +1,41 @@
 # Sicherheit
 
-## Audit-Haltung
+## Prüfungen im CI
 
-Maßgeblich ist der **Produktions-Audit**:
+Der Job `security` in `.github/workflows/ci.yml` ist **blockierend ab
+Schweregrad High** und umfasst drei Prüfungen:
+
+| Prüfung | Werkzeug | Gegenstand |
+| --- | --- | --- |
+| Abhängigkeiten | Snyk Open Source | Bekannte Lücken in Produktions-Paketen |
+| Eigener Code (SAST) | Snyk Code | Injection, unsichere Datenflüsse u.ä. |
+| Gegenprobe | `npm audit` | Zweitmeinung ohne Drittanbieter, informativ |
+
+Der Snyk-Scan benötigt das Repository-Secret `SNYK_TOKEN`.
+
+### Warum Snyk statt CodeQL
+
+CodeQL Code Scanning setzt auf **privaten** Repositories GitHub Advanced
+Security voraus. Da dieses Repository privat ist, übernimmt **Snyk Code** die
+statische Analyse des eigenen Codes — sonst entstünde eine Lücke: Snyk Open
+Source prüft nur Abhängigkeiten, nicht den eigenen Quelltext.
+
+`.github/workflows/codeql.yml` bleibt bewusst bestehen, steht aber auf
+`continue-on-error: true` und blockiert keine Pull Requests. Sobald GHAS
+aktiviert wird, greift CodeQL ohne weitere Änderung wieder; dann sollte der
+Snyk-Code-Schritt entfallen, damit dieselben Befunde nicht doppelt auflaufen.
+
+### Produktions-Audit lokal
+
+Maßgeblich für Handarbeit bleibt der Produktions-Audit:
 
 ```bash
 npm audit --omit=dev --audit-level=high
 ```
 
-Dieser Befehl läuft im CI (Job `audit`) und muss `found 0 vulnerabilities`
-liefern. Er prüft ausschließlich Abhängigkeiten, die im ausgelieferten Code
-landen — nur diese sind für Nutzer relevant.
+Er muss `found 0 vulnerabilities` liefern und prüft ausschließlich
+Abhängigkeiten, die im ausgelieferten Code landen — nur diese sind für Nutzer
+relevant. Auch `snyk test` scannt standardmäßig nur Produktions-Abhängigkeiten.
 
 Ein voller `npm audit` (inkl. `devDependencies`) kann zusätzliche Findings
 zeigen, die Build-/Lint-Werkzeuge betreffen. Solche Findings erreichen weder

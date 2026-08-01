@@ -8,6 +8,7 @@ import '../globals.css';
 import '../i18n.css';
 
 import { AccessibilityMenu } from '@/src/components/a11y/AccessibilityMenu';
+import AvatarStage from '@/src/components/Avatar/AvatarStage';
 import BetaBanner from '@/src/components/BetaBanner';
 import { CookieBanner } from '@/src/components/legal/CookieBanner';
 import AppFooterChrome from '@/src/components/navigation/AppFooterChrome';
@@ -90,6 +91,8 @@ export default async function LocaleLayout({
           <AccessibilityMenu />
         </NextIntlClientProvider>
         <CookieBanner />
+
+        <AvatarStage />
       </body>
     </html>
   );
