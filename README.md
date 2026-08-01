@@ -108,18 +108,18 @@ Jeder Pull Request auf `main` oder `develop` durchläuft `.github/workflows/`:
 | **CI → Lint, Format & Typecheck** | ESLint, Prettier, TypeScript |
 | **CI → Tests** | Vitest |
 | **CI → Build** | Produktions-Build |
-| **CI → Security** | Snyk Open Source (Abhängigkeiten) + Snyk Code (statische Code-Analyse), blockierend ab High; `npm audit` als Gegenprobe |
-| **CodeQL** | Statische Analyse — **non-blocking**, greift erst wieder mit GitHub Advanced Security (siehe unten) |
+| **CI → Security** | Snyk Open Source (Abhängigkeiten), blockierend ab High; `npm audit` als Gegenprobe |
+| **CodeQL** | Statische Analyse des eigenen Codes (`security-extended`), blockierend |
 | **Branch-Restrictions** | Schutz der Zielbranches |
 
 Der Security-Job benötigt das Repository-Secret **`SNYK_TOKEN`**
 (Snyk → Account Settings → Auth Token).
 
-Da dieses Repository privat ist, setzt CodeQL Code Scanning **GitHub Advanced
-Security** voraus. Der Workflow bleibt deshalb liegen, ist aber auf
-`continue-on-error` gestellt und blockiert keine Pull Requests; aktives
-SAST-Gate ist Snyk Code. Wird GHAS aktiviert, greift CodeQL sofort wieder —
-dann sollte der Snyk-Code-Schritt entfallen, um doppelte Befunde zu vermeiden.
+Die beiden Sicherheitsprüfungen ergänzen sich und ersetzen einander nicht:
+**Snyk** prüft die Abhängigkeiten, **CodeQL** den eigenen Quelltext. Auf
+öffentlichen Repositories ist CodeQL kostenlos; wird das Repository privat
+gestellt, braucht es GitHub Advanced Security — der Ersatz wäre dann Snyk Code
+(siehe Kommentar im CI-Workflow).
 
 Die Sicherheitslage, bewusst akzeptierte Befunde und deren Begründung stehen in
 [`SECURITY.md`](SECURITY.md).

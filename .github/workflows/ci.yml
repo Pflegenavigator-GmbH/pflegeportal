@@ -145,16 +145,12 @@ jobs:
           # (ESLint-Kette) und sind zur Laufzeit nicht erreichbar (SECURITY.md).
           args: --severity-threshold=high
 
-      # Statische Analyse des EIGENEN Codes (SAST) — das, was Snyk Open Source
-      # NICHT leistet und was bisher CodeQL abgedeckt hat (dort wurden u.a.
-      # Log-Injection und Prototype Pollution gefunden). Auf privaten Repos
-      # braucht CodeQL GitHub Advanced Security; Snyk Code ist die Alternative.
-      # Muss in der Snyk-Organisation einmalig aktiviert sein.
-      - name: Snyk Code (statische Code-Analyse, ab High)
-        if: always()
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: npx snyk code test --severity-threshold=high
+      # Kein Snyk Code hier: die statische Analyse des eigenen Codes übernimmt
+      # CodeQL (.github/workflows/codeql.yml), das auf öffentlichen
+      # Repositories kostenlos läuft. Zwei SAST-Werkzeuge nebeneinander
+      # erzeugen doppelte Befunde ohne Mehrwert. Wird das Repository wieder
+      # privat, braucht CodeQL GitHub Advanced Security — dann ist
+      # `npx snyk code test --severity-threshold=high` der Ersatz.
 
       # Zweite Meinung ohne Drittanbieter: läuft auch dann, wenn der Snyk-Schritt
       # gescheitert ist, und deckt den Fall ab, dass das Snyk-Kontingent für

@@ -2,28 +2,41 @@
 
 ## Prüfungen im CI
 
-Der Job `security` in `.github/workflows/ci.yml` ist **blockierend ab
-Schweregrad High** und umfasst drei Prüfungen:
+Zwei Werkzeuge mit unterschiedlichem Gegenstand — sie ergänzen sich und
+ersetzen einander **nicht**:
 
-| Prüfung | Werkzeug | Gegenstand |
-| --- | --- | --- |
-| Abhängigkeiten | Snyk Open Source | Bekannte Lücken in Produktions-Paketen |
-| Eigener Code (SAST) | Snyk Code | Injection, unsichere Datenflüsse u.ä. |
-| Gegenprobe | `npm audit` | Zweitmeinung ohne Drittanbieter, informativ |
+| Prüfung | Werkzeug | Wo | Gegenstand |
+| --- | --- | --- | --- |
+| Abhängigkeiten | Snyk Open Source | CI-Job `security` | Bekannte Lücken in Produktions-Paketen |
+| Eigener Code (SAST) | CodeQL `security-extended` | `codeql.yml` | Injection, unsichere Datenflüsse u.ä. |
+| Gegenprobe | `npm audit` | CI-Job `security` | Zweitmeinung ohne Drittanbieter, informativ |
 
-Der Snyk-Scan benötigt das Repository-Secret `SNYK_TOKEN`.
+Beide sind **blockierend ab Schweregrad High**. Der Snyk-Scan benötigt das
+Repository-Secret `SNYK_TOKEN`.
 
-### Warum Snyk statt CodeQL
+CodeQL ist auf öffentlichen Repositories kostenlos. Wird das Repository privat
+gestellt, setzt Code Scanning **GitHub Advanced Security** voraus; ohne GHAS
+scheitert der Ergebnis-Upload. Ersatz wäre dann `npx snyk code test` im
+`security`-Job (Kommentar dort vorhanden). Solange CodeQL läuft, bleibt Snyk
+Code bewusst draußen — zwei SAST-Werkzeuge erzeugen doppelte Befunde.
 
-CodeQL Code Scanning setzt auf **privaten** Repositories GitHub Advanced
-Security voraus. Da dieses Repository privat ist, übernimmt **Snyk Code** die
-statische Analyse des eigenen Codes — sonst entstünde eine Lücke: Snyk Open
-Source prüft nur Abhängigkeiten, nicht den eigenen Quelltext.
+### Log-Injection: warum `sauberFuerLog` so aussieht, wie es aussieht
 
-`.github/workflows/codeql.yml` bleibt bewusst bestehen, steht aber auf
-`continue-on-error: true` und blockiert keine Pull Requests. Sobald GHAS
-aktiviert wird, greift CodeQL ohne weitere Änderung wieder; dann sollte der
-Snyk-Code-Schritt entfallen, damit dieselben Befunde nicht doppelt auflaufen.
+`src/lib/log-safe.ts` bereinigt nutzergesteuerte Werte vor `console.*`. Die
+Schreibweise der `replace`-Aufrufe ist nicht kosmetisch: CodeQL erkennt einen
+Sanitizer nur, wenn der ersetzte Wert konstant auflösbar ist
+(`StringReplaceCall.getAReplacedString()` castet die Regex-Wurzel auf
+`RegExpConstant`). Nur ein nacktes Literal wie `/\n/g` erfüllt das.
+
+Nicht erkannt werden — obwohl zur Laufzeit gleichwertig:
+
+- `/[\r\n]+/g` — Zeichenklasse unter einem Quantor, keine Konstanten-Wurzel
+- `/\r|\n/g` — Alternation, ebenfalls keine Konstanten-Wurzel
+- eine Zeichen-für-Zeichen-Schleife
+
+Beide zuvor probierten Varianten (Schleife, Zeichenklasse) ließen den Befund
+`js/log-injection` bestehen. Die aktuelle Form mit getrennten `/\n/g`- und
+`/\r/g`-Aufrufen darf deshalb nicht „vereinfacht" werden.
 
 ### Produktions-Audit lokal
 

@@ -8,17 +8,28 @@
  * begrenzt die Länge gegen Log-Flooding. Reine String-Operation, damit auch in
  * der Edge-Runtime nutzbar (wo pino mit seiner Serialisierung fehlt).
  *
- * Die Bereinigung erfolgt bewusst über `String.replace` mit einem Regex, der
- * die Zeilenumbrüche erfasst — diese Form wird von der statischen Analyse
- * (CodeQL js/log-injection) als Sanitizer erkannt, eine gleichwertige
- * Zeichen-für-Zeichen-Schleife dagegen nicht.
+ * ACHTUNG — die Form der ersten beiden `replace`-Aufrufe ist bewusst gewählt
+ * und darf nicht „vereinfacht" werden:
+ *
+ * CodeQL (js/log-injection) erkennt einen Sanitizer nur, wenn der ersetzte
+ * Wert konstant auflösbar ist — `StringReplaceCall.getAReplacedString()`
+ * castet die Regex-Wurzel auf `RegExpConstant`. Erfüllt ist das nur von einem
+ * nackten Literal wie `/\n/g`. Kompaktere Schreibweisen wie `/[\r\n]+/g`
+ * (Zeichenklasse unter einem Quantor) oder `/\r|\n/g` (Alternation) sind zur
+ * Laufzeit gleichwertig, haben aber keine Konstanten-Wurzel — der Befund
+ * bleibt dann bestehen, obwohl der Code korrekt bereinigt. Eine
+ * Zeichen-für-Zeichen-Schleife wird ebenfalls nicht erkannt.
  */
 export function sauberFuerLog(wert: unknown, maxLaenge = 200): string {
   const text = typeof wert === 'string' ? wert : String(wert);
 
-  // CR und LF sind die eigentliche Injection-Gefahr; der zweite Durchlauf
-  // neutralisiert Tabs und übrige C0-Steuerzeichen sowie DEL.
-  const bereinigt = text.replace(/[\r\n]+/g, ' ').replace(/[\x00-\x1F\x7F]/g, ' ');
+  const bereinigt = text
+    // CR und LF sind die eigentliche Injection-Gefahr — einzeln und global,
+    // damit die statische Analyse den Sanitizer erkennt (siehe oben).
+    .replace(/\n/g, ' ')
+    .replace(/\r/g, ' ')
+    // Danach die übrigen C0-Steuerzeichen und DEL (Tab, ESC-Sequenzen …).
+    .replace(/[\x00-\x1F\x7F]/g, ' ');
 
   return bereinigt.length > maxLaenge ? `${bereinigt.slice(0, maxLaenge)}…` : bereinigt;
 }

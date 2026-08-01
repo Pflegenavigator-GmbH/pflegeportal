@@ -20,13 +20,6 @@ jobs:
     name: Analyze (javascript-typescript)
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    # Seit das Repository privat ist, setzt CodeQL Code Scanning GitHub
-    # Advanced Security voraus. Ohne GHAS scheitert der Upload der Ergebnisse
-    # ("Advanced Security must be enabled for this repository"). Der Workflow
-    # bleibt bewusst liegen, damit er sofort wieder greift, sobald GHAS
-    # aktiviert wird — bis dahin darf er keine PRs blockieren.
-    # Aktives SAST-Gate ist derweil Snyk Code im CI-Job `security`.
-    continue-on-error: true
     permissions:
       security-events: write
       packages: read
