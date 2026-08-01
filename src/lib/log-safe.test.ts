@@ -12,9 +12,22 @@ describe('sauberFuerLog', () => {
   });
 
   it('neutralisiert CR, LF und weitere Steuerzeichen', () => {
-    // Aufeinanderfolgende Zeilenumbrüche werden zu einem Leerzeichen kollabiert.
-    expect(sauberFuerLog('a\r\nb\tc d')).toBe('a b c d');
+    // Jedes Steuerzeichen wird durch genau ein Leerzeichen ersetzt (1:1),
+    // aus \r\n werden also zwei. Das ist gewollt: die Länge bleibt erhalten
+    // und die Ersetzung ist ohne Regex-Kollaps nachvollziehbar.
+    expect(sauberFuerLog('a\r\nb\tc d')).toBe('a  b c d');
     expect(sauberFuerLog('a\nb\nc')).toBe('a b c');
+  });
+
+  it('lässt keine Steuerzeichen übrig', () => {
+    // Gegenprobe über den gesamten C0-Bereich plus DEL.
+    const alleSteuerzeichen = Array.from({ length: 0x20 }, (_, i) => String.fromCharCode(i))
+      .concat('\x7F')
+      .join('');
+    const sauber = sauberFuerLog(alleSteuerzeichen, 500);
+
+    expect(sauber).toBe(' '.repeat(0x21));
+    expect(/[\x00-\x1F\x7F]/.test(sauber)).toBe(false);
   });
 
   it('lässt normalen Text unverändert', () => {

@@ -17,16 +17,24 @@ if (process.env.ANALYZE === "true") {
 
 // CSP-Konfiguration
 // 'unsafe-eval' braucht nur der Dev-Server (React Refresh) — in Produktion raus.
+//
+// Für den 3D-Avatar (three.js) nötig und bitte nicht entfernen:
+//  - 'wasm-unsafe-eval' in script-src: der Draco-Decoder ist WebAssembly.
+//    Ohne diesen Eintrag läuft es in Dev (dort greift 'unsafe-eval'), scheitert
+//    aber in Produktion.
+//  - blob: in connect-src: three lädt Texturen aus dem GLB über Blob-URLs.
+// Der Draco-Decoder wird bewusst lokal aus /public/draco geladen, damit kein
+// Drittanbieter-Abruf (Google-CDN) nötig ist — siehe AvatarWidget.tsx.
 const isDev = process.env.NODE_ENV === "development";
 const scriptSrcExtra = isDev ? " 'unsafe-eval'" : "";
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self'${scriptSrcExtra} 'unsafe-inline' https://analytics.umami.is;
+  script-src 'self'${scriptSrcExtra} 'wasm-unsafe-eval' 'unsafe-inline' https://analytics.umami.is;
   script-src-elem 'self' 'unsafe-inline' https://analytics.umami.is;
   style-src 'self' 'unsafe-inline';
   img-src 'self' blob: data: https://*.supabase.co https://images.unsplash.com;
   font-src 'self';
-  connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openai.com https://analytics.umami.is;
+  connect-src 'self' blob: https://*.supabase.co wss://*.supabase.co https://api.openai.com https://analytics.umami.is;
   media-src 'self' blob:;
   object-src 'none';
   base-uri 'self';

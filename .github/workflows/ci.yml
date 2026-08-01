@@ -107,15 +107,16 @@ jobs:
       - name: Next.js Build
         run: npm run build
 
-  audit:
-    # Bewusst nicht-blockierend: npm audit schlägt oft wegen transitiv
-    # gemeldeter Advisories fehl, auf die wir keinen Einfluss haben.
-    # Als eigener Job bleibt das Ergebnis trotzdem im PR sichtbar,
-    # statt in einem grünen Log unterzugehen.
-    name: Dependency Audit (informativ)
+  security:
+    # Abhängigkeits-Scan mit Snyk. Anders als der frühere npm-audit-Job ist
+    # dieser hier BLOCKIEREND — er bricht ab, sobald eine High/Critical-Lücke
+    # in einer Produktions-Abhängigkeit auftaucht.
+    #
+    # Voraussetzung: Repository-Secret SNYK_TOKEN (Snyk → Account Settings →
+    # Auth Token). Fehlt es, schlägt der Job fehl — bewusst laut statt still.
+    name: Security (Abhängigkeiten)
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-    continue-on-error: true
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
 
@@ -124,8 +125,37 @@ jobs:
           node-version: "22"
           cache: "npm"
 
+      # Snyk kann npm-Projekte zwar allein aus der package-lock.json lesen,
+      # mit installiertem Baum sind die Ergebnisse aber verlässlicher
+      # (aufgelöste `overrides`, siehe SECURITY.md).
       - name: Abhängigkeiten installieren
         run: npm ci
 
-      - name: npm audit (Produktions-Abhängigkeiten, ab High)
+      - name: Snyk Open Source (ab High)
+        # Hinweis zur Härtung: `@master` ist Snyks dokumentierte Nutzung, hängt
+        # aber an einem beweglichen Branch. Für maximale Lieferketten-Sicherheit
+        # stattdessen auf einen Commit-SHA pinnen.
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          # Bricht den Build nur ab, wenn High/Critical Lücken gefunden werden.
+          # `snyk test` prüft standardmäßig NUR Produktions-Abhängigkeiten —
+          # genau richtig: die bekannten Funde hängen alle an Dev-Werkzeugen
+          # (ESLint-Kette) und sind zur Laufzeit nicht erreichbar (SECURITY.md).
+          args: --severity-threshold=high
+
+      # Kein Snyk Code hier: die statische Analyse des eigenen Codes übernimmt
+      # CodeQL (.github/workflows/codeql.yml), das auf öffentlichen
+      # Repositories kostenlos läuft. Zwei SAST-Werkzeuge nebeneinander
+      # erzeugen doppelte Befunde ohne Mehrwert. Wird das Repository wieder
+      # privat, braucht CodeQL GitHub Advanced Security — dann ist
+      # `npx snyk code test --severity-threshold=high` der Ersatz.
+
+      # Zweite Meinung ohne Drittanbieter: läuft auch dann, wenn der Snyk-Schritt
+      # gescheitert ist, und deckt den Fall ab, dass das Snyk-Kontingent für
+      # private Repos aufgebraucht ist.
+      - name: npm audit (Gegenprobe, informativ)
+        if: always()
+        continue-on-error: true
         run: npm audit --omit=dev --audit-level=high

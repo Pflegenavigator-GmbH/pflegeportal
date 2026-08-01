@@ -1,16 +1,54 @@
 # Sicherheit
 
-## Audit-Haltung
+## Prüfungen im CI
 
-Maßgeblich ist der **Produktions-Audit**:
+Zwei Werkzeuge mit unterschiedlichem Gegenstand — sie ergänzen sich und
+ersetzen einander **nicht**:
+
+| Prüfung | Werkzeug | Wo | Gegenstand |
+| --- | --- | --- | --- |
+| Abhängigkeiten | Snyk Open Source | CI-Job `security` | Bekannte Lücken in Produktions-Paketen |
+| Eigener Code (SAST) | CodeQL `security-extended` | `codeql.yml` | Injection, unsichere Datenflüsse u.ä. |
+| Gegenprobe | `npm audit` | CI-Job `security` | Zweitmeinung ohne Drittanbieter, informativ |
+
+Beide sind **blockierend ab Schweregrad High**. Der Snyk-Scan benötigt das
+Repository-Secret `SNYK_TOKEN`.
+
+CodeQL ist auf öffentlichen Repositories kostenlos. Wird das Repository privat
+gestellt, setzt Code Scanning **GitHub Advanced Security** voraus; ohne GHAS
+scheitert der Ergebnis-Upload. Ersatz wäre dann `npx snyk code test` im
+`security`-Job (Kommentar dort vorhanden). Solange CodeQL läuft, bleibt Snyk
+Code bewusst draußen — zwei SAST-Werkzeuge erzeugen doppelte Befunde.
+
+### Log-Injection: warum `sauberFuerLog` so aussieht, wie es aussieht
+
+`src/lib/log-safe.ts` bereinigt nutzergesteuerte Werte vor `console.*`. Die
+Schreibweise der `replace`-Aufrufe ist nicht kosmetisch: CodeQL erkennt einen
+Sanitizer nur, wenn der ersetzte Wert konstant auflösbar ist
+(`StringReplaceCall.getAReplacedString()` castet die Regex-Wurzel auf
+`RegExpConstant`). Nur ein nacktes Literal wie `/\n/g` erfüllt das.
+
+Nicht erkannt werden — obwohl zur Laufzeit gleichwertig:
+
+- `/[\r\n]+/g` — Zeichenklasse unter einem Quantor, keine Konstanten-Wurzel
+- `/\r|\n/g` — Alternation, ebenfalls keine Konstanten-Wurzel
+- eine Zeichen-für-Zeichen-Schleife
+
+Beide zuvor probierten Varianten (Schleife, Zeichenklasse) ließen den Befund
+`js/log-injection` bestehen. Die aktuelle Form mit getrennten `/\n/g`- und
+`/\r/g`-Aufrufen darf deshalb nicht „vereinfacht" werden.
+
+### Produktions-Audit lokal
+
+Maßgeblich für Handarbeit bleibt der Produktions-Audit:
 
 ```bash
 npm audit --omit=dev --audit-level=high
 ```
 
-Dieser Befehl läuft im CI (Job `audit`) und muss `found 0 vulnerabilities`
-liefern. Er prüft ausschließlich Abhängigkeiten, die im ausgelieferten Code
-landen — nur diese sind für Nutzer relevant.
+Er muss `found 0 vulnerabilities` liefern und prüft ausschließlich
+Abhängigkeiten, die im ausgelieferten Code landen — nur diese sind für Nutzer
+relevant. Auch `snyk test` scannt standardmäßig nur Produktions-Abhängigkeiten.
 
 Ein voller `npm audit` (inkl. `devDependencies`) kann zusätzliche Findings
 zeigen, die Build-/Lint-Werkzeuge betreffen. Solche Findings erreichen weder
