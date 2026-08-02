@@ -111,8 +111,17 @@ Jeder Pull Request auf `main` oder `develop` durchläuft `.github/workflows/`:
 | **CI → Tests** | Vitest |
 | **CI → Build** | Produktions-Build |
 | **CI → Security** | Snyk Open Source (Abhängigkeiten), blockierend ab High; `npm audit` als Gegenprobe |
+| **CI → Secret Scanning** | Gitleaks über die gesamte Git-History, blockierend |
+| **CI → Trivy** | Dateisystem- und Konfigurations-Scan, blockierend ab High |
+| **CI → E2E Smoke Tests** | Playwright gegen den Produktions-Build (Chromium), blockierend |
+| **CI → Bundle Size Guard** | PR-Kommentar bei wachsendem Client-Bundle, nicht blockierend |
 | **CodeQL** | Statische Analyse des eigenen Codes (`security-extended`), blockierend |
 | **Branch-Restrictions** | Schutz der Zielbranches |
+
+Alle acht Jobs laufen **parallel** (keine `needs`-Abhängigkeiten); die
+Gesamtlaufzeit richtet sich nach dem langsamsten, nicht nach der Summe.
+Playwright ist auf der CI bewusst auf Chromium und wenige, breite Tests
+beschränkt — die Feinprüfung leistet Vitest.
 
 Der Security-Job benötigt das Repository-Secret **`SNYK_TOKEN`**
 (Snyk → Account Settings → Auth Token).

@@ -2,17 +2,61 @@
 
 ## Prüfungen im CI
 
-Zwei Werkzeuge mit unterschiedlichem Gegenstand — sie ergänzen sich und
-ersetzen einander **nicht**:
+Werkzeuge mit unterschiedlichem Gegenstand — sie ergänzen sich und ersetzen
+einander **nicht**:
 
-| Prüfung | Werkzeug | Wo | Gegenstand |
-| --- | --- | --- | --- |
-| Abhängigkeiten | Snyk Open Source | CI-Job `security` | Bekannte Lücken in Produktions-Paketen |
-| Eigener Code (SAST) | CodeQL `security-extended` | `codeql.yml` | Injection, unsichere Datenflüsse u.ä. |
-| Gegenprobe | `npm audit` | CI-Job `security` | Zweitmeinung ohne Drittanbieter, informativ |
+| Prüfung | Werkzeug | Wo | Blockierend | Gegenstand |
+| --- | --- | --- | --- | --- |
+| Abhängigkeiten | Snyk Open Source | Job `security` | ja | Bekannte Lücken in Produktions-Paketen |
+| Eigener Code (SAST) | CodeQL `security-extended` | `codeql.yml` | ja | Injection, unsichere Datenflüsse u.ä. |
+| Zugangsdaten | Gitleaks | Job `secrets-scan` | ja | Secrets in der gesamten Git-History |
+| Dateisystem / IaC | Trivy | Job `trivy` | ja | Abhängigkeiten und Konfigurationsdateien |
+| Gegenprobe | `npm audit` | Job `security` | nein | Zweitmeinung ohne Drittanbieter |
+| Laufzeit | Playwright | Job `e2e` | ja | Startet der Produktions-Build im Browser? |
+| Bundle-Größe | compressed-size-action | Job `bundle-size` | nein | Kommentar am PR bei Wachstum |
 
-Beide sind **blockierend ab Schweregrad High**. Der Snyk-Scan benötigt das
-Repository-Secret `SNYK_TOKEN`.
+Alle blockierenden Gates greifen ab Schweregrad **High**. Der Snyk-Scan
+benötigt das Repository-Secret `SNYK_TOKEN`; alle übrigen Werkzeuge sind Open
+Source und brauchen weder Konto noch Lizenz.
+
+### Gitleaks: warum die CLI statt der Action
+
+`gitleaks/gitleaks-action@v2` ist für **Organisationen** lizenzpflichtig
+(`GITLEAKS_LICENSE`). Dieses Repository gehört einer GmbH-Organisation. Die
+CLI selbst steht unter Apache-2.0 und ist uneingeschränkt frei — deshalb läuft
+sie im Job direkt über das offizielle Container-Image.
+
+Zwei Details, die nicht kosmetisch sind:
+
+- **`fetch-depth: 0`** — ohne die volle History sieht Gitleaks nur den letzten
+  Commit. Ein Schlüssel, der vor drei Commits hinzugefügt und danach wieder
+  entfernt wurde, steht weiterhin im Verlauf und ist damit kompromittiert.
+- **`--redact`** — ohne diese Option schreibt Gitleaks den gefundenen
+  Klartext-Schlüssel ins Job-Log. Bei einem öffentlichen Repository wäre das
+  für jeden lesbar; der Fund würde das Leck selbst verbreiten.
+
+**Bekannte Ausnahme:** `.gitleaks.toml` nimmt `.env.example` aus. Die Datei ist
+absichtlich versioniert und enthält Attrappen mit Zählmustern
+(`sk_test_1234…`, `whsec_123456…`), die Gitleaks' Stripe- und
+Generic-API-Key-Regeln erwartungsgemäß treffen — acht Funde, alle unecht,
+geprüft am 02.08.2026. Ohne die Ausnahme wäre der Job dauerhaft rot und würde
+genau das verlieren, wofür er da ist. Die Ausnahme ist auf diesen einen
+Dateipfad verankert; ein echter Schlüssel in jeder anderen Datei wird
+weiterhin gefunden (gegengeprüft).
+
+### Trivy: heutiger Nutzen, ehrlich eingeordnet
+
+Lokal gegen Trivy v0.72 geprüft: Der `vuln`-Scan liest `package-lock.json` und
+meldet **0 Funde** — dieselbe Grundlage, die Snyk bereits blockierend prüft.
+Der `misconfig`-Scanner unterstützt Dockerfile, Terraform, Kubernetes, Helm
+und CloudFormation; nichts davon existiert in diesem Repository, er meldet
+entsprechend „Not scanned". GitHub-Actions-Workflows gehören **nicht** zu
+seinen Zielen.
+
+Der Job trägt heute also nichts bei, was Snyk nicht schon leistet. Er bleibt
+trotzdem: Er greift ohne Änderung, sobald ein Dockerfile oder IaC dazukommt,
+und hat anders als Snyk kein Scan-Kontingent. Wer die Dublette stört, kann ihn
+streichen — dann bleibt die Abhängigkeitsprüfung allein bei Snyk.
 
 CodeQL ist auf öffentlichen Repositories kostenlos. Wird das Repository privat
 gestellt, setzt Code Scanning **GitHub Advanced Security** voraus; ohne GHAS

@@ -159,3 +159,173 @@ jobs:
         if: always()
         continue-on-error: true
         run: npm audit --omit=dev --audit-level=high
+
+  secrets-scan:
+    name: Secret Scanning (Gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Ohne die volle History sieht Gitleaks nur den letzten Commit.
+          # Ein Secret, das vor drei Commits hinzugefügt und danach wieder
+          # entfernt wurde, steht weiterhin im Verlauf — und ist damit
+          # kompromittiert. Genau das soll hier auffallen.
+          fetch-depth: 0
+
+      # Bewusst die CLI statt `gitleaks/gitleaks-action@v2`: Die Action ist für
+      # ORGANISATIONEN lizenzpflichtig (GITHUB-Secret GITLEAKS_LICENSE). Dieses
+      # Repository gehört einer GmbH-Organisation; die CLI selbst steht unter
+      # Apache-2.0 und ist uneingeschränkt frei. Damit ist die Vorgabe
+      # „keine zusätzlichen Lizenzkosten" ohne Restrisiko erfüllt.
+      #
+      # `--redact` ist nicht optional: Ohne die Option schreibt Gitleaks den
+      # gefundenen Klartext-Schlüssel ins Job-Log — und das ist bei einem
+      # öffentlichen Repository für jeden lesbar. Der Fund würde das Leck also
+      # selbst verbreiten.
+      #
+      # Härtung: `:latest` durch ein festes Tag ersetzen, sobald eine Version
+      # als Referenz feststeht.
+      - name: Gitleaks (gesamte Git-History)
+        run: |
+          docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:latest \
+            detect --source=/repo --config=/repo/.gitleaks.toml \
+                   --redact --verbose --exit-code 1
+
+  trivy:
+    name: Trivy (Dateisystem & Konfiguration)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      # Bewusst OHNE `npm ci`: Trivy liest die package-lock.json direkt. Ein
+      # installierter node_modules-Baum macht den Scan nur langsamer.
+      - name: Trivy Scan (ab High, blockierend)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          ignore-unfixed: true
+          severity: "HIGH,CRITICAL"
+          # OHNE diese Zeile meldet die Action nur und der Job wird trotzdem
+          # grün — die Voreinstellung ist 0. Für „blockiert den Merge" ist sie
+          # zwingend.
+          exit-code: "1"
+          # `secret` fehlt absichtlich: Das übernimmt Gitleaks, und zwar über
+          # die gesamte History statt nur über den Arbeitsstand.
+          #
+          # Ehrliche Einordnung des heutigen Nutzens (lokal gegen v0.72
+          # geprüft): Der vuln-Scan liest package-lock.json und meldet 0 Funde
+          # — dieselbe Grundlage, die Snyk bereits blockierend prüft. Der
+          # misconfig-Scanner unterstützt Dockerfile, Terraform, Kubernetes,
+          # Helm und CloudFormation; nichts davon existiert hier, er meldet
+          # entsprechend „Not scanned". GitHub-Actions-Workflows gehören NICHT
+          # zu seinen Zielen.
+          #
+          # Der Job bleibt trotzdem: Er greift ohne Änderung, sobald ein
+          # Dockerfile oder IaC dazukommt, und hat anders als Snyk kein
+          # Scan-Kontingent. Wer die Dublette stört, streicht ihn — dann
+          # bleibt die Abhängigkeitsprüfung allein bei Snyk.
+          scanners: "vuln,misconfig"
+
+  e2e:
+    name: E2E Smoke Tests (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Abhängigkeiten installieren
+        run: npm ci
+
+      # Die Browser-Binaries sind mehrere hundert MB und ändern sich nur mit
+      # der Playwright-Version — daher am Lockfile geschlüsselt.
+      - name: Playwright-Browser aus dem Cache
+        id: playwright-cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Playwright-Browser installieren
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      # Bei einem Cache-Treffer liegen zwar die Browser vor, die
+      # System-Bibliotheken des Runners fehlen aber trotzdem.
+      - name: Systemabhängigkeiten nachziehen
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - name: CI-Umgebung vorbereiten (Dummy-Secrets)
+        run: |
+          cp .env.example .env.local
+          {
+            echo "BREVO_API_KEY=ci_dummy_key_123"
+            echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_dummy"
+            echo "STRIPE_SECRET_KEY=sk_test_dummy"
+          } >> .env.local
+
+      # Der Smoke-Test prüft das Artefakt, das auch deployt wird — deshalb
+      # erst bauen. Playwright startet den Produktions-Server anschließend
+      # selbst (webServer in playwright.config.ts).
+      - name: Next.js Build
+        run: npm run build
+
+      - name: Playwright ausführen
+        run: npm run test:e2e
+
+      - name: Report bei Fehlschlag sichern
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  bundle-size:
+    name: Bundle Size Guard
+    # Nur bei Pull Requests: Die Action vergleicht den Branch gegen die Basis —
+    # bei einem Push auf main gibt es nichts zu vergleichen.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Das Repository steht global auf `contents: read`. Für den PR-Kommentar
+    # braucht dieser Job zusätzlich Schreibrechte — sonst scheitert er beim
+    # Schreiben, obwohl der Vergleich gelungen ist.
+    permissions:
+      contents: read
+      pull-requests: write
+    # Die Action baut Basis- und Branch-Stand selbst und sieht dabei KEINE
+    # .env.local. Die Werte müssen deshalb als echte Umgebungsvariablen
+    # anliegen, sonst schlägt der Build in beiden Durchläufen fehl.
+    env:
+      ENVIRONMENT: development
+      NEXT_PUBLIC_SUPABASE_URL: https://test.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: supabase_anon_test
+      SUPABASE_URL: https://test.supabase.co
+      SUPABASE_SERVICE_ROLE_KEY: ci_dummy_service_role
+      NEXT_PUBLIC_URL: http://localhost:3000
+      BREVO_API_KEY: ci_dummy_key_123
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_dummy
+      STRIPE_SECRET_KEY: sk_test_dummy
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: preactjs/compressed-size-action@v2
+        # Rein informativ: Ein gewachsenes Bundle ist ein Hinweis, kein Grund,
+        # einen fachlich korrekten PR zu blockieren.
+        continue-on-error: true
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          # Die Voreinstellung der Action zeigt auf `dist/` und fände bei
+          # Next.js nichts. Das Client-Bundle liegt unter .next/static.
+          pattern: ".next/static/**/*.js"
+          build-script: "build"
+          compression: "gzip"
