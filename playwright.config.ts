@@ -3,7 +3,18 @@ import { defineConfig, devices } from '@playwright/test';
 
 /**
  * Siehe https://playwright.dev/docs/test-configuration für Details.
+ *
+ * Aufgabenteilung mit Vitest: Vitest deckt Einheiten und Komponenten ab.
+ * Playwright beantwortet nur die Frage, die Vitest nicht beantworten kann —
+ * startet und navigiert die GEBAUTE Anwendung in einem echten Browser?
+ * Deshalb bewusst wenige, breite Tests statt vieler feiner (siehe e2e/).
  */
+const istCI = !!process.env.CI;
+
+// Eine Quelle für beide Seiten: Ohne das läuft `baseURL` gegen einen anderen
+// Port als der von Playwright gestartete Server, sobald 3000 belegt ist.
+const basisUrl = process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3000';
+
 export default defineConfig({
     // Ordner, in dem Playwright nach E2E-Tests sucht
     testDir: './e2e',
@@ -19,56 +30,66 @@ export default defineConfig({
     fullyParallel: true,
 
     // Fehlschläge auf der CI (Continuous Integration) isolieren, lokal im Watch-Modus erlauben
-    forbidOnly: !!process.env.CI,
+    forbidOnly: istCI,
 
     // Automatische Wiederholung bei Fehlschlägen (gut gegen "flaky" Network-Sachen auf der CI)
-    retries: process.env.CI ? 2 : 0,
+    retries: istCI ? 2 : 0,
 
     // Wie viele Worker parallel laufen sollen
-    workers: process.env.CI ? 1 : undefined,
+    workers: istCI ? 1 : undefined,
 
-    // Schickes HTML-Reporting bei Fehlern
-    reporter: 'html',
+    // Auf der CI zusätzlich eine Zeilenausgabe, damit im Log ohne Artefakt-Download
+    // sichtbar ist, was fehlschlug. `open: 'never'` verhindert, dass der
+    // HTML-Report am Ende einen Webserver startet und der Job hängen bleibt.
+    reporter: istCI ? [['list'], ['html', { open: 'never' }]] : [['html']],
 
     use: {
-        baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3000',
+        baseURL: basisUrl,
 
         trace: 'on-first-retry',
         video: 'retain-on-failure',
     },
 
-    /* Die Browser, auf denen getestet wird */
-    projects: [
-        {
-            name: 'chromium',
-            use: { ...devices['Desktop Chrome'] },
-        },
-        {
-            name: 'firefox',
-            use: { ...devices['Desktop Firefox'] },
-        },
-        {
-            name: 'webkit',
-            use: { ...devices['Desktop Safari'] },
-        },
-        /* Optional: Mobile Geräte testen */
-        // {
-        //   name: 'Mobile Chrome',
-        //   use: { ...devices['Pixel 5'] },
-        // },
-        // {
-        //   name: 'Mobile Safari',
-        //   use: { ...devices['iPhone 12'] },
-        // },
-    ],
+    /*
+     * Die Browser, auf denen getestet wird.
+     *
+     * Auf der CI nur Chromium: Der Smoke-Test prüft, ob die Anwendung startet
+     * und navigiert — das ist nicht browserabhängig. Drei Engines würden die
+     * Laufzeit verdreifachen und zusätzlich Firefox- und WebKit-Binaries
+     * herunterladen, ohne mehr auszusagen. Lokal bleiben alle drei verfügbar,
+     * falls doch einmal ein Rendering-Unterschied verdächtigt wird.
+     */
+    projects: istCI
+        ? [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }]
+        : [
+            {
+                name: 'chromium',
+                use: { ...devices['Desktop Chrome'] },
+            },
+            {
+                name: 'firefox',
+                use: { ...devices['Desktop Firefox'] },
+            },
+            {
+                name: 'webkit',
+                use: { ...devices['Desktop Safari'] },
+            },
+        ],
 
-    /* * Best Practice für Next.js: Fährt den Server automatisch hoch,
-     * falls du vergisst, 'npm run dev' im Hintergrund laufen zu lassen.
+    /*
+     * Startet den Server selbst.
+     *
+     * Auf der CI der PRODUKTIONS-Build (`npm start`), nicht `npm run dev`:
+     * Geprüft werden soll das Artefakt, das auch deployt wird. Der Dev-Server
+     * verhält sich anders (React Refresh, gelockerte CSP, andere Fehlerseiten)
+     * und würde genau die Fehlerklasse verdecken, die nur in Produktion
+     * auftritt — siehe die CSP-Falle beim 3D-Avatar. Voraussetzung: `npm run
+     * build` lief vorher.
      */
     webServer: {
-        command: 'npm run dev',
-        url: 'http://localhost:3000',
-        reuseExistingServer: !process.env.CI,
+        command: istCI ? 'npm start' : 'npm run dev',
+        url: basisUrl,
+        reuseExistingServer: !istCI,
         timeout: 120 * 1000, // 2 Minuten Zeit zum Booten des Next.js Servers
     },
 });

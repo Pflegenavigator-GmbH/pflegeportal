@@ -43,6 +43,7 @@ import {
   SessionExpiredError,
 } from '@/src/lib/pflegegrad/client-api';
 import { NBA_CONFIG } from '@/src/lib/pflegegrad/constants';
+import { speichereErgebnis } from '@/src/lib/pflegegrad/ergebnis-storage';
 import {
   AgeGroup,
   BABY_AGE_LIMIT_YEARS,
@@ -511,17 +512,17 @@ export default function KinderModusPage() {
                     const benefits = NBA_CONFIG.BENEFITS[
                       result.level as keyof typeof NBA_CONFIG.BENEFITS
                     ] ?? { monthly: 0, relief: 0 };
-                    localStorage.setItem(
-                      'pflegegrad-ergebnis',
-                      JSON.stringify({
-                        careLevel: result.level,
-                        totalScore: result.points,
-                        benefits: {
-                          monthlyAmount: benefits.monthly,
-                          reliefBudget: benefits.relief,
-                        },
-                      })
-                    );
+                    // Über die Speicherschicht statt direkt: Sie bindet den
+                    // Eintrag an den aktuellen Fall, damit ihn kein anderer
+                    // Fall zu sehen bekommt.
+                    speichereErgebnis({
+                      careLevel: result.level,
+                      totalScore: result.points,
+                      benefits: {
+                        monthlyAmount: benefits.monthly,
+                        reliefBudget: benefits.relief,
+                      },
+                    });
                     router.push(`/${locale}/briefe`);
                   }}
                   className="w-full bg-[#20b2aa] hover:bg-[#3ddbd0] text-slate-950 font-bold h-12 rounded-xl"

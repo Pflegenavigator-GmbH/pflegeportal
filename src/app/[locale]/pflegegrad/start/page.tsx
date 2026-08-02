@@ -23,6 +23,7 @@ import { EREIGNISSE } from '@/src/lib/analytics/events';
 import { verfolge, verfolgeEinmalig } from '@/src/lib/analytics/track';
 import { storeCaseCode } from '@/src/lib/case-storage';
 import { logger } from '@/src/lib/logger';
+import { hatErgebnisFuerAktuellenFall } from '@/src/lib/pflegegrad/ergebnis-storage';
 import { createClient } from '@/src/lib/supabase/client';
 
 import { LoadCaseCard } from './_components/LoadCaseCard';
@@ -150,7 +151,10 @@ export default function PflegegradStartPage(props: PageProps) {
       verfolge(EREIGNISSE.rechnerGestartet, { einstieg: 'geladen' });
 
       toast.success('Willkommen zurück! Daten geladen.');
-      if (localStorage.getItem('pflegegrad-ergebnis')) {
+      // Nur weiterleiten, wenn das Ergebnis zu DIESEM Fall gehört. Die reine
+      // Existenzprüfung von früher zeigte sonst den Pflegegrad des zuvor
+      // geladenen Falls.
+      if (hatErgebnisFuerAktuellenFall()) {
         router.push(`/${locale}/pflegegrad/ergebnis`);
       } else {
         router.push(`/${locale}/pflegegrad/modul1`);

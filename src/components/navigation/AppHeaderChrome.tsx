@@ -40,7 +40,7 @@ import {
 } from '@/src/components/ui';
 import {
   CASE_CODE_EVENT,
-  clearCaseCode,
+  clearCaseData,
   getStoredCaseCode,
   storeCaseCode,
 } from '@/src/lib/case-storage';
@@ -111,7 +111,7 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
     setIsResetting(true);
     try {
       await clearCaseSession(); // Server: HTTP-only-Cookie entwerten
-      clearCaseCode(); // Client: localStorage + Event
+      clearCaseData(); // Client: alle fallbezogenen Daten + Event
       window.location.assign(`/${locale}/pflegegrad/start`);
     } catch {
       toast.error('Fehler beim Beenden.');
