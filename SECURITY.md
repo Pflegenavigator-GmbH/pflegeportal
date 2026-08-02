@@ -99,6 +99,32 @@ zeigen, die Build-/Lint-Werkzeuge betreffen. Solche Findings erreichen weder
 die Produktion noch die Nutzer und blockieren den CI-Gate nicht. Jedes
 bewusst akzeptierte Finding ist unten dokumentiert.
 
+## Behobene Findings
+
+### `nanoid` — Infinite Loop (SNYK-JS-NANOID-18506894 / -18506897, High)
+
+- **Pfad:** `next > postcss > nanoid@3.3.16`. Ein **Produktionspfad** — `next`
+  hängt selbst an `postcss` (dort auf `8.4.31` gepinnt, im Projekt per
+  `overrides` auf `^8.5.10` gehoben).
+- **Warum `npm audit` nichts meldete:** Der Befund steht in Snyks Datenbank,
+  nicht in der GitHub Advisory Database. `npm audit --omit=dev` lieferte
+  durchgehend „0 vulnerabilities". Beide Werkzeuge nebeneinander laufen zu
+  lassen, hat sich damit zum ersten Mal ausgezahlt.
+- **Warum kein einfaches Update:** `3.3.16` ist die letzte 3.x-Version, ein Fix
+  existiert ausschließlich in `5.1.16`. `postcss` verlangt `nanoid@^3.3.16` und
+  lädt es per `require('nanoid/non-secure')` — nanoid 5 ist jedoch ESM-only
+  (`"type": "module"`, kein `require`-Export).
+- **Lösung:** `overrides: { "nanoid": "^5.1.16" }`. Das trägt, weil Node ab
+  20.19 / 22.12 ESM-Module synchron `require`-n kann. Lokal verifiziert:
+  `require('nanoid/non-secure')` liefert eine funktionierende `nanoid`, der
+  Produktions-Build läuft durch, 334 Tests grün.
+
+⚠️ **Diese Lösung hängt an der Node-Version.** Unter Node 18 (ohne
+`require(esm)`) bricht der Build. Deshalb ist die Mindestversion jetzt in
+`package.json` (`engines.node >= 22.12.0`) und `.nvmrc` festgeschrieben —
+Vercel liest `engines.node` zur Auswahl der Build-Laufzeit. Ohne diese
+Festlegung wäre die CI grün geblieben und das Deployment gescheitert.
+
 ## Akzeptierte Findings (dev-only)
 
 ### `brace-expansion` — DoS (GHSA-mh99-v99m-4gvg)

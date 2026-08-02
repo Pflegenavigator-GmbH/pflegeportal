@@ -140,9 +140,10 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           # Bricht den Build nur ab, wenn High/Critical Lücken gefunden werden.
-          # `snyk test` prüft standardmäßig NUR Produktions-Abhängigkeiten —
-          # genau richtig: die bekannten Funde hängen alle an Dev-Werkzeugen
-          # (ESLint-Kette) und sind zur Laufzeit nicht erreichbar (SECURITY.md).
+          # `snyk test` prüft standardmäßig NUR Produktions-Abhängigkeiten.
+          # Achtung: Das schließt transitive Pfade über `next` ein — der
+          # nanoid-Fund kam genau so herein (next > postcss > nanoid) und war
+          # damit trotz sauberem `npm audit` ein echter Produktionsbefund.
           args: --severity-threshold=high
 
       # Kein Snyk Code hier: die statische Analyse des eigenen Codes übernimmt
