@@ -43,6 +43,7 @@ import { usePdfDownload } from '@/src/hooks/usePdfDownload';
 import { useStripeCheckout } from '@/src/hooks/useStripeCheckout';
 import { logger } from '@/src/lib/logger';
 import { loadCaseResult, SessionExpiredError } from '@/src/lib/pflegegrad/client-api';
+import { entferneErgebnis } from '@/src/lib/pflegegrad/ergebnis-storage';
 import { berechneFristen } from '@/src/lib/widerspruch/fristen';
 import { PflegegradErgebnis, EinstufungAmpel } from '@/src/types/pflegegrad';
 
@@ -151,7 +152,7 @@ export default function ErgebnisPage(props: PageProps) {
         localStorage.removeItem(`modul${i}_rohpunkte`);
         localStorage.removeItem(`modul${i}_answers`);
       }
-      localStorage.removeItem('pflegegrad-ergebnis');
+      entferneErgebnis();
 
       logger.info({ caseCode }, 'Begutachtung zurückgesetzt, starte neu bei Modul 1');
       toast.success('Begutachtung zurückgesetzt.');

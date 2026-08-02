@@ -140,6 +140,12 @@ describe('AppHeaderChrome Component', () => {
 
   it('sollte beim Schließen des Falls die Session serverseitig entwerten und lokal aufräumen', async () => {
     window.localStorage.setItem('case_code', 'PF-DELETE-ME');
+    // Gesundheitsbezogene Reste, die ein bewusstes Schließen nicht überleben
+    // dürfen — auf einem geteilten Rechner läge sonst der Pflegegrad offen.
+    window.localStorage.setItem('pflegegrad-ergebnis', '{"grad":3}');
+    window.localStorage.setItem('widersprueche_pipeline', '[{"id":1}]');
+    // Geräteeinstellung: muss bleiben.
+    window.localStorage.setItem('pf-a11y', '{"contrast":"high"}');
 
     // confirm()-Dialog des Browsers automatisch mit "JA" absegnen
     vi.spyOn(window, 'confirm').mockReturnValue(true);
@@ -154,6 +160,9 @@ describe('AppHeaderChrome Component', () => {
       // Aufräumen im localStorage würde die Sitzung offen lassen.
       expect(clearCaseSession).toHaveBeenCalled();
       expect(window.localStorage.getItem('case_code')).toBeNull();
+      expect(window.localStorage.getItem('pflegegrad-ergebnis')).toBeNull();
+      expect(window.localStorage.getItem('widersprueche_pipeline')).toBeNull();
+      expect(window.localStorage.getItem('pf-a11y')).toBe('{"contrast":"high"}');
       // Voller Seitenwechsel statt router.push, damit kein Server-State
       // des alten Falls im Speicher bleibt.
       expect(window.location.assign).toHaveBeenCalledWith('/de/pflegegrad/start');
