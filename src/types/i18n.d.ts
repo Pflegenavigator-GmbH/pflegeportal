@@ -22,6 +22,7 @@ import type pflegegrad from '../../public/locales/de/pflegegrad.json';
 import type philosophie from '../../public/locales/de/philosophie.json';
 import type presse from '../../public/locales/de/presse.json';
 import type startseite from '../../public/locales/de/startseite.json';
+import type widerspruch from '../../public/locales/de/widerspruch.json';
 import type { Locale } from '../i18n/config';
 
 interface Nachrichten {
@@ -30,6 +31,7 @@ interface Nachrichten {
   pflegegrad: typeof pflegegrad;
   philosophie: typeof philosophie;
   presse: typeof presse;
+  widerspruch: typeof widerspruch;
 }
 
 declare module 'next-intl' {
