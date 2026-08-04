@@ -2,7 +2,7 @@
 'use client';
 
 import { Check, Globe, Search } from 'lucide-react';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 
 import {
@@ -19,6 +19,7 @@ import { useLanguageChange } from '@/src/i18n/useLanguageChange';
 export default function LanguageSwitcher() {
   const [search, setSearch] = useState('');
   const locale = useLocale();
+  const t = useTranslations('common.language');
   const { changeLanguage } = useLanguageChange();
 
   const currentLanguage = aktiveSprachen.find((lang) => lang.code === locale) ?? aktiveSprachen[0];
@@ -40,7 +41,7 @@ export default function LanguageSwitcher() {
         <button
           type="button"
           className="hidden items-center gap-2 rounded-xl border border-white/10 bg-slate-950/40 px-3 py-1.5 shadow-inner transition-colors hover:bg-slate-900 sm:flex"
-          aria-label="Sprache wechseln"
+          aria-label={t('wechseln')}
         >
           <Globe className="h-3.5 w-3.5 text-[#20b2aa]" />
           <span className="font-mono text-xs font-medium uppercase text-gray-300">
@@ -57,13 +58,13 @@ export default function LanguageSwitcher() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Sprache suchen..."
+              placeholder={t('search')}
               className="h-10 border-white/10 bg-slate-950/50 pl-10 text-white placeholder:text-gray-500 focus-visible:ring-[#20b2aa]"
             />
           </div>
 
           <p className="mt-2 text-xs text-gray-400">
-            {filteredLanguages.length} von {aktiveSprachen.length} Sprachen
+            {t('anzahl', { gefunden: filteredLanguages.length, gesamt: aktiveSprachen.length })}
           </p>
         </div>
 
@@ -99,9 +100,7 @@ export default function LanguageSwitcher() {
           })}
 
           {filteredLanguages.length === 0 && (
-            <div className="px-3 py-6 text-center text-sm text-gray-500">
-              Keine Sprache gefunden
-            </div>
+            <div className="px-3 py-6 text-center text-sm text-gray-500">{t('keineGefunden')}</div>
           )}
         </div>
 

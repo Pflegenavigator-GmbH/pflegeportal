@@ -2,32 +2,30 @@
 'use client';
 
 import { Accessibility, Check } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useId, useRef, useState } from 'react';
 
 import { useAccessibility } from '@/src/hooks/useAccessibility';
 import { Contrast, FontSize, Motion } from '@/src/lib/a11y';
 
-const FONT_OPTIONS: { value: FontSize; label: string; sample: string }[] = [
-  { value: 'normal', label: 'Standard', sample: 'A' },
-  { value: 'large', label: 'Groß', sample: 'A' },
-  { value: 'xlarge', label: 'Sehr groß', sample: 'A' },
+// Nur die Werte stehen fest — die Beschriftungen kommen aus den
+// Übersetzungen, damit das Menü der gewählten Sprache folgt.
+const FONT_OPTIONS: { value: FontSize; sample: string }[] = [
+  { value: 'normal', sample: 'A' },
+  { value: 'large', sample: 'A' },
+  { value: 'xlarge', sample: 'A' },
 ];
 
-const CONTRAST_OPTIONS: { value: Contrast; label: string }[] = [
-  { value: 'normal', label: 'Normal' },
-  { value: 'high', label: 'Hoher Kontrast' },
-];
+const CONTRAST_OPTIONS: { value: Contrast }[] = [{ value: 'normal' }, { value: 'high' }];
 
-const MOTION_OPTIONS: { value: Motion; label: string }[] = [
-  { value: 'system', label: 'System' },
-  { value: 'reduced', label: 'Reduziert' },
-];
+const MOTION_OPTIONS: { value: Motion }[] = [{ value: 'system' }, { value: 'reduced' }];
 
 /**
  * Barrierefreiheits-Einstellungen als zugängliches Panel (Tastatur + ARIA).
  * Frei platzierbar; hier als fixierter Button unten rechts eingebunden.
  */
 export function AccessibilityMenu() {
+  const t = useTranslations('common.accessibility.menu');
   const { prefs, update } = useAccessibility();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -71,15 +69,17 @@ export function AccessibilityMenu() {
         <div
           id={panelId}
           role="dialog"
-          aria-label="Barrierefreiheit-Einstellungen"
+          aria-label={t('titel')}
           // Breite/Höhe viewport-fest, damit das Panel auch bei großer Schrift
           // und auf schmalen Handys nicht aus dem Rahmen läuft.
           className="pointer-events-auto mb-3 w-72 max-w-[calc(100vw-2rem)] max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-2xl border border-[var(--border-subtle)] bg-surface p-4 shadow-2xl"
         >
-          <h2 className="text-base font-bold text-on-surface mb-3">Darstellung</h2>
+          <h2 className="text-base font-bold text-on-surface mb-3">{t('darstellung')}</h2>
 
           <fieldset className="mb-4">
-            <legend className="text-xs font-semibold text-muted mb-1.5">Schriftgröße</legend>
+            <legend className="text-xs font-semibold text-muted mb-1.5">
+              {t('schriftgroesse')}
+            </legend>
             <div className={group}>
               {FONT_OPTIONS.map((o, i) => (
                 <button
@@ -88,6 +88,7 @@ export function AccessibilityMenu() {
                   aria-pressed={prefs.fontSize === o.value}
                   onClick={() => update({ fontSize: o.value })}
                   className={chip(prefs.fontSize === o.value)}
+                  aria-label={t(`schrift.${o.value}`)}
                 >
                   <span style={{ fontSize: `${0.9 + i * 0.2}rem` }}>{o.sample}</span>
                 </button>
@@ -96,7 +97,7 @@ export function AccessibilityMenu() {
           </fieldset>
 
           <fieldset className="mb-4">
-            <legend className="text-xs font-semibold text-muted mb-1.5">Kontrast</legend>
+            <legend className="text-xs font-semibold text-muted mb-1.5">{t('kontrast')}</legend>
             <div className={group}>
               {CONTRAST_OPTIONS.map((o) => (
                 <button
@@ -107,14 +108,14 @@ export function AccessibilityMenu() {
                   className={chip(prefs.contrast === o.value)}
                 >
                   {prefs.contrast === o.value && <Check className="w-4 h-4" />}
-                  {o.label}
+                  {t(`kontrastWerte.${o.value}`)}
                 </button>
               ))}
             </div>
           </fieldset>
 
           <fieldset>
-            <legend className="text-xs font-semibold text-muted mb-1.5">Bewegung</legend>
+            <legend className="text-xs font-semibold text-muted mb-1.5">{t('bewegung')}</legend>
             <div className={group}>
               {MOTION_OPTIONS.map((o) => (
                 <button
@@ -125,7 +126,7 @@ export function AccessibilityMenu() {
                   className={chip(prefs.motion === o.value)}
                 >
                   {prefs.motion === o.value && <Check className="w-4 h-4" />}
-                  {o.label}
+                  {t(`bewegungWerte.${o.value}`)}
                 </button>
               ))}
             </div>
@@ -139,7 +140,7 @@ export function AccessibilityMenu() {
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
-        aria-label="Barrierefreiheit-Einstellungen öffnen"
+        aria-label={t('oeffnen')}
         onClick={() => setOpen((v) => !v)}
         className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full border border-[var(--border-subtle)] bg-accent text-on-accent shadow-2xl transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
       >

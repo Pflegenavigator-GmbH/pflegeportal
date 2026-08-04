@@ -193,8 +193,11 @@
     "current": "Current Language",
     "select": "Select Language",
     "search": "Search language",
-    "changed": "Language changed to: {{language}}",
-    "detected": "Language automatically detected"
+    "changed": "Language changed to: {language}",
+    "detected": "Language automatically detected",
+    "keineGefunden": "No language found",
+    "anzahl": "{gefunden} of {gesamt} languages",
+    "wechseln": "Change language"
   },
   "buttons": {
     "back": "Back",
@@ -247,7 +250,28 @@
     "closeModal": "Close dialog",
     "loading": "Loading",
     "progress": "Progress",
-    "step": "Step"
+    "step": "Step",
+    "menu": {
+      "titel": "Accessibility settings",
+      "oeffnen": "Open accessibility settings",
+      "darstellung": "Appearance",
+      "schriftgroesse": "Font size",
+      "kontrast": "Contrast",
+      "bewegung": "Motion",
+      "schrift": {
+        "normal": "Standard",
+        "large": "Large",
+        "xlarge": "Very large"
+      },
+      "kontrastWerte": {
+        "normal": "Normal",
+        "high": "High contrast"
+      },
+      "bewegungWerte": {
+        "system": "System",
+        "reduced": "Reduced"
+      }
+    }
   },
   "ampel": {
     "green": "Good - No limitations",
@@ -276,7 +300,46 @@
   },
   "footer": {
     "links": {
-      "cookies": "Cookie settings"
-    }
+      "cookies": "Cookie settings",
+      "impressum": "Legal notice",
+      "datenschutz": "Privacy",
+      "agb": "Terms"
+    },
+    "copyright": "© 2026 PflegeNavigator EU gUG (in formation) • Official guidance under SGB XI."
+  },
+  "beta": {
+    "abzeichen": "Beta version",
+    "hinweis": "Welcome to PflegeNavigator EU. This portal is currently in its optimisation phase. All results are intended as guidance only.",
+    "schliessen": "Close banner"
+  },
+  "cookies": {
+    "titel": "Your privacy matters to us",
+    "titelEinstellungen": "Your cookie settings",
+    "beschreibung": "We use cookies to give you the best possible experience. Because we process sensitive data, only technically essential cookies are set by default. Anonymous analysis to improve our service requires your consent. You can withdraw it at any time.",
+    "essenziell": {
+      "titel": "Technically necessary",
+      "beschreibung": "Stores your case code and language preference.",
+      "immerAktiv": "Always active"
+    },
+    "analyse": {
+      "titel": "Analytics & statistics",
+      "beschreibung": "Anonymous audience measurement with Umami (EU hosting, no cookies)."
+    },
+    "marketing": {
+      "titel": "External media & marketing",
+      "beschreibung": "Required for external content and payment provider tracking."
+    },
+    "detailsZeigen": "Adjust settings",
+    "detailsVerbergen": "Fewer details",
+    "nurEssenzielle": "Essential only",
+    "auswahlSpeichern": "Save selection",
+    "alleAkzeptieren": "Accept all",
+    "einstellungenOeffnen": "Cookie settings"
+  },
+  "dialog": {
+    "bestaetigen": "Confirm",
+    "abbrechen": "Cancel",
+    "laeuft": "Working…",
+    "aktionLaeuft": "Action in progress"
   }
 }

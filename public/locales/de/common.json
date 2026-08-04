@@ -194,7 +194,10 @@
     "select": "Sprache auswählen",
     "search": "Sprache suchen",
     "changed": "Sprache geändert zu: {language}",
-    "detected": "Sprache automatisch erkannt"
+    "detected": "Sprache automatisch erkannt",
+    "keineGefunden": "Keine Sprache gefunden",
+    "anzahl": "{gefunden} von {gesamt} Sprachen",
+    "wechseln": "Sprache wechseln"
   },
   "buttons": {
     "back": "Zurück",
@@ -247,7 +250,28 @@
     "closeModal": "Dialog schließen",
     "loading": "Wird geladen",
     "progress": "Fortschritt",
-    "step": "Schritt"
+    "step": "Schritt",
+    "menu": {
+      "titel": "Barrierefreiheit-Einstellungen",
+      "oeffnen": "Barrierefreiheit-Einstellungen öffnen",
+      "darstellung": "Darstellung",
+      "schriftgroesse": "Schriftgröße",
+      "kontrast": "Kontrast",
+      "bewegung": "Bewegung",
+      "schrift": {
+        "normal": "Standard",
+        "large": "Groß",
+        "xlarge": "Sehr groß"
+      },
+      "kontrastWerte": {
+        "normal": "Normal",
+        "high": "Hoher Kontrast"
+      },
+      "bewegungWerte": {
+        "system": "System",
+        "reduced": "Reduziert"
+      }
+    }
   },
   "ampel": {
     "green": "Gut - Keine Einschränkung",
@@ -282,5 +306,40 @@
       "agb": "AGB",
       "cookies": "Cookie-Einstellungen"
     }
+  },
+  "beta": {
+    "abzeichen": "Beta-Version",
+    "hinweis": "Willkommen beim PflegeNavigator EU. Dieses Portal befindet sich aktuell in der optimierten Testphase. Alle Auswertungen dienen als Orientierungshilfe.",
+    "schliessen": "Banner schließen"
+  },
+  "cookies": {
+    "titel": "Ihre Privatsphäre ist uns wichtig",
+    "titelEinstellungen": "Ihre Cookie-Einstellungen",
+    "beschreibung": "Wir verwenden Cookies, um Ihnen die bestmögliche Nutzung unserer Plattform zu ermöglichen. Da wir sensible Daten verarbeiten, setzen wir standardmäßig nur technisch essenzielle Cookies. Für die anonyme Auswertung zur Verbesserung unseres Services benötigen wir Ihre Zustimmung. Sie können diese jederzeit widerrufen.",
+    "essenziell": {
+      "titel": "Technisch notwendig",
+      "beschreibung": "Speichert Ihre Fallnummer und Spracheinstellungen.",
+      "immerAktiv": "Immer aktiv"
+    },
+    "analyse": {
+      "titel": "Analyse & Statistik",
+      "beschreibung": "Anonyme Reichweitenmessung mit Umami (EU-Hosting, ohne Cookies)."
+    },
+    "marketing": {
+      "titel": "Externe Medien & Marketing",
+      "beschreibung": "Wird für externe Inhalte und Zahlungsanbieter-Tracking benötigt."
+    },
+    "detailsZeigen": "Einstellungen anpassen",
+    "detailsVerbergen": "Weniger Details",
+    "nurEssenzielle": "Nur Essenzielle",
+    "auswahlSpeichern": "Auswahl speichern",
+    "alleAkzeptieren": "Alle akzeptieren",
+    "einstellungenOeffnen": "Cookie-Einstellungen"
+  },
+  "dialog": {
+    "bestaetigen": "Bestätigen",
+    "abbrechen": "Abbrechen",
+    "laeuft": "Wird ausgeführt…",
+    "aktionLaeuft": "Aktion wird ausgeführt"
   }
 }
