@@ -1,32 +1,35 @@
 // src/lib/pflegegrad/fragen.ts
-import { Frage, BewertungOption } from '@/src/types/pflegegrad';
+/**
+ * Fachliche Struktur der Begutachtungsmodule — OHNE Text.
+ *
+ * Die Fragen-IDs sind Domänenwissen (sie landen so in der Datenbank und in der
+ * Punkteberechnung), die Formulierungen dagegen Darstellung. Seit der
+ * Übersetzbarkeit liegen die Texte in
+ * `public/locales/<sprache>/pflegegrad.json` unter
+ * `modules.<modul>.questions.<id>`; hier bleibt nur, was sprachunabhängig gilt.
+ *
+ * Nebenbei behoben: Die Fragen der Module 2–5 standen bisher inline in den
+ * jeweiligen Seiten, nur Modul 1 lag hier. Jetzt sind alle fünf an einer
+ * Stelle.
+ *
+ * `as const` ist dabei nicht Kosmetik: Nur mit Literal-Typen lässt sich
+ * `t(`questions.${id}.label`)` gegen die vorhandenen Schlüssel prüfen. Ohne das
+ * wäre die ID ein `string` und ein Tippfehler fiele erst im Browser auf.
+ */
 
-export const BEWERTUNGEN: BewertungOption[] = [
-  { value: '0', label: 'Keine Einschränkung', punkte: 0 },
-  { value: '1', label: 'Leichte Einschränkung', punkte: 1 },
-  { value: '2', label: 'Mittlere Einschränkung', punkte: 2 },
-  { value: '3', label: 'Schwere Einschränkung', punkte: 3 },
-];
+export const FRAGEN_MODUL_1_IDS = ['m1_1', 'm1_2', 'm1_3', 'm1_4'] as const;
+export const FRAGEN_MODUL_2_IDS = ['m2_1', 'm2_2', 'm2_3', 'm2_4', 'm2_5'] as const;
+export const FRAGEN_MODUL_3_IDS = ['m3_1', 'm3_2', 'm3_3', 'm3_4'] as const;
+export const FRAGEN_MODUL_4_IDS = ['m4_1', 'm4_2', 'm4_3', 'm4_4', 'm4_5', 'm4_6'] as const;
+export const FRAGEN_MODUL_5_IDS = ['m5_1', 'm5_2', 'm5_3', 'm5_4'] as const;
 
-export const FRAGEN_MODUL_1: Frage[] = [
-  {
-    id: 'm1_1',
-    text: 'Können Sie selbstständig aufstehen und sich fortbewegen?',
-    hilfe: 'Aufstehen aus dem Bett oder Stuhl und Bewegen innerhalb der Wohnung.',
-  },
-  {
-    id: 'm1_2',
-    text: 'Benötigen Sie Hilfe beim Gehen oder Stehen?',
-    hilfe: 'Sicherheit beim Halten der Balance im Raum.',
-  },
-  {
-    id: 'm1_3',
-    text: 'Können Sie Treppen steigen?',
-    hilfe: 'Überwinden von Stufen, ggf. mit Handlauf.',
-  },
-  {
-    id: 'm1_4',
-    text: 'Sind Sie auf einen Rollstuhl angewiesen?',
-    hilfe: 'Nutzung zur Fortbewegung im Alltag.',
-  },
-];
+/**
+ * Antwortskala der Module 1–5. Der Punktwert ist fachlich festgelegt, die
+ * Beschriftung kommt aus den Übersetzungen (`pflegegrad.bewertungen`).
+ */
+export const BEWERTUNGS_WERTE = [
+  { value: '0', punkte: 0 },
+  { value: '1', punkte: 1 },
+  { value: '2', punkte: 2 },
+  { value: '3', punkte: 3 },
+] as const;

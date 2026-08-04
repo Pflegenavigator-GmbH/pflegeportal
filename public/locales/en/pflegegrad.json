@@ -8,5 +8,18 @@
   "progress": {
     "step": "Step {{current}} of {{total}}",
     "percent": "{{percent}}% complete"
+  },
+  "start": {
+    "meldungen": {
+      "zahlungInArbeit": "Payment is still being processed. Your case is loaded — premium will unlock shortly.",
+      "premiumFrei": "Premium options unlocked successfully.",
+      "geteilterLinkUngueltig": "The shared case code is invalid or has expired.",
+      "geteilterLinkGeladen": "Case loaded from shared link.",
+      "fallcodeUnbekannt": "Case code not found. Please check your entry.",
+      "willkommenZurueck": "Welcome back — your data has been loaded.",
+      "sitzungFehler": "Could not verify the session.",
+      "anlegenFehler": "Could not create a new case.",
+      "fallcodeErzeugt": "Free case code generated."
+    }
   }
 }

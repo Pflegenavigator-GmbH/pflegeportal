@@ -15,151 +15,149 @@
     "newDescription": "Kostenlose Pflegegrad-Einschätzung beginnen",
     "newText": "Starten Sie ein vollkommen anonymes und kostenfreies Verfahren. Es wird ein verschlüsselter Code generiert, unter dem Ihre Angaben DSGVO-konform gesichert werden.",
     "newButton": "Kostenlos starten",
-    "newButtonLoading": "Wird erstellt..."
+    "newButtonLoading": "Wird erstellt...",
+    "meldungen": {
+      "zahlungInArbeit": "Zahlung wird noch verarbeitet. Ihr Fall ist geladen — Premium schaltet sich in Kürze frei.",
+      "premiumFrei": "Premium-Optionen erfolgreich freigeschaltet!",
+      "geteilterLinkUngueltig": "Der geteilte Fallcode ist ungültig oder abgelaufen.",
+      "geteilterLinkGeladen": "Fall über geteilten Link geladen.",
+      "fallcodeUnbekannt": "Fallcode nicht gefunden. Bitte prüfen Sie die Eingabe.",
+      "willkommenZurueck": "Willkommen zurück! Daten geladen.",
+      "sitzungFehler": "Fehler bei der Session-Prüfung.",
+      "anlegenFehler": "Fehler beim Initialisieren des neuen Falls über die API.",
+      "fallcodeErzeugt": "Kostenloser Fallcode generiert!"
+    }
   },
   "modules": {
     "modul1": {
       "title": "Modul 1: Mobilität",
-      "subtitle": "Gewichtung im Gesamtverfahren: 10%",
+      "weight": "Gewichtung im Gesamtverfahren: 10%",
+      "zurueck": "Zurück zum Start",
+      "weiter": "Weiter zu Modul 2",
       "questions": {
         "m1_1": {
-          "label": "Positionswechsel im Bett",
-          "simple": "Können Sie sich im Bett alleine umdrehen oder aufsetzen?",
-          "hilfe": "Ermittelt die Fähigkeit, die Liegeposition selbstständig anzupassen."
+          "label": "Können Sie selbstständig aufstehen und sich fortbewegen?",
+          "hilfe": "Aufstehen aus dem Bett oder Stuhl und Bewegen innerhalb der Wohnung."
         },
         "m1_2": {
-          "label": "Halten einer stabilen Sitzposition",
-          "simple": "Können Sie sicher auf der Bettkante oder einem Stuhl sitzen?",
-          "hilfe": "Sicherheit beim Halten der Balance im Raum ohne fremde Hilfe."
+          "label": "Benötigen Sie Hilfe beim Gehen oder Stehen?",
+          "hilfe": "Sicherheit beim Halten der Balance im Raum."
         },
         "m1_3": {
-          "label": "Fortbewegen innerhalb des Wohnbereichs",
-          "simple": "Können Sie alleine in Ihrer Wohnung von Raum zu Raum gehen?",
-          "hilfe": "Überwinden von Strecken innerhalb der gewohnten häuslichen Umgebung."
+          "label": "Können Sie Treppen steigen?",
+          "hilfe": "Überwinden von Stufen, ggf. mit Handlauf."
         },
         "m1_4": {
-          "label": "Treppensteigen",
-          "simple": "Können Sie Stufen und Treppen steigen?",
-          "hilfe": "Überwinden von Etagen, ggf. unter Nutzung eines Handlaufs."
+          "label": "Sind Sie auf einen Rollstuhl angewiesen?",
+          "hilfe": "Nutzung zur Fortbewegung im Alltag."
         }
       }
     },
     "modul2": {
-      "title": "Modul 2: Kognitive Fähigkeiten",
-      "subtitle": "Gewichtung: 15% (Höchstwertprinzip mit Modul 3)",
+      "title": "Modul 2: Kognition & Kommunikation",
+      "weight": "Gewichtung: 15% (oder Modul 3, je nachdem was höher ist)",
+      "zurueck": "Zurück zu Modul 1",
+      "weiter": "Weiter zu Modul 3",
       "questions": {
         "m2_1": {
           "label": "Personen aus dem näheren Umfeld erkennen",
-          "simple": "Erkennen Sie Familie, Freunde oder Nachbarn ohne Probleme?",
-          "hilfe": "Werden vertraute Personen zweifelsfrei identifiziert?"
+          "hilfe": "Werden Familienmitglieder oder Nachbarn zweifelsfrei identifiziert?"
         },
         "m2_2": {
           "label": "Örtliche Orientierung",
-          "simple": "Wissen Sie genau, wo Sie sind und finden Sie sich in der Wohnung zurecht?",
-          "hilfe": "Zurechtfinden in der eigenen Wohnung oder der gewohnten Umgebung."
+          "hilfe": "Findet sich die Person in der eigenen Wohnung oder der gewohnten Umgebung zurecht?"
         },
         "m2_3": {
           "label": "Zeitliche Orientierung",
-          "simple": "Wissen Sie, welchen Tag, welchen Monat und welches Jahr wir haben?",
           "hilfe": "Können Tageszeit, Wochentag und Jahreszeit korrekt benannt werden?"
         },
         "m2_4": {
           "label": "Erinnern an wesentliche Ereignisse",
-          "simple": "Können Sie sich wichtige Dinge oder Termine gut merken?",
           "hilfe": "Werden wichtige Erlebnisse oder Vereinbarungen (z.B. Arztbesuche) behalten?"
         },
         "m2_5": {
           "label": "Steuerung von Alltagshandlungen",
-          "simple": "Können Sie Ihren Tag normal planen und Aufgaben nacheinander erledigen?",
-          "hilfe": "Können mehrschrittige Alltagsaktivitäten selbstständig umgesetzt werden?"
+          "hilfe": "Können mehrschrittige Alltagsaktivitäten selbstständig geplant und umgesetzt werden?"
         }
       }
     },
     "modul3": {
       "title": "Modul 3: Verhaltensweisen & Psyche",
-      "subtitle": "Gewichtung: 15% (Höchstwertprinzip mit Modul 2)",
+      "weight": "Gewichtung: 15% (Vergleichs-Fusing mit Modul 2)",
+      "zurueck": "Zurück zu Modul 2",
+      "weiter": "Weiter zu Modul 4",
       "questions": {
         "m3_1": {
           "label": "Motorisch geprägte Verhaltensweisen",
-          "simple": "Laufen Sie manchmal ziellos umher oder wollen weglaufen?",
           "hilfe": "Z.B. zielloses Herumlaufen, Aufstehen und Niedersetzen, Weglauf-Tendenzen."
         },
         "m3_2": {
           "label": "Nächtliche Unruhe",
-          "simple": "Können Sie nachts schlecht schlafen, wandern umher oder rufen nach Hilfe?",
-          "hilfe": "Wird der Tag-Nacht-Rhythmus gestört? Nächtliches Umherwandern oder Rufen."
+          "hilfe": "Wird der Tag-Nacht-Rhythmus gestört? Gibt es nächtliches Umherwandern oder Rufen?"
         },
         "m3_3": {
-          "label": "Selbstschädigendes Verhalten",
-          "simple": "Tun Sie sich manchmal selbst weh oder verweigern Essen und Trinken?",
-          "hilfe": "Z.B. Kratzen, Schlagen, Verweigerung von Nahrung oder Flüssigkeit."
+          "label": "Selbstschädigendes und autoaggressives Verhalten",
+          "hilfe": "Z.B. Kratzen, Schlagen gegen Gegenstände, Verweigerung von Nahrung/Flüssigkeit."
         },
         "m3_4": {
           "label": "Abwehr von pflegerischen Maßnahmen",
-          "simple": "Wehren Sie sich manchmal, wenn man Ihnen beim Waschen oder Anziehen helfen will?",
-          "hilfe": "Gibt es verbalen oder physischen Widerstand bei der Pflege."
+          "hilfe": "Gibt es verbalen oder physischen Widerstand bei der Körperpflege oder beim Ankleiden?"
         }
       }
     },
     "modul4": {
       "title": "Modul 4: Selbstversorgung",
-      "subtitle": "Gewichtung: 40% – Die wichtigste Kategorie im NBA-Verfahren!",
+      "weight": "Gewichtung: 40% – Die wichtigste Kategorie im NBA-Verfahren!",
+      "zurueck": "Zurück zu Modul 3",
+      "weiter": "Weiter zu Modul 5",
       "questions": {
         "m4_1": {
           "label": "Waschen des Oberkörpers und Intimbereichs",
-          "simple": "Können Sie sich am Waschbecken oder in der Dusche alleine waschen?",
           "hilfe": "Können Sie sich am Waschbecken oder in der Dusche selbstständig reinigen?"
         },
         "m4_2": {
           "label": "Zähneputzen, Kämmen, Rasieren",
-          "simple": "Klappt die tägliche Mund-, Haar- und Gesichtspflege ohne Hilfe?",
           "hilfe": "Können Sie die tägliche Mund- und Haarpflege eigenständig durchführen?"
         },
         "m4_3": {
           "label": "Mundgerechtes Zubereiten & Aufnehmen von Speisen",
-          "simple": "Können Sie Ihr Brot schneiden und das Essen normal zum Mund führen?",
           "hilfe": "Können Sie Brot schneiden, Nahrung zum Mund führen, kauen und schlucken?"
         },
         "m4_4": {
-          "label": "Nutzen einer Toilette",
-          "simple": "Können Sie alleine auf die Toilette gehen, sich sauber machen und die Kleidung richten?",
+          "label": "Nutzen einer Toilette oder eines Toilettenstuhls",
           "hilfe": "Können Sie sich hinsetzen, aufstehen, die Kleidung richten und sich säubern?"
         },
         "m4_5": {
           "label": "An- und Auskleiden des Oberkörpers",
-          "simple": "Können Sie Pullover, Hemden oder Jacken alleine anziehen?",
           "hilfe": "Können Sie Hemden, Pullover oder Unterwäsche selbstständig an- und ablegen?"
         },
         "m4_6": {
           "label": "An- und Auskleiden des Unterkörpers",
-          "simple": "Können Sie Hosen, Socken und Schuhe ohne fremde Hilfe anziehen?",
           "hilfe": "Können Sie Hosen, Socken und Schuhe ohne fremde Hilfe anziehen?"
         }
       }
     },
     "modul5": {
       "title": "Modul 5: Krankheitsbewältigung",
-      "subtitle": "Gewichtung: 20% – Eigenständigkeit bei medizinischen Vorgaben",
+      "weight": "Gewichtung: 20% – Eigenständigkeit bei therapeutischen Maßnahmen",
+      "zurueck": "Zurück zu Modul 4",
+      "weiter": "Weiter zu Modul 6",
       "questions": {
         "m5_1": {
           "label": "Medikation",
-          "simple": "Können Sie Ihre Tabletten alleine zur richtigen Zeit einnehmen?",
-          "hilfe": "Können Medikamente rechtzeitig und in der richtigen Dosierung genommen werden?"
+          "hilfe": "Können Medikamente rechtzeitig, in der richtigen Dosierung und selbstständig eingenommen werden?"
         },
         "m5_2": {
           "label": "Injektionen, Infusionen, Absaugen",
-          "simple": "Können Sie medizinische Dinge wie Blutzuckermessen oder Spritzen alleine machen?",
-          "hilfe": "Können medizinische Maßnahmen eigenständig durchgeführt werden?"
+          "hilfe": "Können medizinische Maßnahmen (z.B. Insulinspritzen oder Messungen) eigenständig durchgeführt werden?"
         },
         "m5_3": {
           "label": "Arzt- und Therapiebesuche",
-          "simple": "Können Sie Termine beim Arzt ausmachen und alleine dorthin kommen?",
-          "hilfe": "Können Termine koordiniert und der Weg zur Praxis bewältigt werden?"
+          "hilfe": "Können Termine koordiniert und der Weg zur Praxis eigenständig bewältigt werden?"
         },
         "m5_4": {
           "label": "Einhaltung von Diäten und Einschränkungen",
-          "simple": "Können Sie verordnete Diäten oder Verbote vom Arzt im Alltag alleine einhalten?",
-          "hilfe": "Können verordnete Gesundheitsvorgaben im Alltag eingehalten werden?"
+          "hilfe": "Können verordnete Gesundheitsvorgaben im Alltag selbstständig eingehalten werden?"
         }
       }
     },
@@ -198,5 +196,11 @@
   "progress": {
     "step": "Schritt {current} von {total}",
     "percent": "{percent}% fertig"
+  },
+  "bewertungen": {
+    "0": "Keine Einschränkung (Selbstständig)",
+    "1": "Leichte Einschränkung (Größtenteils selbstständig)",
+    "2": "Mittlere Einschränkung (Größtenteils unselbstständig)",
+    "3": "Schwere Einschränkung (Unselbstständig)"
   }
 }
