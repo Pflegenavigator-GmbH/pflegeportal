@@ -44,7 +44,11 @@ export default function Startseite() {
     { id: 'tagebuch', icon: BookOpen, path: './tagebuch' },
     { id: 'qr', icon: QrCode, path: '#' },
     { id: 'multi', icon: Smartphone, path: '#' },
-  ];
+    // `as const` ist hier nicht Kosmetik: Erst dadurch ist `fkt.id` ein
+    // Literal-Typ, und `t(`features.items.${fkt.id}.title`)` lässt sich
+    // gegen die vorhandenen Schlüssel prüfen. Ohne das wäre es `string`
+    // und die Prüfung liefe ins Leere.
+  ] as const;
 
   return (
     <div className={pageStyles.pageContainer}>

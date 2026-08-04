@@ -1,5 +1,6 @@
 import type { Viewport } from 'next';
 import { notFound } from 'next/navigation';
+import Script from 'next/script';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { Toaster } from 'sonner';
@@ -60,6 +61,10 @@ export default async function LocaleLayout({
       lang={locale}
       dir={dir}
       className="h-full scroll-smooth"
+      // Sagt Next, dass das weiche Scrollen gewollt ist. Ohne dieses Attribut
+      // warnt der Router und schaltet es bei Routenwechseln nicht ab — dann
+      // „gleitet" ein Seitenwechsel sichtbar nach oben.
+      data-scroll-behavior="smooth"
       // Default-Werte serverseitig rendern → Standardfall matcht exakt.
       // Das Init-Script überschreibt nur bei abweichender Nutzerwahl;
       // suppressHydrationWarning ist das Sicherheitsnetz für diese Fälle.
@@ -69,8 +74,14 @@ export default async function LocaleLayout({
       suppressHydrationWarning
     >
       <body className="antialiased bg-[#0a1c3a] text-white min-h-screen flex flex-col font-sans">
-        {/* No-FOUC: setzt die A11y-Attribute vor dem ersten Paint */}
-        <script dangerouslySetInnerHTML={{ __html: A11Y_INIT_SCRIPT }} />
+        {/* No-FOUC: setzt die A11y-Attribute vor dem ersten Paint.
+            Über next/script statt eines nackten <script>: React führt
+            Skript-Elemente beim reinen Client-Rendern nicht aus und warnt
+            deshalb. `beforeInteractive` hängt es in den <head>, wo es sogar
+            früher läuft — das ist für ein No-FOUC-Skript genau richtig. */}
+        <Script id="a11y-init" strategy="beforeInteractive">
+          {A11Y_INIT_SCRIPT}
+        </Script>
         <NextIntlClientProvider messages={messages} locale={locale}>
           <Toaster closeButton richColors position="top-right" />
           <BetaBanner />
@@ -90,10 +101,15 @@ export default async function LocaleLayout({
 
           <AppFooterChrome locale={locale} />
           <AccessibilityMenu />
-        </NextIntlClientProvider>
-        <CookieBanner />
-        <Analytics />
 
+          {/* Muss INNERHALB des Providers stehen: Der Banner nutzt
+              useTranslations. Außerhalb lief er nur, solange seine Texte
+              hartkodiert waren — mit Übersetzungen bricht die ganze Seite. */}
+          <CookieBanner />
+        </NextIntlClientProvider>
+
+        {/* Ohne Übersetzungen, deshalb bewusst außerhalb. */}
+        <Analytics />
         <AvatarStage />
       </body>
     </html>

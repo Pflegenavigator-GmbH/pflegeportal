@@ -2,7 +2,7 @@
 'use client';
 
 import { Check, Globe, Search } from 'lucide-react';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 
 import {
@@ -13,21 +13,21 @@ import {
   DropdownMenuTrigger,
   Input,
 } from '@/src/components/ui';
-import { supportedLanguages } from '@/src/i18n/languages';
+import { aktiveSprachen } from '@/src/i18n/config';
 import { useLanguageChange } from '@/src/i18n/useLanguageChange';
 
 export default function LanguageSwitcher() {
   const [search, setSearch] = useState('');
   const locale = useLocale();
+  const t = useTranslations('common.language');
   const { changeLanguage } = useLanguageChange();
 
-  const currentLanguage =
-    supportedLanguages.find((lang) => lang.code === locale) ?? supportedLanguages[0];
+  const currentLanguage = aktiveSprachen.find((lang) => lang.code === locale) ?? aktiveSprachen[0];
 
   const filteredLanguages = useMemo(() => {
     const query = search.trim().toLowerCase();
 
-    return supportedLanguages.filter(
+    return aktiveSprachen.filter(
       (lang) =>
         lang.nativeName.toLowerCase().includes(query) ||
         lang.name.toLowerCase().includes(query) ||
@@ -41,7 +41,7 @@ export default function LanguageSwitcher() {
         <button
           type="button"
           className="hidden items-center gap-2 rounded-xl border border-white/10 bg-slate-950/40 px-3 py-1.5 shadow-inner transition-colors hover:bg-slate-900 sm:flex"
-          aria-label="Sprache wechseln"
+          aria-label={t('wechseln')}
         >
           <Globe className="h-3.5 w-3.5 text-[#20b2aa]" />
           <span className="font-mono text-xs font-medium uppercase text-gray-300">
@@ -58,13 +58,13 @@ export default function LanguageSwitcher() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Sprache suchen..."
+              placeholder={t('search')}
               className="h-10 border-white/10 bg-slate-950/50 pl-10 text-white placeholder:text-gray-500 focus-visible:ring-[#20b2aa]"
             />
           </div>
 
           <p className="mt-2 text-xs text-gray-400">
-            {filteredLanguages.length} von {supportedLanguages.length} Sprachen
+            {t('anzahl', { gefunden: filteredLanguages.length, gesamt: aktiveSprachen.length })}
           </p>
         </div>
 
@@ -88,15 +88,10 @@ export default function LanguageSwitcher() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {!lang.complete && (
-                    <span
-                      className={`rounded px-2 py-0.5 text-xs ${
-                        selected ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-700'
-                      }`}
-                    >
-                      Beta
-                    </span>
-                  )}
+                  {/* Kein „Beta"-Abzeichen mehr: Im Umschalter stehen nur noch
+                      Sprachen mit echten Übersetzungen (aktiveSprachen). Das
+                      frühere Abzeichen hing an `complete`, das handgepflegt und
+                      falsch war — siehe languages.ts. */}
 
                   {selected && <Check className="h-4 w-4 text-[#20b2aa]" />}
                 </div>
@@ -105,9 +100,7 @@ export default function LanguageSwitcher() {
           })}
 
           {filteredLanguages.length === 0 && (
-            <div className="px-3 py-6 text-center text-sm text-gray-500">
-              Keine Sprache gefunden
-            </div>
+            <div className="px-3 py-6 text-center text-sm text-gray-500">{t('keineGefunden')}</div>
           )}
         </div>
 

@@ -1,8 +1,10 @@
 // src/app/[locale]/presse/page.tsx
 import { ArrowLeft, Download, FileText, Mail, Newspaper } from 'lucide-react';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 
+import { isValidLocale } from '@/src/i18n/config';
 import { ladeMeldungen } from '@/src/lib/presse/queries';
 import { SOCIAL_LINKS } from '@/src/lib/social-links';
 import styles from '@/src/styles/presse.module.css';
@@ -19,6 +21,8 @@ export const revalidate = 3600;
 
 export default async function PressePage({ params }: PageProps) {
   const { locale } = await params;
+  if (!isValidLocale(locale)) notFound();
+
   const t = await getTranslations({ locale, namespace: 'presse' });
 
   // Server-seitiger Erststand (ISR/SEO); die Live-Suche übernimmt der Client.

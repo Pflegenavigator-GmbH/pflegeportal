@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 
+import { isValidLocale } from '@/src/i18n/config';
 import { ladeMeldung, ladeVeroeffentlichteSlugs } from '@/src/lib/presse/queries';
 import styles from '@/src/styles/presse.module.css';
 
@@ -45,6 +46,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ArtikelPage({ params }: PageProps) {
   const { locale, slug } = await params;
+  if (!isValidLocale(locale)) notFound();
+
   const t = await getTranslations({ locale, namespace: 'presse' });
   const meldung = await ladeMeldung(slug, locale);
 

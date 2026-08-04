@@ -17,6 +17,7 @@ import {
   CalendarClock,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState, use } from 'react';
 import { toast } from 'sonner';
 
@@ -60,6 +61,8 @@ const MVP_PRODUCTS = [
 ];
 
 export default function ErgebnisPage(props: PageProps) {
+  const tMeldung = useTranslations('pflegegrad.meldungen');
+  const t = useTranslations('pflegegrad.ergebnis');
   const router = useRouter();
   const params = use(props.params);
   const locale = params?.locale || 'de';
@@ -104,7 +107,7 @@ export default function ErgebnisPage(props: PageProps) {
 
     if (!caseCode) {
       logger.warn('Keine aktive Fall-Session gefunden. Leite um.');
-      toast.error('Keine aktive Fall-Session gefunden.');
+      toast.error(tMeldung('keineSitzungKurz'));
       router.push(`/${locale}/pflegegrad/start`);
       return;
     }
@@ -118,14 +121,14 @@ export default function ErgebnisPage(props: PageProps) {
       })
       .catch((err) => {
         if (err instanceof SessionExpiredError) {
-          toast.error('Ihre Fall-Session ist abgelaufen. Bitte laden Sie Ihren Fall erneut.');
+          toast.error(tMeldung('sitzungAbgelaufen'));
           router.push(`/${locale}/pflegegrad/start`);
           return;
         }
         logger.error({ err, caseCode }, 'Ergebnis konnte nicht geladen werden');
-        toast.error('Das Ergebnis konnte nicht berechnet werden.');
+        toast.error(tMeldung('ergebnisFehler'));
       });
-  }, [caseCode, locale, router]);
+  }, [caseCode, locale, router, tMeldung]);
 
   /**
    * Setzt die Begutachtung zurück.
@@ -155,13 +158,13 @@ export default function ErgebnisPage(props: PageProps) {
       entferneErgebnis();
 
       logger.info({ caseCode }, 'Begutachtung zurückgesetzt, starte neu bei Modul 1');
-      toast.success('Begutachtung zurückgesetzt.');
+      toast.success(tMeldung('zurueckgesetzt'));
 
       // Ladezustand bewusst aktiv lassen — die Navigation folgt unmittelbar.
       router.push(`/${locale}/pflegegrad/modul1`);
     } catch (error) {
       logger.error({ error, caseCode }, 'Begutachtung konnte nicht zurückgesetzt werden');
-      toast.error('Die Begutachtung konnte nicht zurückgesetzt werden. Bitte erneut versuchen.');
+      toast.error(tMeldung('zuruecksetzenFehler'));
       setResetLaeuft(false);
       setResetDialogOffen(false);
     }
@@ -173,7 +176,7 @@ export default function ErgebnisPage(props: PageProps) {
     if (!caseCode) return;
     setIsVerifyingGdb(true);
     logger.debug({ caseCode }, 'Verifiziere GdB-Lizenzfreigabe');
-    const verificationToast = toast.loading('Verifiziere aktive Lizenzrechte für Zusatzmodule...');
+    const verificationToast = toast.loading(t('lizenzPruefen'));
 
     try {
       // Leichtgewichtige Statusabfrage — kein Puppeteer, kein Cache-Eintrag
@@ -194,7 +197,7 @@ export default function ErgebnisPage(props: PageProps) {
       router.push(`/${locale}/gdb`);
     } catch (err) {
       logger.error({ err }, 'GdB Lizenzcheck-Verbindung abgebrochen');
-      toast.error('Verbindungsfehler bei der Lizenzprüfung.', { id: verificationToast });
+      toast.error(t('lizenzFehler'), { id: verificationToast });
       setIsVerifyingGdb(false);
     }
   };
@@ -203,10 +206,8 @@ export default function ErgebnisPage(props: PageProps) {
     return (
       <div className="container mx-auto px-4 py-12 text-center text-white bg-[var(--color-surface)] min-h-screen flex flex-col justify-center items-center">
         <AlertCircle className="w-16 h-16 text-orange-400 mb-4 animate-pulse" />
-        <h1 className="text-2xl font-bold mb-2">Berechne Auswertungs-Matrix...</h1>
-        <p className="text-[var(--color-text-muted)] max-w-sm">
-          Die SGB XI Schwellenwerte werden mit Ihren Angaben abgeglichen.
-        </p>
+        <h1 className="text-2xl font-bold mb-2">{t('ladenTitel')}</h1>
+        <p className="text-[var(--color-text-muted)] max-w-sm">{t('ladenText')}</p>
       </div>
     );
   }
@@ -219,19 +220,19 @@ export default function ErgebnisPage(props: PageProps) {
       bg: 'bg-emerald-500/10',
       text: 'text-emerald-400',
       border: 'border-emerald-500/30',
-      label: 'Sicher über der gesetzlichen Schwelle',
+      label: t('ampel.gruen'),
     },
     gelb: {
       bg: 'bg-amber-500/10',
       text: 'text-amber-400',
       border: 'border-amber-500/30',
-      label: 'Knapp über der gesetzlichen Schwelle (Grenzfall)',
+      label: t('ampel.gelb'),
     },
     rot: {
       bg: 'bg-rose-500/10',
       text: 'text-rose-400',
       border: 'border-rose-500/30',
-      label: 'Unterhalb der gesetzlichen Mindest-Schwelle',
+      label: t('ampel.rot'),
     },
   };
 
@@ -245,9 +246,9 @@ export default function ErgebnisPage(props: PageProps) {
           text: `Voraussichtlicher Pflegegrad: ${ergebnis.careLevel} mit ${ergebnis.totalScore} Punkten.`,
           url: window.location.href,
         })
-        .catch(() => toast.error('Teilen fehlgeschlagen.'));
+        .catch(() => toast.error(tMeldung('teilenFehler')));
     } else {
-      toast.info('Link in die Zwischenablage kopiert.');
+      toast.info(tMeldung('linkKopiert'));
       navigator.clipboard.writeText(window.location.href);
     }
   };
@@ -522,7 +523,7 @@ export default function ErgebnisPage(props: PageProps) {
               disabled={isVerifyingGdb}
               className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[var(--color-on-accent)] font-bold text-xs h-10 rounded-xl"
             >
-              {isVerifyingGdb ? 'Prüfe...' : 'GdB-Rechner'}
+              {isVerifyingGdb ? t('gdbPruefen') : t('gdbRechner')}
             </Button>
           </div>
         </Card>
@@ -543,17 +544,12 @@ export default function ErgebnisPage(props: PageProps) {
           onAbbrechen={() => setResetDialogOffen(false)}
           onBestaetigen={handleReEvaluateFromScratch}
           destruktiv
-          titel="Begutachtung neu beginnen?"
-          beschreibung="Sie beantworten alle Fragen der sechs Module noch einmal von vorne. Ihre bisherigen Antworten werden dabei endgültig gelöscht und lassen sich nicht wiederherstellen."
-          folgen={[
-            'Alle Antworten aus den Modulen 1 bis 6 werden gelöscht.',
-            'Das errechnete Ergebnis wird verworfen.',
-            'Ihr Fallcode und ein bereits gekaufter Zugang bleiben erhalten.',
-          ]}
-          bestaetigenText="Ja, neu beginnen"
-          abbrechenText="Abbrechen"
+          titel={t('reset.titel')}
+          beschreibung={t('reset.beschreibung')}
+          folgen={[t('reset.folge1'), t('reset.folge2'), t('reset.folge3')]}
+          bestaetigenText={t('reset.bestaetigen')}
           laeuft={resetLaeuft}
-          laeuftText="Antworten werden gelöscht…"
+          laeuftText={t('reset.laeuft')}
         />
       </div>
     </main>

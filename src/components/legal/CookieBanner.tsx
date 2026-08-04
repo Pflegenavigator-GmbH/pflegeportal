@@ -2,6 +2,7 @@
 'use client';
 
 import { Check, ChevronDown, ChevronUp, ShieldCheck } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useId, useState, useSyncExternalStore } from 'react';
 
 import { Button } from '@/src/components/ui';
@@ -34,6 +35,7 @@ export function CookieBanner() {
   const [erneutGeoeffnet, setErneutGeoeffnet] = useState(false);
   const [consents, setConsents] = useState<Einwilligung>(NUR_ESSENZIELL);
 
+  const t = useTranslations('common.cookies');
   const istHydriert = useIstHydriert();
   const { einwilligung, hatEntschieden } = useConsent();
 
@@ -78,13 +80,10 @@ export function CookieBanner() {
           </div>
           <div>
             <h2 id={titelId} className="text-xl font-bold mb-2">
-              {erneutGeoeffnet ? 'Ihre Cookie-Einstellungen' : 'Ihre Privatsphäre ist uns wichtig'}
+              {erneutGeoeffnet ? t('titelEinstellungen') : t('titel')}
             </h2>
             <p id={beschreibungId} className="text-sm text-gray-300 leading-relaxed">
-              Wir verwenden Cookies, um Ihnen die bestmögliche Nutzung unserer Plattform zu
-              ermöglichen. Da wir sensible Daten verarbeiten, setzen wir standardmäßig nur technisch
-              essenzielle Cookies. Für die anonyme Auswertung zur Verbesserung unseres Services
-              benötigen wir Ihre Zustimmung. Sie können diese jederzeit widerrufen.
+              {t('beschreibung')}
             </p>
           </div>
         </div>
@@ -93,22 +92,18 @@ export function CookieBanner() {
           <div className="space-y-4 bg-slate-950/50 p-4 rounded-xl border border-white/5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-bold text-sm text-white">Technisch notwendig</p>
-                <p className="text-xs text-gray-400">
-                  Speichert Ihre Fallnummer und Spracheinstellungen.
-                </p>
+                <p className="font-bold text-sm text-white">{t('essenziell.titel')}</p>
+                <p className="text-xs text-gray-400">{t('essenziell.beschreibung')}</p>
               </div>
-              <Check className="w-5 h-5 text-gray-500" aria-label="Immer aktiv" />
+              <Check className="w-5 h-5 text-gray-500" aria-label={t('essenziell.immerAktiv')} />
             </div>
 
             <div className="flex items-center justify-between border-t border-white/5 pt-4">
               <div>
                 <label htmlFor={analyticsId} className="font-bold text-sm text-white">
-                  Analyse & Statistik
+                  {t('analyse.titel')}
                 </label>
-                <p className="text-xs text-gray-400">
-                  Anonyme Reichweitenmessung mit Umami (EU-Hosting, ohne Cookies).
-                </p>
+                <p className="text-xs text-gray-400">{t('analyse.beschreibung')}</p>
               </div>
               <input
                 id={analyticsId}
@@ -122,11 +117,9 @@ export function CookieBanner() {
             <div className="flex items-center justify-between border-t border-white/5 pt-4">
               <div>
                 <label htmlFor={marketingId} className="font-bold text-sm text-white">
-                  Externe Medien & Marketing
+                  {t('marketing.titel')}
                 </label>
-                <p className="text-xs text-gray-400">
-                  Wird für externe Inhalte und Zahlungsanbieter-Tracking benötigt.
-                </p>
+                <p className="text-xs text-gray-400">{t('marketing.beschreibung')}</p>
               </div>
               <input
                 id={marketingId}
@@ -151,7 +144,7 @@ export function CookieBanner() {
             ) : (
               <ChevronDown className="w-4 h-4" aria-hidden="true" />
             )}
-            {showDetails ? 'Weniger Details' : 'Einstellungen anpassen'}
+            {showDetails ? t('detailsVerbergen') : t('detailsZeigen')}
           </button>
 
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
@@ -160,13 +153,13 @@ export function CookieBanner() {
               onClick={() => speichern(showDetails ? consents : NUR_ESSENZIELL)}
               className="bg-transparent border-white/20 text-white hover:bg-white/5"
             >
-              {showDetails ? 'Auswahl speichern' : 'Nur Essenzielle'}
+              {showDetails ? t('auswahlSpeichern') : t('nurEssenzielle')}
             </Button>
             <Button
               onClick={() => speichern({ essential: true, analytics: true, marketing: true })}
               className="bg-[#20b2aa] hover:bg-[#3ddbd0] text-slate-950 font-bold"
             >
-              Alle akzeptieren
+              {t('alleAkzeptieren')}
             </Button>
           </div>
         </div>

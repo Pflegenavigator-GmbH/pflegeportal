@@ -2,6 +2,7 @@
 'use client';
 
 import { AlertTriangle, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef, type ReactNode } from 'react';
 
 import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@/src/components/ui';
@@ -41,12 +42,13 @@ export function BestaetigungsDialog({
   titel,
   beschreibung,
   folgen,
-  bestaetigenText = 'Bestätigen',
-  abbrechenText = 'Abbrechen',
+  bestaetigenText,
+  abbrechenText,
   laeuft = false,
   laeuftText,
   destruktiv = false,
 }: Props) {
+  const t = useTranslations('common.dialog');
   const abbrechenRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -110,7 +112,7 @@ export function BestaetigungsDialog({
             disabled={laeuft}
             className="min-h-[44px] rounded-xl border-white/10 text-white hover:bg-white/5"
           >
-            {abbrechenText}
+            {abbrechenText ?? t('abbrechen')}
           </Button>
 
           <Button
@@ -126,10 +128,10 @@ export function BestaetigungsDialog({
             {laeuft ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-                {laeuftText ?? 'Wird ausgeführt…'}
+                {laeuftText ?? t('laeuft')}
               </>
             ) : (
-              bestaetigenText
+              (bestaetigenText ?? t('bestaetigen'))
             )}
           </Button>
         </div>
@@ -137,7 +139,7 @@ export function BestaetigungsDialog({
         {/* Statusmeldung für Screenreader, damit der Ladezustand nicht nur
             visuell existiert. */}
         <span aria-live="polite" className="sr-only">
-          {laeuft ? (laeuftText ?? 'Aktion wird ausgeführt') : ''}
+          {laeuft ? (laeuftText ?? t('aktionLaeuft')) : ''}
         </span>
       </DialogContent>
     </Dialog>

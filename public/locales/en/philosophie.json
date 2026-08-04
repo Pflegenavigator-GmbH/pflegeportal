@@ -1,0 +1,41 @@
+{
+  "hero": {
+    "badge": "Innovation in social law",
+    "title": "What is <span>PflegeNavigator</span> EU?",
+    "text": "A digital navigation portal that guides people in need of care, people with disabilities and victims of violence through complex social-law application and appeal procedures — accessibly, in several languages and supported by AI.",
+    "btnStart": "Check your classification now"
+  },
+  "story": {
+    "badge": "Born of personal experience",
+    "title": "How it began: a personal journey",
+    "p1": "PflegeNavigator EU was not designed on a drawing board. It started with the personal predicament of our founder, André Schulze. After a serious act of violence with significant health consequences, he had to navigate several parallel German social-law procedures at once — long-term care insurance, severe disability status and victim compensation.",
+    "p2": "Applications, appeals, deadlines and expert reports piled up. To stay capable of acting at all, he began using AI-assisted tools for his own proceedings: to organise documents, to understand complex decisions and to prepare legally sound letters. At first this was done purely out of necessity.",
+    "subtitle": "The realisation",
+    "p3": "It quickly became clear that what helped him is missing for millions of people in the same situation: a structured, understandable, multilingual and accessible path through social law. Supported by modern tools and a highly secure server infrastructure, this grew into a fully functional portal.",
+    "statusNotice": "<strong>A note on status:</strong> this portal is not evidence of full capability. It is the result of a long road taken in small steps — born of personal experience and carried by tools that make possible what would otherwise be out of reach."
+  },
+  "trust": {
+    "mission": {
+      "title": "The mission",
+      "text": "To effectively remove barriers to access in social law. We bring together entitlements from five German social codes in a single, transparent place."
+    },
+    "vision": {
+      "title": "The vision",
+      "text": "A world in which administrative and linguistic hurdles no longer stop anyone from claiming the support they are legally entitled to."
+    },
+    "partner": {
+      "title": "Validated care partner",
+      "text": "Professionally and operationally backed by a binding cooperation agreement with <strong>Pflegedienst Lirio GmbH</strong> (Bielefeld, since 13 April 2026).",
+      "badge": "Contractually established"
+    },
+    "expert": {
+      "title": "Social-psychological assurance",
+      "text": "The system and its triage evaluations draw on the official professional assessment by <strong>Vedat Karasu</strong> (graduate social pedagogue, LWL Clinics Gütersloh).",
+      "badge": "Scientifically evaluated"
+    }
+  },
+  "legal": {
+    "copyright": "© 2026 PflegeNavigator EU gUG (in formation) • André Schulze (concept & owner) & Rodrigue Lawson (systems architecture & tech). All rights reserved.",
+    "notice": "Once the non-profit gUG has been formally entered in the commercial register, the wording regarding its charitable operations will be adjusted."
+  }
+}

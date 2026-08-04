@@ -4,7 +4,13 @@ import 'server-only';
 import { logger } from '@/src/lib/logger';
 import { createPublicSupabaseClient } from '@/src/lib/supabase/public';
 
-import { KATEGORIE_ALLE, normalisiereKategorie, type KategorieFilter } from './kategorien';
+import {
+  KATEGORIE_ALLE,
+  istPresseKategorie,
+  normalisiereKategorie,
+  type KategorieFilter,
+  type PresseKategorie,
+} from './kategorien';
 
 /** Eine Pressemeldung in der Listenansicht. */
 export interface Meldung {
@@ -14,7 +20,12 @@ export interface Meldung {
   slug: string;
   subtitle: string | null;
   summary: string | null;
-  category: string;
+  /**
+   * Enger Typ statt `string`: Die Spalte hat in der Datenbank einen
+   * CHECK-Constraint auf genau diese Werte. Erst dadurch lässt sich
+   * `t(`kategorie.${category}`)` gegen die vorhandenen Schlüssel prüfen.
+   */
+  category: PresseKategorie;
   publishedAt: string | null;
 }
 
@@ -55,7 +66,9 @@ function zuMeldung(zeile: PostZeile): Meldung {
     slug: zeile.slug,
     subtitle: zeile.subtitle,
     summary: zeile.summary,
-    category: zeile.category,
+    // Fällt ein unerwarteter Wert aus der Datenbank, lieber die
+    // allgemeinste Kategorie als ein fehlender Übersetzungsschlüssel.
+    category: istPresseKategorie(zeile.category) ? zeile.category : 'produktlaunch',
     publishedAt: zeile.published_at,
   };
 }

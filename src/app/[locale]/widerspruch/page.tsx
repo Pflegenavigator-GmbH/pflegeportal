@@ -2,6 +2,7 @@
 
 import { ArrowLeft, Bell, Clock, FileText, Info, Lock, Mail, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState, use } from 'react';
 import { toast } from 'sonner';
 
@@ -53,6 +54,7 @@ const MVP_PRODUCTS = [
 ];
 
 export default function WiderspruchPage(props: PageProps) {
+  const t = useTranslations('widerspruch');
   const router = useRouter();
   const params = use(props.params);
   const locale = params?.locale || 'de';
@@ -175,7 +177,7 @@ export default function WiderspruchPage(props: PageProps) {
    */
   const handleKalkulation = () => {
     if (!isFormValid) {
-      toast.error('Bitte füllen Sie alle markierten Pflichtfelder korrekt aus.');
+      toast.error(t('pflichtfelder'));
       return;
     }
 
@@ -197,7 +199,7 @@ export default function WiderspruchPage(props: PageProps) {
 
     setBriefText(generiereWiderspruchBrief(daten, zielFrist));
     setShowErgebnis(true);
-    toast.success('Anschreiben wurde erfolgreich generiert.');
+    toast.success(t('briefErzeugt'));
   };
 
   /**
@@ -222,7 +224,7 @@ export default function WiderspruchPage(props: PageProps) {
         return;
       }
 
-      toast.error('Die Lizenzprüfung ist fehlgeschlagen. Bitte prüfen Sie Ihre Verbindung.');
+      toast.error(t('lizenzFehler'));
     } finally {
       setIsVerifying(false);
     }
@@ -245,7 +247,7 @@ export default function WiderspruchPage(props: PageProps) {
     const aktualisiert = [...gespeicherte, daten];
     setGespeicherte(aktualisiert);
     localStorage.setItem('widersprueche_pipeline', JSON.stringify(aktualisiert));
-    toast.success('Entwurf erfolgreich gesichert.');
+    toast.success(t('entwurfGesichert'));
   };
 
   const handleLoeschen = (id: string | undefined) => {
@@ -253,7 +255,7 @@ export default function WiderspruchPage(props: PageProps) {
     const gefiltert = gespeicherte.filter((w) => w.id !== id);
     setGespeicherte(gefiltert);
     localStorage.setItem('widersprueche_pipeline', JSON.stringify(gefiltert));
-    toast.info('Akte entfernt.');
+    toast.info(t('akteEntfernt'));
   };
 
   if (!hasMounted) return null;
@@ -265,7 +267,7 @@ export default function WiderspruchPage(props: PageProps) {
           <div className="inline-flex items-center justify-center w-20 h-20 bg-amber-500/10 border border-amber-500/30 rounded-2xl shadow-xl mb-4">
             <FileText className="w-10 h-10 text-amber-400" />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">Widerspruchs-Zentrum</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('titel')}</h1>
           <p className="text-sm text-gray-400 mt-1">
             Gekoppelt an aktive Fallnummer:{' '}
             <span className="text-white font-mono font-bold">
@@ -280,13 +282,13 @@ export default function WiderspruchPage(props: PageProps) {
               value="neu"
               className="data-[state=active]:bg-amber-500 data-[state=active]:text-slate-950 font-bold rounded-lg py-2 text-sm transition-all"
             >
-              Neues Anschreiben
+              {t('tabNeu')}
             </TabsTrigger>
             <TabsTrigger
               value="gespeichert"
               className="data-[state=active]:bg-amber-500 data-[state=active]:text-slate-950 font-bold rounded-lg py-2 text-sm transition-all"
             >
-              Gespeicherte Entwürfe ({gespeicherte.length})
+              {t('tabGespeichert', { anzahl: gespeicherte.length })}
             </TabsTrigger>
           </TabsList>
 
@@ -294,12 +296,12 @@ export default function WiderspruchPage(props: PageProps) {
             <Card className="bg-white/5 border-white/10 text-white shadow-xl">
               <CardHeader>
                 <CardTitle className="text-lg font-bold flex items-center gap-2">
-                  <Mail className="w-5 h-5 text-amber-400" /> DIN 5008 Stammdaten erfassen
+                  <Mail className="w-5 h-5 text-amber-400" /> {t('stammdatenTitel')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-gray-300 font-medium">Verfahrenstyp</Label>
+                  <Label className="text-xs text-gray-300 font-medium">{t('verfahrenstyp')}</Label>
                   <Select
                     value={typ}
                     onValueChange={(v: string) => {
@@ -328,15 +330,9 @@ export default function WiderspruchPage(props: PageProps) {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-950 border-white/10 text-white">
-                      <SelectItem value="pflegegrad">
-                        Pflegegrad-Bescheid (§ 84 Abs. 1 SGG)
-                      </SelectItem>
-                      <SelectItem value="mdk-gutachten">
-                        MD-Gutachten anfordern (§ 25 SGB X)
-                      </SelectItem>
-                      <SelectItem value="klage">
-                        Klage beim Sozialgericht (§ 87 Abs. 1 SGG)
-                      </SelectItem>
+                      <SelectItem value="pflegegrad">{t('typ.pflegegrad')}</SelectItem>
+                      <SelectItem value="mdk-gutachten">{t('typ.gutachten')}</SelectItem>
+                      <SelectItem value="klage">{t('typ.klage')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -347,7 +343,7 @@ export default function WiderspruchPage(props: PageProps) {
                     htmlFor="bescheidDatum"
                     className={`text-xs font-medium transition-colors ${zeigeDatumFehler ? 'text-rose-400' : 'text-gray-300'}`}
                   >
-                    Datum des Bescheid-Zugangs *
+                    {t('bescheidDatum')}
                   </Label>
                   <Input
                     id="bescheidDatum"
@@ -362,9 +358,7 @@ export default function WiderspruchPage(props: PageProps) {
                     }`}
                   />
                   {zeigeDatumFehler && (
-                    <p className="text-[10px] text-rose-400 font-medium">
-                      Ungültiges Datum oder Datum liegt in der Zukunft.
-                    </p>
+                    <p className="text-[10px] text-rose-400 font-medium">{t('datumUngueltig')}</p>
                   )}
                 </div>
 
@@ -373,17 +367,14 @@ export default function WiderspruchPage(props: PageProps) {
                     auslösende Ereignisse haben. */}
                 <fieldset className="space-y-3 rounded-xl border border-white/10 bg-slate-950/30 p-4">
                   <legend className="px-1 text-xs font-semibold text-gray-300">
-                    Verfahrensverlauf (optional)
+                    {t('verlaufTitel')}
                   </legend>
-                  <p className="text-[11px] leading-relaxed text-gray-400">
-                    Ergänzen Sie, was bereits geschehen ist — der Fristen-Monitor berechnet daraus
-                    zusätzlich die Klagefrist und die Wartezeiten für eine Untätigkeitsklage.
-                  </p>
+                  <p className="text-[11px] leading-relaxed text-gray-400">{t('verlaufText')}</p>
 
                   <div className="grid gap-4 md:grid-cols-3">
                     <div className="space-y-1.5">
                       <Label htmlFor="antragDatum" className="text-xs text-gray-300 font-medium">
-                        Antrag gestellt am
+                        {t('antragGestellt')}
                       </Label>
                       <Input
                         id="antragDatum"
@@ -400,7 +391,7 @@ export default function WiderspruchPage(props: PageProps) {
                         htmlFor="widerspruchEingelegtAm"
                         className="text-xs text-gray-300 font-medium"
                       >
-                        Widerspruch eingelegt am
+                        {t('widerspruchEingelegt')}
                       </Label>
                       <Input
                         id="widerspruchEingelegtAm"
@@ -417,7 +408,7 @@ export default function WiderspruchPage(props: PageProps) {
                         htmlFor="widerspruchsbescheidDatum"
                         className="text-xs text-gray-300 font-medium"
                       >
-                        Widerspruchsbescheid vom
+                        {t('widerspruchsbescheid')}
                       </Label>
                       <Input
                         id="widerspruchsbescheidDatum"
@@ -434,25 +425,25 @@ export default function WiderspruchPage(props: PageProps) {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <Label htmlFor="name" className="text-xs text-gray-300 font-medium">
-                      Name des Versicherten *
+                      {t('name')}
                     </Label>
                     <Input
                       id="name"
                       value={versicherterName}
                       onChange={(e) => setVersicherterName(e.target.value)}
-                      placeholder="z.B. Max Mustermann"
+                      placeholder={t('namePlatzhalter')}
                       className="bg-slate-950/50 border-white/10 h-11 text-white"
                     />
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="pflegekasse" className="text-xs text-gray-300 font-medium">
-                      Pflegekasse *
+                      {t('pflegekasse')}
                     </Label>
                     <Input
                       id="pflegekasse"
                       value={pflegekasse}
                       onChange={(e) => setPflegekasse(e.target.value)}
-                      placeholder="z.B. BARMER Pflegekasse"
+                      placeholder={t('pflegekassePlatzhalter')}
                       className="bg-slate-950/50 border-white/10 h-11 text-white"
                     />
                   </div>
@@ -460,13 +451,13 @@ export default function WiderspruchPage(props: PageProps) {
 
                 <div className="space-y-1.5">
                   <Label htmlFor="strasse" className="text-xs text-gray-300 font-medium">
-                    Straße und Hausnummer *
+                    {t('strasse')}
                   </Label>
                   <Input
                     id="strasse"
                     value={strasse}
                     onChange={(e) => setStrasse(e.target.value)}
-                    placeholder="Musterstraße 12"
+                    placeholder={t('strassePlatzhalter')}
                     className="bg-slate-950/50 border-white/10 h-11 text-white"
                   />
                 </div>
@@ -474,7 +465,7 @@ export default function WiderspruchPage(props: PageProps) {
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-1.5 col-span-1">
                     <Label htmlFor="plz" className="text-xs text-gray-300 font-medium">
-                      PLZ *
+                      {t('plz')}
                     </Label>
                     <Input
                       id="plz"
@@ -487,13 +478,13 @@ export default function WiderspruchPage(props: PageProps) {
                   </div>
                   <div className="space-y-1.5 col-span-2">
                     <Label htmlFor="ort" className="text-xs text-gray-300 font-medium">
-                      Ort *
+                      {t('ort')}
                     </Label>
                     <Input
                       id="ort"
                       value={ort}
                       onChange={(e) => setOrt(e.target.value)}
-                      placeholder="Musterstadt"
+                      placeholder={t('ortPlatzhalter')}
                       className="bg-slate-950/50 border-white/10 h-11 text-white"
                     />
                   </div>
@@ -504,26 +495,26 @@ export default function WiderspruchPage(props: PageProps) {
                     htmlFor="versicherungsnummer"
                     className="text-xs text-gray-300 font-medium"
                   >
-                    Versicherungsnummer
+                    {t('versicherungsnummer')}
                   </Label>
                   <Input
                     id="versicherungsnummer"
                     value={versicherungsnummer}
                     onChange={(e) => setVersicherungsnummer(e.target.value)}
-                    placeholder="z.B. KV-Nummer eintragen"
+                    placeholder={t('versicherungsnummerPlatzhalter')}
                     className="bg-slate-950/50 border-white/10 h-11 text-white"
                   />
                 </div>
 
                 <div className="space-y-1.5">
                   <Label htmlFor="begruendung" className="text-xs text-gray-300 font-medium">
-                    Begründung (Leer lassen für fristwahrenden Vorab-Widerspruch)
+                    {t('begruendung')}
                   </Label>
                   <Textarea
                     id="begruendung"
                     value={begruendung}
                     onChange={(e) => setBegruendung(e.target.value)}
-                    placeholder="Wird zur Fristwahrung unbegründet eingereicht..."
+                    placeholder={t('begruendungPlatzhalter')}
                     rows={3}
                     className="bg-slate-950/50 border-white/10 text-white resize-none"
                   />
@@ -535,7 +526,7 @@ export default function WiderspruchPage(props: PageProps) {
                   className="w-full h-12 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-base shadow-lg rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Clock className="mr-2 w-4 h-4" />
-                  Brief entwerfen &amp; Frist ermitteln
+                  {t('briefErzeugen')}
                 </Button>
               </CardContent>
             </Card>
@@ -545,11 +536,10 @@ export default function WiderspruchPage(props: PageProps) {
             <Card className="bg-white/5 border-white/10 text-white shadow-xl">
               <CardHeader>
                 <CardTitle className="text-lg font-bold flex items-center gap-2">
-                  <Bell className="w-5 h-5 text-amber-400" /> Fristen-Monitor
+                  <Bell className="w-5 h-5 text-amber-400" /> {t('monitorTitel')}
                 </CardTitle>
                 <CardDescription className="text-xs text-gray-400">
-                  Sozialrechtliche Fristen nach SGG — Wochenenden und bundesweite Feiertage sind
-                  berücksichtigt (§ 64 Abs. 3 SGG).
+                  {t('monitorText')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -561,10 +551,9 @@ export default function WiderspruchPage(props: PageProps) {
               <>
                 <Card className="bg-white/5 border-white/10 text-white shadow-xl">
                   <CardHeader>
-                    <CardTitle className="text-base font-bold">Vorschau des Anschreibens</CardTitle>
+                    <CardTitle className="text-base font-bold">{t('vorschauTitel')}</CardTitle>
                     <CardDescription className="text-xs text-gray-400">
-                      Text und Fristberechnung sind kostenfrei. Sie können das Schreiben abtippen
-                      oder herauskopieren und selbst versenden.
+                      {t('vorschauText')}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -584,7 +573,7 @@ export default function WiderspruchPage(props: PageProps) {
                       className="flex-1 h-12 bg-[#20b2aa] hover:bg-[#3ddbd0] text-white font-bold rounded-xl shadow-md disabled:opacity-60"
                     >
                       <Lock className="mr-2 w-4 h-4" aria-hidden="true" />
-                      {isVerifying ? 'Prüfe…' : 'Gutachten-Vorschau öffnen'}
+                      {isVerifying ? t('pruefe') : t('gutachtenVorschau')}
                     </Button>
                     <Button
                       onClick={() => mitFreischaltung(handleSpeichern)}
@@ -593,7 +582,7 @@ export default function WiderspruchPage(props: PageProps) {
                       className="flex-1 h-12 border-white/10 text-white hover:bg-white/5 rounded-xl disabled:opacity-60"
                     >
                       <Lock className="mr-2 w-4 h-4" aria-hidden="true" />
-                      {isVerifying ? 'Prüfe…' : 'Entwurf sichern'}
+                      {isVerifying ? t('pruefe') : t('entwurfSichern')}
                     </Button>
                   </CardFooter>
                 </Card>
@@ -606,7 +595,7 @@ export default function WiderspruchPage(props: PageProps) {
               <Card className="bg-white/5 border-white/10 text-white text-center py-8">
                 <CardContent>
                   <Info className="w-8 h-8 text-gray-500 mx-auto mb-2" />
-                  <p className="text-gray-400 text-sm">Keine Einträge gesichert.</p>
+                  <p className="text-gray-400 text-sm">{t('keineEintraege')}</p>
                 </CardContent>
               </Card>
             ) : (
@@ -675,7 +664,7 @@ export default function WiderspruchPage(props: PageProps) {
             onClick={() => router.push(`/${locale}`)}
             className="text-gray-400 hover:text-white hover:bg-white/5 h-11 px-6 rounded-xl"
           >
-            <ArrowLeft className="mr-2 w-4 h-4" /> Zurück zum Hauptportal
+            <ArrowLeft className="mr-2 w-4 h-4" /> {t('zurueck')}
           </Button>
         </div>
       </div>
