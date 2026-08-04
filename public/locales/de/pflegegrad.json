@@ -163,32 +163,100 @@
     },
     "modul6": {
       "title": "Modul 6: Alltagsgestaltung",
-      "subtitle": "Rechtlicher Kontext: SGB XI Widerspruchs-Sicherung",
+      "weight": "Rechtlicher Kontext: SGB XI Widerspruchs-Sicherung",
+      "zurueck": "Zurück zu Modul 5",
+      "zurueckKurz": "Zurück",
+      "widerspruchTitel": "Widerspruchs-Relevanz:",
+      "widerspruchText": "Dieses Modul verändert die mathematischen Systempunkte nicht direkt, bildet aber die rechtliche Argumentationsbasis, falls der Medizinische Dienst die Pflegesituation unvollständig erfasst hat.",
+      "auswertungHinweis": "Mit dem Klick auf Auswertung starten werden Ihre Daten nach den Richtlinien des SGB XI berechnet und mit den länderspezifischen Entlastungsbeträgen abgeglichen.",
+      "berechnet": "Berechne Matrix…",
+      "auswertungStarten": "Auswertung starten",
+      "fussnote": "© 2026 PflegeNavigator EU gUG • Alle Berechnungen basieren auf den gesetzlichen Schwellenwerten des Bundesministeriums für Gesundheit.",
       "questions": {
-        "haushalt": {
-          "label": "Hauswirtschaftliche Versorgung",
-          "simple": "Wer putzt die Wohnung und wäscht die Wäsche?",
-          "hilfe": "Erledigung sämtlicher Reinigungsarbeiten im häuslichen Umfeld."
+        "m6_q1": {
+          "label": "1. Wer erledigt die hauswirtschaftliche Versorgung (Putzen, Wäsche)?",
+          "optionen": {
+            "selbst": {
+              "titel": "Die betroffene Person allein",
+              "beschreibung": "Erledigt sämtliche Reinigungsarbeiten selbstständig."
+            },
+            "teilweise": {
+              "titel": "Mit regelmäßiger Unterstützung",
+              "beschreibung": "Leichte Arbeiten eigenständig, schwere Arbeiten (z.B. Gardinen, Saugen) mit Hilfe."
+            },
+            "nicht": {
+              "titel": "Vollständige Übernahme durch andere",
+              "beschreibung": "Der Haushalt wird komplett durch Angehörige oder Dienste geführt."
+            }
+          }
         },
-        "einkaufen": {
-          "label": "Einkäufe des täglichen Bedarfs",
-          "simple": "Können Sie Lebensmittel und wichtige Dinge alleine einkaufen?",
-          "hilfe": "Sucht Geschäfte eigenständig auf und transportiert Waren nach Hause."
+        "m6_q2": {
+          "label": "2. Wie selbstständig können Einkäufe des täglichen Bedarfs erledigt werden?",
+          "optionen": {
+            "ja": {
+              "titel": "Vollständig selbstständig",
+              "beschreibung": "Sucht Geschäfte eigenständig auf und transportiert Waren nach Hause."
+            },
+            "online_begleitung": {
+              "titel": "Nur mit Begleitung oder digital",
+              "beschreibung": "Benötigt Unterstützung beim Tragen oder Begleitung zum Geschäft."
+            },
+            "nicht": {
+              "titel": "Nicht mehr eigenständig möglich",
+              "beschreibung": "Besorgungen werden vollständig von Dritten übernommen."
+            }
+          }
         },
-        "kochen": {
-          "label": "Zubereitung von Mahlzeiten",
-          "simple": "Können Sie sich selbstständig warmes oder kaltes Essen kochen?",
-          "hilfe": "Zubereitung von warmen und kalten Mahlzeiten sowie Reinigung der Küche."
+        "m6_q3": {
+          "label": "3. Kann die Zubereitung von warmen und kalten Mahlzeiten sichergestellt werden?",
+          "optionen": {
+            "selbst": {
+              "titel": "Ja, vollkommen autark",
+              "beschreibung": "Plant, kocht, bereitet zu und reinigt die Küche eigenständig."
+            },
+            "teilweise": {
+              "titel": "Mit punktueller Unterstützung",
+              "beschreibung": "Hilfe beim Schneiden/Heben schwerer Töpfe oder Strukturierung nötig."
+            },
+            "nicht": {
+              "titel": "Vollständige Fremdversorgung",
+              "beschreibung": "Mahlzeiten müssen fertig zubereitet oder geliefert werden (Essen auf Rädern)."
+            }
+          }
         },
-        "finanzen": {
-          "label": "Finanzielle Angelegenheiten",
-          "simple": "Regeln Sie Geldgeschäfte, Überweisungen und Post normal alleine?",
-          "hilfe": "Regelt Überweisungen, Verträge, Bargeld und Postverkehr fehlerfrei."
+        "m6_q4": {
+          "label": "4. Werden finanzielle Angelegenheiten und Behördengänge bewältigt?",
+          "optionen": {
+            "voll": {
+              "titel": "Vollständig eigenständig",
+              "beschreibung": "Regelt Überweisungen, Verträge, Bargeld und Postverkehr fehlerfrei."
+            },
+            "teilweise": {
+              "titel": "Mit beratender Unterstützung",
+              "beschreibung": "Braucht Hilfe bei komplexen Formularen oder Überwachung von Fristen."
+            },
+            "nicht": {
+              "titel": "Vollständige Vertretung erforderlich",
+              "beschreibung": "Angelegenheiten werden per Vollmacht komplett abgegeben."
+            }
+          }
         },
-        "entscheidungen": {
-          "label": "Zukunftsrelevante Entscheidungen",
-          "simple": "Können Sie wichtige Entscheidungen für Ihr Leben noch alleine treffen?",
-          "hilfe": "Trifft medizinische und organisatorische Entscheidungen sicher selbst."
+        "m6_q5": {
+          "label": "5. Können zukunftsrelevante Entscheidungen gefällt werden?",
+          "optionen": {
+            "selbst": {
+              "titel": "Ja, vollkommen eigenverantwortlich",
+              "beschreibung": "Trifft medizinische und organisatorische Entscheidungen sicher selbst."
+            },
+            "beratung": {
+              "titel": "Nur nach eingehender Beratung",
+              "beschreibung": "Wägt Optionen mit Angehörigen ab, entscheidet im Kern jedoch selbst."
+            },
+            "nicht": {
+              "titel": "Nicht allein möglich",
+              "beschreibung": "Benötigt eine rechtliche Betreuung oder umfassende Entscheidungshilfe."
+            }
+          }
         }
       }
     }
@@ -202,5 +270,80 @@
     "1": "Leichte Einschränkung (Größtenteils selbstständig)",
     "2": "Mittlere Einschränkung (Größtenteils unselbstständig)",
     "3": "Schwere Einschränkung (Unselbstständig)"
+  },
+  "kinder": {
+    "titel": "Kinder-Modus 🌟",
+    "untertitel": "Spezial-Assessment zur Feststellung von Pflegebedürftigkeit bei Säuglingen, Kleinkindern und Jugendlichen nach dem SGB XI.",
+    "altersvergleichTitel": "Altersgruppen-Vergleich:",
+    "altersvergleichText": "Abzug des natürlichen, altersbedingten Pflegebedarfs gesunder Kinder.",
+    "babyschutzTitel": "Baby-Sonderschutz:",
+    "babyschutzText": "Berücksichtigung der pauschalen Höhergruppierung für Kinder unter 18 Monaten.",
+    "analyseStarten": "Analyse starten",
+    "stammdatenTitel": "Stammdaten des Kindes",
+    "stammdatenBeschreibung": "Ermöglicht das Laden der altersgerechten Vergleichsmatrizen.",
+    "vorname": "Vorname (Optional)",
+    "vornamePlatzhalter": "z.B. Lea",
+    "alter": "Alter in Jahren",
+    "sonderregelTitel": "Sonderregelung aktiv:",
+    "sonderregelText": "Unter 18 Monaten greift der pauschale Ein-Stufen-Aufschlag. Pflegegrad 1 ist gesetzlich ausgeschlossen (Direkteinstieg in PG 2).",
+    "zurueck": "Zurück",
+    "fragenLaden": "Fragen laden",
+    "vergleichsmatrix": "Vergleichsmatrix für Altersgruppe: {gruppe}",
+    "naechsterBereich": "Nächster Bereich",
+    "auswerten": "Analyse auswerten",
+    "assistentTitel": "Kinder-KI Assistent",
+    "assistentText": "Ich unterstütze Sie bei der rechtssicheren Erfassung für {name}.",
+    "ihrKind": "Ihr Kind",
+    "aktuelleMatrix": "Aktuelle Matrix: {alter} Jahre ({gruppe})",
+    "gesperrtTitel": "Rechtssicheres MD-Gutachten gesperrt",
+    "gesperrtText": "Die Rohdaten wurden erfasst. Schalten Sie jetzt die professionelle SGB-XI Auswertungsmatrix und das fertige Antrags-PDF für Ihre Pflegekasse frei.",
+    "vorteil1": "Vollständiger Abgleich mit den offiziellen Kinder-Vergleichstabellen.",
+    "vorteil2": "Fertig formuliertes PDF-Anschreiben für den Erstantrag.",
+    "verbindungAufbau": "Verbindung wird aufgebaut…",
+    "freischalten": "Dossier kostenpflichtig freischalten",
+    "eingabenKorrigieren": "Eingaben korrigieren",
+    "entschluesselt": "Kinder-Analyse Entschlüsselt 🌟",
+    "keinPflegegrad": "Kein Pflegegrad",
+    "voraussichtlich": "Voraussichtlich: Pflegegrad {grad}",
+    "systempunkte": "Erreichte Systempunkte: {punkte} / {maximum}",
+    "rechtlicherHintergrundTitel": "Gesetzlicher Hintergrund (§ 15 Abs. 6/7 SGB XI):",
+    "rechtlicherHintergrundText": "Bei Kindern wird der Mehraufwand im Vergleich zu einem gesunden Kind desselben Alters gemessen.",
+    "babyregelAngewandt": "Da Ihr Kind unter 18 Monaten alt ist, wurden nur die altersunabhängigen Bereiche bewertet und der pauschale Ein-Stufen-Aufschlag bereits mitberücksichtigt.",
+    "alleBereiche": "Bewertet wurden alle sechs gesetzlichen Lebensbereiche mit den amtlichen Modulgewichtungen.",
+    "briefErstellen": "Antrags-Anschreiben im Brief-Zentrum erstellen"
+  },
+  "meldungen": {
+    "sitzungAbgelaufen": "Ihre Fall-Session ist abgelaufen. Bitte laden Sie Ihren Fall erneut.",
+    "keineSitzung": "Keine aktive Fall-Session gefunden. Bitte starten Sie neu.",
+    "keineSitzungKurz": "Keine aktive Fall-Session gefunden.",
+    "fortschrittGespeichert": "Fortschritt gespeichert.",
+    "speichernFehlgeschlagen": "Speichern fehlgeschlagen. Das Ergebnis wird nur lokal berechnet.",
+    "zurueckgesetzt": "Begutachtung zurückgesetzt.",
+    "zuruecksetzenFehler": "Die Begutachtung konnte nicht zurückgesetzt werden. Bitte erneut versuchen.",
+    "ergebnisFehler": "Das Ergebnis konnte nicht berechnet werden.",
+    "linkKopiert": "Link in die Zwischenablage kopiert.",
+    "teilenFehler": "Teilen fehlgeschlagen."
+  },
+  "ergebnis": {
+    "ladenTitel": "Berechne Auswertungs-Matrix…",
+    "ladenText": "Die SGB XI Schwellenwerte werden mit Ihren Angaben abgeglichen.",
+    "ampel": {
+      "gruen": "Sicher über der gesetzlichen Schwelle",
+      "gelb": "Knapp über der gesetzlichen Schwelle (Grenzfall)",
+      "rot": "Unterhalb der gesetzlichen Mindest-Schwelle"
+    },
+    "lizenzPruefen": "Verifiziere aktive Lizenzrechte für Zusatzmodule…",
+    "lizenzFehler": "Verbindungsfehler bei der Lizenzprüfung.",
+    "gdbPruefen": "Prüfe…",
+    "gdbRechner": "GdB-Rechner",
+    "reset": {
+      "titel": "Begutachtung neu beginnen?",
+      "beschreibung": "Sie beantworten alle Fragen der sechs Module noch einmal von vorne. Ihre bisherigen Antworten werden dabei endgültig gelöscht und lassen sich nicht wiederherstellen.",
+      "folge1": "Alle Antworten aus den Modulen 1 bis 6 werden gelöscht.",
+      "folge2": "Das errechnete Ergebnis wird verworfen.",
+      "folge3": "Ihr Fallcode und ein bereits gekaufter Zugang bleiben erhalten.",
+      "bestaetigen": "Ja, neu beginnen",
+      "laeuft": "Antworten werden gelöscht…"
+    }
   }
 }

@@ -53,6 +53,7 @@ export default function PflegegradStartPage(props: PageProps) {
   // Namensraum-Weichen aktivieren
   const tStart = useTranslations('pflegegrad.start');
   const tCommon = useTranslations('common.buttons');
+  const tMeldung = useTranslations('pflegegrad.start.meldungen');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -84,12 +85,10 @@ export default function PflegegradStartPage(props: PageProps) {
         });
 
         if (status.isUnlocked) {
-          toast.success('Premium-Optionen erfolgreich freigeschaltet!');
+          toast.success(tMeldung('premiumFrei'));
           router.push(`/${locale}/pflegegrad/modul1`);
         } else {
-          toast.info(
-            'Zahlung wird noch verarbeitet. Ihr Fall ist geladen — Premium schaltet sich in Kürze frei.'
-          );
+          toast.info(tMeldung('zahlungInArbeit'));
         }
       });
     } else if (searchParams.case) {
@@ -98,7 +97,7 @@ export default function PflegegradStartPage(props: PageProps) {
 
       validateAndStoreSession(sharedCode).then((status) => {
         if (!status.success) {
-          setError('Der geteilte Fallcode ist ungültig oder abgelaufen.');
+          setError(tMeldung('geteilterLinkUngueltig'));
           return;
         }
 
@@ -112,7 +111,7 @@ export default function PflegegradStartPage(props: PageProps) {
         }
 
         verfolge(EREIGNISSE.rechnerGestartet, { einstieg: 'geteilt' });
-        toast.success('Fall über geteilten Link geladen.');
+        toast.success(tMeldung('geteilterLinkGeladen'));
       });
     }
 
@@ -123,7 +122,7 @@ export default function PflegegradStartPage(props: PageProps) {
       .then(({ data }) => {
         if (data) setDbProducts(data as ProductFromDb[]);
       });
-  }, [searchParams, locale, router, supabase]);
+  }, [searchParams, locale, router, supabase, tMeldung]);
 
   const handleLoadCase = async (inputCode: string) => {
     setLoading(true);
@@ -133,7 +132,7 @@ export default function PflegegradStartPage(props: PageProps) {
       const status = await validateAndStoreSession(verifiedCode);
 
       if (!status.success) {
-        setError('Fallcode nicht gefunden. Bitte prüfen Sie die Eingabe.');
+        setError(tMeldung('fallcodeUnbekannt'));
         setLoading(false);
         return;
       }
@@ -150,7 +149,7 @@ export default function PflegegradStartPage(props: PageProps) {
 
       verfolge(EREIGNISSE.rechnerGestartet, { einstieg: 'geladen' });
 
-      toast.success('Willkommen zurück! Daten geladen.');
+      toast.success(tMeldung('willkommenZurueck'));
       // Nur weiterleiten, wenn das Ergebnis zu DIESEM Fall gehört. Die reine
       // Existenzprüfung von früher zeigte sonst den Pflegegrad des zuvor
       // geladenen Falls.
@@ -160,7 +159,7 @@ export default function PflegegradStartPage(props: PageProps) {
         router.push(`/${locale}/pflegegrad/modul1`);
       }
     } catch {
-      setError('Fehler bei der Session-Prüfung.');
+      setError(tMeldung('sitzungFehler'));
     } finally {
       setLoading(false);
     }
@@ -186,10 +185,10 @@ export default function PflegegradStartPage(props: PageProps) {
 
       setIsNewCase(true);
       verfolge(EREIGNISSE.rechnerGestartet, { einstieg: 'neu' });
-      toast.success('Kostenloser Fallcode generiert!');
+      toast.success(tMeldung('fallcodeErzeugt'));
     } catch (err) {
       logger.error({ err }, 'Fehler beim Initialisieren des neuen Falls über die API');
-      setError('Fehler beim Initialisieren des neuen Falls über die API.');
+      setError(tMeldung('anlegenFehler'));
     } finally {
       setLoading(false);
     }

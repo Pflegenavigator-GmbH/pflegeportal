@@ -1,0 +1,62 @@
+{
+  "hero": {
+    "badge": "New: your digital care companion",
+    "title": "Your clear path through the <span>care maze</span>",
+    "text": "Estimate your care level, prepare applications, file an appeal – <strong>{avatarName}</strong> guides you step by step. Anonymous, free of charge and without bureaucratic jargon.",
+    "avatarName": "PflegeNavigator",
+    "btnStart": "Estimate care level now",
+    "btnResume": "Continue my case",
+    "btnWiderspruch": "File an appeal"
+  },
+  "promise": {
+    "text": "From the first question to a well-founded estimate in under <strong>{timePortal}</strong> – instead of weeks of paperwork.",
+    "timeStuetzkopf": "10 minutes",
+    "timePortal": "5 minutes"
+  },
+  "features": {
+    "heading": "What we offer",
+    "subheading": "Everything in one place to support you as well as possible.",
+    "items": {
+      "rechner": {
+        "tag": "Calculator",
+        "title": "Care level calculator",
+        "description": "Work out your likely care level without obligation."
+      },
+      "widerspruch": {
+        "tag": "Application",
+        "title": "Appeal assistant",
+        "description": "Draft legally sound appeals if your application is rejected."
+      },
+      "avatar": {
+        "title": "Avatar guidance with “Navi”",
+        "description": "Clarify complex questions in an accessible dialogue — by text or gentle audio output.",
+        "tag": "Kokoro Engine"
+      },
+      "tagebuch": {
+        "title": "Digital care diary",
+        "description": "Record care times and relief measures as complete primary evidence for the Medical Service assessment.",
+        "tag": "Exportable"
+      },
+      "qr": {
+        "title": "Encrypted QR system",
+        "description": "Share your case file securely with relatives or doctors — without disclosing any names.",
+        "tag": "GDPR safe"
+      },
+      "multi": {
+        "title": "Integrated multi-calculators",
+        "description": "Degree of disability under VersMedV, victim compensation under SGB XIV and the 2026 tax allowances.",
+        "tag": "Legal status 2026"
+      }
+    }
+  },
+  "b2b": {
+    "title": "For care staff, advisors and care services",
+    "text": "Use advanced case handling, PflegeGPT interfaces and workload analyses.",
+    "link": "Open professional tools"
+  },
+  "trust": {
+    "basis": "<strong>4.9 million</strong> verified case histories as the mathematical basis for our calculations.",
+    "anonym": "<strong>100% anonymous:</strong> no real names or sensitive data are ever required.",
+    "rechtssicher": "<strong>Legally current for 2026:</strong> all allowances, SGB rates and deadlines are kept up to date."
+  }
+}

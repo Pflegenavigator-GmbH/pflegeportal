@@ -19,6 +19,7 @@ import {
   Home,
 } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
@@ -77,6 +78,8 @@ const CATEGORY_STYLES: Record<string, { icon: React.ReactNode; color: string }> 
 };
 
 export default function KinderModusPage() {
+  const tMeldung = useTranslations('pflegegrad.meldungen');
+  const t = useTranslations('pflegegrad.kinder');
   const router = useRouter();
   const { locale } = useParams();
 
@@ -99,7 +102,7 @@ export default function KinderModusPage() {
     }, 0);
 
     if (!caseCode) {
-      toast.error('Keine aktive Fall-Session gefunden. Bitte starten Sie neu.');
+      toast.error(tMeldung('keineSitzung'));
       router.push(`/${locale}/pflegegrad/start`);
       return () => clearTimeout(timer);
     }
@@ -115,7 +118,7 @@ export default function KinderModusPage() {
       })
       .catch((err) => {
         if (err instanceof SessionExpiredError) {
-          toast.error('Ihre Fall-Session ist abgelaufen. Bitte laden Sie Ihren Fall erneut.');
+          toast.error(tMeldung('sitzungAbgelaufen'));
           router.push(`/${locale}/pflegegrad/start`);
           return;
         }
@@ -123,7 +126,7 @@ export default function KinderModusPage() {
       });
 
     return () => clearTimeout(timer);
-  }, [caseCode, locale, router]);
+  }, [caseCode, locale, router, tMeldung]);
 
   const categories = getAssessmentCategories(childInfo.age);
   const totalQuestions = categories.reduce((sum, cat) => sum + cat.questions.length, 0);
@@ -158,12 +161,12 @@ export default function KinderModusPage() {
           await saveModuleAnswers(caseCode, 'kinder', answers);
         } catch (err) {
           if (err instanceof SessionExpiredError) {
-            toast.error('Ihre Fall-Session ist abgelaufen. Bitte laden Sie Ihren Fall erneut.');
+            toast.error(tMeldung('sitzungAbgelaufen'));
             router.push(`/${locale}/pflegegrad/start`);
             return;
           }
           logger.error({ err }, 'Fehler beim Sichern des Kinder-Assessments');
-          toast.error('Speichern fehlgeschlagen. Das Ergebnis wird nur lokal berechnet.');
+          toast.error(tMeldung('speichernFehlgeschlagen'));
         }
       }
 
@@ -197,26 +200,21 @@ export default function KinderModusPage() {
             <Baby className="w-10 h-10 text-pink-400" />
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
-            Kinder-Modus 🌟
+            {t('titel')}
           </h1>
-          <p className="text-gray-400 text-lg leading-relaxed">
-            Spezial-Assessment zur Feststellung von Pflegebedürftigkeit bei Säuglingen, Kleinkindern
-            und Jugendlichen nach dem SGB XI.
-          </p>
+          <p className="text-gray-400 text-lg leading-relaxed">{t('untertitel')}</p>
 
           <div className="grid gap-3 text-left">
             <div className="p-4 bg-white/[0.02] border border-white/5 rounded-xl flex gap-3">
               <Star className="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0" />
               <p className="text-sm text-gray-300">
-                <strong>Altersgruppen-Vergleich:</strong> Abzug des natürlichen, altersbedingten
-                Pflegebedarfs gesunder Kinder.
+                <strong>{t('altersvergleichTitel')}</strong> {t('altersvergleichText')}
               </p>
             </div>
             <div className="p-4 bg-white/[0.02] border border-white/5 rounded-xl flex gap-3">
               <Sparkles className="w-5 h-5 text-pink-400 mt-0.5 flex-shrink-0" />
               <p className="text-sm text-gray-300">
-                <strong>Baby-Sonderschutz:</strong> Berücksichtigung der pauschalen Höhergruppierung
-                für Kinder unter 18 Monaten.
+                <strong>{t('babyschutzTitel')}</strong> {t('babyschutzText')}
               </p>
             </div>
           </div>
@@ -226,7 +224,7 @@ export default function KinderModusPage() {
             className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold h-14 text-lg rounded-xl shadow-lg"
           >
             <Gamepad2 className="w-5 h-5 mr-2" />
-            Analyse starten
+            {t('analyseStarten')}
           </Button>
         </div>
       </div>
@@ -239,23 +237,23 @@ export default function KinderModusPage() {
       <div className="min-h-screen bg-slate-900 text-white p-4 flex flex-col justify-center items-center">
         <Card className="w-full max-w-md bg-white/5 border-white/10 text-white shadow-2xl">
           <CardHeader>
-            <CardTitle className="text-xl">Stammdaten des Kindes</CardTitle>
+            <CardTitle className="text-xl">{t('stammdatenTitel')}</CardTitle>
             <CardDescription className="text-gray-400">
-              Ermöglicht das Laden der altersgerechten Vergleichsmatrizen.
+              {t('stammdatenBeschreibung')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-300">Vorname (Optional)</label>
+              <label className="text-sm font-medium text-gray-300">{t('vorname')}</label>
               <Input
                 value={childInfo.name}
                 onChange={(e) => setChildInfo((prev) => ({ ...prev, name: e.target.value }))}
-                placeholder="z.B. Lea"
+                placeholder={t('vornamePlatzhalter')}
                 className="bg-slate-950 border-white/10 text-white h-11"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-300">Alter in Jahren</label>
+              <label className="text-sm font-medium text-gray-300">{t('alter')}</label>
               <Input
                 type="number"
                 min="0"
@@ -271,9 +269,7 @@ export default function KinderModusPage() {
               <div className="p-3 bg-pink-500/10 border border-pink-500/20 rounded-xl flex gap-2 text-xs text-pink-400">
                 <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                 <span>
-                  <strong>Sonderregelung aktiv:</strong> Unter 18 Monaten greift der pauschale
-                  Ein-Stufen-Aufschlag. Pflegegrad 1 ist gesetzlich ausgeschlossen (Direkteinstieg
-                  in PG 2).
+                  <strong>{t('sonderregelTitel')}</strong> {t('sonderregelText')}
                 </span>
               </div>
             )}
@@ -284,13 +280,13 @@ export default function KinderModusPage() {
               onClick={() => setStep('intro')}
               className="flex-1 border-white/10 text-white hover:bg-white/5"
             >
-              Zurück
+              {t('zurueck')}
             </Button>
             <Button
               onClick={() => setStep('assessment')}
               className="flex-1 bg-pink-600 hover:bg-pink-500 text-white font-semibold"
             >
-              Fragen laden
+              {t('fragenLaden')}
             </Button>
           </CardFooter>
         </Card>
@@ -331,7 +327,7 @@ export default function KinderModusPage() {
                   <div>
                     <CardTitle className="text-xl">{currentCat.name}</CardTitle>
                     <CardDescription className="text-gray-400">
-                      Vergleichsmatrix für Altersgruppe: {childInfo.ageGroup.toUpperCase()}
+                      {t('vergleichsmatrix', { gruppe: childInfo.ageGroup.toUpperCase() })}
                     </CardDescription>
                   </div>
                 </div>
@@ -385,16 +381,14 @@ export default function KinderModusPage() {
                   onClick={handleBack}
                   className="border-white/10 text-white hover:bg-white/5"
                 >
-                  Zurück
+                  {t('zurueck')}
                 </Button>
                 <Button
                   onClick={handleNext}
                   disabled={currentQuestions.some((q) => answers[q.id] === undefined)}
                   className="bg-pink-600 hover:bg-pink-500 text-white font-bold"
                 >
-                  {currentCategory < categories.length - 1
-                    ? 'Nächster Bereich'
-                    : 'Analyse auswerten'}
+                  {currentCategory < categories.length - 1 ? t('naechsterBereich') : t('auswerten')}
                   <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </CardFooter>
@@ -406,16 +400,16 @@ export default function KinderModusPage() {
               <div className="p-4 bg-gradient-to-r from-pink-500/20 to-purple-500/20 border-b border-white/10">
                 <h3 className="font-bold text-sm text-white flex items-center gap-2">
                   <Baby className="w-4 h-4 text-pink-400" />
-                  Kinder-KI Assistent
+                  {t('assistentTitel')}
                 </h3>
               </div>
               <div className="p-4 text-xs text-gray-400 leading-relaxed space-y-2">
-                <p>
-                  Ich unterstütze Sie bei der rechtssicheren Erfassung für{' '}
-                  <strong>{childInfo.name || 'Ihr Kind'}</strong>.
-                </p>
+                <p>{t('assistentText', { name: childInfo.name || t('ihrKind') })}</p>
                 <p className="bg-white/5 p-2.5 rounded border border-white/5 font-mono text-[10px]">
-                  Aktuelle Matrix: {childInfo.age} Jahre ({childInfo.ageGroup.toUpperCase()})
+                  {t('aktuelleMatrix', {
+                    alter: childInfo.age,
+                    gruppe: childInfo.ageGroup.toUpperCase(),
+                  })}
                 </p>
               </div>
             </div>
@@ -436,22 +430,19 @@ export default function KinderModusPage() {
                 <div className="w-16 h-16 bg-purple-500/20 border border-purple-500/30 rounded-2xl flex items-center justify-center mx-auto shadow-xl">
                   <Lock className="w-8 h-8 text-purple-400" />
                 </div>
-                <h2 className="text-2xl font-extrabold tracking-tight">
-                  Rechtssicheres MD-Gutachten gesperrt
-                </h2>
+                <h2 className="text-2xl font-extrabold tracking-tight">{t('gesperrtTitel')}</h2>
                 <p className="text-gray-400 text-sm max-w-sm mx-auto leading-relaxed">
-                  Die Rohdaten wurden erfasst. Schalten Sie jetzt die professionelle SGB-XI
-                  Auswertungsmatrix und das fertige Antrags-PDF für Ihre Pflegekasse frei.
+                  {t('gesperrtText')}
                 </p>
               </div>
               <CardContent className="p-6 pt-0 space-y-3 max-w-md mx-auto">
                 <div className="flex items-center gap-3 text-xs text-gray-300 p-3 bg-white/[0.02] border border-white/5 rounded-xl">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                  <span>Vollständiger Abgleich mit den offiziellen Kinder-Vergleichstabellen.</span>
+                  <span>{t('vorteil1')}</span>
                 </div>
                 <div className="flex items-center gap-3 text-xs text-gray-300 p-3 bg-white/[0.02] border border-white/5 rounded-xl">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                  <span>Fertig formuliertes PDF-Anschreiben für den Erstantrag.</span>
+                  <span>{t('vorteil2')}</span>
                 </div>
               </CardContent>
               <CardFooter className="p-6 border-t border-white/5 bg-white/[0.01] flex flex-col gap-3">
@@ -461,15 +452,13 @@ export default function KinderModusPage() {
                   className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold h-14 text-base rounded-xl shadow-lg"
                 >
                   <FileText className="w-5 h-5 mr-2" />
-                  {checkoutLoading
-                    ? 'Verbindung aufbau...'
-                    : 'Dossier kostenpflichtig freischalten'}
+                  {checkoutLoading ? t('verbindungAufbau') : t('freischalten')}
                 </Button>
                 <button
                   onClick={() => setStep('assessment')}
                   className="text-xs text-gray-500 hover:text-gray-400 font-mono underline"
                 >
-                  Eingaben korrigieren
+                  {t('eingabenKorrigieren')}
                 </button>
               </CardFooter>
             </Card>
@@ -477,15 +466,15 @@ export default function KinderModusPage() {
             <Card className="bg-white/5 border-white/10 text-white shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-300">
               <div className="p-8 bg-gradient-to-r from-pink-500/10 to-purple-500/10 border-b border-white/5 text-center space-y-2">
                 <span className="text-xs font-mono tracking-widest uppercase text-pink-400 bg-pink-500/10 px-3 py-1 rounded-full border border-pink-500/20">
-                  Kinder-Analyse Entschlüsselt 🌟
+                  {t('entschluesselt')}
                 </span>
                 <h2 className="text-3xl font-extrabold">
                   {result.level === 0
-                    ? 'Kein Pflegegrad'
-                    : `Voraussichtlich: Pflegegrad ${result.level}`}
+                    ? t('keinPflegegrad')
+                    : t('voraussichtlich', { grad: result.level })}
                 </h2>
                 <p className="text-sm text-gray-400 font-mono">
-                  Erreichte Systempunkte: {result.points} / {result.maxPoints}
+                  {t('systempunkte', { punkte: result.points, maximum: result.maxPoints })}
                 </p>
               </div>
               <CardContent className="p-6 space-y-4">
@@ -495,12 +484,9 @@ export default function KinderModusPage() {
                 <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl flex gap-3 text-xs text-blue-400">
                   <Info className="w-5 h-5 flex-shrink-0 mt-0.5" />
                   <p>
-                    <strong>Gesetzlicher Hintergrund (§ 15 Abs. 6/7 SGB XI):</strong> Bei Kindern
-                    wird der Mehraufwand im Vergleich zu einem gesunden Kind desselben Alters
-                    gemessen.{' '}
-                    {result.babyRuleApplied
-                      ? 'Da Ihr Kind unter 18 Monaten alt ist, wurden nur die altersunabhängigen Bereiche bewertet und der pauschale Ein-Stufen-Aufschlag bereits mitberücksichtigt.'
-                      : 'Bewertet wurden alle sechs gesetzlichen Lebensbereiche mit den amtlichen Modulgewichtungen.'}
+                    <strong>{t('rechtlicherHintergrundTitel')}</strong>{' '}
+                    {t('rechtlicherHintergrundText')}{' '}
+                    {result.babyRuleApplied ? t('babyregelAngewandt') : t('alleBereiche')}
                   </p>
                 </div>
               </CardContent>
@@ -527,8 +513,7 @@ export default function KinderModusPage() {
                   }}
                   className="w-full bg-[#20b2aa] hover:bg-[#3ddbd0] text-slate-950 font-bold h-12 rounded-xl"
                 >
-                  <FileText className="w-4 h-4 mr-2" /> Antrags-Anschreiben im Brief-Zentrum
-                  erstellen
+                  <FileText className="w-4 h-4 mr-2" /> {t('briefErstellen')}
                 </Button>
               </CardFooter>
             </Card>

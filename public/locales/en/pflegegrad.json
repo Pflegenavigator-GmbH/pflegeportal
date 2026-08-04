@@ -21,5 +21,94 @@
       "anlegenFehler": "Could not create a new case.",
       "fallcodeErzeugt": "Free case code generated."
     }
+  },
+  "kinder": {
+    "titel": "Children's mode 🌟",
+    "untertitel": "Special assessment for determining care needs in infants, toddlers and adolescents under SGB XI.",
+    "altersvergleichTitel": "Age-group comparison:",
+    "altersvergleichText": "Deducts the natural, age-related care needs of healthy children.",
+    "babyschutzTitel": "Infant protection:",
+    "babyschutzText": "Accounts for the flat upgrade for children under 18 months.",
+    "analyseStarten": "Start assessment",
+    "stammdatenTitel": "Child's details",
+    "stammdatenBeschreibung": "Loads the age-appropriate comparison matrices.",
+    "vorname": "First name (optional)",
+    "vornamePlatzhalter": "e.g. Lea",
+    "alter": "Age in years",
+    "sonderregelTitel": "Special rule active:",
+    "sonderregelText": "Under 18 months the flat one-level upgrade applies. Care level 1 is excluded by law (direct entry at level 2).",
+    "zurueck": "Back",
+    "fragenLaden": "Load questions",
+    "vergleichsmatrix": "Comparison matrix for age group: {gruppe}",
+    "naechsterBereich": "Next section",
+    "auswerten": "Evaluate assessment",
+    "assistentTitel": "Children's assistant",
+    "assistentText": "I help you record everything correctly for {name}.",
+    "ihrKind": "your child",
+    "aktuelleMatrix": "Current matrix: {alter} years ({gruppe})",
+    "gesperrtTitel": "Legally sound MD report locked",
+    "gesperrtText": "The raw data has been recorded. Unlock the professional SGB XI evaluation matrix and the ready-made application PDF for your care insurer.",
+    "vorteil1": "Full comparison against the official children's reference tables.",
+    "vorteil2": "Ready-drafted PDF cover letter for the initial application.",
+    "verbindungAufbau": "Connecting…",
+    "freischalten": "Unlock dossier (paid)",
+    "eingabenKorrigieren": "Correct entries",
+    "entschluesselt": "Children's analysis unlocked 🌟",
+    "keinPflegegrad": "No care level",
+    "voraussichtlich": "Expected: care level {grad}",
+    "systempunkte": "Points achieved: {punkte} / {maximum}",
+    "rechtlicherHintergrundTitel": "Legal background (§ 15 (6)/(7) SGB XI):",
+    "rechtlicherHintergrundText": "For children, the additional effort is measured against a healthy child of the same age.",
+    "babyregelAngewandt": "As your child is under 18 months, only the age-independent areas were assessed and the flat one-level upgrade is already included.",
+    "alleBereiche": "All six statutory areas of life were assessed using the official module weightings.",
+    "briefErstellen": "Create application letter in the letter centre"
+  },
+  "meldungen": {
+    "sitzungAbgelaufen": "Your case session has expired. Please load your case again.",
+    "keineSitzung": "No active case session found. Please start again.",
+    "keineSitzungKurz": "No active case session found.",
+    "fortschrittGespeichert": "Progress saved.",
+    "speichernFehlgeschlagen": "Saving failed. The result is calculated locally only.",
+    "zurueckgesetzt": "Assessment reset.",
+    "zuruecksetzenFehler": "The assessment could not be reset. Please try again.",
+    "ergebnisFehler": "The result could not be calculated.",
+    "linkKopiert": "Link copied to clipboard.",
+    "teilenFehler": "Sharing failed."
+  },
+  "ergebnis": {
+    "ladenTitel": "Calculating evaluation matrix…",
+    "ladenText": "Your answers are being compared against the SGB XI thresholds.",
+    "ampel": {
+      "gruen": "Safely above the statutory threshold",
+      "gelb": "Just above the statutory threshold (borderline)",
+      "rot": "Below the statutory minimum threshold"
+    },
+    "lizenzPruefen": "Verifying licence rights for add-on modules…",
+    "lizenzFehler": "Connection error while checking the licence.",
+    "gdbPruefen": "Checking…",
+    "gdbRechner": "Disability degree calculator",
+    "reset": {
+      "titel": "Start the assessment again?",
+      "beschreibung": "You will answer all questions from the six modules again from the beginning. Your previous answers will be permanently deleted and cannot be restored.",
+      "folge1": "All answers from modules 1 to 6 will be deleted.",
+      "folge2": "The calculated result will be discarded.",
+      "folge3": "Your case code and any purchased access remain intact.",
+      "bestaetigen": "Yes, start again",
+      "laeuft": "Deleting answers…"
+    }
+  },
+  "modules": {
+    "modul6": {
+      "title": "Module 6: Everyday life",
+      "weight": "Legal context: safeguarding an SGB XI appeal",
+      "zurueck": "Back to module 5",
+      "zurueckKurz": "Back",
+      "widerspruchTitel": "Relevance for an appeal:",
+      "widerspruchText": "This module does not change the calculated points directly, but it forms the legal basis for an appeal if the Medical Service recorded the care situation incompletely.",
+      "auswertungHinweis": "When you start the evaluation, your data is calculated according to the SGB XI guidelines and compared with the state-specific relief amounts.",
+      "berechnet": "Calculating…",
+      "auswertungStarten": "Start evaluation",
+      "fussnote": "© 2026 PflegeNavigator EU gUG • All calculations are based on the statutory thresholds of the Federal Ministry of Health."
+    }
   }
 }
