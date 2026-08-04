@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
   Input,
 } from '@/src/components/ui';
-import { supportedLanguages } from '@/src/i18n/languages';
+import { aktiveSprachen } from '@/src/i18n/config';
 import { useLanguageChange } from '@/src/i18n/useLanguageChange';
 
 export default function LanguageSwitcher() {
@@ -21,13 +21,12 @@ export default function LanguageSwitcher() {
   const locale = useLocale();
   const { changeLanguage } = useLanguageChange();
 
-  const currentLanguage =
-    supportedLanguages.find((lang) => lang.code === locale) ?? supportedLanguages[0];
+  const currentLanguage = aktiveSprachen.find((lang) => lang.code === locale) ?? aktiveSprachen[0];
 
   const filteredLanguages = useMemo(() => {
     const query = search.trim().toLowerCase();
 
-    return supportedLanguages.filter(
+    return aktiveSprachen.filter(
       (lang) =>
         lang.nativeName.toLowerCase().includes(query) ||
         lang.name.toLowerCase().includes(query) ||
@@ -64,7 +63,7 @@ export default function LanguageSwitcher() {
           </div>
 
           <p className="mt-2 text-xs text-gray-400">
-            {filteredLanguages.length} von {supportedLanguages.length} Sprachen
+            {filteredLanguages.length} von {aktiveSprachen.length} Sprachen
           </p>
         </div>
 
@@ -88,15 +87,10 @@ export default function LanguageSwitcher() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {!lang.complete && (
-                    <span
-                      className={`rounded px-2 py-0.5 text-xs ${
-                        selected ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-700'
-                      }`}
-                    >
-                      Beta
-                    </span>
-                  )}
+                  {/* Kein „Beta"-Abzeichen mehr: Im Umschalter stehen nur noch
+                      Sprachen mit echten Übersetzungen (aktiveSprachen). Das
+                      frühere Abzeichen hing an `complete`, das handgepflegt und
+                      falsch war — siehe languages.ts. */}
 
                   {selected && <Check className="h-4 w-4 text-[#20b2aa]" />}
                 </div>

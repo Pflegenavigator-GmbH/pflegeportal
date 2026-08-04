@@ -1,64 +1,62 @@
 {
-  "startseite": {
-    "hero": {
-      "badge": "Neu: Ihr digitaler Pflege-Begleiter",
-      "title": "Ihr klarer Weg durch den <span>Pflegedschungel</span>",
-      "text": "Pflegegrad einschätzen, Anträge vorbereiten, Widerspruch einlegen – <strong>{avatarName}</strong> führt Sie Schritt für Schritt ans Ziel. Anonym, kostenlos und ohne Behördendeutsch.",
-      "avatarName": "PflegeNavigator",
-      "btnStart": "Pflegegrad jetzt einschätzen",
-      "btnResume": "Meinen Fall fortsetzen",
-      "btnWiderspruch": "Widerspruch einlegen"
-    },
-    "promise": {
-      "text": "Von der ersten Frage zur fundierten Einschätzung in unter <strong>{timePortal}</strong> – statt Wochen im Papierkrieg.",
-      "timeStuetzkopf": "10 Minuten",
-      "timePortal": "5 Minuten"
-    },
-    "features": {
-      "heading": "Unsere Funktionen",
-      "subheading": "Alles an einem Ort, um Sie bestmöglich zu unterstützen.",
-      "items": {
-        "rechner": {
-          "tag": "Rechner",
-          "title": "Pflegegrad-Rechner",
-          "description": "Berechnen Sie unverbindlich Ihren voraussichtlichen Pflegegrad."
-        },
-        "widerspruch": {
-          "tag": "Antrag",
-          "title": "Widerspruch-Assistent",
-          "description": "Erstellen Sie rechtssichere Widersprüche bei Ablehnung."
-        },
-        "avatar": {
-          "title": "Avatar-Begleitung „Navi“",
-          "description": "Klären Sie komplexe Fragen im barrierefreien Dialog per Text oder sanfter Audio-Ausgabe.",
-          "tag": "Kokoro Engine"
-        },
-        "tagebuch": {
-          "title": "Digitales Pflegetagebuch",
-          "description": "Dokumentieren Sie Pflegezeiten und Erleichterungen als lückenlosen Hauptbeweis für die MDK-Prüfung.",
-          "tag": "Export-Fähig"
-        },
-        "qr": {
-          "title": "Verschlüsseltes QR-System",
-          "description": "Teilen Sie Ihre Fall-Akte ohne Angabe von Namen sicher mit Familienangehörigen oder Ärzten.",
-          "tag": "DSGVO Safe"
-        },
-        "multi": {
-          "title": "Integrierte Multi-Rechner",
-          "description": "GdB-Ermittlung nach VersMedV, SGB XIV Opferentschädigung und steuerliche Pauschbeträge 2026.",
-          "tag": "Rechtsstand 2026"
-        }
+  "hero": {
+    "badge": "Neu: Ihr digitaler Pflege-Begleiter",
+    "title": "Ihr klarer Weg durch den <span>Pflegedschungel</span>",
+    "text": "Pflegegrad einschätzen, Anträge vorbereiten, Widerspruch einlegen – <strong>{avatarName}</strong> führt Sie Schritt für Schritt ans Ziel. Anonym, kostenlos und ohne Behördendeutsch.",
+    "avatarName": "PflegeNavigator",
+    "btnStart": "Pflegegrad jetzt einschätzen",
+    "btnResume": "Meinen Fall fortsetzen",
+    "btnWiderspruch": "Widerspruch einlegen"
+  },
+  "promise": {
+    "text": "Von der ersten Frage zur fundierten Einschätzung in unter <strong>{timePortal}</strong> – statt Wochen im Papierkrieg.",
+    "timeStuetzkopf": "10 Minuten",
+    "timePortal": "5 Minuten"
+  },
+  "features": {
+    "heading": "Unsere Funktionen",
+    "subheading": "Alles an einem Ort, um Sie bestmöglich zu unterstützen.",
+    "items": {
+      "rechner": {
+        "tag": "Rechner",
+        "title": "Pflegegrad-Rechner",
+        "description": "Berechnen Sie unverbindlich Ihren voraussichtlichen Pflegegrad."
+      },
+      "widerspruch": {
+        "tag": "Antrag",
+        "title": "Widerspruch-Assistent",
+        "description": "Erstellen Sie rechtssichere Widersprüche bei Ablehnung."
+      },
+      "avatar": {
+        "title": "Avatar-Begleitung „Navi“",
+        "description": "Klären Sie komplexe Fragen im barrierefreien Dialog per Text oder sanfter Audio-Ausgabe.",
+        "tag": "Kokoro Engine"
+      },
+      "tagebuch": {
+        "title": "Digitales Pflegetagebuch",
+        "description": "Dokumentieren Sie Pflegezeiten und Erleichterungen als lückenlosen Hauptbeweis für die MDK-Prüfung.",
+        "tag": "Export-Fähig"
+      },
+      "qr": {
+        "title": "Verschlüsseltes QR-System",
+        "description": "Teilen Sie Ihre Fall-Akte ohne Angabe von Namen sicher mit Familienangehörigen oder Ärzten.",
+        "tag": "DSGVO Safe"
+      },
+      "multi": {
+        "title": "Integrierte Multi-Rechner",
+        "description": "GdB-Ermittlung nach VersMedV, SGB XIV Opferentschädigung und steuerliche Pauschbeträge 2026.",
+        "tag": "Rechtsstand 2026"
       }
-    },
-    "b2b": {
-      "title": "Für Pflegekräfte, Berater & Pflegedienste",
-      "text": "Nutzen Sie fortgeschrittene Fall-Akteure, PflegeGPT-Schnittstellen und Lastprofil-Analysen.",
-      "link": "Fach-Tools öffnen"
-    },
-    "trust": {
-      "basis": "<strong>4,9 Millionen</strong> verifizierte Fall-Schicksale als mathematische Berechnungsbasis.",
-      "anonym": "<strong>100% Anonym:</strong> Keine Angabe von Klarnamen oder sensiblen Daten erzwungen.",
-      "rechtssicher": "<strong>Rechtssicher 2026:</strong> Ständige Aktualisierung aller Freibeträge, SGB-Sätze und Fristen."
     }
+  },
+  "b2b": {
+    "title": "Für Pflegekräfte, Berater & Pflegedienste",
+    "text": "Nutzen Sie fortgeschrittene Fall-Akteure, PflegeGPT-Schnittstellen und Lastprofil-Analysen.",
+    "link": "Fach-Tools öffnen"
+  },
+  "trust": {
+    "basis": "<strong>4,9 Millionen</strong> verifizierte Fall-Schicksale als mathematische Berechnungsbasis.",
+    "anonym": "<strong>100% Anonym:</strong> Keine Angabe von Klarnamen oder sensiblen Daten erzwungen.",
+    "rechtssicher": "<strong>Rechtssicher 2026:</strong> Ständige Aktualisierung aller Freibeträge, SGB-Sätze und Fristen."
   }
 }
