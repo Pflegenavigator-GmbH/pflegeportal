@@ -2,6 +2,7 @@
 'use client';
 
 import { ChevronDown, ChevronRight, Trash2, FileDown, AlertTriangle, Calendar } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -29,6 +30,7 @@ export function TagebuchListe({
   onRefresh: () => void;
   onSelect: (key: string, data: TagebuchEintrag) => void;
 }) {
+  const t = useTranslations('tagebuch.liste');
   const { triggerCheckout } = useStripeCheckout();
   const [openMonths, setOpenMonths] = useState<string[]>([]);
   const [isExporting, setIsExporting] = useState(false);
@@ -50,22 +52,22 @@ export function TagebuchListe({
 
   const handleDelete = async (e: React.MouseEvent, key: string) => {
     e.stopPropagation();
-    if (!confirm('Möchten Sie diesen Tagebucheintrag unwiderruflich löschen?')) return;
+    if (!confirm(t('loeschBestaetigung'))) return;
 
     const res = await fetch(`/api/tagebuch?caseCode=${caseCode}&entryKey=${key}`, {
       method: 'DELETE',
     });
     if (res.ok) {
       onRefresh();
-      toast.success('Eintrag erfolgreich entfernt.');
+      toast.success(t('eintragEntfernt'));
     } else {
-      toast.error('Fehler beim Löschen des Eintrags.');
+      toast.error(t('loeschFehler'));
     }
   };
 
   // 🛡️ Paywall- & Lizenzprüfung vor dem PDF-Transit
   const handlePdfExportInit = async () => {
-    const toastId = toast.loading('Verifiziere Dokumentenlizenz...');
+    const toastId = toast.loading(t('lizenzPruefen'));
     try {
       const status = await validateAndStoreSession(caseCode);
       toast.dismiss(toastId);
@@ -77,13 +79,13 @@ export function TagebuchListe({
       }
     } catch {
       toast.dismiss(toastId);
-      toast.error('Verbindungsfehler bei der Lizenzprüfung.');
+      toast.error(t('lizenzFehler'));
     }
   };
 
   const executePdfDownload = async () => {
     setIsExporting(true);
-    const toastId = toast.loading('PDF wird serverseitig kompiliert...');
+    const toastId = toast.loading(t('pdfLaeuft'));
 
     try {
       const response = await fetch(`/api/pdf/generate`, {
@@ -97,10 +99,10 @@ export function TagebuchListe({
       });
 
       if (!response.ok) throw new Error();
-      toast.success('Dossier erfolgreich heruntergeladen!', { id: toastId });
+      toast.success(t('pdfFertig'), { id: toastId });
       setShowPreview(false);
     } catch {
-      toast.error('Fehler bei der PDF-Generierung.', { id: toastId });
+      toast.error(t('pdfFehler'), { id: toastId });
     } finally {
       setIsExporting(false);
     }
@@ -120,13 +122,13 @@ export function TagebuchListe({
           disabled={Object.keys(entries).length === 0}
           className="w-full bg-[#1a4480] hover:bg-[#0f2744] text-white border border-white/10 h-10 text-xs font-bold shadow-md"
         >
-          <FileDown className="w-3.5 h-3.5 mr-1.5" /> PDF exportieren
+          <FileDown className="w-3.5 h-3.5 mr-1.5" /> {t('pdfExport')}
         </Button>
       </div>
 
       {Object.keys(grouped).length === 0 && (
         <div className="text-center py-8 border border-dashed border-white/10 rounded-xl text-gray-500 text-xs px-2">
-          Noch keine Einträge vorhanden.
+          {t('leer')}
         </div>
       )}
 
@@ -192,17 +194,17 @@ export function TagebuchListe({
                       </span>
                       {entry.sturz && (
                         <span className="text-[10px] inline-flex items-center px-1 rounded bg-rose-500/10 border border-rose-500/20 text-rose-400 font-medium">
-                          <AlertTriangle className="w-2.5 h-2.5 mr-0.5" /> Sturz
+                          <AlertTriangle className="w-2.5 h-2.5 mr-0.5" /> {t('markeSturz')}
                         </span>
                       )}
                       {entry.krankenhaus && (
                         <span className="text-[10px] px-1 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400">
-                          Klinik
+                          {t('markeKlinik')}
                         </span>
                       )}
                       {entry.medikamentenKontrolle && (
                         <span className="text-[10px] px-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-                          Med ✓
+                          {t('markeMed')}
                         </span>
                       )}
                     </div>

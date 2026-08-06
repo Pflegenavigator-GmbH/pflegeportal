@@ -1,0 +1,40 @@
+{
+  "titel": "Rechtssicheres Brief-Zentrum",
+  "untertitel": "Erstellen Sie rechtlich fundierte Anträge, Widersprüche und Mitteilungen nach aktuellen SGB- und BGB-Richtlinien.",
+  "hinweisTitel": "Hinweis zur Dokumenten-Validierung:",
+  "hinweisText": "Alle Schreiben basieren auf den gesetzlichen Standards für das Jahr 2026. Für komplexe Individualfälle haftet die gUG nicht. Einschreiben mit Rückschein wird dringend empfohlen.",
+  "kategorien": {
+    "antrag-pflegegrad": {
+      "name": "Antrag Pflegegrad",
+      "beschreibung": "Erstbeantragung bei der Pflegekasse"
+    },
+    "widerspruch-pflegegrad": {
+      "name": "Widerspruch Pflegegrad",
+      "beschreibung": "Widerspruch gegen Pflegekassen-Bescheid"
+    },
+    "versorgungsamt": {
+      "name": "Versorgungsamt",
+      "beschreibung": "Anfragen und Feststellungsanträge"
+    },
+    "em-rente": {
+      "name": "Erwerbsminderungsrente",
+      "beschreibung": "Antrag bei der Deutschen Rentenversicherung"
+    },
+    "schwerbehindertenausweis": {
+      "name": "Schwerbehindertenausweis",
+      "beschreibung": "GdB-Antrag beim Versorgungsamt"
+    },
+    "betreuungsrecht": {
+      "name": "Betreuungsrecht",
+      "beschreibung": "Vorsorgevollmacht & Patientenverfügung"
+    },
+    "erbrecht": {
+      "name": "Erbrecht",
+      "beschreibung": "Testament- und Pflichtteilsansprüche"
+    },
+    "allgemein": {
+      "name": "Allgemeiner Brief",
+      "beschreibung": "Universelle Vorlage für Behörden & Kassen"
+    }
+  }
+}

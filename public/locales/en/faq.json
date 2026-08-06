@@ -1,0 +1,89 @@
+{
+  "titel": "Frequently asked questions",
+  "untertitel": "Quick answers to the most important questions about long-term care",
+  "suchePlatzhalter": "Search questions…",
+  "keineTreffer": "No questions found",
+  "keineTrefferHinweis": "Try a different search term",
+  "beliebt": "Popular",
+  "kategorien": {
+    "alle": "All questions",
+    "pflegegrad": "Care level",
+    "widerspruch": "Appeals",
+    "leistungen": "Benefits",
+    "geld": "Money & tax",
+    "migration": "Migration",
+    "recht": "Legal",
+    "technik": "Technical"
+  },
+  "kontakt": {
+    "titel": "Still have questions?",
+    "untertitel": "We are happy to help you personally",
+    "email": "Email",
+    "emailAntwort": "Reply within 24 hours",
+    "hotline": "Care hotline",
+    "hotlineZeiten": "Mon–Fri: 9 am – 6 pm"
+  },
+  "zurueck": "Back to the home page",
+  "fragen": {
+    "1": {
+      "frage": "What is a care level (Pflegegrad)?",
+      "antwort": "The care level measures how much care a person needs. There are five care levels (1–5), where 1 means the least and 5 the greatest need. The level is determined by the Medical Service (MD) or your care insurance fund. It decides which benefits you receive and how much money you get."
+    },
+    "2": {
+      "frage": "How do I apply for a care level?",
+      "antwort": "You apply to your care insurance fund. Use our care level check first to see which level is likely. After the application, an assessor from the Medical Service visits you at home and evaluates how independent you are, using the six modules of the new assessment instrument (NBA)."
+    },
+    "3": {
+      "frage": "How long does it take to receive the decision?",
+      "antwort": "After applying, you are entitled to a decision within 25 working days (§ 18 (3) SGB XI). If the care insurance fund misses this deadline, it must pay you €70 for each begun week of delay under § 18 (3b) SGB XI — unless the delay is not its fault. Use our letter generator for the letter to your care insurance fund."
+    },
+    "4": {
+      "frage": "What are the six NBA modules?",
+      "antwort": "The new assessment instrument (NBA) evaluates how independent you are across six modules (§ 14 SGB XI): 1) mobility, 2) cognitive and communicative abilities, 3) behaviour and psychological problems, 4) self-care, 5) coping with and independently managing illness- or therapy-related demands, 6) organising everyday life and social contacts. The modules carry different weights; your care level follows from the weighted points."
+    },
+    "5": {
+      "frage": "My care level was rejected — what now?",
+      "antwort": "You can file an appeal. You have one month from receiving the decision. Use our appeal generator to create a complete appeal letter. Important: explain why you believe the care level is too low. A doctor's letter or a care report can help."
+    },
+    "6": {
+      "frage": "How successful are appeals?",
+      "antwort": "Around 40–50% of appeals against care level decisions succeed. In other words: filing an appeal is worth it. Many people are granted a higher care level after appealing — or a care level at all."
+    },
+    "7": {
+      "frage": "What do I receive at care level 2?",
+      "antwort": "At care level 2 you are entitled to: care allowance (up to €573 per month if relatives care for you), care benefits in kind (up to €1,146 per month for professional care services), or a combination of both. In addition: relief amount (€194 per month), care aids, home adaptations and short-term care."
+    },
+    "8": {
+      "frage": "What is the difference between care allowance and benefits in kind?",
+      "antwort": "The care allowance is paid directly to you when relatives provide the care. Benefits in kind are paid directly to the care services that look after you. You can combine both — for example 50% care allowance and 50% benefits in kind. The care allowance is tax-free."
+    },
+    "9": {
+      "frage": "Do I have to pay tax on the care allowance?",
+      "antwort": "No. The care allowance is tax-free. It counts neither as income nor as assets. You may keep it even if you receive social benefits such as citizen's allowance or housing benefit. That makes it particularly valuable for relatives providing care."
+    },
+    "10": {
+      "frage": "Can I apply for a care level if I have a migration background?",
+      "antwort": "Yes, absolutely. Your background makes no difference — what matters is the need for care. The portal is currently available in German and English, with more languages to follow, and we help you with any question. You have exactly the same rights as every other insured person in Germany."
+    },
+    "11": {
+      "frage": "My German is not good — can I still apply?",
+      "antwort": "Yes. You can ask your care insurance fund for an interpreter, free of charge. Or bring someone you trust to accompany you. Our portal is multilingual and explains every step in plain language. Our advice: take someone with you to the assessment who can support you."
+    },
+    "12": {
+      "frage": "Is the portal free to use?",
+      "antwort": "Yes, entirely free. PflegeNavigator EU is a non-profit service funded by donations and grants. There are no hidden costs, no registration requirement and no advertising. All letters, calculations and information are free of charge."
+    },
+    "13": {
+      "frage": "Do I need a user account?",
+      "antwort": "No. You can use every function without signing up. Your data is stored locally in your browser (if you wish). We do not store any personal data on our servers. That makes the portal particularly privacy-friendly."
+    },
+    "14": {
+      "frage": "Is PflegeNavigator EU legal advice?",
+      "antwort": "No. We provide guidance and information, but not binding legal advice. Binding decisions rest with the competent bodies (Medical Service, care insurance funds, social courts). For complex cases we recommend advice from a care support centre (Pflegestützpunkt) or a legal advice service."
+    },
+    "15": {
+      "frage": "What is a care directive (Betreuungsverfügung)?",
+      "antwort": "A care directive sets out who decides for you if you are no longer able to do so yourself — for example on medical decisions or care matters. You can draw it up yourself and deposit it with the guardianship authority. We offer template documents for download."
+    }
+  }
+}

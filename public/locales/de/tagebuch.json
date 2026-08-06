@@ -1,70 +1,54 @@
 {
-  "title": "Pflegetagebuch",
-  "subtitle": "Tägliche lückenlose Pflegenachweise als Hauptbeweis für den Begutachtungstermin.",
-  "fallback": "Bitte Fallcode laden.",
-  "actions": {
-    "newEntry": "Neuer Eintrag",
+  "titel": "Pflegetagebuch",
+  "untertitel": "Tägliche lückenlose Pflegenachweise als Hauptbeweis für den Begutachtungstermin.",
+  "neuerEintrag": "Neuer Eintrag",
+  "fallcodeFehlt": "Bitte Fallcode laden.",
+  "formular": {
+    "datum": "Datum",
+    "wasNicht": "Was konnte nicht alleine gemacht werden?",
+    "wasNichtHinweis": "Bitte beschreiben Sie, was nicht alleine gemacht werden konnte.",
+    "wasNichtPlatzhalter": "z.B. Hilfe beim Aufstehen, Duschen oder Kochen benötigt…",
+    "spracheingabe": "Sprach-Eingabe",
+    "werGeholfen": "Wer hat heute geholfen?",
+    "helfer": {
+      "niemand": "Niemand (selbstständig bewältigt)",
+      "angehoerige": "Hauptpflegeperson (Angehörige)",
+      "pflegedienst": "Pflegedienst (professionell)",
+      "andere": "Andere Person (Nachbarn/Freunde)"
+    },
+    "schmerzen": "Schmerzen heute:",
+    "schlaf": "Wie war der Schlaf nachts?",
+    "besonderheiten": "Besonderheiten / Ereignisse",
+    "sturz": "Sturz / Unfall",
+    "krankenhaus": "Krankenhaus",
+    "arzttermin": "Arzttermin",
+    "bettlaegerig": "Bettlägerigkeit",
+    "medikamente": "Medikamentenkontrolle durch Pflegedienst erfolgt?",
+    "abbrechen": "Bearbeitung abbrechen",
+    "speicherFehler": "Fehler beim Speichern",
+    "neu": "Neuer Tagebucheintrag",
+    "bearbeiten": "Eintrag bearbeiten",
+    "sichern": "Eintrag sichern",
+    "speichert": "Wird gespeichert…",
+    "schlafWerte": {
+      "Gut": "Gut",
+      "Unterbrochen": "Unterbrochen",
+      "Schlecht": "Schlecht"
+    }
+  },
+  "liste": {
+    "leer": "Noch keine Einträge vorhanden.",
     "pdfExport": "PDF exportieren",
-    "exporting": "Dossier wird erstellt...",
-    "history": "Historie",
-    "empty": "Noch keine Einträge vorhanden."
-  },
-  "form": {
-    "newTitle": "Neuer Tagebucheintrag",
-    "editTitle": "Eintrag bearbeiten",
-    "voiceInput": "Sprach-Eingabe",
-    "dateLabel": "Datum",
-    "contentLabel": "Was konnte nicht alleine gemacht werden?",
-    "contentPlaceholder": "z.B. Hilfe beim Aufstehen, Duschen oder Kochen benötigt...",
-    "painLabel": "Schmerzen heute:",
-    "sleepLabel": "Wie war der Schlaf nachts?",
-    "eventsLabel": "Besonderheiten / Ereignisse",
-    "submitSave": "Eintrag sichern",
-    "submitSaving": "Wird gespeichert...",
-    "submitCancel": "Bearbeitung abbrechen",
-    "helferLabel": "Wer hat heute geholfen?",
-    "helferOptions": {
-      "hauptpflegeperson": "Hauptpflegeperson (Angehörige)",
-      "pflegedienst": "Pflegedienst (Professionell)",
-      "andere": "Andere Person (Nachbarn/Freunde)",
-      "niemand": "Niemand (Selbstständig bewältigt)"
-    },
-    "sleepOptions": {
-      "gut": "Gut",
-      "unterbrochen": "Unterbrochen",
-      "schlecht": "Schlecht"
-    },
-    "events": {
-      "sturz": "Sturz / Unfall",
-      "arzt": "Arzttermin",
-      "klinik": "Krankenhaus",
-      "bett": "Bettlägerigkeit",
-      "meds": "Medikamentenkontrolle durch Pflegedienst erfolgt?"
-    }
-  },
-  "list": {
-    "exportBannerTitle": "Chronologische Erfassung",
-    "exportBannerSub": "Nutzen Sie den Export als Hauptbeweis für Ihren MD-Termin.",
-    "helperPrefix": "Helfende Hand:",
-    "painPrefix": "S:",
-    "sleepPrefix": "Schlaf:",
-    "tags": {
-      "sturz": "Sturz",
-      "klinik": "Klinik",
-      "bett": "Bettlägerig",
-      "meds": "Med ✓"
-    }
-  },
-  "messages": {
-    "required": "Bitte beschreiben Sie, was nicht alleine gemacht werden konnte.",
-    "saveSuccess": "Eintrag gespeichert!",
-    "updateSuccess": "Eintrag aktualisiert!",
-    "saveError": "Fehler beim Speichern",
-    "deleteConfirm": "Möchten Sie diesen Tagebucheintrag unwiderruflich löschen?",
-    "deleteSuccess": "Eintrag erfolgreich entfernt.",
-    "deleteError": "Fehler beim Löschen des Eintrags.",
-    "pdfLoading": "Chronologisches Pflegetagebuch-PDF wird generiert...",
-    "pdfSuccess": "Pflegetagebuch-Dossier erfolgreich erstellt!",
-    "pdfError": "Fehler beim PDF-Export des Tagebuchs."
+    "pdfLaeuft": "PDF wird serverseitig kompiliert…",
+    "pdfFertig": "Dossier erfolgreich heruntergeladen!",
+    "pdfFehler": "Fehler bei der PDF-Generierung.",
+    "lizenzPruefen": "Verifiziere Dokumentenlizenz…",
+    "lizenzFehler": "Verbindungsfehler bei der Lizenzprüfung.",
+    "eintragEntfernt": "Eintrag erfolgreich entfernt.",
+    "loeschFehler": "Fehler beim Löschen des Eintrags.",
+    "markeSturz": "Sturz",
+    "markeKlinik": "Klinik",
+    "markeMed": "Med ✓",
+    "loeschBestaetigung": "Möchten Sie diesen Tagebucheintrag unwiderruflich löschen?"
   }
 }
