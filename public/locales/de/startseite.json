@@ -58,5 +58,9 @@
     "basis": "<strong>4,9 Millionen</strong> verifizierte Fall-Schicksale als mathematische Berechnungsbasis.",
     "anonym": "<strong>100% Anonym:</strong> Keine Angabe von Klarnamen oder sensiblen Daten erzwungen.",
     "rechtssicher": "<strong>Rechtssicher 2026:</strong> Ständige Aktualisierung aller Freibeträge, SGB-Sätze und Fristen."
+  },
+  "abschnitte": {
+    "leistungsversprechen": "Leistungsversprechen",
+    "sicherheitszertifikate": "Sicherheitszertifikate"
   }
 }

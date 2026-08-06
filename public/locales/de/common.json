@@ -19,6 +19,47 @@
     "abmelden": "Abmelden",
     "anmelden": "Anmelden"
   },
+  "header": {
+    "gruppen": {
+      "betroffene": "Für Betroffene",
+      "fachkraefte": "Für Fachkräfte",
+      "ueberUns": "Über uns"
+    },
+    "labels": {
+      "assistenten": "Assistenten",
+      "institutionen": "Institutionen",
+      "hintergrund": "Hintergrund"
+    },
+    "links": {
+      "pflegegrad": "Pflegegrad-Rechner",
+      "briefe": "Brief-Zentrum",
+      "tagebuch": "Pflegetagebuch",
+      "pflegekraefte": "Pflegedienste & Berater",
+      "pflegekraefteMobil": "Für Fachkräfte & Dienste",
+      "faq": "FAQ",
+      "philosophie": "Philosophie & Vision",
+      "presse": "Presse & Blog"
+    },
+    "zurueck": "Zurück",
+    "fall": {
+      "keiner": "Kein Fall",
+      "codeEingeben": "Fallcode eingeben",
+      "pruefe": "Prüfe...",
+      "oeffnen": "Akte öffnen",
+      "teilen": "Akte teilen / sichern",
+      "kopieren": "Code kopieren",
+      "kopiert": "Code kopiert",
+      "wirdBeendet": "Wird beendet...",
+      "schliessen": "Fall schließen",
+      "schliessenBestaetigung": "Möchten Sie die aktuelle Fall-Session wirklich schließen?"
+    },
+    "fehler": {
+      "abgelaufen": "Dieser Beta-Zugang ist nach 12 Monaten abgelaufen.",
+      "codeUnbekannt": "Fallcode nicht gefunden.",
+      "verbindung": "Verbindungsfehler.",
+      "beenden": "Fehler beim Beenden."
+    }
+  },
   "language": {
     "title": "Sprache",
     "current": "Aktuelle Sprache",

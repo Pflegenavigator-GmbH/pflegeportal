@@ -20,11 +20,14 @@
 import type briefe from '../../public/locales/de/briefe.json';
 import type common from '../../public/locales/de/common.json';
 import type faq from '../../public/locales/de/faq.json';
+import type hilfe from '../../public/locales/de/hilfe.json';
+import type kombileistungen from '../../public/locales/de/kombileistungen.json';
 import type pflegegrad from '../../public/locales/de/pflegegrad.json';
 import type philosophie from '../../public/locales/de/philosophie.json';
 import type presse from '../../public/locales/de/presse.json';
 import type startseite from '../../public/locales/de/startseite.json';
 import type tagebuch from '../../public/locales/de/tagebuch.json';
+import type unterstuetzung from '../../public/locales/de/unterstuetzung.json';
 import type widerspruch from '../../public/locales/de/widerspruch.json';
 import type { Locale } from '../i18n/config';
 
@@ -38,6 +41,9 @@ interface Nachrichten {
   faq: typeof faq;
   tagebuch: typeof tagebuch;
   briefe: typeof briefe;
+  hilfe: typeof hilfe;
+  kombileistungen: typeof kombileistungen;
+  unterstuetzung: typeof unterstuetzung;
 }
 
 declare module 'next-intl' {

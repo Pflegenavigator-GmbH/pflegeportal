@@ -1,10 +1,11 @@
 // src/components/fristen/BescheidDatumAbfrage.tsx
 'use client';
 
-import { format } from 'date-fns';
 import { CalendarClock, CheckCircle2 } from 'lucide-react';
+import { useFormatter, useTranslations } from 'next-intl';
 import { useId, useState } from 'react';
 
+import type { DatumFehlerCode } from '@/src/lib/widerspruch/bescheid-datum';
 import {
   heuteAlsIso,
   isoVorTagen,
@@ -30,16 +31,20 @@ interface Props {
  * wenig, ist aber eine Aussage des Nutzers statt einer Vermutung des Systems.
  */
 export function BescheidDatumAbfrage({ wert, onChange, gespeichertWird = false }: Props) {
+  const t = useTranslations('widerspruch.datumsAbfrage');
+  const format = useFormatter();
   const feldId = useId();
   const fehlerId = useId();
   const [eigenesDatum, setEigenesDatum] = useState('');
-  const [fehler, setFehler] = useState<string | null>(null);
+  // Der Fehlercode statt des fertigen Satzes: Sonst bliebe die Meldung in der
+  // Sprache hängen, in der sie erzeugt wurde.
+  const [fehler, setFehler] = useState<DatumFehlerCode | null>(null);
   const [bearbeiten, setBearbeiten] = useState(false);
 
   const uebernehmen = (isoDatum: string) => {
     const pruefung = pruefeBescheidDatum(isoDatum);
     if (!pruefung.gueltig) {
-      setFehler(pruefung.fehler);
+      setFehler(pruefung.code);
       return;
     }
     setFehler(null);
@@ -54,7 +59,7 @@ export function BescheidDatumAbfrage({ wert, onChange, gespeichertWird = false }
         <p className={styles.bestaetigt}>
           <CheckCircle2 size={18} aria-hidden="true" />
           <span>
-            Bescheid zugegangen am <strong>{format(new Date(wert), 'dd.MM.yyyy')}</strong>
+            {t('bestaetigt')} <strong>{format.dateTime(new Date(wert), 'short')}</strong>
           </span>
         </p>
         <button
@@ -65,7 +70,7 @@ export function BescheidDatumAbfrage({ wert, onChange, gespeichertWird = false }
             setBearbeiten(true);
           }}
         >
-          Datum korrigieren
+          {t('korrigieren')}
         </button>
       </div>
     );
@@ -74,7 +79,7 @@ export function BescheidDatumAbfrage({ wert, onChange, gespeichertWird = false }
   return (
     <fieldset className={styles.abfrage} disabled={gespeichertWird}>
       <legend className={styles.abfrageFrage}>
-        <CalendarClock size={18} aria-hidden="true" /> Wann haben Sie den Bescheid erhalten?
+        <CalendarClock size={18} aria-hidden="true" /> {t('frage')}
       </legend>
 
       <div className={styles.schnellwahl}>
@@ -83,21 +88,21 @@ export function BescheidDatumAbfrage({ wert, onChange, gespeichertWird = false }
           className={styles.schnellwahlKnopf}
           onClick={() => uebernehmen(heuteAlsIso())}
         >
-          Heute
+          {t('heute')}
         </button>
         <button
           type="button"
           className={styles.schnellwahlKnopf}
           onClick={() => uebernehmen(isoVorTagen(1))}
         >
-          Gestern
+          {t('gestern')}
         </button>
         <button
           type="button"
           className={styles.schnellwahlKnopf}
           onClick={() => uebernehmen(isoVorTagen(7))}
         >
-          Vor einer Woche
+          {t('vorEinerWoche')}
         </button>
       </div>
 
@@ -107,7 +112,7 @@ export function BescheidDatumAbfrage({ wert, onChange, gespeichertWird = false }
           type="date"
           max={heuteAlsIso()}
           value={eigenesDatum}
-          aria-label="Datum des Bescheid-Zugangs"
+          aria-label={t('feldLabel')}
           aria-invalid={fehler !== null}
           aria-describedby={fehler ? fehlerId : undefined}
           onChange={(e) => {
@@ -121,20 +126,17 @@ export function BescheidDatumAbfrage({ wert, onChange, gespeichertWird = false }
           className={styles.schnellwahlKnopf}
           onClick={() => uebernehmen(eigenesDatum)}
         >
-          {gespeichertWird ? 'Speichert…' : 'Übernehmen'}
+          {gespeichertWird ? t('speichert') : t('uebernehmen')}
         </button>
       </div>
 
       {fehler && (
         <p id={fehlerId} className={styles.fehlerText} role="alert">
-          {fehler}
+          {t(`fehler.${fehler}`)}
         </p>
       )}
 
-      <p className={styles.abfrageHinweis}>
-        Ohne dieses Datum lässt sich Ihre Widerspruchsfrist nicht berechnen. Maßgeblich ist der Tag,
-        an dem der Bescheid bei Ihnen ankam — nicht das Datum auf dem Schreiben.
-      </p>
+      <p className={styles.abfrageHinweis}>{t('hinweis')}</p>
     </fieldset>
   );
 }

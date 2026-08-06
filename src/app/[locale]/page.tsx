@@ -112,7 +112,11 @@ export default function Startseite() {
         </section>
 
         {/* ⚖️ TRIAGE-RIEGEL: Der direkte, leicht verständliche Systemvergleich */}
-        <div className={pageStyles.promiseBox} role="note" aria-label="Leistungsversprechen">
+        <div
+          className={pageStyles.promiseBox}
+          role="note"
+          aria-label={t('abschnitte.leistungsversprechen')}
+        >
           <Clock className="w-5 h-5 text-[#4a90e2] flex-shrink-0" />
           <p className={pageStyles.promiseText}>
             {t.rich('promise.text', {
@@ -185,7 +189,7 @@ export default function Startseite() {
         <div
           className={pageStyles.footerRegister}
           role="region"
-          aria-label="Sicherheitszertifikate"
+          aria-label={t('abschnitte.sicherheitszertifikate')}
         >
           <div className={pageStyles.registerCard}>
             <Users className="w-5 h-5 text-[#4a90e2] flex-shrink-0" />

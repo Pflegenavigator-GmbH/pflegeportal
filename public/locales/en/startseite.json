@@ -58,5 +58,9 @@
     "basis": "<strong>4.9 million</strong> verified case histories as the mathematical basis for our calculations.",
     "anonym": "<strong>100% anonymous:</strong> no real names or sensitive data are ever required.",
     "rechtssicher": "<strong>Legally current for 2026:</strong> all allowances, SGB rates and deadlines are kept up to date."
+  },
+  "abschnitte": {
+    "leistungsversprechen": "Our promise",
+    "sicherheitszertifikate": "Security certificates"
   }
 }

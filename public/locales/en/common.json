@@ -19,6 +19,47 @@
     "abmelden": "Sign Out",
     "anmelden": "Sign In"
   },
+  "header": {
+    "gruppen": {
+      "betroffene": "For those affected",
+      "fachkraefte": "For professionals",
+      "ueberUns": "About us"
+    },
+    "labels": {
+      "assistenten": "Assistants",
+      "institutionen": "Institutions",
+      "hintergrund": "Background"
+    },
+    "links": {
+      "pflegegrad": "Care level calculator",
+      "briefe": "Letter centre",
+      "tagebuch": "Care diary",
+      "pflegekraefte": "Care services & advisers",
+      "pflegekraefteMobil": "For professionals & services",
+      "faq": "FAQ",
+      "philosophie": "Philosophy & vision",
+      "presse": "Press & blog"
+    },
+    "zurueck": "Back",
+    "fall": {
+      "keiner": "No case",
+      "codeEingeben": "Enter case code",
+      "pruefe": "Checking...",
+      "oeffnen": "Open case",
+      "teilen": "Share / back up case",
+      "kopieren": "Copy code",
+      "kopiert": "Code copied",
+      "wirdBeendet": "Closing...",
+      "schliessen": "Close case",
+      "schliessenBestaetigung": "Do you really want to close the current case session?"
+    },
+    "fehler": {
+      "abgelaufen": "This beta access expired after 12 months.",
+      "codeUnbekannt": "Case code not found.",
+      "verbindung": "Connection error.",
+      "beenden": "The case could not be closed."
+    }
+  },
   "language": {
     "title": "Language",
     "current": "Current Language",

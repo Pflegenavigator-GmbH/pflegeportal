@@ -2,6 +2,7 @@
 'use client';
 
 import { X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
@@ -60,6 +61,9 @@ interface DialogContentProps extends React.HTMLAttributes<HTMLDivElement> {
 const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
   ({ className, children, showCloseButton = true, ...props }, ref) => {
     const { open, setOpen } = useDialog();
+    // Der Schließen-Knopf trägt nur ein Icon; ohne übersetztes aria-label
+    // hörten englischsprachige Screenreader-Nutzer hier „Dialog schließen".
+    const tA11y = useTranslations('common.accessibility');
 
     React.useEffect(() => {
       const onKeyDown = (event: KeyboardEvent) => {
@@ -103,7 +107,7 @@ const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
               type="button"
               onClick={() => setOpen(false)}
               className="absolute right-4 top-4 rounded-md p-2 text-[var(--color-text-muted)] transition-colors hover:bg-white/5 hover:text-white"
-              aria-label="Dialog schließen"
+              aria-label={tA11y('closeModal')}
             >
               <X className="h-4 w-4" />
             </button>

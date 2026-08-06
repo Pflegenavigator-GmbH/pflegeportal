@@ -1,5 +1,7 @@
 {
   "titel": "Widerspruchs-Zentrum",
+  "fallBindung": "Gekoppelt an aktive Fallnummer:",
+  "keinFall": "Keine (Kaltstart)",
   "tabNeu": "Neues Anschreiben",
   "tabGespeichert": "Gespeicherte Entwürfe ({anzahl})",
   "verfahrenstyp": "Verfahrenstyp",
@@ -9,6 +11,24 @@
     "gutachten": "MD-Gutachten anfordern (§ 25 SGB X)"
   },
   "bescheidDatum": "Datum des Bescheid-Zugangs *",
+  "datumsAbfrage": {
+    "bestaetigt": "Bescheid zugegangen am",
+    "korrigieren": "Datum korrigieren",
+    "frage": "Wann haben Sie den Bescheid erhalten?",
+    "heute": "Heute",
+    "gestern": "Gestern",
+    "vorEinerWoche": "Vor einer Woche",
+    "feldLabel": "Datum des Bescheid-Zugangs",
+    "speichert": "Speichert…",
+    "uebernehmen": "Übernehmen",
+    "hinweis": "Ohne dieses Datum lässt sich Ihre Widerspruchsfrist nicht berechnen. Maßgeblich ist der Tag, an dem der Bescheid bei Ihnen ankam — nicht das Datum auf dem Schreiben.",
+    "fehler": {
+      "format": "Bitte geben Sie ein Datum im Format TT.MM.JJJJ an.",
+      "existiertNicht": "Dieses Datum gibt es nicht.",
+      "zukunft": "Das Datum liegt in der Zukunft.",
+      "zuFrueh": "Das Datum liegt zu weit zurück."
+    }
+  },
   "datumUngueltig": "Ungültiges Datum oder Datum liegt in der Zukunft.",
   "verlaufTitel": "Verfahrensverlauf (optional)",
   "verlaufText": "Ergänzen Sie, was bereits geschehen ist — der Fristen-Monitor berechnet daraus zusätzlich die Klagefrist und die Wartezeiten für eine Untätigkeitsklage.",
