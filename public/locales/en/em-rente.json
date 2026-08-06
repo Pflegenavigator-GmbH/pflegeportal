@@ -1,0 +1,63 @@
+{
+  "titel": "Reduced earning capacity pension",
+  "untertitel": "Estimate the order of magnitude of your possible reduced earning capacity pension under SGB VI.",
+  "hinweisTitel": "Important note on care levels",
+  "hinweis": "A care level does not increase the reduced earning capacity pension. SGB VI contains no supplement tied to a care level — care levels govern benefits of the long-term care insurance under SGB XI. What determines the amount are your earnings points, the supplementary period and the deduction.",
+  "schritt1": {
+    "titel": "Basic data",
+    "untertitel": "Basis for the supplementary period and the deduction",
+    "geburtsdatum": "Date of birth",
+    "eintritt": "Onset of reduced earning capacity",
+    "eintrittHinweis": "The day from which your earning capacity is reduced — not the day you applied."
+  },
+  "schritt2": {
+    "titel": "Type of reduced earning capacity",
+    "untertitel": "Determines the pension type factor under § 67 SGB VI",
+    "label": "Which situation applies?",
+    "platzhalter": "Please select...",
+    "voll": "Full reduction (less than 3 hours a day)",
+    "teilweise": "Partial reduction (3 to under 6 hours a day)",
+    "hinweis": "What counts is how many hours a day you can still work under normal labour market conditions. A partial reduction yields half the pension."
+  },
+  "schritt3": {
+    "titel": "Insurance record",
+    "untertitel": "Basis for the earnings points",
+    "beitragsjahre": "Years of compulsory contributions (estimate)",
+    "beitragsjahrePlatzhalter": "e.g. 25",
+    "gehalt": "Average gross annual salary",
+    "gehaltPlatzhalter": "e.g. 45000",
+    "hinweis": "The exact figures are in your pension statement from the Deutsche Rentenversicherung. An estimate is enough for the order of magnitude."
+  },
+  "weiter": "Next",
+  "zurueck": "Back",
+  "kalkulieren": "Calculate",
+  "neueProjektion": "Start a new projection",
+  "ergebnis": {
+    "titel": "Your projection",
+    "monatsrente": "Estimated monthly gross pension",
+    "auszahlung": "Paid 12 times a year, before health and long-term care insurance contributions",
+    "wartezeitOk": "The general qualifying period of five years is met (§ 50 (1) SGB VI).",
+    "wartezeitFehlt": "The general qualifying period of five years is not yet met (§ 50 (1) SGB VI). Without it there is no entitlement.",
+    "voraussetzungen": "In addition, § 43 (1) no. 2 SGB VI requires three years of compulsory contributions within the last five years before the onset. That can only be checked against your insurance record.",
+    "aufschluesselung": "How the amount is made up",
+    "epBeitrag": "Earnings points from contribution periods",
+    "epZurechnung": "Earnings points from the supplementary period (§ 59 SGB VI)",
+    "epGesamt": "Total earnings points",
+    "zurechnungszeit": "Supplementary period credited",
+    "monate": "{monate} months",
+    "abschlag": "Deduction (§ 77 SGB VI)",
+    "abschlagWert": "−{prozent}% over {monate} months",
+    "rentenartfaktor": "Pension type factor (§ 67 SGB VI)",
+    "rentenwert": "Current pension value",
+    "stand": "Calculation values as of {stand}"
+  },
+  "aktionen": {
+    "antragTitel": "Prepare the application",
+    "antragText": "Create it in the letter centre",
+    "antragKnopf": "Go to the letter centre",
+    "beratungTitel": "Binding information",
+    "beratungText": "Deutsche Rentenversicherung",
+    "beratungKnopf": "Go to the DRV website"
+  },
+  "disclaimer": "This is a non-binding estimate without the basic pension supplement, the higher valuation of training periods and other special rules. Entitlement and amount are decided solely by the Deutsche Rentenversicherung after a medical assessment."
+}

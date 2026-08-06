@@ -19,6 +19,7 @@
  */
 import type briefe from '../../public/locales/de/briefe.json';
 import type common from '../../public/locales/de/common.json';
+import type emRente from '../../public/locales/de/em-rente.json';
 import type faq from '../../public/locales/de/faq.json';
 import type hilfe from '../../public/locales/de/hilfe.json';
 import type kombileistungen from '../../public/locales/de/kombileistungen.json';
@@ -44,6 +45,7 @@ interface Nachrichten {
   hilfe: typeof hilfe;
   kombileistungen: typeof kombileistungen;
   unterstuetzung: typeof unterstuetzung;
+  'em-rente': typeof emRente;
 }
 
 declare module 'next-intl' {
