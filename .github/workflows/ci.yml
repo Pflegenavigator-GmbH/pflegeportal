@@ -325,7 +325,7 @@ jobs:
       # Repository kein Tag, sondern ein BRANCH — also unveröffentlichter,
       # beweglicher Code. Neueste Freigabe der 2er-Linie ist 2.10.0, und `v2`
       # zieht deren Patches automatisch nach.
-      - uses: preactjs/compressed-size-action@v2
+      - uses: preactjs/compressed-size-action@v3
         # Rein informativ: Ein gewachsenes Bundle ist ein Hinweis, kein Grund,
         # einen fachlich korrekten PR zu blockieren.
         continue-on-error: true
