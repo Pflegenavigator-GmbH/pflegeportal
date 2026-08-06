@@ -5,11 +5,17 @@
     "label": "Simple Language",
     "description": "Easy words and short sentences"
   },
-  "progress": {
-    "step": "Step {{current}} of {{total}}",
-    "percent": "{{percent}}% complete"
-  },
   "start": {
+    "loadTitle": "Load an existing case",
+    "loadDescription": "Do you already have a case code?",
+    "loadInputLabel": "Enter case code",
+    "loadButton": "Load case and check",
+    "loadButtonLoading": "Checking status...",
+    "newTitle": "Start a new case",
+    "newDescription": "Begin a free care level assessment",
+    "newText": "Start a completely anonymous and free assessment. An encrypted code is generated under which your entries are stored in line with the GDPR.",
+    "newButton": "Start for free",
+    "newButtonLoading": "Creating...",
     "meldungen": {
       "zahlungInArbeit": "Payment is still being processed. Your case is loaded — premium will unlock shortly.",
       "premiumFrei": "Premium options unlocked successfully.",
@@ -21,6 +27,249 @@
       "anlegenFehler": "Could not create a new case.",
       "fallcodeErzeugt": "Free case code generated."
     }
+  },
+  "modules": {
+    "modul1": {
+      "title": "Module 1: Mobility",
+      "weight": "Weighting in the overall assessment: 10%",
+      "zurueck": "Back to the start",
+      "weiter": "Continue to module 2",
+      "questions": {
+        "m1_1": {
+          "label": "Can you get up and move about on your own?",
+          "hilfe": "Getting up from a bed or chair and moving around inside the home."
+        },
+        "m1_2": {
+          "label": "Do you need help walking or standing?",
+          "hilfe": "Keeping your balance safely in a room."
+        },
+        "m1_3": {
+          "label": "Can you climb stairs?",
+          "hilfe": "Managing steps, with a handrail if needed."
+        },
+        "m1_4": {
+          "label": "Do you depend on a wheelchair?",
+          "hilfe": "Using one to get around in everyday life."
+        }
+      }
+    },
+    "modul2": {
+      "title": "Module 2: Cognition and communication",
+      "weight": "Weighting: 15% (or module 3, whichever scores higher)",
+      "zurueck": "Back to module 1",
+      "weiter": "Continue to module 3",
+      "questions": {
+        "m2_1": {
+          "label": "Recognising people close to you",
+          "hilfe": "Are family members or neighbours identified without doubt?"
+        },
+        "m2_2": {
+          "label": "Orientation to place",
+          "hilfe": "Can the person find their way around their own home or familiar surroundings?"
+        },
+        "m2_3": {
+          "label": "Orientation to time",
+          "hilfe": "Can the time of day, day of the week and season be named correctly?"
+        },
+        "m2_4": {
+          "label": "Remembering important events",
+          "hilfe": "Are significant events or arrangements (e.g. doctor appointments) retained?"
+        },
+        "m2_5": {
+          "label": "Directing everyday activities",
+          "hilfe": "Can multi-step everyday activities be planned and carried out independently?"
+        }
+      }
+    },
+    "modul3": {
+      "title": "Module 3: Behaviour and mental health",
+      "weight": "Weighting: 15% (compared with module 2 — the higher score counts)",
+      "zurueck": "Back to module 2",
+      "weiter": "Continue to module 4",
+      "questions": {
+        "m3_1": {
+          "label": "Motor-driven behaviour",
+          "hilfe": "E.g. aimless pacing, getting up and sitting down repeatedly, tendency to wander off."
+        },
+        "m3_2": {
+          "label": "Restlessness at night",
+          "hilfe": "Is the day-night rhythm disturbed? Is there wandering or calling out at night?"
+        },
+        "m3_3": {
+          "label": "Self-harming and self-aggressive behaviour",
+          "hilfe": "E.g. scratching, striking objects, refusing food or fluids."
+        },
+        "m3_4": {
+          "label": "Resistance to care",
+          "hilfe": "Is there verbal or physical resistance during personal hygiene or dressing?"
+        }
+      }
+    },
+    "modul4": {
+      "title": "Module 4: Self-care",
+      "weight": "Weighting: 40% — the most important category in the assessment",
+      "zurueck": "Back to module 3",
+      "weiter": "Continue to module 5",
+      "questions": {
+        "m4_1": {
+          "label": "Washing the upper body and intimate area",
+          "hilfe": "Can you wash yourself at the basin or in the shower without help?"
+        },
+        "m4_2": {
+          "label": "Brushing teeth, combing hair, shaving",
+          "hilfe": "Can you carry out daily mouth and hair care yourself?"
+        },
+        "m4_3": {
+          "label": "Preparing food into bite-sized pieces and eating",
+          "hilfe": "Can you cut bread, bring food to your mouth, chew and swallow?"
+        },
+        "m4_4": {
+          "label": "Using a toilet or commode",
+          "hilfe": "Can you sit down, stand up, adjust your clothing and clean yourself?"
+        },
+        "m4_5": {
+          "label": "Dressing and undressing the upper body",
+          "hilfe": "Can you put on and take off shirts, jumpers or underwear on your own?"
+        },
+        "m4_6": {
+          "label": "Dressing and undressing the lower body",
+          "hilfe": "Can you put on trousers, socks and shoes without help?"
+        }
+      }
+    },
+    "modul5": {
+      "title": "Module 5: Coping with illness and treatment",
+      "weight": "Weighting: 20% — managing therapeutic measures independently",
+      "zurueck": "Back to module 4",
+      "weiter": "Continue to module 6",
+      "questions": {
+        "m5_1": {
+          "label": "Medication",
+          "hilfe": "Can medication be taken independently, on time and at the right dose?"
+        },
+        "m5_2": {
+          "label": "Injections, infusions, suctioning",
+          "hilfe": "Can medical measures (e.g. insulin injections or measurements) be carried out independently?"
+        },
+        "m5_3": {
+          "label": "Doctor and therapy appointments",
+          "hilfe": "Can appointments be arranged and the journey to the practice managed independently?"
+        },
+        "m5_4": {
+          "label": "Following diets and restrictions",
+          "hilfe": "Can prescribed health requirements be followed independently in everyday life?"
+        }
+      }
+    },
+    "modul6": {
+      "title": "Module 6: Everyday life",
+      "weight": "Legal context: safeguarding an SGB XI appeal",
+      "zurueck": "Back to module 5",
+      "zurueckKurz": "Back",
+      "widerspruchTitel": "Relevance for an appeal:",
+      "widerspruchText": "This module does not change the calculated points directly, but it forms the legal basis for an appeal if the Medical Service recorded the care situation incompletely.",
+      "auswertungHinweis": "When you start the evaluation, your data is calculated according to the SGB XI guidelines and compared with the state-specific relief amounts.",
+      "berechnet": "Calculating…",
+      "auswertungStarten": "Start evaluation",
+      "fussnote": "© 2026 PflegeNavigator EU gUG • All calculations are based on the statutory thresholds of the Federal Ministry of Health.",
+      "questions": {
+        "m6_q1": {
+          "label": "1. Who takes care of the housekeeping (cleaning, laundry)?",
+          "optionen": {
+            "selbst": {
+              "titel": "The person concerned, alone",
+              "beschreibung": "Carries out all cleaning tasks independently."
+            },
+            "teilweise": {
+              "titel": "With regular support",
+              "beschreibung": "Light tasks alone, heavier ones (e.g. curtains, vacuuming) with help."
+            },
+            "nicht": {
+              "titel": "Fully taken over by others",
+              "beschreibung": "The household is run entirely by relatives or services."
+            }
+          }
+        },
+        "m6_q2": {
+          "label": "2. How independently can everyday shopping be done?",
+          "optionen": {
+            "ja": {
+              "titel": "Fully independently",
+              "beschreibung": "Visits shops alone and carries the goods home."
+            },
+            "online_begleitung": {
+              "titel": "Only accompanied or online",
+              "beschreibung": "Needs help carrying items or someone to come along to the shop."
+            },
+            "nicht": {
+              "titel": "No longer possible alone",
+              "beschreibung": "Errands are handled entirely by others."
+            }
+          }
+        },
+        "m6_q3": {
+          "label": "3. Can hot and cold meals be prepared reliably?",
+          "optionen": {
+            "selbst": {
+              "titel": "Yes, entirely self-sufficient",
+              "beschreibung": "Plans, cooks, serves and cleans the kitchen independently."
+            },
+            "teilweise": {
+              "titel": "With occasional support",
+              "beschreibung": "Help needed with cutting, lifting heavy pots or organising the steps."
+            },
+            "nicht": {
+              "titel": "Fully provided by others",
+              "beschreibung": "Meals have to be prepared or delivered ready to eat (meals on wheels)."
+            }
+          }
+        },
+        "m6_q4": {
+          "label": "4. Are financial matters and dealings with authorities managed?",
+          "optionen": {
+            "voll": {
+              "titel": "Fully independently",
+              "beschreibung": "Handles transfers, contracts, cash and post without errors."
+            },
+            "teilweise": {
+              "titel": "With advisory support",
+              "beschreibung": "Needs help with complex forms or someone to keep track of deadlines."
+            },
+            "nicht": {
+              "titel": "Full representation required",
+              "beschreibung": "Matters are handed over completely under a power of attorney."
+            }
+          }
+        },
+        "m6_q5": {
+          "label": "5. Can decisions about the future be made?",
+          "optionen": {
+            "selbst": {
+              "titel": "Yes, entirely on their own responsibility",
+              "beschreibung": "Makes medical and organisational decisions confidently and alone."
+            },
+            "beratung": {
+              "titel": "Only after detailed advice",
+              "beschreibung": "Weighs up options with relatives, but decides the essentials alone."
+            },
+            "nicht": {
+              "titel": "Not possible alone",
+              "beschreibung": "Needs a legal guardian or comprehensive help with decisions."
+            }
+          }
+        }
+      }
+    }
+  },
+  "progress": {
+    "step": "Step {{current}} of {{total}}",
+    "percent": "{{percent}}% complete"
+  },
+  "bewertungen": {
+    "0": "No impairment (independent)",
+    "1": "Slight impairment (largely independent)",
+    "2": "Moderate impairment (largely dependent)",
+    "3": "Severe impairment (dependent)"
   },
   "kinder": {
     "titel": "Children's mode 🌟",
@@ -95,20 +344,6 @@
       "folge3": "Your case code and any purchased access remain intact.",
       "bestaetigen": "Yes, start again",
       "laeuft": "Deleting answers…"
-    }
-  },
-  "modules": {
-    "modul6": {
-      "title": "Module 6: Everyday life",
-      "weight": "Legal context: safeguarding an SGB XI appeal",
-      "zurueck": "Back to module 5",
-      "zurueckKurz": "Back",
-      "widerspruchTitel": "Relevance for an appeal:",
-      "widerspruchText": "This module does not change the calculated points directly, but it forms the legal basis for an appeal if the Medical Service recorded the care situation incompletely.",
-      "auswertungHinweis": "When you start the evaluation, your data is calculated according to the SGB XI guidelines and compared with the state-specific relief amounts.",
-      "berechnet": "Calculating…",
-      "auswertungStarten": "Start evaluation",
-      "fussnote": "© 2026 PflegeNavigator EU gUG • All calculations are based on the statutory thresholds of the Federal Ministry of Health."
     }
   }
 }

@@ -213,5 +213,16 @@
     "abbrechen": "Cancel",
     "laeuft": "Working…",
     "aktionLaeuft": "Action in progress"
+  },
+  "zustaende": {
+    "modulLaedt": "Loading module…",
+    "fehlerTitel": "Something went wrong",
+    "fehlerText": "Please try again. Your saved case data is not affected.",
+    "fehlercode": "Error code: {digest}",
+    "erneutVersuchen": "Try again",
+    "nichtGefundenTitel": "Page not found",
+    "nichtGefundenText": "We could not find this page.",
+    "zurStartseite": "Go to the home page",
+    "zurueck": "Back"
   }
 }

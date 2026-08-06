@@ -21,23 +21,36 @@ const WURZEL = path.join(process.cwd(), 'public', 'locales');
 
 type Knoten = Record<string, unknown>;
 
-function pfade(objekt: unknown, praefix = ''): string[] {
+/**
+ * Alle Blattpfade eines Nachrichtenbaums.
+ *
+ * `nurGefuellte` überspringt leere Zeichenketten: `messages.ts` behandelt sie
+ * als unübersetzt und greift auf die Referenzsprache zurück. Würde die Quote
+ * sie mitzählen, ließe sich eine Sprache durch das Anlegen leerer Schlüssel
+ * auf 100 % bringen, ohne ein einziges Wort übersetzt zu haben.
+ */
+function pfade(objekt: unknown, praefix = '', nurGefuellte = false): string[] {
   if (typeof objekt !== 'object' || objekt === null || Array.isArray(objekt)) {
+    if (nurGefuellte && String(objekt ?? '').trim() === '') return [];
     return [praefix];
   }
   return Object.entries(objekt as Knoten).flatMap(([schluessel, wert]) =>
-    pfade(wert, praefix ? `${praefix}.${schluessel}` : schluessel)
+    pfade(wert, praefix ? `${praefix}.${schluessel}` : schluessel, nurGefuellte)
   );
 }
 
-function lies(locale: string, ns: string): { pfade: Set<string>; fehler?: string } | null {
+function lies(
+  locale: string,
+  ns: string
+): { pfade: Set<string>; gefuellt: Set<string>; fehler?: string } | null {
   const datei = path.join(WURZEL, locale, `${ns}.json`);
   if (!fs.existsSync(datei)) return null;
 
   try {
-    return { pfade: new Set(pfade(JSON.parse(fs.readFileSync(datei, 'utf-8')))) };
+    const inhalt: unknown = JSON.parse(fs.readFileSync(datei, 'utf-8'));
+    return { pfade: new Set(pfade(inhalt)), gefuellt: new Set(pfade(inhalt, '', true)) };
   } catch (e) {
-    return { pfade: new Set(), fehler: (e as Error).message };
+    return { pfade: new Set(), gefuellt: new Set(), fehler: (e as Error).message };
   }
 }
 
@@ -107,7 +120,7 @@ describe('Übersetzungsdateien', () => {
         referenzSumme += erlaubt.size;
         const datei = lies(sprache.code, ns);
         if (datei) {
-          for (const p of datei.pfade) if (erlaubt.has(p)) uebersetzt++;
+          for (const p of datei.gefuellt) if (erlaubt.has(p)) uebersetzt++;
         }
       }
 

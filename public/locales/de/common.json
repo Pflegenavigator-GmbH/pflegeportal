@@ -213,5 +213,16 @@
     "abbrechen": "Abbrechen",
     "laeuft": "Wird ausgeführt…",
     "aktionLaeuft": "Aktion wird ausgeführt"
+  },
+  "zustaende": {
+    "modulLaedt": "Modul wird geladen…",
+    "fehlerTitel": "Es ist ein Fehler aufgetreten",
+    "fehlerText": "Bitte versuchen Sie es erneut. Ihre gespeicherten Falldaten sind davon nicht betroffen.",
+    "fehlercode": "Fehlercode: {digest}",
+    "erneutVersuchen": "Erneut versuchen",
+    "nichtGefundenTitel": "Seite nicht gefunden",
+    "nichtGefundenText": "Hoppla! Diese Seite konnten wir im Pflege-Dschungel leider nicht finden.",
+    "zurStartseite": "Zur Startseite",
+    "zurueck": "Zurück"
   }
 }
