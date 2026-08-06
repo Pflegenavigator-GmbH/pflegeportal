@@ -1,0 +1,40 @@
+{
+  "titel": "Letter centre",
+  "untertitel": "Create legally sound applications, appeals and notifications in line with current SGB and BGB rules.",
+  "hinweisTitel": "Note on document validation:",
+  "hinweisText": "All letters are based on the legal standards for 2026. The gUG accepts no liability for complex individual cases. Sending by registered mail with acknowledgement of receipt is strongly recommended.",
+  "kategorien": {
+    "antrag-pflegegrad": {
+      "name": "Care level application",
+      "beschreibung": "Initial application to your care insurance fund"
+    },
+    "widerspruch-pflegegrad": {
+      "name": "Care level appeal",
+      "beschreibung": "Appeal against a decision of the care insurance fund"
+    },
+    "versorgungsamt": {
+      "name": "Pension and benefits office",
+      "beschreibung": "Enquiries and applications for formal assessment"
+    },
+    "em-rente": {
+      "name": "Reduced earning capacity pension",
+      "beschreibung": "Application to the German pension insurance"
+    },
+    "schwerbehindertenausweis": {
+      "name": "Severe disability pass",
+      "beschreibung": "Application for a degree of disability (GdB)"
+    },
+    "betreuungsrecht": {
+      "name": "Guardianship law",
+      "beschreibung": "Power of attorney and advance healthcare directive"
+    },
+    "erbrecht": {
+      "name": "Inheritance law",
+      "beschreibung": "Wills and compulsory-portion claims"
+    },
+    "allgemein": {
+      "name": "General letter",
+      "beschreibung": "Universal template for authorities and insurers"
+    }
+  }
+}

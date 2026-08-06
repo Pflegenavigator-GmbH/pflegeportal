@@ -1,0 +1,89 @@
+{
+  "titel": "Häufig gestellte Fragen",
+  "untertitel": "Schnelle Antworten auf die wichtigsten Fragen rund um Pflege",
+  "suchePlatzhalter": "Fragen durchsuchen…",
+  "keineTreffer": "Keine Fragen gefunden",
+  "keineTrefferHinweis": "Versuchen Sie es mit einem anderen Suchbegriff",
+  "beliebt": "Beliebt",
+  "kategorien": {
+    "alle": "Alle Fragen",
+    "pflegegrad": "Pflegegrad",
+    "widerspruch": "Widerspruch",
+    "leistungen": "Leistungen",
+    "geld": "Geld & Steuern",
+    "migration": "Migration",
+    "recht": "Rechtliches",
+    "technik": "Technik"
+  },
+  "kontakt": {
+    "titel": "Haben Sie weitere Fragen?",
+    "untertitel": "Wir helfen Ihnen persönlich weiter",
+    "email": "E-Mail",
+    "emailAntwort": "Antwort innerhalb 24h",
+    "hotline": "Pflegehotline",
+    "hotlineZeiten": "Mo–Fr: 9–18 Uhr"
+  },
+  "zurueck": "Zurück zur Startseite",
+  "fragen": {
+    "1": {
+      "frage": "Was ist ein Pflegegrad?",
+      "antwort": "Der Pflegegrad ist ein Maß für den Pflegebedarf einer Person. Es gibt fünf Pflegegrade (1-5), wobei 1 der geringste und 5 der höchste Pflegebedarf ist. Der Pflegegrad wird vom Medizinischen Dienst (MDK) oder der Pflegekasse festgestellt. Die Einstufung bestimmt, welche Leistungen und wie viel Geld Sie erhalten."
+    },
+    "2": {
+      "frage": "Wie beantrage ich einen Pflegegrad?",
+      "antwort": "Sie beantragen den Pflegegrad bei Ihrer Pflegekasse. Nutzen Sie unseren Pflegegrad-Check, um vorab zu prüfen, welcher Grad wahrscheinlich ist. Nach dem Antrag kommt ein Gutachter des Medizinischen Dienstes zu Ihnen nach Hause und bewertet Ihre Selbstständigkeit anhand der sechs Module des Neuen Begutachtungsassessments (NBA)."
+    },
+    "3": {
+      "frage": "Wie lange dauert es, bis ich den Bescheid bekomme?",
+      "antwort": "Nach dem Antrag haben Sie Anspruch auf einen Bescheid innerhalb von 25 Arbeitstagen (§ 18 Abs. 3 SGB XI). Überschreitet die Pflegekasse diese Frist, muss sie Ihnen nach § 18 Abs. 3b SGB XI 70 Euro für jede begonnene Woche der Verzögerung zahlen — außer sie hat die Verzögerung nicht zu vertreten. Nutzen Sie unseren Briefgenerator für das Anschreiben an die Pflegekasse."
+    },
+    "4": {
+      "frage": "Was sind die sechs Module der NBA?",
+      "antwort": "Das Neue Begutachtungsassessment (NBA) bewertet, wie selbstständig Sie in sechs Modulen sind (§ 14 SGB XI): 1) Mobilität, 2) Kognitive und kommunikative Fähigkeiten, 3) Verhaltensweisen und psychische Problemlagen, 4) Selbstversorgung, 5) Bewältigung von und selbständiger Umgang mit krankheits- oder therapiebedingten Anforderungen, 6) Gestaltung des Alltagslebens und sozialer Kontakte. Die Module gehen unterschiedlich stark in die Gesamtwertung ein; aus den gewichteten Punkten ergibt sich Ihr Pflegegrad."
+    },
+    "5": {
+      "frage": "Mein Pflegegrad wurde abgelehnt – was nun?",
+      "antwort": "Sie können Widerspruch einlegen! Sie haben 1 Monat Zeit ab Erhalt des Bescheids. Nutzen Sie unseren Widerspruchsgenerator, um einen vollständigen Widerspruchsbrief zu erstellen. Wichtig: Begründen Sie, warum Sie der Meinung sind, dass der Pflegegrad zu niedrig ist. Ein Arztbrief oder Pflegebericht kann helfen."
+    },
+    "6": {
+      "frage": "Wie erfolgreich sind Widersprüche?",
+      "antwort": "Etwa 40-50% der Widersprüche gegen Pflegegrad-Bescheide sind erfolgreich. Das bedeutet: Es lohnt sich, Widerspruch einzulegen! Viele Menschen bekommen nach dem Widerspruch einen höheren Pflegegrad oder überhaupt erst einen Pflegegrad zuerkannt."
+    },
+    "7": {
+      "frage": "Was kriege ich bei Pflegegrad 2?",
+      "antwort": "Bei Pflegegrad 2 haben Sie Anspruch auf: Pflegegeld (bis zu 573 €/Monat bei Selbstpflege), Pflegesachleistungen (bis zu 1.146 €/Monat für Pflegedienste), oder eine Kombination aus beidem. Außerdem: Entlastungsbetrag (194 €/Monat), Pflegehilfsmittel, Wohnumfeldverbesserungen, und Kurzzeitpflege."
+    },
+    "8": {
+      "frage": "Was ist der Unterschied zwischen Pflegegeld und Sachleistungen?",
+      "antwort": "Pflegegeld erhalten Sie direkt ausgezahlt, wenn Angehörige Sie pflegen. Sachleistungen werden direkt an Pflegedienste gezahlt, die Sie pflegen. Sie können beides kombinieren: z.B. 50% Pflegegeld + 50% Sachleistungen. Das Pflegegeld ist steuerfrei."
+    },
+    "9": {
+      "frage": "Muss ich das Pflegegeld versteuern?",
+      "antwort": "Nein! Pflegegeld ist steuerfrei. Es zählt weder als Einkommen noch als Vermögen. Sie dürfen es behalten, auch wenn Sie Sozialleistungen wie Bürgergeld oder Wohngeld bekommen. Das macht das Pflegegeld besonders wertvoll für pflegende Angehörige."
+    },
+    "10": {
+      "frage": "Kann ich als Migrant/in auch einen Pflegegrad beantragen?",
+      "antwort": "Ja, absolut! Ihr Migrationshintergrund spielt keine Rolle. Entscheidend ist der Pflegebedarf. Das Portal ist derzeit auf Deutsch und Englisch verfügbar, weitere Sprachen folgen — und wir helfen Ihnen bei allen Fragen. Sie haben dieselben Rechte wie alle anderen versicherten Personen in Deutschland."
+    },
+    "11": {
+      "frage": "Mein Deutsch ist nicht gut – kann ich trotzdem einen Antrag stellen?",
+      "antwort": "Ja! Sie können bei der Pflegekasse um einen Dolmetscher bitten – kostenlos. Oder Sie lassen sich von einer Vertrauensperson begleiten. Unser Portal ist mehrsprachig und erklärt alle Schritte einfach. Wir empfehlen: Nehmen Sie jemanden zum Gespräch mit, der Ihnen hilft."
+    },
+    "12": {
+      "frage": "Ist die Nutzung des Portals kostenlos?",
+      "antwort": "Ja, vollständig kostenlos! PflegeNavigator EU ist ein gemeinnütziges Angebot. Wir finanzieren uns durch Spenden und Fördermittel. Es gibt keine versteckten Kosten, keine Registrierungspflicht, keine Werbung. Alle Briefe, Berechnungen und Informationen sind gratis."
+    },
+    "13": {
+      "frage": "Brauche ich ein Benutzerkonto?",
+      "antwort": "Nein. Sie können alle Funktionen ohne Anmeldung nutzen. Ihre Daten werden lokal in Ihrem Browser gespeichert (wenn Sie das möchten). Wir speichern keine persönlichen Daten auf unseren Servern. Das macht das Portal besonders datenschutzfreundlich."
+    },
+    "14": {
+      "frage": "Ist PflegeNavigator EU eine Rechtsberatung?",
+      "antwort": "Nein. Wir bieten Orientierungshilfen und Informationen, aber keine verbindliche Rechtsberatung. Für verbindliche Entscheidungen sind die zuständigen Stellen (MDK, Pflegekassen, Sozialgerichte) zuständig. Bei komplexen Fällen empfehlen wir eine Beratung beim Pflegestützpunkt oder einer Rechtsberatungsstelle."
+    },
+    "15": {
+      "frage": "Was ist eine Betreuungsverfügung?",
+      "antwort": "Eine Betreuungsverfügung legt fest, wer für Sie entscheidet, wenn Sie selbst nicht mehr können. Das betrifft z.B. medizinische Entscheidungen oder Pflegefragen. Sie können die Verfügung selbst erstellen und bei einer Betreuungsbehörde hinterlegen. Wir bieten Muster-Dokumente zum Download an."
+    }
+  }
+}

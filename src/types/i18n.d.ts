@@ -17,11 +17,14 @@
  *
  * Wer einen Namespace ergänzt, trägt ihn HIER und in `namespaces.json` ein.
  */
+import type briefe from '../../public/locales/de/briefe.json';
 import type common from '../../public/locales/de/common.json';
+import type faq from '../../public/locales/de/faq.json';
 import type pflegegrad from '../../public/locales/de/pflegegrad.json';
 import type philosophie from '../../public/locales/de/philosophie.json';
 import type presse from '../../public/locales/de/presse.json';
 import type startseite from '../../public/locales/de/startseite.json';
+import type tagebuch from '../../public/locales/de/tagebuch.json';
 import type widerspruch from '../../public/locales/de/widerspruch.json';
 import type { Locale } from '../i18n/config';
 
@@ -32,6 +35,9 @@ interface Nachrichten {
   philosophie: typeof philosophie;
   presse: typeof presse;
   widerspruch: typeof widerspruch;
+  faq: typeof faq;
+  tagebuch: typeof tagebuch;
+  briefe: typeof briefe;
 }
 
 declare module 'next-intl' {

@@ -2,6 +2,7 @@
 'use client';
 
 import { BookOpen, PlusCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState, useEffect, useCallback, useSyncExternalStore } from 'react';
 
 import { Button } from '@/src/components/ui';
@@ -24,6 +25,7 @@ const getSnapshot = () => {
 const getServerSnapshot = () => null;
 
 export default function TagebuchPage() {
+  const t = useTranslations('tagebuch');
   const caseCode = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const [entries, setEntries] = useState<TagebuchData>({});
@@ -75,7 +77,7 @@ export default function TagebuchPage() {
   };
 
   if (caseCode === null) {
-    return <div className="text-center py-20 text-gray-400">Bitte Fallcode laden.</div>;
+    return <div className="text-center py-20 text-gray-400">{t('fallcodeFehlt')}</div>;
   }
 
   return (
@@ -87,10 +89,8 @@ export default function TagebuchPage() {
             <BookOpen className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Pflegetagebuch</h1>
-            <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
-              Tägliche lückenlose Pflegenachweise als Hauptbeweis für den Begutachtungstermin.
-            </p>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t('titel')}</h1>
+            <p className="text-xs sm:text-sm text-gray-400 mt-0.5">{t('untertitel')}</p>
           </div>
         </div>
 
@@ -121,7 +121,7 @@ export default function TagebuchPage() {
               className="w-full h-[56px] bg-[#20b2aa] hover:bg-[#3ddbd0] text-slate-950 font-bold tracking-wide shadow-lg flex items-center justify-center gap-2 rounded-xl transition-all"
             >
               <PlusCircle className="w-5 h-5" />
-              Neuer Eintrag
+              {t('neuerEintrag')}
             </Button>
 
             <TagebuchListe

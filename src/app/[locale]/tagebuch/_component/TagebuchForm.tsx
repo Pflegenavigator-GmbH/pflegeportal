@@ -2,6 +2,7 @@
 'use client';
 
 import { Save, Sparkles, X, Mic } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -29,6 +30,7 @@ export function TagebuchForm({
   entryToEdit,
   onCancelAction,
 }: TagebuchFormProps) {
+  const t = useTranslations('tagebuch.formular');
   // 🪄 REPARATUR: States direkt aus der Prop ableiten statt über einen useEffect
   const [datum, setDatum] = useState(() =>
     entryToEdit ? entryToEdit.data.date.split('T')[0] : new Date().toISOString().split('T')[0]
@@ -86,7 +88,7 @@ export function TagebuchForm({
       toast.success(entryToEdit ? 'Eintrag aktualisiert!' : 'Eintrag gespeichert!');
       onSavedAction();
     } catch {
-      toast.error('Fehler beim Speichern');
+      toast.error(t('speicherFehler'));
     } finally {
       setIsSaving(false);
     }
@@ -98,17 +100,19 @@ export function TagebuchForm({
         <CardTitle className="text-lg flex items-center justify-between font-bold text-[#0f2744]">
           <span className="flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-amber-500" />
-            {entryToEdit ? 'Eintrag bearbeiten' : 'Neuer Tagebucheintrag'}
+            {entryToEdit ? t('bearbeiten') : t('neu')}
           </span>
           <Button variant="outline" size="sm" className="h-9 gap-1 border-gray-300 text-slate-700">
-            <Mic className="w-4 h-4 text-[#1a4480]" /> Sprach-Eingabe
+            <Mic className="w-4 h-4 text-[#1a4480]" /> {t('spracheingabe')}
           </Button>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-5 space-y-4 text-sm">
         {/* Datum */}
         <div>
-          <label className="block font-bold text-xs uppercase text-gray-500 mb-1">Datum</label>
+          <label className="block font-bold text-xs uppercase text-gray-500 mb-1">
+            {t('datum')}
+          </label>
           <Input
             type="date"
             value={datum}
@@ -121,24 +125,24 @@ export function TagebuchForm({
         {/* Wer hat geholfen */}
         <div>
           <label className="block font-bold text-xs uppercase text-gray-500 mb-1">
-            Wer hat heute geholfen?
+            {t('werGeholfen')}
           </label>
           <select
             value={helfer}
             onChange={(e) => setHelfer(e.target.value as PflegeHelfer)}
             className="w-full h-11 px-3 rounded-md border border-gray-300 bg-white shadow-sm focus:border-[#1a4480] focus:ring-1 focus:ring-[#1a4480] text-base text-slate-900"
           >
-            <option value="Hauptpflegeperson">Hauptpflegeperson (Angehörige)</option>
-            <option value="Pflegedienst">Pflegedienst (Professionell)</option>
-            <option value="Andere Person">Andere Person (Nachbarn/Freunde)</option>
-            <option value="Niemand">Niemand (Selbstständig bewältigt)</option>
+            <option value="Hauptpflegeperson">{t('helfer.angehoerige')}</option>
+            <option value="Pflegedienst">{t('helfer.pflegedienst')}</option>
+            <option value="Andere Person">{t('helfer.andere')}</option>
+            <option value="Niemand">{t('helfer.niemand')}</option>
           </select>
         </div>
 
         {/* Freitext-Beschreibung */}
         <div>
           <label className="block font-bold text-xs uppercase text-gray-500 mb-1">
-            Was konnte nicht alleine gemacht werden?
+            {t('wasNicht')}
           </label>
           <Textarea
             value={content}
@@ -152,7 +156,7 @@ export function TagebuchForm({
         {/* Schmerz-Skala */}
         <div>
           <label className="block font-bold text-xs uppercase text-gray-500 mb-1 flex justify-between">
-            <span>Schmerzen heute:</span>
+            <span>{t('schmerzen')}</span>
             <span className="font-mono text-base font-bold text-[#1a4480]">{schmerzen}/10</span>
           </label>
           <input
@@ -168,7 +172,7 @@ export function TagebuchForm({
         {/* Schlaf-Struktur */}
         <div>
           <label className="block font-bold text-xs uppercase text-gray-500 mb-2">
-            Wie war der Schlaf nachts?
+            {t('schlaf')}
           </label>
           <div className="grid grid-cols-3 gap-2">
             {(['Gut', 'Unterbrochen', 'Schlecht'] as SchlafQualitaet[]).map((s) => (
@@ -182,7 +186,7 @@ export function TagebuchForm({
                     : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                 }`}
               >
-                {s}
+                {t(`schlafWerte.${s}`)}
               </button>
             ))}
           </div>
@@ -191,7 +195,7 @@ export function TagebuchForm({
         {/* Besonderheiten Checkboxen */}
         <div className="pt-2 border-t border-gray-100 space-y-2">
           <label className="block font-bold text-xs uppercase text-gray-500 mb-1">
-            Besonderheiten / Ereignisse
+            {t('besonderheiten')}
           </label>
 
           <div className="grid grid-cols-2 gap-2 text-slate-900">
@@ -202,7 +206,7 @@ export function TagebuchForm({
                 onChange={(e) => setSturz(e.target.checked)}
                 className="rounded text-[#1a4480]"
               />
-              <span>Sturz / Unfall</span>
+              <span>{t('sturz')}</span>
             </label>
             <label className="flex items-center gap-2 p-2 rounded border border-gray-200 cursor-pointer hover:bg-gray-50">
               <input
@@ -211,7 +215,7 @@ export function TagebuchForm({
                 onChange={(e) => setArzttermin(e.target.checked)}
                 className="rounded text-[#1a4480]"
               />
-              <span>Arzttermin</span>
+              <span>{t('arzttermin')}</span>
             </label>
             <label className="flex items-center gap-2 p-2 rounded border border-gray-200 cursor-pointer hover:bg-gray-50">
               <input
@@ -220,7 +224,7 @@ export function TagebuchForm({
                 onChange={(e) => setKrankenhaus(e.target.checked)}
                 className="rounded text-[#1a4480]"
               />
-              <span>Krankenhaus</span>
+              <span>{t('krankenhaus')}</span>
             </label>
             <label className="flex items-center gap-2 p-2 rounded border border-gray-200 cursor-pointer hover:bg-gray-50">
               <input
@@ -229,7 +233,7 @@ export function TagebuchForm({
                 onChange={(e) => setBettlaegerig(e.target.checked)}
                 className="rounded text-[#1a4480]"
               />
-              <span>Bettlägerigkeit</span>
+              <span>{t('bettlaegerig')}</span>
             </label>
           </div>
 
@@ -240,9 +244,7 @@ export function TagebuchForm({
               onChange={(e) => setMedikamentenKontrolle(e.target.checked)}
               className="rounded text-[#1a4480]"
             />
-            <span className="text-xs text-slate-700 font-medium">
-              Medikamentenkontrolle durch Pfledienst erfolgt?
-            </span>
+            <span className="text-xs text-slate-700 font-medium">{t('medikamente')}</span>
           </label>
         </div>
 
@@ -253,7 +255,7 @@ export function TagebuchForm({
             disabled={isSaving}
             className="w-full h-[56px] bg-[#0f2744] hover:bg-[#1a4480] text-white text-base font-bold transition-all shadow-md"
           >
-            <Save className="mr-2 w-5 h-5" /> {isSaving ? 'Wird gespeichert...' : 'Eintrag sichern'}
+            <Save className="mr-2 w-5 h-5" /> {isSaving ? t('speichert') : t('sichern')}
           </Button>
 
           {entryToEdit && (
@@ -262,7 +264,7 @@ export function TagebuchForm({
               onClick={onCancelAction}
               className="w-full h-[56px] text-gray-500 border-gray-300 text-base font-medium"
             >
-              <X className="mr-2 w-5 h-5" /> Bearbeitung abbrechen
+              <X className="mr-2 w-5 h-5" /> {t('abbrechen')}
             </Button>
           )}
         </div>
