@@ -6,6 +6,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { clearCaseSession, validateAndStoreSession } from '@/src/app/actions/case-session';
 import AppHeaderChrome from '@/src/components/navigation/AppHeaderChrome';
 
+import common from '../../../public/locales/de/common.json';
+
 // 1. Next.js Navigation Hooks mocken
 const mockPush = vi.fn();
 const mockBack = vi.fn();
@@ -39,14 +41,17 @@ vi.mock('sonner', () => ({
 
 /**
  * Der Header enthält den LanguageSwitcher, und der ruft `useLocale()` auf —
- * ohne Provider wirft next-intl beim Rendern. Bewusst der echte Provider statt
- * eines Mocks für den Switcher: So bleibt der Test gültig, wenn der Header
- * später selbst Übersetzungen nutzt. `onError` schluckt Meldungen über
- * fehlende Schlüssel, die für diesen Test ohne Belang sind.
+ * ohne Provider wirft next-intl beim Rendern.
+ *
+ * Die echten deutschen Nachrichten statt eines leeren Objekts: Seit der Header
+ * seine Beschriftungen selbst übersetzt, rendert `messages={{}}` nur noch
+ * Schlüsselpfade wie `common.header.fall.keiner`, und jede Zusicherung auf
+ * sichtbaren Text schlägt fehl. Mit den echten Nachrichten prüft der Test
+ * zugleich, dass die Schlüssel überhaupt existieren.
  */
 const rendereHeader = () =>
   render(
-    <NextIntlClientProvider locale="de" messages={{}} onError={() => {}}>
+    <NextIntlClientProvider locale="de" messages={{ common }}>
       <AppHeaderChrome locale="de" />
     </NextIntlClientProvider>
   );

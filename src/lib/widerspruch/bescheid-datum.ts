@@ -16,7 +16,15 @@ const ISO_DATUM = /^\d{4}-\d{2}-\d{2}$/;
  */
 const FRUEHESTES_JAHR = 1995;
 
-export type DatumPruefung = { gueltig: true; wert: string } | { gueltig: false; fehler: string };
+/**
+ * Grund der Ablehnung als stabiler Schlüssel. Der Client übersetzt ihn über
+ * `widerspruch.bescheidDatum.fehler.<code>`; `fehler` bleibt als deutscher
+ * Klartext erhalten, weil die API-Antwort und die Logs ihn direkt tragen.
+ */
+export type DatumFehlerCode = 'format' | 'existiertNicht' | 'zukunft' | 'zuFrueh';
+
+export type DatumPruefung =
+  { gueltig: true; wert: string } | { gueltig: false; code: DatumFehlerCode; fehler: string };
 
 /** Lokales ISO-Datum von heute — ohne die UTC-Verschiebung von toISOString(). */
 export function heuteAlsIso(referenz: Date = new Date()): string {
@@ -42,7 +50,11 @@ export function isoVorTagen(tage: number, referenz: Date = new Date()): string {
  */
 export function pruefeBescheidDatum(eingabe: unknown, referenz: Date = new Date()): DatumPruefung {
   if (typeof eingabe !== 'string' || !ISO_DATUM.test(eingabe.trim())) {
-    return { gueltig: false, fehler: 'Bitte geben Sie ein Datum im Format TT.MM.JJJJ an.' };
+    return {
+      gueltig: false,
+      code: 'format',
+      fehler: 'Bitte geben Sie ein Datum im Format TT.MM.JJJJ an.',
+    };
   }
 
   const wert = eingabe.trim();
@@ -53,15 +65,15 @@ export function pruefeBescheidDatum(eingabe: unknown, referenz: Date = new Date(
   const existiert =
     datum.getFullYear() === jahr && datum.getMonth() === monat - 1 && datum.getDate() === tag;
   if (!existiert) {
-    return { gueltig: false, fehler: 'Dieses Datum gibt es nicht.' };
+    return { gueltig: false, code: 'existiertNicht', fehler: 'Dieses Datum gibt es nicht.' };
   }
 
   if (wert > heuteAlsIso(referenz)) {
-    return { gueltig: false, fehler: 'Das Datum liegt in der Zukunft.' };
+    return { gueltig: false, code: 'zukunft', fehler: 'Das Datum liegt in der Zukunft.' };
   }
 
   if (jahr < FRUEHESTES_JAHR) {
-    return { gueltig: false, fehler: 'Das Datum liegt zu weit zurück.' };
+    return { gueltig: false, code: 'zuFrueh', fehler: 'Das Datum liegt zu weit zurück.' };
   }
 
   return { gueltig: true, wert };

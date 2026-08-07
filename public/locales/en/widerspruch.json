@@ -1,5 +1,7 @@
 {
   "titel": "Appeal centre",
+  "fallBindung": "Linked to active case number:",
+  "keinFall": "None (cold start)",
   "tabNeu": "New letter",
   "tabGespeichert": "Saved drafts ({anzahl})",
   "verfahrenstyp": "Type of procedure",
@@ -9,6 +11,24 @@
     "gutachten": "Request the MD report (§ 25 SGB X)"
   },
   "bescheidDatum": "Date the decision reached you *",
+  "datumsAbfrage": {
+    "bestaetigt": "Decision received on",
+    "korrigieren": "Correct the date",
+    "frage": "When did you receive the decision?",
+    "heute": "Today",
+    "gestern": "Yesterday",
+    "vorEinerWoche": "A week ago",
+    "feldLabel": "Date the decision arrived",
+    "speichert": "Saving…",
+    "uebernehmen": "Apply",
+    "hinweis": "Without this date your appeal deadline cannot be calculated. What counts is the day the decision reached you — not the date printed on the letter.",
+    "fehler": {
+      "format": "Please enter a date in the format DD/MM/YYYY.",
+      "existiertNicht": "That date does not exist.",
+      "zukunft": "The date is in the future.",
+      "zuFrueh": "The date is too far in the past."
+    }
+  },
   "datumUngueltig": "Invalid date, or the date lies in the future.",
   "verlaufTitel": "Course of proceedings (optional)",
   "verlaufText": "Add what has already happened — the deadline monitor then also calculates the litigation deadline and the waiting periods for an action for failure to act.",

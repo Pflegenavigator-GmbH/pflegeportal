@@ -269,10 +269,8 @@ export default function WiderspruchPage(props: PageProps) {
           </div>
           <h1 className="text-3xl font-bold tracking-tight">{t('titel')}</h1>
           <p className="text-sm text-gray-400 mt-1">
-            Gekoppelt an aktive Fallnummer:{' '}
-            <span className="text-white font-mono font-bold">
-              {caseCode || 'Keine (Kaltstart)'}
-            </span>
+            {t('fallBindung')}{' '}
+            <span className="text-white font-mono font-bold">{caseCode || t('keinFall')}</span>
           </p>
         </div>
 

@@ -3,11 +3,14 @@
 
 import { ChevronDown, Check } from 'lucide-react';
 import {
+  Children,
   createContext,
+  isValidElement,
   useContext,
   useState,
   useEffect,
   useCallback,
+  useMemo,
   forwardRef,
   useRef,
   ButtonHTMLAttributes,
@@ -22,6 +25,8 @@ interface SelectContextValue {
   onValueChange: (value: string) => void;
   open: boolean;
   setOpen: (open: boolean) => void;
+  /** value → Beschriftung des zugehörigen `SelectItem`. */
+  beschriftungen: Map<string, ReactNode>;
 }
 
 const SelectContext = createContext<SelectContextValue | undefined>(undefined);
@@ -32,6 +37,30 @@ function useSelect() {
     throw new Error('Select components must be used within a Select provider');
   }
   return context;
+}
+
+/**
+ * Liest die Beschriftungen der `SelectItem`s aus dem Elementbaum.
+ *
+ * Warum nicht per Registrierung im Kontext: `SelectContent` gibt im
+ * geschlossenen Zustand `null` zurück, die Einträge sind also gar nicht
+ * gemountet und könnten sich nirgends anmelden — genau dann braucht der
+ * Auslöser die Beschriftung aber. Der Elementbaum steht dagegen schon vor dem
+ * Rendern in `children`, und das Auslesen bleibt eine reine Funktion.
+ */
+function sammleBeschriftungen(knoten: ReactNode, ziel: Map<string, ReactNode>): void {
+  Children.forEach(knoten, (kind) => {
+    if (!isValidElement(kind)) return;
+
+    if (kind.type === SelectItem) {
+      const { value, children } = kind.props as SelectItemProps;
+      ziel.set(value, children);
+      return;
+    }
+
+    const { children } = kind.props as { children?: ReactNode };
+    if (children) sammleBeschriftungen(children, ziel);
+  });
 }
 
 // Select Root
@@ -82,9 +111,21 @@ const Select = ({ value, defaultValue, onValueChange, children }: SelectProps) =
     };
   }, [open]);
 
+  const beschriftungen = useMemo(() => {
+    const gesammelt = new Map<string, ReactNode>();
+    sammleBeschriftungen(children, gesammelt);
+    return gesammelt;
+  }, [children]);
+
   return (
     <SelectContext.Provider
-      value={{ value: currentValue, onValueChange: handleValueChange, open, setOpen }}
+      value={{
+        value: currentValue,
+        onValueChange: handleValueChange,
+        open,
+        setOpen,
+        beschriftungen,
+      }}
     >
       <div ref={containerRef} className="relative">
         {children}
@@ -125,8 +166,11 @@ interface SelectValueProps {
 }
 
 const SelectValue = ({ placeholder }: SelectValueProps) => {
-  const { value } = useSelect();
-  return <>{value || placeholder}</>;
+  const { value, beschriftungen } = useSelect();
+  // Bisher stand hier der Rohwert: Der Auslöser zeigte „pflegegrad" statt
+  // „Pflegegrad-Bescheid (§ 84 Abs. 1 SGG)" — in jeder Sprache gleichermaßen.
+  const beschriftung = beschriftungen.get(value);
+  return <>{beschriftung ?? placeholder}</>;
 };
 
 // Select Content

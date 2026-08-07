@@ -1,0 +1,40 @@
+{
+  "titel": "Support and care network",
+  "untertitel": "Regional providers, free care courses and emergency contacts",
+  "diensteTitel": "Home care services near you",
+  "diensteHinweis": "Search by postcode or city — the list shows registered services near you",
+  "suchePlatzhalter": "Enter a postcode or city (e.g. 33607 or Berlin)...",
+  "keineDienste": "No registered services found for this entry.",
+  "diensteFehler": "The care services could not be loaded.",
+  "schulungTitel": "Courses for family carers (§ 45 SGB XI)",
+  "gesetzesAnspruch": "Your legal entitlement:",
+  "schulungText": "Care funds offer family carers free training courses to make caring easier.",
+  "schulungAnfragen": "Request a course place",
+  "kurse": {
+    "drk": {
+      "name": "Deutsches Rotes Kreuz",
+      "ort": "Nationwide",
+      "kosten": "€0 (covered under § 45)",
+      "dauer": "Intensive courses / online"
+    },
+    "johanniter": {
+      "name": "Johanniter Unfallhilfe",
+      "ort": "Nationwide",
+      "kosten": "€0 (covered under § 45)",
+      "dauer": "Evening courses / in person"
+    }
+  },
+  "notfallTitel": "Medical emergencies and crisis services",
+  "notruf": {
+    "rettung": "Ambulance and emergency doctor",
+    "rettungHinweis": "For immediate danger to life",
+    "bereitschaft": "Out-of-hours medical service",
+    "bereitschaftHinweis": "Outside surgery opening hours",
+    "seelsorge": "Crisis helpline",
+    "seelsorgeHinweis": "Free psychosocial counselling"
+  },
+  "assistentTitel": "Live care assistant",
+  "assistentLaedt": "Preparing the audio interface...",
+  "assistentBegruessung": "Hello! I can help with questions about care services, courses or emergency contacts. What would you like to know?",
+  "zurueck": "Back to the main overview"
+}

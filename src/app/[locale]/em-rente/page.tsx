@@ -16,6 +16,7 @@ import {
   Heart,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useFormatter, useTranslations } from 'next-intl';
 import { useState, use } from 'react';
 
 import {
@@ -28,73 +29,73 @@ import {
   Input,
   Label,
 } from '@/src/components/ui';
+import {
+  RECHENGROESSEN,
+  berechneEmRente,
+  type EmRenteErgebnis,
+  type Erwerbsminderungsart,
+} from '@/src/lib/em-rente/berechnung';
 
 interface PageProps {
   params: Promise<{ locale: string }>;
 }
 
-interface EmRenteErgebnis {
-  renteBetrag: number;
-  zulageBetrag: number;
-  gesamtBetrag: number;
-  pflegegrad: number;
-  qualifiziert: boolean;
+const LEER = {
+  geburtsdatum: '',
+  eintrittsdatum: '',
+  art: '' as Erwerbsminderungsart | '',
+  beitragsjahre: '',
+  bruttoJahresentgelt: '',
+};
+
+/**
+ * Zeile der Ergebnis-Aufschlüsselung — der Betrag steht rechts, monospaced.
+ *
+ * Auf Modulebene, nicht in der Seite: Eine im Rendern erzeugte Komponente hat
+ * bei jedem Durchlauf eine neue Identität, React wirft den Teilbaum deshalb
+ * weg und baut ihn neu auf, statt ihn zu aktualisieren.
+ */
+function Zeile({ bezeichnung, wert }: { bezeichnung: string; wert: string }) {
+  return (
+    <div className="flex justify-between items-baseline gap-4 py-2 border-b border-white/5 last:border-0">
+      <span className="text-xs text-gray-400">{bezeichnung}</span>
+      <span className="text-sm font-mono font-semibold text-white whitespace-nowrap">{wert}</span>
+    </div>
+  );
 }
 
 export default function EmRenteRechner(props: PageProps) {
   const router = useRouter();
   const params = use(props.params);
   const locale = params?.locale || 'de';
+  const t = useTranslations('em-rente');
+  const format = useFormatter();
 
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    geburtsjahr: '',
-    eintrittsdatum: '',
-    pflegegrad: '',
-    arbeitsjahre: '',
-    durchschnittsgehalt: '',
-  });
+  const [formData, setFormData] = useState(LEER);
   const [ergebnis, setErgebnis] = useState<EmRenteErgebnis | null>(null);
 
-  const berechneEmRente = () => {
-    // Vereinfachte Berechnung basierend auf Eckdaten der DRV (Stand 2026)
-    const pflegegrad = parseInt(formData.pflegegrad) || 0;
-    const arbeitsjahre = parseInt(formData.arbeitsjahre) || 0;
-    const gehalt = parseFloat(formData.durchschnittsgehalt) || 0;
+  const euro = (betrag: number) => format.number(betrag, { style: 'currency', currency: 'EUR' });
+  const punkte = (wert: number) =>
+    format.number(wert, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-    // Durchschnittsentgelt (ca. 45.358 € Referenzwert)
-    const rentenpunkte = Math.min(arbeitsjahre * (gehalt / 45358), 45); // Max 45 Punkte gekappt
-    const aktuellerRentenwert = 39.32; // Prognosewert
-
-    const renteBasis = rentenpunkte * aktuellerRentenwert;
-
-    // Pflege-Personal-Zulage
-    const pflegeZulagen: Record<number, number> = {
-      1: 0,
-      2: 0,
-      3: 201.06,
-      4: 302.65,
-      5: 403.53,
-    };
-
-    const zulage = pflegeZulagen[pflegegrad] || 0;
-
-    // Grobe Qualifikation: Mindestens Pflegegrad 3 oder 5+ Jahre gearbeitet
-    const qualifiziert = pflegegrad >= 3 || (pflegegrad >= 1 && arbeitsjahre >= 5);
-
-    setErgebnis({
-      renteBetrag: Math.round(renteBasis * 100) / 100,
-      zulageBetrag: zulage,
-      gesamtBetrag: Math.round((renteBasis + zulage) * 100) / 100,
-      pflegegrad,
-      qualifiziert,
-    });
+  const kalkuliere = () => {
+    if (!formData.art) return;
+    setErgebnis(
+      berechneEmRente({
+        geburtsdatum: formData.geburtsdatum,
+        eintrittsdatum: formData.eintrittsdatum,
+        art: formData.art,
+        beitragsjahre: Number(formData.beitragsjahre) || 0,
+        bruttoJahresentgeltEuro: Number(formData.bruttoJahresentgelt) || 0,
+      })
+    );
     setStep(4);
   };
 
-  const isStep1Valid = formData.geburtsjahr.length === 4 && formData.eintrittsdatum;
-  const isStep2Valid = formData.pflegegrad !== '';
-  const isStep3Valid = formData.arbeitsjahre && formData.durchschnittsgehalt;
+  const schritt1Gueltig = Boolean(formData.geburtsdatum && formData.eintrittsdatum);
+  const schritt2Gueltig = formData.art !== '';
+  const schritt3Gueltig = Boolean(formData.beitragsjahre && formData.bruttoJahresentgelt);
 
   return (
     <main className="min-h-screen bg-slate-900 text-white font-sans py-12 px-4">
@@ -104,28 +105,24 @@ export default function EmRenteRechner(props: PageProps) {
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#0f2744] to-[#20b2aa] border border-white/10 rounded-2xl shadow-xl">
             <Briefcase className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-            EM-Rente & Pflegezulage
-          </h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">{t('titel')}</h1>
           <p className="text-sm sm:text-base text-gray-400 max-w-xl mx-auto leading-relaxed">
-            Schätzen Sie Ihre mögliche Erwerbsminderungsrente inklusive gesetzlicher Pflegezulagen
-            ab.
+            {t('untertitel')}
           </p>
         </div>
 
-        {/* Info-Box (nur in Schritt 1-3) */}
+        {/* Richtigstellung zum Pflegegrad — ersetzt die frühere Behauptung, ab
+            Pflegegrad 3 gebe es eine Zulage zur Rente. */}
         {step < 4 && (
           <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 flex items-start gap-3">
             <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
             <div className="text-gray-300 text-xs sm:text-sm leading-relaxed">
-              <strong>Wussten Sie schon?</strong> Die Erwerbsminderungsrente kann bei vorliegender
-              Pflegebedürftigkeit (ab Pflegegrad 3) deutlich erhöht werden. Diese
-              Pflege-Personal-Zulage wird <em>zusätzlich</em> zur Rente gezahlt.
+              <strong>{t('hinweisTitel')}:</strong> {t('hinweis')}
             </div>
           </div>
         )}
 
-        {/* Step 1: Grunddaten */}
+        {/* Schritt 1: Grunddaten */}
         {step === 1 && (
           <Card className="bg-white/5 border-white/10 shadow-xl">
             <CardHeader className="border-b border-white/5 pb-4">
@@ -134,9 +131,9 @@ export default function EmRenteRechner(props: PageProps) {
                   1
                 </div>
                 <div>
-                  <CardTitle className="text-lg text-white">Biometrische Grunddaten</CardTitle>
+                  <CardTitle className="text-lg text-white">{t('schritt1.titel')}</CardTitle>
                   <CardDescription className="text-gray-400 text-xs mt-1">
-                    Für die Altersgrenzen-Berechnung
+                    {t('schritt1.untertitel')}
                   </CardDescription>
                 </div>
               </div>
@@ -144,21 +141,20 @@ export default function EmRenteRechner(props: PageProps) {
             <CardContent className="pt-6 space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="geburtsjahr" className="text-xs text-gray-300">
-                    Geburtsjahr
+                  <Label htmlFor="geburtsdatum" className="text-xs text-gray-300">
+                    {t('schritt1.geburtsdatum')}
                   </Label>
                   <Input
-                    id="geburtsjahr"
-                    type="number"
-                    placeholder="z.B. 1965"
+                    id="geburtsdatum"
+                    type="date"
                     className="bg-slate-950/50 border-white/10 h-11 text-white"
-                    value={formData.geburtsjahr}
-                    onChange={(e) => setFormData({ ...formData, geburtsjahr: e.target.value })}
+                    value={formData.geburtsdatum}
+                    onChange={(e) => setFormData({ ...formData, geburtsdatum: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="eintrittsdatum" className="text-xs text-gray-300">
-                    Beginn der Einschränkung
+                    {t('schritt1.eintritt')}
                   </Label>
                   <Input
                     id="eintrittsdatum"
@@ -169,20 +165,24 @@ export default function EmRenteRechner(props: PageProps) {
                   />
                 </div>
               </div>
+              <p className="text-xs text-gray-500 leading-relaxed">
+                {t('schritt1.eintrittHinweis')}
+              </p>
               <div className="flex justify-end pt-2">
                 <Button
                   onClick={() => setStep(2)}
-                  disabled={!isStep1Valid}
+                  disabled={!schritt1Gueltig}
                   className="h-11 bg-[#20b2aa] hover:bg-[#3ddbd0] text-slate-950 font-bold px-8 rounded-xl disabled:opacity-50"
                 >
-                  Weiter <ArrowRight className="ml-2 w-4 h-4" />
+                  {t('weiter')} <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Step 2: Pflegebedürftigkeit */}
+        {/* Schritt 2: Art der Erwerbsminderung — der Rentenartfaktor ist der
+            einzige Faktor, den die frühere Fassung gar nicht kannte. */}
         {step === 2 && (
           <Card className="bg-white/5 border-white/10 shadow-xl">
             <CardHeader className="border-b border-white/5 pb-4">
@@ -191,42 +191,36 @@ export default function EmRenteRechner(props: PageProps) {
                   2
                 </div>
                 <div>
-                  <CardTitle className="text-lg text-white">Pflege-Status</CardTitle>
+                  <CardTitle className="text-lg text-white">{t('schritt2.titel')}</CardTitle>
                   <CardDescription className="text-gray-400 text-xs mt-1">
-                    Ermittlung der Zulagen-Ansprüche
+                    {t('schritt2.untertitel')}
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="pt-6 space-y-6">
-              <div className="space-y-2 max-w-md">
-                <Label htmlFor="pflegegrad" className="text-xs text-gray-300">
-                  Aktueller Pflegegrad
+              <div className="space-y-2">
+                <Label htmlFor="art" className="text-xs text-gray-300">
+                  {t('schritt2.label')}
                 </Label>
                 <select
-                  id="pflegegrad"
+                  id="art"
                   className="w-full bg-slate-950/50 border border-white/10 h-11 rounded-xl px-3 text-sm text-white focus:outline-none focus:border-[#20b2aa]"
-                  value={formData.pflegegrad}
-                  onChange={(e) => setFormData({ ...formData, pflegegrad: e.target.value })}
+                  value={formData.art}
+                  onChange={(e) =>
+                    setFormData({ ...formData, art: e.target.value as Erwerbsminderungsart | '' })
+                  }
                 >
-                  <option value="" className="text-gray-500">
-                    Bitte auswählen...
-                  </option>
-                  <option value="0">Noch kein Pflegegrad</option>
-                  <option value="1">Pflegegrad 1</option>
-                  <option value="2">Pflegegrad 2</option>
-                  <option value="3">Pflegegrad 3</option>
-                  <option value="4">Pflegegrad 4</option>
-                  <option value="5">Pflegegrad 5</option>
+                  <option value="">{t('schritt2.platzhalter')}</option>
+                  <option value="voll">{t('schritt2.voll')}</option>
+                  <option value="teilweise">{t('schritt2.teilweise')}</option>
                 </select>
               </div>
 
               <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-xl flex items-start gap-3">
                 <Info className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
                 <p className="text-xs sm:text-sm text-amber-200/80 leading-relaxed">
-                  <strong>Wichtig:</strong> Die gesetzliche Pflege-Zulage zur EM-Rente wird
-                  grundsätzlich erst ab Pflegegrad 3 gewährt. Bei niedrigeren Graden gelten strenge
-                  Sonderregelungen.
+                  {t('schritt2.hinweis')}
                 </p>
               </div>
 
@@ -236,21 +230,21 @@ export default function EmRenteRechner(props: PageProps) {
                   onClick={() => setStep(1)}
                   className="h-11 border-white/10 text-white hover:bg-white/5 px-6 rounded-xl"
                 >
-                  <ArrowLeft className="mr-2 w-4 h-4" /> Zurück
+                  <ArrowLeft className="mr-2 w-4 h-4" /> {t('zurueck')}
                 </Button>
                 <Button
                   onClick={() => setStep(3)}
-                  disabled={!isStep2Valid}
+                  disabled={!schritt2Gueltig}
                   className="h-11 bg-[#20b2aa] hover:bg-[#3ddbd0] text-slate-950 font-bold px-8 rounded-xl disabled:opacity-50"
                 >
-                  Weiter <ArrowRight className="ml-2 w-4 h-4" />
+                  {t('weiter')} <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Step 3: Berufsdaten */}
+        {/* Schritt 3: Versicherungsverlauf */}
         {step === 3 && (
           <Card className="bg-white/5 border-white/10 shadow-xl">
             <CardHeader className="border-b border-white/5 pb-4">
@@ -259,9 +253,9 @@ export default function EmRenteRechner(props: PageProps) {
                   3
                 </div>
                 <div>
-                  <CardTitle className="text-lg text-white">Berufliche Renten-Historie</CardTitle>
+                  <CardTitle className="text-lg text-white">{t('schritt3.titel')}</CardTitle>
                   <CardDescription className="text-gray-400 text-xs mt-1">
-                    Grundlage für die Punkte-Kalkulation
+                    {t('schritt3.untertitel')}
                   </CardDescription>
                 </div>
               </div>
@@ -269,42 +263,42 @@ export default function EmRenteRechner(props: PageProps) {
             <CardContent className="pt-6 space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="arbeitsjahre" className="text-xs text-gray-300">
-                    Beitragsjahre (geschätzt)
+                  <Label htmlFor="beitragsjahre" className="text-xs text-gray-300">
+                    {t('schritt3.beitragsjahre')}
                   </Label>
                   <Input
-                    id="arbeitsjahre"
+                    id="beitragsjahre"
                     type="number"
-                    placeholder="z.B. 25"
+                    min="0"
+                    placeholder={t('schritt3.beitragsjahrePlatzhalter')}
                     className="bg-slate-950/50 border-white/10 h-11 text-white"
-                    value={formData.arbeitsjahre}
-                    onChange={(e) => setFormData({ ...formData, arbeitsjahre: e.target.value })}
+                    value={formData.beitragsjahre}
+                    onChange={(e) => setFormData({ ...formData, beitragsjahre: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="durchschnittsgehalt" className="text-xs text-gray-300">
-                    Durchschnittliches Brutto-Jahresgehalt
+                  <Label htmlFor="bruttoJahresentgelt" className="text-xs text-gray-300">
+                    {t('schritt3.gehalt')}
                   </Label>
                   <div className="relative">
                     <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                     <Input
-                      id="durchschnittsgehalt"
+                      id="bruttoJahresentgelt"
                       type="number"
+                      min="0"
                       className="pl-10 bg-slate-950/50 border-white/10 h-11 text-white"
-                      placeholder="z.B. 45000"
-                      value={formData.durchschnittsgehalt}
+                      placeholder={t('schritt3.gehaltPlatzhalter')}
+                      value={formData.bruttoJahresentgelt}
                       onChange={(e) =>
-                        setFormData({ ...formData, durchschnittsgehalt: e.target.value })
+                        setFormData({ ...formData, bruttoJahresentgelt: e.target.value })
                       }
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="bg-slate-950/40 p-4 border border-white/5 rounded-xl text-xs text-gray-400">
-                <strong>Hinweis zur Berechnung:</strong> Die tatsächliche Rentenhöhe hängt von
-                komplexen Faktoren (Zurechnungszeiten, Abschläge) ab. Dies ist ein Referenzwert für
-                Ihre private Vorplanung.
+              <div className="bg-slate-950/40 p-4 border border-white/5 rounded-xl text-xs text-gray-400 leading-relaxed">
+                {t('schritt3.hinweis')}
               </div>
 
               <div className="flex justify-between pt-2">
@@ -313,83 +307,104 @@ export default function EmRenteRechner(props: PageProps) {
                   onClick={() => setStep(2)}
                   className="h-11 border-white/10 text-white hover:bg-white/5 px-6 rounded-xl"
                 >
-                  <ArrowLeft className="mr-2 w-4 h-4" /> Zurück
+                  <ArrowLeft className="mr-2 w-4 h-4" /> {t('zurueck')}
                 </Button>
                 <Button
-                  onClick={berechneEmRente}
-                  disabled={!isStep3Valid}
+                  onClick={kalkuliere}
+                  disabled={!schritt3Gueltig}
                   className="h-11 bg-[#20b2aa] hover:bg-[#3ddbd0] text-slate-950 font-bold px-8 rounded-xl disabled:opacity-50"
                 >
-                  <Calculator className="mr-2 w-4 h-4" /> Kalkulieren
+                  <Calculator className="mr-2 w-4 h-4" /> {t('kalkulieren')}
                 </Button>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Step 4: Ergebnis */}
+        {/* Schritt 4: Ergebnis */}
         {step === 4 && ergebnis && (
           <div className="space-y-6">
             <Card className="bg-white/5 border-[#20b2aa]/30 shadow-2xl overflow-hidden">
-              <div className="p-6 sm:p-8 bg-gradient-to-br from-[#20b2aa]/10 to-transparent">
-                <div className="flex items-center gap-3 mb-6">
+              <div className="p-6 sm:p-8 bg-gradient-to-br from-[#20b2aa]/10 to-transparent space-y-6">
+                <div className="flex items-center gap-3">
                   <Calculator className="w-6 h-6 text-[#20b2aa]" />
-                  <CardTitle className="text-xl text-white">Ihr Projektions-Ergebnis</CardTitle>
+                  <CardTitle className="text-xl text-white">{t('ergebnis.titel')}</CardTitle>
                 </div>
 
-                {ergebnis.qualifiziert ? (
-                  <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-xl flex items-center gap-3 mb-6">
-                    <CheckCircle className="w-5 h-5 flex-shrink-0" />
-                    <span className="text-sm font-medium">
-                      Ihre Eckdaten weisen auf eine hohe Qualifikations-Chance für die Rente hin!
-                    </span>
+                {ergebnis.wartezeitErfuellt ? (
+                  <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-xl flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">{t('ergebnis.wartezeitOk')}</span>
                   </div>
                 ) : (
-                  <div className="bg-amber-500/10 border border-amber-500/20 text-amber-400 p-4 rounded-xl flex items-start gap-3 mb-6">
+                  <div className="bg-amber-500/10 border border-amber-500/20 text-amber-400 p-4 rounded-xl flex items-start gap-3">
                     <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm">
-                      Sie erfüllen die harten Beitrags- oder Pflege-Kriterien eventuell noch nicht
-                      vollständig. Eine Detailprüfung durch die DRV ist angeraten.
-                    </span>
+                    <span className="text-sm">{t('ergebnis.wartezeitFehlt')}</span>
                   </div>
                 )}
 
-                <div className="grid sm:grid-cols-3 gap-4">
-                  <div className="bg-slate-950/40 border border-white/5 rounded-xl p-5 text-center">
-                    <p className="text-xs text-gray-400 mb-2 font-medium uppercase tracking-wide">
-                      Basis-EM-Rente
-                    </p>
-                    <p className="text-2xl font-bold text-white">
-                      {ergebnis.renteBetrag.toLocaleString('de-DE')} €
-                    </p>
-                  </div>
-                  <div className="bg-slate-950/40 border border-white/5 rounded-xl p-5 text-center relative overflow-hidden">
-                    <div className="absolute inset-0 bg-blue-500/5" />
-                    <p className="text-xs text-gray-400 mb-2 font-medium uppercase tracking-wide relative z-10">
-                      Pflege-Zulage
-                    </p>
-                    <p className="text-2xl font-bold text-blue-400 relative z-10">
-                      + {ergebnis.zulageBetrag.toLocaleString('de-DE')} €
-                    </p>
-                  </div>
-                  <div className="bg-[#20b2aa]/20 border border-[#20b2aa]/30 rounded-xl p-5 text-center">
-                    <p className="text-xs text-[#20b2aa] mb-2 font-bold uppercase tracking-wide">
-                      Gesamt (geschätzt)
-                    </p>
-                    <p className="text-3xl font-extrabold text-white">
-                      {ergebnis.gesamtBetrag.toLocaleString('de-DE')} €
-                    </p>
+                {/* Der Betrag — eine Zahl statt der früheren drei, von denen
+                    zwei auf einer nicht existierenden Zulage beruhten. */}
+                <div className="bg-[#20b2aa]/20 border border-[#20b2aa]/30 rounded-xl p-6 text-center">
+                  <p className="text-xs text-[#20b2aa] mb-2 font-bold uppercase tracking-wide">
+                    {t('ergebnis.monatsrente')}
+                  </p>
+                  <p className="text-4xl font-extrabold text-white">
+                    {euro(ergebnis.monatsrenteEuro)}
+                  </p>
+                  <div className="flex items-center justify-center gap-2 text-gray-400 text-xs mt-3">
+                    <Clock className="w-4 h-4 flex-shrink-0" />
+                    <span>{t('ergebnis.auszahlung')}</span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-center gap-2 text-gray-400 text-xs mt-6">
-                  <Clock className="w-4 h-4" />
-                  <span>Monatliche Renten-Auszahlung (12x im Jahr)</span>
+                {/* Aufschlüsselung: Wer eine Zahl bekommt, soll nachvollziehen
+                    können, woher sie stammt — sonst bleibt jede Korrektur
+                    unüberprüfbar. */}
+                <div className="bg-slate-950/40 border border-white/5 rounded-xl p-5">
+                  <h3 className="text-sm font-bold text-white mb-3">
+                    {t('ergebnis.aufschluesselung')}
+                  </h3>
+                  <Zeile
+                    bezeichnung={t('ergebnis.epBeitrag')}
+                    wert={punkte(ergebnis.entgeltpunkteBeitrag)}
+                  />
+                  <Zeile
+                    bezeichnung={t('ergebnis.epZurechnung')}
+                    wert={punkte(ergebnis.entgeltpunkteZurechnung)}
+                  />
+                  <Zeile
+                    bezeichnung={t('ergebnis.zurechnungszeit')}
+                    wert={t('ergebnis.monate', { monate: ergebnis.zurechnungsmonate })}
+                  />
+                  <Zeile
+                    bezeichnung={t('ergebnis.epGesamt')}
+                    wert={punkte(ergebnis.entgeltpunkteGesamt)}
+                  />
+                  <Zeile
+                    bezeichnung={t('ergebnis.abschlag')}
+                    wert={t('ergebnis.abschlagWert', {
+                      prozent: format.number(ergebnis.abschlagProzent, {
+                        maximumFractionDigits: 1,
+                      }),
+                      monate: ergebnis.abschlagsmonate,
+                    })}
+                  />
+                  <Zeile
+                    bezeichnung={t('ergebnis.rentenwert')}
+                    wert={euro(RECHENGROESSEN.rentenwertEuro)}
+                  />
+                  <p className="text-[10px] text-gray-500 mt-3">
+                    {t('ergebnis.stand', { stand: RECHENGROESSEN.stand })}
+                  </p>
                 </div>
+
+                <p className="text-xs text-gray-400 leading-relaxed">
+                  {t('ergebnis.voraussetzungen')}
+                </p>
               </div>
             </Card>
 
-            {/* B2B / Action Cards */}
             <div className="grid md:grid-cols-2 gap-4">
               <Card
                 className="bg-white/5 border-white/10 text-white hover:bg-white/[0.07] transition-colors cursor-pointer group"
@@ -401,16 +416,16 @@ export default function EmRenteRechner(props: PageProps) {
                       <FileText className="w-5 h-5" />
                     </div>
                     <div>
-                      <CardTitle className="text-base">Offiziellen Antrag erstellen</CardTitle>
+                      <CardTitle className="text-base">{t('aktionen.antragTitel')}</CardTitle>
                       <CardDescription className="text-gray-400 text-xs mt-1">
-                        Im Brief-Zentrum generieren
+                        {t('aktionen.antragText')}
                       </CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <Button className="w-full bg-[#20b2aa] hover:bg-[#3ddbd0] text-slate-950 font-bold rounded-xl h-10 text-xs">
-                    Zum Brief-Generator <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
+                    {t('aktionen.antragKnopf')} <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
                   </Button>
                 </CardContent>
               </Card>
@@ -422,9 +437,9 @@ export default function EmRenteRechner(props: PageProps) {
                       <Heart className="w-5 h-5" />
                     </div>
                     <div>
-                      <CardTitle className="text-base">Fachliche Beratung</CardTitle>
+                      <CardTitle className="text-base">{t('aktionen.beratungTitel')}</CardTitle>
                       <CardDescription className="text-gray-400 text-xs mt-1">
-                        Deutsche Rentenversicherung
+                        {t('aktionen.beratungText')}
                       </CardDescription>
                     </div>
                   </div>
@@ -434,10 +449,14 @@ export default function EmRenteRechner(props: PageProps) {
                     variant="outline"
                     className="w-full border-white/10 text-white hover:bg-white/5 rounded-xl h-10 text-xs"
                     onClick={() =>
-                      window.open('https://www.deutsche-rentenversicherung.de', '_blank')
+                      window.open(
+                        'https://www.deutsche-rentenversicherung.de',
+                        '_blank',
+                        'noopener,noreferrer'
+                      )
                     }
                   >
-                    Zur DRV-Webseite <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
+                    {t('aktionen.beratungKnopf')} <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
                   </Button>
                 </CardContent>
               </Card>
@@ -449,24 +468,20 @@ export default function EmRenteRechner(props: PageProps) {
                 onClick={() => {
                   setStep(1);
                   setErgebnis(null);
+                  setFormData(LEER);
                 }}
                 className="text-gray-400 hover:text-white hover:bg-white/5 px-6 rounded-xl"
               >
-                <ArrowLeft className="mr-2 w-4 h-4" /> Neue Projektion starten
+                <ArrowLeft className="mr-2 w-4 h-4" /> {t('neueProjektion')}
               </Button>
             </div>
           </div>
         )}
 
-        {/* Footer Disclaimer */}
         <footer className="mt-12 pt-6 border-t border-white/10 text-center">
           <div className="flex flex-col sm:flex-row items-center justify-center gap-2 text-gray-500 text-xs max-w-2xl mx-auto leading-relaxed">
             <Shield className="w-4 h-4 flex-shrink-0" />
-            <p>
-              Dies ist eine unverbindliche mathematische Schätzung. Die rechtsverbindliche
-              Rentenhöhe und der Anspruch werden ausschließlich von der Deutschen Rentenversicherung
-              nach ärztlicher Begutachtung festgestellt.
-            </p>
+            <p>{t('disclaimer')}</p>
           </div>
         </footer>
       </div>

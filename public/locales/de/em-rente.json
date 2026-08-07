@@ -1,0 +1,63 @@
+{
+  "titel": "Erwerbsminderungsrente",
+  "untertitel": "Schätzen Sie die Größenordnung Ihrer möglichen Erwerbsminderungsrente nach SGB VI ab.",
+  "hinweisTitel": "Wichtig zum Pflegegrad",
+  "hinweis": "Ein Pflegegrad erhöht die Erwerbsminderungsrente nicht. Das SGB VI kennt keine Zulage, die an den Pflegegrad anknüpft — Pflegegrade steuern Leistungen der Pflegeversicherung nach SGB XI. Die Rentenhöhe bestimmen Ihre Entgeltpunkte, die Zurechnungszeit und der Abschlag.",
+  "schritt1": {
+    "titel": "Grunddaten",
+    "untertitel": "Grundlage für Zurechnungszeit und Abschlag",
+    "geburtsdatum": "Geburtsdatum",
+    "eintritt": "Eintritt der Erwerbsminderung",
+    "eintrittHinweis": "Der Tag, ab dem die Erwerbsfähigkeit gemindert ist — nicht der Tag der Antragstellung."
+  },
+  "schritt2": {
+    "titel": "Art der Erwerbsminderung",
+    "untertitel": "Bestimmt den Rentenartfaktor nach § 67 SGB VI",
+    "label": "Welche Erwerbsminderung liegt vor?",
+    "platzhalter": "Bitte auswählen...",
+    "voll": "Volle Erwerbsminderung (unter 3 Stunden täglich)",
+    "teilweise": "Teilweise Erwerbsminderung (3 bis unter 6 Stunden täglich)",
+    "hinweis": "Maßgeblich ist, wie viele Stunden täglich Sie unter den üblichen Bedingungen des Arbeitsmarktes noch arbeiten können. Die teilweise Erwerbsminderung ergibt die halbe Rente."
+  },
+  "schritt3": {
+    "titel": "Versicherungsverlauf",
+    "untertitel": "Grundlage für die Entgeltpunkte",
+    "beitragsjahre": "Jahre mit Pflichtbeiträgen (geschätzt)",
+    "beitragsjahrePlatzhalter": "z.B. 25",
+    "gehalt": "Durchschnittliches Brutto-Jahresgehalt",
+    "gehaltPlatzhalter": "z.B. 45000",
+    "hinweis": "Die genauen Werte stehen in Ihrer Renteninformation der Deutschen Rentenversicherung. Eine Schätzung genügt für die Größenordnung."
+  },
+  "weiter": "Weiter",
+  "zurueck": "Zurück",
+  "kalkulieren": "Berechnen",
+  "neueProjektion": "Neue Projektion starten",
+  "ergebnis": {
+    "titel": "Ihre Projektion",
+    "monatsrente": "Monatliche Bruttorente (geschätzt)",
+    "auszahlung": "Auszahlung 12x im Jahr, vor Kranken- und Pflegeversicherungsbeiträgen",
+    "wartezeitOk": "Die allgemeine Wartezeit von fünf Jahren ist erfüllt (§ 50 Abs. 1 SGB VI).",
+    "wartezeitFehlt": "Die allgemeine Wartezeit von fünf Jahren ist noch nicht erfüllt (§ 50 Abs. 1 SGB VI). Ohne sie besteht kein Anspruch.",
+    "voraussetzungen": "Zusätzlich verlangt § 43 Abs. 1 Nr. 2 SGB VI drei Jahre Pflichtbeiträge in den letzten fünf Jahren vor Eintritt der Erwerbsminderung. Das lässt sich nur anhand Ihres Versicherungsverlaufs prüfen.",
+    "aufschluesselung": "So kommt der Betrag zustande",
+    "epBeitrag": "Entgeltpunkte aus Beitragszeiten",
+    "epZurechnung": "Entgeltpunkte aus der Zurechnungszeit (§ 59 SGB VI)",
+    "epGesamt": "Entgeltpunkte gesamt",
+    "zurechnungszeit": "Angerechnete Zurechnungszeit",
+    "monate": "{monate} Monate",
+    "abschlag": "Abschlag (§ 77 SGB VI)",
+    "abschlagWert": "−{prozent} % über {monate} Monate",
+    "rentenartfaktor": "Rentenartfaktor (§ 67 SGB VI)",
+    "rentenwert": "Aktueller Rentenwert",
+    "stand": "Rechengrößen Stand {stand}"
+  },
+  "aktionen": {
+    "antragTitel": "Antrag vorbereiten",
+    "antragText": "Im Brief-Zentrum erstellen",
+    "antragKnopf": "Zum Brief-Zentrum",
+    "beratungTitel": "Verbindliche Auskunft",
+    "beratungText": "Deutsche Rentenversicherung",
+    "beratungKnopf": "Zur DRV-Webseite"
+  },
+  "disclaimer": "Dies ist eine unverbindliche Schätzung ohne Grundrentenzuschlag, Höherbewertung von Ausbildungszeiten und weitere Sonderregelungen. Über Anspruch und Höhe entscheidet allein die Deutsche Rentenversicherung nach ärztlicher Begutachtung."
+}

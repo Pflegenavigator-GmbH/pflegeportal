@@ -76,7 +76,7 @@ export default function DatenLoeschenPage(props: PageProps) {
               Destruktive Operation: Die Löschung ist unumkehrbar!
             </strong>
             Mit Ausführung dieses Antrags werden alle Berechnungen, Punktwerte der 6 Module und
-            Verläufe unwiderruflich aus den Supabase-Clustern getilgt.
+            Verläufe unwiderruflich gelöscht.
           </div>
         </div>
 

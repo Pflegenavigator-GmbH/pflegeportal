@@ -1,0 +1,18 @@
+{
+  "titel": "Kombinationspflege-Rechner (§ 38 SGB XI)",
+  "untertitel": "Nutzen Sie einen Pflegedienst und pflegen gleichzeitig selbst? Berechnen Sie hier Ihr restliches Pflegegeld.",
+  "erklaerungTitel": "Wie wird gerechnet? (Einfach erklärt)",
+  "erklaerung": "Je mehr Geld der <b>Pflegedienst</b> verbraucht, desto weniger <b>Pflegegeld</b> wird auf Ihr Konto überwiesen. Wenn der Pflegedienst z.B. genau 60% seines Budgets ausschöpft, zahlt Ihnen die Pflegekasse die restlichen 40% als Pflegegeld aus.",
+  "schrittPflegegrad": "1. Wählen Sie den Pflegegrad:",
+  "kachelBetraege": "Geld: {pflegegeld}€ | Sach: {sachleistung}€",
+  "schrittNutzung": "2. Wie viel Prozent nutzt der Pflegedienst?",
+  "skalaNull": "0% (Nur Angehörige)",
+  "skalaHalb": "50% (Halbe-Halbe)",
+  "skalaVoll": "100% (Vollständig Pflegedienst)",
+  "sachleistung": "Wert der Sachleistungen (Pflegedienst)",
+  "pflegegeldRest": "Ihr verbleibendes Pflegegeld (Konto-Überweisung)",
+  "anteilVonMax": "({prozent}% von max. {maximum}€)",
+  "gesamtwert": "Gesamtwert der monatlichen Hilfen durch die Kombination:",
+  "zurueck": "Zurück zum Gutachten",
+  "briefZentrum": "Brief-Zentrum öffnen"
+}

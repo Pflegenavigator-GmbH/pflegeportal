@@ -1,0 +1,18 @@
+{
+  "titel": "Combined care calculator (§ 38 SGB XI)",
+  "untertitel": "Do you use a care service and also provide care yourself? Work out how much care allowance is left for you.",
+  "erklaerungTitel": "How is it calculated? (In plain terms)",
+  "erklaerung": "The more of the budget the <b>care service</b> uses, the less <b>care allowance</b> is paid into your account. If the service uses exactly 60% of its budget, for example, the care fund pays you the remaining 40% as care allowance.",
+  "schrittPflegegrad": "1. Choose the care level:",
+  "kachelBetraege": "Cash: €{pflegegeld} | In kind: €{sachleistung}",
+  "schrittNutzung": "2. What share does the care service use?",
+  "skalaNull": "0% (relatives only)",
+  "skalaHalb": "50% (half and half)",
+  "skalaVoll": "100% (care service only)",
+  "sachleistung": "Value of benefits in kind (care service)",
+  "pflegegeldRest": "Your remaining care allowance (paid to your account)",
+  "anteilVonMax": "({prozent}% of max. €{maximum})",
+  "gesamtwert": "Total value of the monthly benefits from the combination:",
+  "zurueck": "Back to the assessment",
+  "briefZentrum": "Open the letter centre"
+}
