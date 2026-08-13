@@ -26,6 +26,7 @@ import type kombileistungen from '../../public/locales/de/kombileistungen.json';
 import type pflegegrad from '../../public/locales/de/pflegegrad.json';
 import type philosophie from '../../public/locales/de/philosophie.json';
 import type presse from '../../public/locales/de/presse.json';
+import type rechtliches from '../../public/locales/de/rechtliches.json';
 import type startseite from '../../public/locales/de/startseite.json';
 import type tagebuch from '../../public/locales/de/tagebuch.json';
 import type unterstuetzung from '../../public/locales/de/unterstuetzung.json';
@@ -46,6 +47,7 @@ interface Nachrichten {
   kombileistungen: typeof kombileistungen;
   unterstuetzung: typeof unterstuetzung;
   'em-rente': typeof emRente;
+  rechtliches: typeof rechtliches;
 }
 
 declare module 'next-intl' {
