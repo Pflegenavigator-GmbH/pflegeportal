@@ -12,13 +12,13 @@ import {
   CheckCircle,
   AlertTriangle,
   Clock,
-  Shield,
   Heart,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useState, use } from 'react';
 
+import { RechtshinweisFuss } from '@/src/components/layout/SeitenFuss';
 import {
   Button,
   Card,
@@ -478,12 +478,7 @@ export default function EmRenteRechner(props: PageProps) {
           </div>
         )}
 
-        <footer className="mt-12 pt-6 border-t border-white/10 text-center">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 text-gray-500 text-xs max-w-2xl mx-auto leading-relaxed">
-            <Shield className="w-4 h-4 flex-shrink-0" />
-            <p>{t('disclaimer')}</p>
-          </div>
-        </footer>
+        <RechtshinweisFuss>{t('disclaimer')}</RechtshinweisFuss>
       </div>
     </main>
   );

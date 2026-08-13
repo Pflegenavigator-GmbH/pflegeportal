@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
+import { Sprachhinweis } from '@/src/components/rechtliches/Sprachhinweis';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui';
 
 export const dynamic = 'force-dynamic';
@@ -29,6 +30,7 @@ export default async function AgbPage(props: PageProps) {
   return (
     <div className="min-h-screen bg-slate-900 text-white font-sans py-12 px-4">
       <div className="max-w-3xl mx-auto space-y-8">
+        <Sprachhinweis />
         {/* Header */}
         <div className="text-center space-y-3">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#0f2744] to-[#20b2aa] rounded-2xl shadow-xl border border-white/10">
