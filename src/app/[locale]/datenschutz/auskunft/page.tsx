@@ -3,6 +3,7 @@
 
 import { FileText, ArrowRight, ArrowLeft, Mail, Check, Clock, Database } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState, use } from 'react';
 import { toast } from 'sonner';
 
@@ -24,6 +25,8 @@ export default function DatenauskunftPage(props: PageProps) {
   const router = useRouter();
   const params = use(props.params);
   const locale = params?.locale || 'de';
+
+  const t = useTranslations('rechtliches.auskunft');
 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -54,9 +57,9 @@ export default function DatenauskunftPage(props: PageProps) {
       if (!res.ok) throw new Error();
 
       setSubmitted(true);
-      toast.success('Auskunftsantrag revisionssicher protokolliert.');
+      toast.success(t('erfolgToast'));
     } catch {
-      toast.error('Fehler bei der Übermittlung. Bitte wenden Sie sich an den Support.');
+      toast.error(t('fehlerToast'));
     } finally {
       setLoading(false);
     }
@@ -69,22 +72,17 @@ export default function DatenauskunftPage(props: PageProps) {
           <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-500/10 border border-blue-500/20 rounded-xl mb-3">
             <FileText className="w-7 h-7 text-blue-400" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">Datenauskunft nach Art. 15 DSGVO</h1>
-          <p className="text-xs text-gray-400 mt-1">
-            Fordern Sie die vollständigen, lokal und serverseitig hinterlegten Maschinen-Datensätze
-            Ihrer Akte an
-          </p>
+          <h1 className="text-2xl font-bold tracking-tight">{t('titel')}</h1>
+          <p className="text-xs text-gray-400 mt-1">{t('untertitel')}</p>
         </div>
 
         {!submitted ? (
           <Card className="bg-white/5 border-white/10 text-white shadow-xl">
             <CardHeader className="border-b border-white/5 pb-4">
               <div className="flex items-center gap-2 text-xs font-mono text-gray-400 mb-1">
-                <span>Schritt {step} von 2</span>
+                <span>{t('schritt', { schritt: step })}</span>
               </div>
-              <CardTitle className="text-base font-bold text-white">
-                Verfahrensdaten eingeben
-              </CardTitle>
+              <CardTitle className="text-base font-bold text-white">{t('kartenTitel')}</CardTitle>
             </CardHeader>
             <CardContent className="pt-5">
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -92,7 +90,7 @@ export default function DatenauskunftPage(props: PageProps) {
                   <div className="space-y-4">
                     <div className="space-y-1.5">
                       <label className="text-xs text-gray-300 font-medium">
-                        Zugeordneter Fallcode (z.B. PF-ABC123)
+                        {t('fallcodeLabel')}
                       </label>
                       <Input
                         type="text"
@@ -100,7 +98,7 @@ export default function DatenauskunftPage(props: PageProps) {
                         onChange={(e) =>
                           setFormData({ ...formData, fallcode: e.target.value.toUpperCase() })
                         }
-                        placeholder="PF-..."
+                        placeholder={t('fallcodePlatzhalter')}
                         className="bg-slate-950/50 border-white/10 text-center tracking-widest text-lg font-mono text-white h-12"
                       />
                     </div>
@@ -110,20 +108,18 @@ export default function DatenauskunftPage(props: PageProps) {
                       disabled={!formData.fallcode || formData.fallcode.length < 4}
                       onClick={() => setStep(2)}
                     >
-                      Weiter zur Verifizierung <ArrowRight className="ml-2 w-4 h-4" />
+                      {t('weiterZurVerifizierung')} <ArrowRight className="ml-2 w-4 h-4" />
                     </Button>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <label className="text-xs text-gray-300 font-medium">
-                        Zustelladresse für verschlüsseltes Daten-Dossier (E-Mail)
-                      </label>
+                      <label className="text-xs text-gray-300 font-medium">{t('emailLabel')}</label>
                       <Input
                         type="email"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        placeholder="name@beispiel.de"
+                        placeholder={t('emailPlatzhalter')}
                         className="bg-slate-950/50 border-white/10 h-11 text-white"
                         required
                       />
@@ -142,8 +138,7 @@ export default function DatenauskunftPage(props: PageProps) {
                         htmlFor="legal-confirm"
                         className="text-xs text-gray-400 leading-relaxed cursor-pointer"
                       >
-                        Ich versichere eidesstattlich, dass ich Inhaber dieses Fallcodes bin oder
-                        eine rechtsgültige Vollmacht des Betroffenen vorliegt.
+                        {t('versicherung')}
                       </label>
                     </div>
                     <div className="flex gap-2 pt-2">
@@ -153,14 +148,14 @@ export default function DatenauskunftPage(props: PageProps) {
                         onClick={() => setStep(1)}
                         className="border-white/10 text-white hover:bg-white/5 h-11"
                       >
-                        <ArrowLeft className="mr-1.5 w-4 h-4" /> Zurück
+                        <ArrowLeft className="mr-1.5 w-4 h-4" /> {t('zurueck')}
                       </Button>
                       <Button
                         type="submit"
                         disabled={!formData.email || !formData.bestaetigung || loading}
                         className="flex-1 h-11 bg-[#20b2aa] hover:bg-[#3ddbd0] text-slate-950 font-bold"
                       >
-                        {loading ? 'Protokolliere...' : 'Auskunftsanspruch geltend machen'}
+                        {loading ? t('absendenLaeuft') : t('absenden')}
                       </Button>
                     </div>
                   </div>
@@ -177,10 +172,10 @@ export default function DatenauskunftPage(props: PageProps) {
                 </div>
                 <div>
                   <CardTitle className="text-emerald-400 text-base font-bold">
-                    Antrag revisionssicher eingegangen!
+                    {t('erfolgTitel')}
                   </CardTitle>
                   <CardDescription className="text-gray-400 text-xs">
-                    Gesetzliche Bearbeitungsfrist nach Art. 12 Abs. 3 DSGVO läuft
+                    {t('erfolgText')}
                   </CardDescription>
                 </div>
               </div>
@@ -188,18 +183,17 @@ export default function DatenauskunftPage(props: PageProps) {
             <CardContent className="pt-4 space-y-3 text-xs text-gray-300">
               <p className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-emerald-400" />{' '}
-                <span>E-Mail-Protokoll hinterlegt für: {formData.email}</span>
+                <span>{t('emailProtokoll', { email: formData.email })}</span>
               </p>
               <p className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-emerald-400" />{' '}
-                <span>Maximale Bearbeitungsdauer: 30 Tage (Regelfall deutlich schneller)</span>
+                <Clock className="w-4 h-4 text-emerald-400" /> <span>{t('frist')}</span>
               </p>
               <Button
                 variant="outline"
                 onClick={() => router.push(`/${locale}/datenschutz`)}
                 className="w-full h-10 border-white/10 text-white hover:bg-white/5 mt-2"
               >
-                Zurück zur Übersicht
+                {t('zurUebersicht')}
               </Button>
             </CardContent>
           </Card>
@@ -208,13 +202,12 @@ export default function DatenauskunftPage(props: PageProps) {
         <Card className="bg-white/5 border-white/10 text-white shadow-md">
           <CardHeader className="p-4 pb-2">
             <CardTitle className="text-xs font-bold flex items-center gap-2 text-gray-300">
-              <Database className="w-4 h-4 text-[#20b2aa]" /> Gesetzlicher Rechte-Spiegel (Kapitel 3
-              DSGVO)
+              <Database className="w-4 h-4 text-[#20b2aa]" /> {t('rechteTitel')}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-0 text-[11px] text-gray-400 leading-relaxed space-y-1">
-            <p>• **Art. 15:** Umfassendes Recht auf Dateneinsicht und Kriterienauskunft</p>
-            <p>• **Art. 17:** Recht auf sofortige Datenlöschung („Vergessenwerden“)</p>
+            <p>• {t.rich('rechte.art15', { b: (inhalt) => <strong>{inhalt}</strong> })}</p>
+            <p>• {t.rich('rechte.art17', { b: (inhalt) => <strong>{inhalt}</strong> })}</p>
           </CardContent>
         </Card>
       </div>

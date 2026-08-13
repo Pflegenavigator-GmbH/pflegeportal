@@ -1,12 +1,13 @@
 // src/app/[locale]/pflegegrad/modul6/page.tsx
 'use client';
 
-import { Shield, ArrowRight, ArrowLeft, Home, AlertCircle, Info } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Home, AlertCircle, Info } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMessages, useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 
 import { AlltagsgestaltungForm } from '@/src/app/[locale]/pflegegrad/modul6/_component/AlltagsgestaltungForm';
+import { RechtshinweisFuss } from '@/src/components/layout/SeitenFuss';
 import {
   Button,
   Card,
@@ -159,10 +160,7 @@ export default function Modul6Page() {
           </CardFooter>
         </Card>
 
-        <footer className="mt-8 pt-6 border-t border-[var(--border-subtle)] flex items-start gap-3 text-[var(--color-text-faint)] text-xs leading-relaxed">
-          <Shield className="w-4 h-4 flex-shrink-0 mt-0.5" />
-          <p>{t('fussnote')}</p>
-        </footer>
+        <RechtshinweisFuss>{t('fussnote')}</RechtshinweisFuss>
       </div>
     </main>
   );
