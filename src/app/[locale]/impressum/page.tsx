@@ -2,6 +2,7 @@
 import { Building2, Mail, Globe, Shield, FileText, AlertCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
+import { Sprachhinweis } from '@/src/components/rechtliches/Sprachhinweis';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui';
 
 export const dynamic = 'force-dynamic';
@@ -22,21 +23,22 @@ export default async function ImpressumPage(props: PageProps) {
   return (
     <div className="min-h-screen bg-slate-900 text-white font-sans py-12 px-4">
       <div className="max-w-3xl mx-auto space-y-8">
+        <Sprachhinweis />
         {/* Header Chrome */}
         <div className="text-center space-y-3">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#0f2744] to-[#20b2aa] rounded-2xl shadow-xl border border-white/10">
             <Building2 className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight">Impressum</h1>
-          <p className="text-gray-400 text-sm">Rechtliche Angaben nach § 5 TMG</p>
+          <p className="text-gray-400 text-sm">Rechtliche Angaben nach § 5 DDG</p>
         </div>
 
-        {/* Angaben nach § 5 TMG */}
+        {/* Angaben nach § 5 DDG (früher § 5 TMG) */}
         <Card className="bg-white/5 border-white/10 text-white shadow-xl">
           <CardHeader className="border-b border-white/5">
             <CardTitle className="flex items-center gap-2 text-base font-bold text-white">
               <Building2 className="w-5 h-5 text-[#20b2aa]" />
-              Angaben nach § 5 TMG
+              Angaben nach § 5 DDG
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-5 space-y-4 text-xs sm:text-sm text-gray-300">

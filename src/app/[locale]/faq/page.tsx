@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 
+import { SeitenFuss } from '@/src/components/layout/SeitenFuss';
 import {
   Button,
   Card,
@@ -238,12 +239,12 @@ export default function FAQPage() {
         </Card>
 
         {/* Footer */}
-        <footer className="mt-12 pt-6 border-t text-center">
+        <SeitenFuss>
           <Button variant="outline" onClick={() => router.push('/')} size="lg">
             <ArrowLeft className="mr-2 w-4 h-4" />
             {t('zurueck')}
           </Button>
-        </footer>
+        </SeitenFuss>
       </div>
     </main>
   );

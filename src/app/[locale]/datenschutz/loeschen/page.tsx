@@ -4,6 +4,7 @@
 
 import { Trash2, AlertTriangle, ArrowRight, Check, Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState, use } from 'react';
 
 import {
@@ -16,6 +17,13 @@ import {
   Input,
 } from '@/src/components/ui';
 
+/**
+ * Nur die IDs — die Beschriftungen stehen in `rechtliches.loeschen.gruende`.
+ * `as const` hält sie als Literale, sonst ließe sich der zusammengesetzte
+ * Schlüssel nicht gegen die vorhandenen Einträge prüfen.
+ */
+const LOESCHGRUENDE = ['nichtMehr', 'unsicher', 'anderes'] as const;
+
 interface PageProps {
   params: Promise<{ locale: string }>;
 }
@@ -24,6 +32,8 @@ export default function DatenLoeschenPage(props: PageProps) {
   const router = useRouter();
   const params = use(props.params);
   const locale = params?.locale || 'de';
+
+  const t = useTranslations('rechtliches.loeschen');
 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -34,12 +44,6 @@ export default function DatenLoeschenPage(props: PageProps) {
     grund: '',
     bestaetigung: false,
   });
-
-  const loeschgruende = [
-    { id: 'nicht-mehr', label: 'Ich benötige das Pflege-Dossier nicht mehr' },
-    { id: 'unsicher', label: 'Ich habe generelle Datenschutz-Bedenken' },
-    { id: 'anderes', label: 'Anderer administrativer Grund' },
-  ];
 
   const handleFinalDelete = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,11 +76,8 @@ export default function DatenLoeschenPage(props: PageProps) {
         <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-4 flex items-start gap-3 text-rose-400">
           <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
           <div className="text-xs leading-relaxed">
-            <strong className="text-white block font-bold mb-0.5">
-              Destruktive Operation: Die Löschung ist unumkehrbar!
-            </strong>
-            Mit Ausführung dieses Antrags werden alle Berechnungen, Punktwerte der 6 Module und
-            Verläufe unwiderruflich gelöscht.
+            <strong className="text-white block font-bold mb-0.5">{t('warnungTitel')}</strong>
+            {t('warnungText')}
           </div>
         </div>
 
@@ -84,7 +85,7 @@ export default function DatenLoeschenPage(props: PageProps) {
           <Card className="bg-white/5 border-white/10 text-white shadow-xl">
             <CardHeader className="border-b border-white/5">
               <CardTitle className="text-base font-bold text-white flex items-center gap-2">
-                <Trash2 className="w-4 h-4 text-rose-400" /> Löschantrag (Schritt {step} von 3)
+                <Trash2 className="w-4 h-4 text-rose-400" /> {t('kartenTitel', { schritt: step })}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-5">
@@ -93,7 +94,7 @@ export default function DatenLoeschenPage(props: PageProps) {
                   <div className="space-y-4">
                     <div className="space-y-1.5">
                       <label className="text-xs text-gray-300 font-medium">
-                        Zu löschender Fallcode (z.B. PF-ABC123)
+                        {t('fallcodeLabel')}
                       </label>
                       <Input
                         type="text"
@@ -101,7 +102,7 @@ export default function DatenLoeschenPage(props: PageProps) {
                         onChange={(e) =>
                           setFormData({ ...formData, fallcode: e.target.value.toUpperCase() })
                         }
-                        placeholder="PF-..."
+                        placeholder={t('fallcodePlatzhalter')}
                         className="bg-slate-950/50 border-white/10 text-center tracking-widest text-lg font-mono text-white h-12"
                       />
                     </div>
@@ -111,7 +112,7 @@ export default function DatenLoeschenPage(props: PageProps) {
                       disabled={!formData.fallcode || formData.fallcode.length < 4}
                       onClick={() => setStep(2)}
                     >
-                      Weiter <ArrowRight className="ml-1.5 w-4 h-4" />
+                      {t('weiter')} <ArrowRight className="ml-1.5 w-4 h-4" />
                     </Button>
                   </div>
                 )}
@@ -119,23 +120,23 @@ export default function DatenLoeschenPage(props: PageProps) {
                 {step === 2 && (
                   <div className="space-y-4">
                     <label className="text-xs text-gray-300 font-medium block">
-                      Grund für das Löschbegehren (Optional für die System-Statistik)
+                      {t('grundLabel')}
                     </label>
                     <div className="space-y-2">
-                      {loeschgruende.map((g) => (
+                      {LOESCHGRUENDE.map((grundId) => (
                         <label
-                          key={g.id}
-                          className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all text-xs ${formData.grund === g.id ? 'border-rose-500 bg-rose-500/5 text-white' : 'border-white/5 bg-slate-950/20 text-gray-400 hover:border-white/10'}`}
+                          key={grundId}
+                          className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all text-xs ${formData.grund === grundId ? 'border-rose-500 bg-rose-500/5 text-white' : 'border-white/5 bg-slate-950/20 text-gray-400 hover:border-white/10'}`}
                         >
                           <input
                             type="radio"
                             name="grund"
-                            value={g.id}
-                            checked={formData.grund === g.id}
+                            value={grundId}
+                            checked={formData.grund === grundId}
                             onChange={(e) => setFormData({ ...formData, grund: e.target.value })}
                             className="accent-rose-500"
                           />
-                          <span>{g.label}</span>
+                          <span>{t(`gruende.${grundId}`)}</span>
                         </label>
                       ))}
                     </div>
@@ -146,7 +147,7 @@ export default function DatenLoeschenPage(props: PageProps) {
                         onClick={() => setStep(1)}
                         className="border-white/10 text-white hover:bg-white/5 h-11"
                       >
-                        Zurück
+                        {t('zurueck')}
                       </Button>
                       <Button
                         type="button"
@@ -154,7 +155,7 @@ export default function DatenLoeschenPage(props: PageProps) {
                         disabled={!formData.grund}
                         onClick={() => setStep(3)}
                       >
-                        Weiter
+                        {t('weiter')}
                       </Button>
                     </div>
                   </div>
@@ -163,14 +164,12 @@ export default function DatenLoeschenPage(props: PageProps) {
                 {step === 3 && (
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <label className="text-xs text-gray-300 font-medium">
-                        E-Mail für die Löschbestätigung
-                      </label>
+                      <label className="text-xs text-gray-300 font-medium">{t('emailLabel')}</label>
                       <Input
                         type="email"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        placeholder="name@beispiel.de"
+                        placeholder={t('emailPlatzhalter')}
                         className="bg-slate-950/50 border-white/10 h-11 text-white"
                         required
                       />
@@ -189,8 +188,7 @@ export default function DatenLoeschenPage(props: PageProps) {
                         htmlFor="confirm-delete"
                         className="text-xs text-gray-400 leading-relaxed cursor-pointer"
                       >
-                        Ich bestätige ausdrücklich, dass dieser Vorgang unwiderruflich ist und das
-                        Recht auf Vergessenwerden (Art. 17) hiermit final vollzogen werden soll.
+                        {t('bestaetigung')}
                       </label>
                     </div>
                     <div className="flex gap-2 pt-2">
@@ -200,14 +198,14 @@ export default function DatenLoeschenPage(props: PageProps) {
                         onClick={() => setStep(2)}
                         className="border-white/10 text-white hover:bg-white/5 h-11"
                       >
-                        Zurück
+                        {t('zurueck')}
                       </Button>
                       <Button
                         type="submit"
                         disabled={!formData.email || !formData.bestaetigung || loading}
                         className="flex-1 h-11 bg-rose-600 hover:bg-rose-700 text-white font-bold"
                       >
-                        {loading ? 'Bereinge Tabellen...' : 'Daten jetzt unwiderruflich löschen'}
+                        {loading ? t('absendenLaeuft') : t('absenden')}
                       </Button>
                     </div>
                   </div>
@@ -224,18 +222,17 @@ export default function DatenLoeschenPage(props: PageProps) {
                 </div>
                 <div>
                   <CardTitle className="text-emerald-400 text-base font-bold">
-                    Löschauftrag erfolgreich registriert!
+                    {t('erfolgTitel')}
                   </CardTitle>
                   <CardDescription className="text-gray-400 text-xs">
-                    Das System bereinigt die Relationen im Hintergrund
+                    {t('erfolgText')}
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="pt-4 space-y-3 text-xs text-gray-300">
               <p className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-emerald-400" />{' '}
-                <span>Maximale Lösch- und Replikationslatenz: bis zu 30 Tage.</span>
+                <Clock className="w-4 h-4 text-emerald-400" /> <span>{t('frist')}</span>
               </p>
               <div className="flex gap-2 pt-2">
                 <Button
@@ -243,13 +240,13 @@ export default function DatenLoeschenPage(props: PageProps) {
                   onClick={() => router.push(`/${locale}/datenschutz`)}
                   className="flex-1 h-10 border-white/10 text-white hover:bg-white/5"
                 >
-                  Zum Datenschutz
+                  {t('zumDatenschutz')}
                 </Button>
                 <Button
                   onClick={() => router.push(`/${locale}`)}
                   className="flex-1 h-10 bg-[#20b2aa] hover:bg-[#3ddbd0] text-slate-950 font-bold"
                 >
-                  Zur Startseite
+                  {t('zurStartseite')}
                 </Button>
               </div>
             </CardContent>
