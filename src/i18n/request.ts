@@ -63,6 +63,26 @@ export default getRequestConfig(async ({ requestLocale }) => {
     messages: Object.assign({}, ...teile) as AbstractIntlMessages,
 
     /**
+     * Benannte Formate für `useFormatter()`.
+     *
+     * Ohne diesen Block liefert `format.dateTime(datum, 'kurz')` nicht etwa
+     * ein Datum, sondern die rohe `Date.toString()` — also
+     * „Tue Sep 01 2026 02:00:00 GMT+0200 (Mitteleuropäische Sommerzeit)"
+     * mitten im Fließtext. next-intl wirft dabei keinen Fehler, der Aufruf
+     * fällt einfach still zurück.
+     *
+     * Zentral hier statt als Optionen an jeder Aufrufstelle: Datumsangaben
+     * sollen im ganzen Portal gleich aussehen, und die Locale bestimmt die
+     * Reihenfolge (01.09.2026 gegenüber 09/01/2026) von allein.
+     */
+    formats: {
+      dateTime: {
+        kurz: { day: '2-digit', month: '2-digit', year: 'numeric' },
+        lang: { day: 'numeric', month: 'long', year: 'numeric' },
+      },
+    },
+
+    /**
      * Stufe 3: Greift nur, wenn ein Schlüssel auch in der Referenzsprache
      * fehlt. Das ist dann kein Übersetzungsproblem, sondern ein Fehler im Code.
      *

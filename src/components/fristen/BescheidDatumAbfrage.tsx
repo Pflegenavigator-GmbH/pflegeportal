@@ -59,7 +59,7 @@ export function BescheidDatumAbfrage({ wert, onChange, gespeichertWird = false }
         <p className={styles.bestaetigt}>
           <CheckCircle2 size={18} aria-hidden="true" />
           <span>
-            {t('bestaetigt')} <strong>{format.dateTime(new Date(wert), 'short')}</strong>
+            {t('bestaetigt')} <strong>{format.dateTime(new Date(wert), 'kurz')}</strong>
           </span>
         </p>
         <button

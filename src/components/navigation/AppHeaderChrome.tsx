@@ -4,6 +4,7 @@
 import {
   ArrowLeft,
   BookOpen,
+  Briefcase,
   Copy,
   FileText,
   FolderLock,
@@ -192,6 +193,14 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
                     <FileText className="w-4 h-4 text-[#4a90e2]" /> {t('links.briefe')}
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link
+                    href={`/${locale}/em-rente`}
+                    className="cursor-pointer font-medium p-2 hover:bg-white/5 flex items-center gap-2"
+                  >
+                    <Briefcase className="w-4 h-4 text-[#4a90e2]" /> {t('links.emRente')}
+                  </Link>
+                </DropdownMenuItem>
                 {caseCode && (
                   <DropdownMenuItem asChild>
                     <Link
@@ -370,6 +379,13 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
                 className="text-[#4a90e2] hover:bg-white/5 p-2.5 rounded-xl flex items-center gap-3 transition-colors"
               >
                 <FileText className="w-4 h-4" /> {t('links.briefe')}
+              </Link>
+              <Link
+                href={`/${locale}/em-rente`}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="hover:text-white hover:bg-white/5 p-2.5 rounded-xl flex items-center gap-3 transition-colors text-gray-300"
+              >
+                <Briefcase className="w-4 h-4" /> {t('links.emRente')}
               </Link>
               {caseCode && (
                 <Link

@@ -32,6 +32,7 @@ import {
 import {
   RECHENGROESSEN,
   berechneEmRente,
+  hatBerufsschutz,
   type EmRenteErgebnis,
   type Erwerbsminderungsart,
 } from '@/src/lib/em-rente/berechnung';
@@ -92,6 +93,10 @@ export default function EmRenteRechner(props: PageProps) {
     );
     setStep(4);
   };
+
+  // § 240 SGB VI hängt allein am Geburtsdatum aus Schritt 1 — die Auswahl in
+  // Schritt 2 richtet sich danach.
+  const berufsschutz = formData.geburtsdatum ? hatBerufsschutz(formData.geburtsdatum) : false;
 
   const schritt1Gueltig = Boolean(formData.geburtsdatum && formData.eintrittsdatum);
   const schritt2Gueltig = formData.art !== '';
@@ -214,7 +219,29 @@ export default function EmRenteRechner(props: PageProps) {
                   <option value="">{t('schritt2.platzhalter')}</option>
                   <option value="voll">{t('schritt2.voll')}</option>
                   <option value="teilweise">{t('schritt2.teilweise')}</option>
+                  {berufsschutz && (
+                    <option value="berufsunfaehig">{t('schritt2.berufsunfaehig')}</option>
+                  )}
                 </select>
+              </div>
+
+              <div
+                className={`p-4 rounded-xl flex items-start gap-3 border ${berufsschutz ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-slate-950/40 border-white/10'}`}
+              >
+                <Info
+                  className={`w-5 h-5 flex-shrink-0 mt-0.5 ${berufsschutz ? 'text-emerald-400' : 'text-gray-400'}`}
+                />
+                <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
+                  <strong className="text-white">
+                    {berufsschutz
+                      ? t('schritt2.berufsschutzTitel')
+                      : t('schritt2.berufsschutzEntfallenTitel')}
+                    :
+                  </strong>{' '}
+                  {berufsschutz
+                    ? t('schritt2.berufsschutzText')
+                    : t('schritt2.berufsschutzEntfallenText')}
+                </p>
               </div>
 
               <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-xl flex items-start gap-3">
@@ -331,6 +358,18 @@ export default function EmRenteRechner(props: PageProps) {
                   <CardTitle className="text-xl text-white">{t('ergebnis.titel')}</CardTitle>
                 </div>
 
+                {ergebnis.berufsschutzEntfallen && (
+                  <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 p-4 rounded-xl flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">
+                      <strong className="block text-white">
+                        {t('ergebnis.keinAnspruchTitel')}
+                      </strong>
+                      {t('ergebnis.keinAnspruchText')}
+                    </span>
+                  </div>
+                )}
+
                 {ergebnis.wartezeitErfuellt ? (
                   <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-xl flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
@@ -391,6 +430,14 @@ export default function EmRenteRechner(props: PageProps) {
                     })}
                   />
                   <Zeile
+                    bezeichnung={t('ergebnis.hinzuverdienst')}
+                    wert={euro(ergebnis.hinzuverdienstgrenzeJahrEuro)}
+                  />
+                  <Zeile
+                    bezeichnung={t('ergebnis.laeuftBis')}
+                    wert={format.dateTime(new Date(ergebnis.renteLaeuftBis), 'kurz')}
+                  />
+                  <Zeile
                     bezeichnung={t('ergebnis.rentenwert')}
                     wert={euro(RECHENGROESSEN.rentenwertEuro)}
                   />
@@ -398,6 +445,17 @@ export default function EmRenteRechner(props: PageProps) {
                     {t('ergebnis.stand', { stand: RECHENGROESSEN.stand })}
                   </p>
                 </div>
+
+                <p className="text-xs text-gray-400 leading-relaxed">
+                  {t('ergebnis.hinzuverdienstHinweis')}
+                </p>
+
+                <p className="text-xs text-gray-400 leading-relaxed">
+                  {t('ergebnis.laeuftBisHinweis', {
+                    jahre: Math.floor(ergebnis.regelaltersgrenzeMonate / 12),
+                    monate: ergebnis.regelaltersgrenzeMonate % 12,
+                  })}
+                </p>
 
                 <p className="text-xs text-gray-400 leading-relaxed">
                   {t('ergebnis.voraussetzungen')}
@@ -408,7 +466,7 @@ export default function EmRenteRechner(props: PageProps) {
             <div className="grid md:grid-cols-2 gap-4">
               <Card
                 className="bg-white/5 border-white/10 text-white hover:bg-white/[0.07] transition-colors cursor-pointer group"
-                onClick={() => router.push(`/${locale}/briefe`)}
+                onClick={() => router.push(`/${locale}/briefe?kategorie=em-rente`)}
               >
                 <CardHeader>
                   <div className="flex items-center gap-3">

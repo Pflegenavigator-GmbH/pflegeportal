@@ -12,9 +12,9 @@ import {
   Wallet,
   HelpCircle,
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState, use } from 'react';
+import { Suspense, useCallback, useEffect, useState, use } from 'react';
 
 import { BriefFormModal } from '@/src/components/modal/BriefFormModal';
 import { BriefType } from '@/src/types/briefe';
@@ -42,6 +42,29 @@ const BRIEF_KATEGORIEN = [
   { id: 'allgemein', icon: GraduationCap, color: 'text-teal-400', bg: 'bg-teal-500/10' },
 ] as const;
 
+/** Gültige Ziele für einen Tiefenlink — schützt vor erfundenen URL-Werten. */
+const KATEGORIE_IDS = new Set<string>(BRIEF_KATEGORIEN.map((k) => k.id));
+
+/**
+ * Liest `?kategorie=` aus der URL und öffnet die passende Vorlage.
+ *
+ * In einer eigenen Komponente hinter `<Suspense>`, weil `useSearchParams()`
+ * sonst die ganze Seite aus dem statischen Rendern nimmt — Next verlangt die
+ * Grenze ausdrücklich.
+ *
+ * Damit kann der EM-Renten-Rechner direkt auf „seine" Vorlage verweisen,
+ * statt den Nutzer im Kategorien-Raster allein zu lassen.
+ */
+function KategorieAusUrl({ oeffne }: { oeffne: (id: string) => void }) {
+  const kategorie = useSearchParams().get('kategorie');
+
+  useEffect(() => {
+    if (kategorie && KATEGORIE_IDS.has(kategorie)) oeffne(kategorie);
+  }, [kategorie, oeffne]);
+
+  return null;
+}
+
 interface PageProps {
   params: Promise<{ locale: string }>;
 }
@@ -53,8 +76,25 @@ export default function BriefePage(props: PageProps) {
   const locale = params?.locale || 'de';
   const [selectedType, setSelectedType] = useState<BriefType | null>(null);
 
+  // Eine Stelle für beide Wege — Klick im Raster wie Tiefenlink aus der URL.
+  const oeffneKategorie = useCallback(
+    (id: string) => {
+      if (id === 'widerspruch-pflegegrad') {
+        // Der Widerspruch hat eine eigene, umfangreichere Seite.
+        router.push(`/${locale}/widerspruch`);
+        return;
+      }
+      setSelectedType(id as BriefType);
+    },
+    [locale, router]
+  );
+
   return (
     <main className="min-h-screen bg-slate-900 text-white font-sans py-12 px-4">
+      <Suspense fallback={null}>
+        <KategorieAusUrl oeffne={oeffneKategorie} />
+      </Suspense>
+
       <div className="container mx-auto max-w-6xl space-y-12">
         {/* Header */}
         <div className="text-center space-y-4">
@@ -76,15 +116,7 @@ export default function BriefePage(props: PageProps) {
                 whileHover={{ scale: 1.02, borderColor: 'rgba(255,255,255,0.15)' }}
                 whileTap={{ scale: 0.98 }}
                 // 🚀 HINZUGEFÜGT: Intelligente onClick-Logik
-                onClick={() => {
-                  if (kat.id === 'widerspruch-pflegegrad') {
-                    // Leitet zur spezialisierten Premium-Widerspruchsseite weiter
-                    router.push(`/${locale}/widerspruch`);
-                  } else {
-                    // Öffnet für alle anderen das normale Formular-Modal
-                    setSelectedType(kat.id as BriefType);
-                  }
-                }}
+                onClick={() => oeffneKategorie(kat.id)}
                 className="p-6 bg-white/5 border border-white/10 rounded-2xl text-left transition-all group flex flex-col justify-between h-48 hover:bg-white/[0.08]"
               >
                 <div>

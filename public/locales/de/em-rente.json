@@ -2,7 +2,7 @@
   "titel": "Erwerbsminderungsrente",
   "untertitel": "Schätzen Sie die Größenordnung Ihrer möglichen Erwerbsminderungsrente nach SGB VI ab.",
   "hinweisTitel": "Wichtig zum Pflegegrad",
-  "hinweis": "Ein Pflegegrad erhöht die Erwerbsminderungsrente nicht. Das SGB VI kennt keine Zulage, die an den Pflegegrad anknüpft — Pflegegrade steuern Leistungen der Pflegeversicherung nach SGB XI. Die Rentenhöhe bestimmen Ihre Entgeltpunkte, die Zurechnungszeit und der Abschlag.",
+  "hinweis": "Für die Erwerbsminderungsrente brauchen Sie keinen Pflegegrad — und ein Pflegegrad erhöht sie auch nicht. Das SGB VI kennt keine Zulage, die daran anknüpft; Pflegegrade steuern Leistungen der Pflegeversicherung nach SGB XI. Über die Rentenhöhe entscheiden Ihre Entgeltpunkte, die Zurechnungszeit und der Abschlag.",
   "schritt1": {
     "titel": "Grunddaten",
     "untertitel": "Grundlage für Zurechnungszeit und Abschlag",
@@ -17,7 +17,12 @@
     "platzhalter": "Bitte auswählen...",
     "voll": "Volle Erwerbsminderung (unter 3 Stunden täglich)",
     "teilweise": "Teilweise Erwerbsminderung (3 bis unter 6 Stunden täglich)",
-    "hinweis": "Maßgeblich ist, wie viele Stunden täglich Sie unter den üblichen Bedingungen des Arbeitsmarktes noch arbeiten können. Die teilweise Erwerbsminderung ergibt die halbe Rente."
+    "hinweis": "Maßgeblich ist, wie viele Stunden täglich Sie unter den üblichen Bedingungen des Arbeitsmarktes noch arbeiten können. Die teilweise Erwerbsminderung ergibt die halbe Rente.",
+    "berufsunfaehig": "Berufsunfähig — nicht mehr im erlernten Beruf (§ 240 SGB VI)",
+    "berufsschutzTitel": "Berufsschutz besteht",
+    "berufsschutzText": "Weil Sie vor dem 2. Januar 1961 geboren sind, kommt zusätzlich die Rente wegen Berufsunfähigkeit in Betracht. Maßstab ist dann Ihr erlernter Beruf, nicht der allgemeine Arbeitsmarkt — eine mildere Hürde. Sie ergibt die halbe Rente.",
+    "berufsschutzEntfallenTitel": "Kein Berufsschutz",
+    "berufsschutzEntfallenText": "Für ab dem 2. Januar 1961 Geborene hat der Gesetzgeber die Rente wegen Berufsunfähigkeit gestrichen. Maßgeblich ist allein, wie viele Stunden Sie auf dem allgemeinen Arbeitsmarkt noch arbeiten können — unabhängig vom erlernten Beruf."
   },
   "schritt3": {
     "titel": "Versicherungsverlauf",
@@ -49,7 +54,13 @@
     "abschlagWert": "−{prozent} % über {monate} Monate",
     "rentenartfaktor": "Rentenartfaktor (§ 67 SGB VI)",
     "rentenwert": "Aktueller Rentenwert",
-    "stand": "Rechengrößen Stand {stand}"
+    "stand": "Rechengrößen Stand {stand}",
+    "keinAnspruchTitel": "Über § 240 SGB VI besteht kein Anspruch",
+    "keinAnspruchText": "Ihr Jahrgang hat keinen Berufsschutz mehr. Prüfen Sie stattdessen, ob eine volle oder teilweise Erwerbsminderung nach § 43 SGB VI vorliegt.",
+    "hinzuverdienst": "Hinzuverdienstgrenze im Jahr (§ 96a SGB VI)",
+    "hinzuverdienstHinweis": "Bis zu diesem Betrag können Sie neben der Rente hinzuverdienen, ohne dass sie gekürzt wird. Bei teilweiser Erwerbsminderung hängt die Grenze von Ihren Entgeltpunkten ab; hier ist Ihr angegebenes Durchschnittsentgelt angesetzt.",
+    "laeuftBis": "Rente längstens bis",
+    "laeuftBisHinweis": "Renten wegen Erwerbsminderung enden mit dem Erreichen der Regelaltersgrenze; danach tritt die Altersrente an ihre Stelle. Ihre Regelaltersgrenze liegt bei {jahre} Jahren und {monate} Monaten."
   },
   "aktionen": {
     "antragTitel": "Antrag vorbereiten",
