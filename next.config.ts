@@ -62,7 +62,14 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-    output: "standalone",
+    // `output: "standalone"` ist bewusst NICHT gesetzt.
+    //
+    // Der Modus kopiert die Serverdateien nach `.next/standalone` und ist für
+    // Eigenhosting oder Docker gedacht. Dieses Projekt läuft auf Vercel; dort
+    // legt die Plattform die Serverdateien selbst ab und meldet im Build
+    // ausdrücklich „Applying modifyConfig from Vercel". Ein Dockerfile gibt es
+    // im Repo nicht, in der CI wird der Ordner nirgends referenziert — er
+    // wurde also von niemandem genutzt.
 
     images: {
         unoptimized: true,
@@ -93,7 +100,11 @@ const nextConfig: NextConfig = {
             "@radix-ui/react-separator",
             "@supabase/supabase-js",
         ],
-        parallelServerBuildTraces: true,
+        // `parallelServerBuildTraces` ist entfernt: Das Flag steht in der
+        // mitgelieferten Next-Doku (node_modules/next/dist/docs) nirgends, ist
+        // also nicht öffentlich unterstützt — und es parallelisiert
+        // ausgerechnet die Erzeugung der Trace-Dateien. Es beschleunigt nur den
+        // Build, der hier ohnehin in gut 20 Sekunden compiliert.
         parallelServerCompiles: true,
     },
 
