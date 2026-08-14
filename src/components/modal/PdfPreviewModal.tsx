@@ -3,6 +3,7 @@
 'use client';
 
 import { Printer, X, ShieldAlert, Building2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import {
   Button,
@@ -32,6 +33,8 @@ export function PdfPreviewModal({
   caseCode,
   loading,
 }: PdfPreviewModalProps) {
+  const t = useTranslations('briefe.vorschau');
+
   if (!isOpen) return null;
 
   return (
@@ -45,11 +48,9 @@ export function PdfPreviewModal({
                 <Building2 className="w-5 h-5 text-amber-400" />
               </div>
               <div>
-                <CardTitle className="text-lg font-bold text-white">
-                  Amtliche Druckvorschau (DIN 5008)
-                </CardTitle>
+                <CardTitle className="text-lg font-bold text-white">{t('titel')}</CardTitle>
                 <CardDescription className="text-xs text-gray-400">
-                  Verfahrenskorrespondenz Akte: {caseCode?.toUpperCase() || 'LOKAL'}
+                  {t('akte', { code: caseCode?.toUpperCase() || 'LOKAL' })}
                 </CardDescription>
               </div>
             </div>
@@ -75,18 +76,13 @@ export function PdfPreviewModal({
                     PflegeNavigator <span className="text-[#20b2aa]">EU</span>
                   </h2>
                   <p className="text-[10px] text-gray-500 font-medium tracking-wide uppercase mt-0.5">
-                    Offizieller Dokumenten-Generator
+                    {t('briefkopf')}
                   </p>
                 </div>
                 <div className="text-right text-[10px] text-gray-400 font-mono">
                   <p>ID: {caseCode?.toUpperCase() || 'OFFLINE-VERSION'}</p>
                   <p>DATUM: {new Date().toLocaleDateString('de-DE')}</p>
                 </div>
-              </div>
-
-              {/* Einzeilige Absenderzeile für das Kuvert-Sichtfenster */}
-              <div className="text-[9px] text-gray-400 underline decoration-gray-300 mb-2 tracking-tight">
-                PflegeNavigator EU gUG • Postfach 11 04 • 86601 Donauwörth
               </div>
 
               {/* Haupt-Textkörper */}
@@ -98,15 +94,11 @@ export function PdfPreviewModal({
               <div className="absolute bottom-8 left-12 right-12 border-t border-gray-200 pt-3 flex justify-between items-center text-[9px] text-gray-400 font-sans">
                 <div>
                   <p className="font-semibold text-slate-700">PflegeNavigator EU gUG</p>
-                  <p>Gemeinnützige Unternehmergesellschaft</p>
-                </div>
-                <div className="text-center">
-                  <p>Zertifiziert nach § 14 SGB XI</p>
-                  <p>In-Memory RAM-Secured</p>
+                  <p>{t('rechtsform')}</p>
                 </div>
                 <div className="text-right">
-                  <p>Seite 1 von 1</p>
-                  <p>Stand: 2026</p>
+                  <p>{t('seite')}</p>
+                  <p>{t('stand', { jahr: new Date().getFullYear() })}</p>
                 </div>
               </div>
             </div>
@@ -116,7 +108,7 @@ export function PdfPreviewModal({
           <CardFooter className="border-t border-white/5 bg-white/[0.01] p-4 flex flex-col sm:flex-row gap-3">
             <div className="flex items-center gap-2 text-[11px] text-gray-400 sm:flex-1 text-left">
               <ShieldAlert className="w-4 h-4 text-[#20b2aa] flex-shrink-0" />
-              <span>Der Puppeteer-Core generiert das Dokument im verschlüsselten Server-RAM.</span>
+              <span>{t('hinweis')}</span>
             </div>
             <div className="flex gap-2 w-full sm:w-auto">
               <Button
@@ -124,7 +116,7 @@ export function PdfPreviewModal({
                 onClick={onClose}
                 className="flex-1 sm:flex-none border-white/10 text-white hover:bg-white/5 h-11 px-5"
               >
-                Schließen
+                {t('schliessen')}
               </Button>
               <Button
                 onClick={onConfirmPrint}
@@ -132,7 +124,7 @@ export function PdfPreviewModal({
                 className="flex-1 sm:w-48 h-11 bg-[#20b2aa] hover:bg-[#3ddbd0] text-slate-950 font-bold text-sm shadow-md transition-all"
               >
                 <Printer className="w-4 h-4 mr-2" />
-                {loading ? 'Generiere PDF...' : 'Jetzt Dokument drucken'}
+                {loading ? t('druckenLaeuft') : t('drucken')}
               </Button>
             </div>
           </CardFooter>

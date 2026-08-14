@@ -97,7 +97,7 @@ export default function ErgebnisPage(props: PageProps) {
     documentTitle: `PflegeGutachten_${caseCode?.toUpperCase()}`,
     footerText: 'PflegeNavigator EU gUG — Offizielles Orientierungsgutachten nach § 14 SGB XI',
     fallbackHtml: ergebnis
-      ? `<h2>Zusammenfassung</h2><p>Errechneter Pflegegrad: ${ergebnis.careLevel}</p>`
+      ? `<h2>{t('zusammenfassung')}</h2><p>Errechneter Pflegegrad: ${ergebnis.careLevel}</p>`
       : undefined,
   });
 
@@ -259,10 +259,8 @@ export default function ErgebnisPage(props: PageProps) {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Ihre NBA-Leistungsanalyse</h1>
-            <p className="text-sm text-[var(--color-text-muted)] mt-1">
-              Ermittelt nach den Begutachtungs-Richtlinien
-            </p>
+            <h1 className="text-3xl font-bold tracking-tight">{t('seitenTitel')}</h1>
+            <p className="text-sm text-[var(--color-text-muted)] mt-1">{t('seitenUntertitel')}</p>
           </div>
 
           {/* 📁 NEUES AKTEN-DROPDOWN-MENÜ */}
@@ -281,14 +279,14 @@ export default function ErgebnisPage(props: PageProps) {
                   align="end"
                 >
                   <DropdownMenuLabel className="text-xs text-[var(--color-text-muted)]">
-                    Akten-Optionen
+                    {t('aktenOptionen')}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-[var(--surface-1)]" />
                   <DropdownMenuItem
                     onClick={() => setResetDialogOffen(true)}
                     className="text-rose-400 focus:text-rose-400 focus:bg-rose-500/10 cursor-pointer"
                   >
-                    <RefreshCw className="w-3.5 h-3.5 mr-2" /> Neu evaluieren
+                    <RefreshCw className="w-3.5 h-3.5 mr-2" /> {t('neuEvaluieren')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -308,10 +306,12 @@ export default function ErgebnisPage(props: PageProps) {
                 {aktuelleAmpel.label}
               </span>
               <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight">
-                {ergebnis.careLevel === 0 ? 'Kein Pflegegrad' : `Pflegegrad ${ergebnis.careLevel}`}
+                {ergebnis.careLevel === 0
+                  ? t('keinPflegegrad')
+                  : t('pflegegradN', { stufe: ergebnis.careLevel })}
               </h2>
               <p className="text-sm text-[var(--color-text-muted)] max-w-md">
-                Punktwert: {ergebnis.totalScore.toFixed(1)} von 100.
+                {t('punktwert', { punkte: ergebnis.totalScore.toFixed(1) })}
               </p>
             </div>
             <div
@@ -327,16 +327,9 @@ export default function ErgebnisPage(props: PageProps) {
           <div className="flex gap-3">
             <Info className="w-5 h-5 text-[var(--color-accent)] flex-shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <h4 className="text-sm font-bold text-gray-200">
-                Wie kommt mein Pflegegrad zustande? (Einfach erklärt)
-              </h4>
+              <h4 className="text-sm font-bold text-gray-200">{t('erklaerungTitel')}</h4>
               <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
-                Ein Pflegegrad wird im Gesetz nicht nach Minuten oder Stunden bemessen, sondern rein
-                nach Ihrer verbleibenden
-                <strong> Eigenständigkeit im Alltag</strong>. Das Begutachtungssystem verteilt
-                Punkte in den unten stehenden Lebensbereichen. Ab 12.5 Punkten erhalten Sie
-                Pflegegrad 1, ab 27 Punkten Pflegegrad 2, ab 47.5 Punkten Pflegegrad 3, ab 70
-                Punkten Pflegegrad 4 und ab 90 Punkten den höchsten Pflegegrad 5.
+                {t.rich('erklaerungText', { b: (inhalt) => <strong>{inhalt}</strong> })}
               </p>
             </div>
           </div>
@@ -351,28 +344,27 @@ export default function ErgebnisPage(props: PageProps) {
           <Card className="bg-[var(--surface-1)] border-[var(--border-subtle)] text-white shadow-xl">
             <CardHeader className="border-b border-[var(--border-faint)] pb-4">
               <CardTitle className="text-lg font-bold flex items-center gap-2">
-                <Coins className="w-5 h-5 text-[var(--color-accent)]" /> Leistungsansprüche &
-                Kombinationspflege
+                <Coins className="w-5 h-5 text-[var(--color-accent)]" /> {t('anspruecheTitel')}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <div className="grid gap-4 sm:grid-cols-2 mb-4">
                 <div className="p-4 bg-[var(--surface-hairline)] border border-[var(--border-faint)] rounded-xl">
                   <span className="text-xs text-[var(--color-text-muted)]">
-                    Pflegegeld (SGB XI § 37)
+                    {t('pflegegeldLabel')}
                   </span>
                   <p className="text-2xl font-bold">{ergebnis.benefits.monthlyAmount} €</p>
                   <p className="text-[10px] text-[var(--color-text-faint)] mt-1">
-                    Bei privater Pflege durch Angehörige
+                    {t('pflegegeldHinweis')}
                   </p>
                 </div>
                 <div className="p-4 bg-[var(--surface-hairline)] border border-[var(--border-faint)] rounded-xl">
                   <span className="text-xs text-[var(--color-text-muted)]">
-                    Entlastungsbetrag (SGB XI § 45b)
+                    {t('entlastungLabel')}
                   </span>
                   <p className="text-2xl font-bold">{ergebnis.benefits.reliefBudget} €</p>
                   <p className="text-[10px] text-[var(--color-text-faint)] mt-1">
-                    Zweckgebunden für Betreuungsdienste
+                    {t('entlastungHinweis')}
                   </p>
                 </div>
               </div>
@@ -383,7 +375,7 @@ export default function ErgebnisPage(props: PageProps) {
                 onClick={() => router.push(`/${locale}/kombileistungen`)}
                 className="w-full h-12 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
               >
-                <Calculator className="w-4 h-4 mr-2" /> Sachleistungen aufteilen (Kombi-Rechner)
+                <Calculator className="w-4 h-4 mr-2" /> {t('kombiRechner')}
               </Button>
             </CardContent>
           </Card>
@@ -394,19 +386,17 @@ export default function ErgebnisPage(props: PageProps) {
           <Card className="bg-[var(--surface-1)] border-[var(--border-subtle)] text-white shadow-xl">
             <CardHeader className="border-b border-[var(--border-faint)] pb-4">
               <CardTitle className="text-lg font-bold flex items-center gap-2 text-amber-400">
-                <Info className="w-5 h-5" /> Ihre Ansprüche bei Pflegegrad 1
+                <Info className="w-5 h-5" /> {t('pg1Titel')}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
               <div className="p-4 bg-[var(--surface-hairline)] border border-[var(--border-faint)] rounded-xl">
                 <span className="text-xs text-[var(--color-text-muted)]">
-                  Monatlicher Entlastungsbetrag (§ 45b SGB XI)
+                  {t('pg1EntlastungLabel')}
                 </span>
                 <p className="text-2xl font-bold text-white">{ergebnis.benefits.reliefBudget} €</p>
                 <p className="text-[11px] text-[var(--color-text-muted)] mt-1.5 leading-relaxed">
-                  Bei Pflegegrad 1 zahlt die Kasse noch kein direktes Pflegegeld aus. Sie erhalten
-                  jedoch den vollen Entlastungsbetrag. Dieser ist zweckgebunden und kann für
-                  zugelassene Alltagsbegleiter, Haushaltshilfen oder Tagespflege erstattet werden.
+                  {t('pg1Text')}
                 </p>
               </div>
             </CardContent>
@@ -418,12 +408,9 @@ export default function ErgebnisPage(props: PageProps) {
           <Card className="bg-rose-500/5 border border-rose-500/20 text-white shadow-xl p-6 rounded-2xl flex gap-4 items-start">
             <AlertCircle className="w-6 h-6 text-rose-400 flex-shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <h4 className="font-bold text-sm text-rose-400">Hinweis zum aktuellen Punktestand</h4>
+              <h4 className="font-bold text-sm text-rose-400">{t('pg0Titel')}</h4>
               <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
-                Mit Ihrem errechneten Wert von {ergebnis.totalScore} Punkten wird die gesetzliche
-                Mindesthürde von 12,5 Punkten für eine Einstufung aktuell unterschritten. Sollte
-                sich der Zustand im Alltag verschlechtern, empfiehlt es sich, die Evaluierung
-                umgehend mit den neuen Gegebenheiten zu wiederholen.
+                {t('pg0Text', { punkte: ergebnis.totalScore })}
               </p>
             </div>
           </Card>
@@ -433,9 +420,9 @@ export default function ErgebnisPage(props: PageProps) {
         <div className="space-y-3">
           <div className="flex justify-between items-center px-1">
             <h3 className="text-sm font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
-              Modul-Einstufung anpassen
+              {t('moduleTitel')}
             </h3>
-            <span className="text-xs text-[var(--color-accent)]">Klicken zum Editieren</span>
+            <span className="text-xs text-[var(--color-accent)]">{t('moduleEditieren')}</span>
           </div>
           <ModulListe metadata={NBA_MODULE_METADATA} ergebnis={ergebnis} locale={locale} />
         </div>
@@ -448,7 +435,7 @@ export default function ErgebnisPage(props: PageProps) {
         <Card className="bg-white/5 border-white/10 text-white shadow-xl">
           <CardHeader>
             <CardTitle className="text-base font-bold flex items-center gap-2">
-              <CalendarClock className="w-5 h-5 text-[var(--color-accent)]" /> Ihre Fristen
+              <CalendarClock className="w-5 h-5 text-[var(--color-accent)]" /> {t('fristenTitel')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -465,7 +452,7 @@ export default function ErgebnisPage(props: PageProps) {
         {ergebnis.benefits.additionalBenefits.length > 0 && (
           <div className="space-y-2">
             <h4 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider px-1">
-              Zusätzliche gesetzliche Hilfen
+              {t('zusatzTitel')}
             </h4>
             <div className="grid gap-2 sm:grid-cols-2">
               {ergebnis.benefits.additionalBenefits.map((benefit, idx) => (
@@ -489,20 +476,20 @@ export default function ErgebnisPage(props: PageProps) {
             disabled={loadingPdf}
             className="h-14 border-[var(--border-subtle)] text-white hover:bg-[var(--surface-1)] shadow-md"
           >
-            <Download className="w-4 h-4 mr-2" /> PDF
+            <Download className="w-4 h-4 mr-2" /> {t('pdf')}
           </Button>
           <Button
             variant="outline"
             onClick={shareErgebnis}
             className="h-14 border-[var(--border-subtle)] text-white hover:bg-[var(--surface-1)] shadow-md"
           >
-            <Share2 className="w-4 h-4 mr-2" /> Teilen
+            <Share2 className="w-4 h-4 mr-2" /> {t('teilen')}
           </Button>
           <Button
             onClick={() => router.push(`/${locale}/briefe`)}
             className="h-14 bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[var(--color-on-accent)] font-bold shadow-xl"
           >
-            <FileText className="w-4 h-4 mr-2" /> Briefe
+            <FileText className="w-4 h-4 mr-2" /> {t('briefe')}
           </Button>
         </div>
 
@@ -511,12 +498,9 @@ export default function ErgebnisPage(props: PageProps) {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-center sm:text-left">
               <h4 className="font-bold text-sm flex items-center gap-2">
-                <Accessibility className="w-4 h-4 text-[var(--color-accent)]" /> Grad der
-                Behinderung prüfen?
+                <Accessibility className="w-4 h-4 text-[var(--color-accent)]" /> {t('gdbTitel')}
               </h4>
-              <p className="text-[var(--color-text-muted)] text-xs">
-                Erhalten Sie Steuerfreibeträge und Zusatzurlaub.
-              </p>
+              <p className="text-[var(--color-text-muted)] text-xs">{t('gdbText')}</p>
             </div>
             <Button
               onClick={handleGdbNavigation}

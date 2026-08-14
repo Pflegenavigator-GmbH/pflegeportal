@@ -11,6 +11,7 @@ import {
   ShieldAlert,
 } from 'lucide-react';
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { QRCodeSVG } from 'qrcode.react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -32,6 +33,7 @@ interface AccessShareModalProps {
 }
 
 export function AccessShareModal({ caseCode, open, onOpenChange }: AccessShareModalProps) {
+  const t = useTranslations('common.akteTeilen');
   const params = useParams();
   const locale = typeof params?.locale === 'string' ? params.locale : 'de';
   const [contactType, setContactType] = useState<'email' | 'sms'>('email');
@@ -71,7 +73,7 @@ export function AccessShareModal({ caseCode, open, onOpenChange }: AccessShareMo
 
   // Brevo Versand (Nur für den Nutzer selbst)
   const handleSendToSelf = async () => {
-    if (!contactValue) return toast.error('Bitte geben Sie einen Empfänger an.');
+    if (!contactValue) return toast.error(t('empfaengerFehlt'));
     setIsLoading(true);
 
     try {
@@ -87,7 +89,7 @@ export function AccessShareModal({ caseCode, open, onOpenChange }: AccessShareMo
       onOpenChange(false);
       setContactValue('');
     } catch {
-      toast.error('Versand fehlgeschlagen. Bitte versuchen Sie es später erneut.');
+      toast.error(t('versandFehler'));
     } finally {
       setIsLoading(false);
     }
@@ -111,7 +113,7 @@ export function AccessShareModal({ caseCode, open, onOpenChange }: AccessShareMo
     } else {
       // Fallback für Desktop: In die Zwischenablage kopieren
       navigator.clipboard.writeText(`${shareData.text} \n\n${shareData.url}`);
-      toast.success('Link in die Zwischenablage kopiert!');
+      toast.success(t('linkKopiert'));
     }
   };
 
@@ -120,9 +122,9 @@ export function AccessShareModal({ caseCode, open, onOpenChange }: AccessShareMo
       <DialogContent className="bg-[#0f2744] text-white border-white/10 sm:max-w-md p-0 overflow-hidden">
         <div className="max-h-[90vh] overflow-y-auto px-5 py-5">
           <DialogHeader className="pr-10">
-            <DialogTitle className="text-2xl font-semibold">Fall-Zugang verwalten</DialogTitle>
+            <DialogTitle className="text-2xl font-semibold">{t('titel')}</DialogTitle>
             <DialogDescription className="text-slate-400 mt-2 leading-relaxed">
-              Speichern Sie den Zugang für sich selbst oder teilen Sie ihn sicher mit Angehörigen.
+              {t('untertitel')}
             </DialogDescription>
           </DialogHeader>
 
@@ -145,14 +147,14 @@ export function AccessShareModal({ caseCode, open, onOpenChange }: AccessShareMo
               className="h-11 text-gray-300 hover:bg-white/10 hover:text-white"
             >
               <Download className="mr-2 h-4 w-4" />
-              QR-Code ausdrucken / speichern
+              {t('qrSpeichern')}
             </Button>
           </div>
 
           <div className="mt-6">
             <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-[#20b2aa]">
               <Share2 className="h-4 w-4" />
-              Mit Angehörigen teilen
+              {t('teilenTitel')}
             </h3>
 
             <Button
@@ -160,15 +162,14 @@ export function AccessShareModal({ caseCode, open, onOpenChange }: AccessShareMo
               className="h-12 w-full border border-[#25D366]/40 bg-[#25D366]/15 text-[#25D366] hover:bg-[#25D366]/25"
             >
               <MessageCircle className="mr-2 h-4 w-4" />
-              Über eigene Apps teilen
+              {t('appsTeilen')}
             </Button>
 
             <div className="mt-3 flex items-start gap-2 rounded-xl border border-white/5 bg-slate-950/40 p-3 text-slate-400">
               <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
               <p className="text-[11px] leading-relaxed">
-                <strong className="text-amber-500">Eigenverantwortung:</strong> Dieser Button öffnet
-                das Nachrichten-Programm Ihres eigenen Geräts. Bitte teilen Sie den Link
-                ausschließlich mit Personen Ihres Vertrauens.
+                <strong className="text-amber-500">{t('eigenverantwortung')}</strong>{' '}
+                {t('eigenverantwortungText')}
               </p>
             </div>
           </div>
@@ -178,7 +179,7 @@ export function AccessShareModal({ caseCode, open, onOpenChange }: AccessShareMo
           <div className="space-y-4 pb-1">
             <h3 className="flex items-center gap-2 text-sm font-semibold text-[#20b2aa]">
               <Mail className="h-4 w-4" />
-              Backup an mich selbst senden
+              {t('backupSenden')}
             </h3>
 
             <div className="flex overflow-hidden rounded-xl border border-white/10 bg-slate-950/60 p-1">
@@ -220,15 +221,19 @@ export function AccessShareModal({ caseCode, open, onOpenChange }: AccessShareMo
                 disabled={isLoading}
                 className="h-12 min-w-[96px] bg-slate-700 px-6 font-bold text-white hover:bg-slate-600"
               >
-                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Senden'}
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : t('senden')}
               </Button>
             </div>
 
             <p className="px-2 text-center text-[11px] leading-relaxed text-slate-400">
-              🔒 <strong>Datenschutz:</strong> Ihre Kontaktdaten werden{' '}
-              <span className="underline decoration-slate-500 underline-offset-2">nicht</span> in
-              unserer Datenbank gespeichert. Sie werden ausschließlich für diesen einmaligen Versand
-              genutzt.
+              🔒 <strong>{t('datenschutz')}</strong>{' '}
+              {t.rich('datenschutzText', {
+                b: (inhalt) => (
+                  <span className="underline decoration-slate-500 underline-offset-2">
+                    {inhalt}
+                  </span>
+                ),
+              })}
             </p>
           </div>
         </div>

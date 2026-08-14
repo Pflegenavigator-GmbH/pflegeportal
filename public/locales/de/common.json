@@ -225,5 +225,23 @@
     "nichtGefundenText": "Hoppla! Diese Seite konnten wir im Pflege-Dschungel leider nicht finden.",
     "zurStartseite": "Zur Startseite",
     "zurueck": "Zurück"
+  },
+  "akteTeilen": {
+    "appsTeilen": "Über eigene Apps teilen",
+    "datenschutz": "Datenschutz:",
+    "datenschutzText": "Ihre Kontaktdaten werden <b>nicht</b> in unserer Datenbank gespeichert. Sie werden ausschließlich für diesen einmaligen Versand genutzt.",
+    "eigenverantwortung": "Eigenverantwortung:",
+    "eigenverantwortungText": "Dieser Knopf öffnet das Nachrichten-Programm Ihres eigenen Geräts. Bitte teilen Sie den Link ausschließlich mit Personen Ihres Vertrauens.",
+    "empfaengerFehlt": "Bitte geben Sie einen Empfänger an.",
+    "linkKopiert": "Link in die Zwischenablage kopiert!",
+    "qrSpeichern": "QR-Code ausdrucken / speichern",
+    "senden": "Senden",
+    "teilenTitel": "Mit Angehörigen teilen",
+    "titel": "Fall-Zugang verwalten",
+    "untertitel": "Speichern Sie den Zugang für sich selbst oder teilen Sie ihn sicher mit Angehörigen.",
+    "versandFehler": "Versand fehlgeschlagen. Bitte versuchen Sie es später erneut.",
+    "backupSenden": "Backup an mich selbst senden",
+    "sms": "SMS",
+    "email": "E-Mail"
   }
 }
