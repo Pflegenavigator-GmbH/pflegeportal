@@ -218,7 +218,7 @@ export default function PflegegradStartPage(props: PageProps) {
                 <div className="w-full border-t border-white/10"></div>
               </div>
               <div className="relative flex justify-center">
-                <span className="bg-slate-900 px-4 text-sm text-gray-500">oder</span>
+                <span className="bg-slate-900 px-4 text-sm text-gray-500">{tStart('oder')}</span>
               </div>
             </div>
 
@@ -268,10 +268,7 @@ export default function PflegegradStartPage(props: PageProps) {
         <div className="mt-8 pt-6 border-t border-white/10 flex items-start gap-3 text-gray-400 text-xs leading-relaxed">
           <Shield className="w-5 h-5 flex-shrink-0 text-gray-500 mt-0.5" />
           <p>
-            <strong>Wichtiger rechtlicher Hinweis:</strong> Dieser Pflegegrad-Rechner bietet eine
-            mathematische Orientierungshilfe auf Basis des SGB XI. Er ersetzt keine medizinische
-            Begutachtung oder verbindliche Rechtsberatung. Einstufungen werden rechtswirksam
-            ausschließlich durch die zuständige Pflegekasse vorgenommen.
+            <strong>{tStart('rechtshinweisTitel')}</strong> {tStart('rechtshinweis')}
           </p>
         </div>
       </div>

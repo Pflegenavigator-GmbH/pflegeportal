@@ -26,7 +26,22 @@
       "sitzungFehler": "Could not verify the session.",
       "anlegenFehler": "Could not create a new case.",
       "fallcodeErzeugt": "Free case code generated."
-    }
+    },
+    "fallcodeTitel": "Your personal case code",
+    "fallcodeUntertitel": "Keep this code for later visits",
+    "fallcodeLautet": "Your case code is:",
+    "wichtig": "Important:",
+    "fallcodeNotieren": "Write this code down. It lets you pause the assessment at any time and continue free of charge on any device.",
+    "zielgruppeTitel": "Who is the care assessment for?",
+    "zielgruppeText": "Choose the option that applies so the right questionnaire starts:",
+    "erwachseneTitel": "Adults and older people",
+    "erwachseneText": "Standard assessment procedure (NBA) for people aged 18 and over.",
+    "kinderTitel": "Children and adolescents",
+    "kinderText": "Special assessment that discounts the development normal for the child’s age.",
+    "oder": "or",
+    "rechtshinweis": "This care level calculator offers mathematical guidance based on SGB XI. It does not replace a medical assessment or binding legal advice. Only the responsible care fund can make a legally effective classification.",
+    "rechtshinweisTitel": "Important legal notice:",
+    "fallcodePlatzhalter": "e.g. PF-A1B2-C3D4"
   },
   "modules": {
     "modul1": {
@@ -344,6 +359,36 @@
       "folge3": "Your case code and any purchased access remain intact.",
       "bestaetigen": "Yes, start again",
       "laeuft": "Deleting answers…"
-    }
+    },
+    "keinPflegegrad": "No care level",
+    "pflegegradN": "Care level {stufe}",
+    "punktwert": "Score: {punkte} out of 100.",
+    "erklaerungTitel": "How is my care level determined? (In plain terms)",
+    "erklaerungText": "The law does not measure a care level in minutes or hours, but purely by how much <b>independence in everyday life</b> you retain. The assessment system awards points across the areas listed below. From 12.5 points you receive care level 1, from 27 points level 2, from 47.5 points level 3, from 70 points level 4, and from 90 points the highest level 5.",
+    "anspruecheTitel": "Benefits and combined care",
+    "pflegegeldLabel": "Care allowance (§ 37 SGB XI)",
+    "pflegegeldHinweis": "For care provided privately by relatives",
+    "entlastungLabel": "Relief amount (§ 45b SGB XI)",
+    "entlastungHinweis": "Earmarked for support services",
+    "kombiRechner": "Split benefits in kind (combined care calculator)",
+    "pg1Titel": "Your entitlements at care level 1",
+    "pg1EntlastungLabel": "Monthly relief amount (§ 45b SGB XI)",
+    "pg1Text": "At care level 1 the fund does not yet pay a care allowance directly. You do, however, receive the full relief amount. It is earmarked and can be reimbursed for approved everyday companions, home help or day care.",
+    "pg0Titel": "Note on your current score",
+    "pg0Text": "With your calculated score of {punkte} points you currently fall below the statutory threshold of 12.5 points for a care level. Should your situation deteriorate in everyday life, it is worth repeating the assessment promptly with the new circumstances.",
+    "moduleTitel": "Adjust module ratings",
+    "moduleEditieren": "Click to edit",
+    "fristenTitel": "Your deadlines",
+    "zusatzTitel": "Additional statutory support",
+    "pdf": "PDF",
+    "teilen": "Share",
+    "briefe": "Letters",
+    "gdbTitel": "Check your degree of disability?",
+    "gdbText": "You may be entitled to tax allowances and extra leave.",
+    "seitenTitel": "Your NBA assessment results",
+    "seitenUntertitel": "Determined according to the official assessment guidelines",
+    "zusammenfassung": "Summary",
+    "aktenOptionen": "Case options",
+    "neuEvaluieren": "Reassess"
   }
 }

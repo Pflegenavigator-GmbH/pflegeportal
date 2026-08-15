@@ -3,6 +3,7 @@
 
 import { KeyRound, AlertTriangle, Users, Baby } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/src/components/ui';
 
@@ -13,6 +14,7 @@ interface NewCaseCardProps {
 
 export function NewCaseCard({ caseCode, locale }: NewCaseCardProps) {
   const router = useRouter();
+  const t = useTranslations('pflegegrad.start');
 
   return (
     <Card className="bg-white/5 border-emerald-500/30 text-white shadow-xl rounded-2xl overflow-hidden">
@@ -22,9 +24,9 @@ export function NewCaseCard({ caseCode, locale }: NewCaseCardProps) {
             <KeyRound className="w-6 h-6 text-emerald-400" />
           </div>
           <div>
-            <CardTitle className="text-white">Ihr persönlicher Fallcode</CardTitle>
+            <CardTitle className="text-white">{t('fallcodeTitel')}</CardTitle>
             <CardDescription className="text-gray-400 text-xs">
-              Sichern Sie diesen Code für spätere Aufrufe
+              {t('fallcodeUntertitel')}
             </CardDescription>
           </div>
         </div>
@@ -33,7 +35,7 @@ export function NewCaseCard({ caseCode, locale }: NewCaseCardProps) {
       <CardContent className="space-y-6">
         {/* Generierter Code-Block */}
         <div className="bg-emerald-500/10 border-2 border-emerald-500/30 rounded-xl p-5 text-center">
-          <p className="text-xs text-gray-400 mb-1">Ihr Fallcode lautet:</p>
+          <p className="text-xs text-gray-400 mb-1">{t('fallcodeLautet')}</p>
           <p className="text-3xl font-mono font-bold text-emerald-400 tracking-wider">{caseCode}</p>
         </div>
 
@@ -41,20 +43,15 @@ export function NewCaseCard({ caseCode, locale }: NewCaseCardProps) {
         <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex gap-3 items-start">
           <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
           <p className="text-xs text-amber-300 leading-relaxed">
-            <strong>Wichtig:</strong> Notieren Sie sich diesen Code. Damit können Sie das Verfahren
-            jederzeit unterbrechen und an jedem Gerät kostenfrei fortsetzen.
+            <strong>{t('wichtig')}</strong> {t('fallcodeNotieren')}
           </p>
         </div>
 
         {/* 🧭 DIE INTEGRIERTE ALTERSWEICHE */}
         <div className="border-t border-white/10 pt-5 space-y-4">
           <div className="space-y-1">
-            <h4 className="text-sm font-bold text-[#20b2aa]">
-              Für wen wird die Pflege-Einstufung durchgeführt?
-            </h4>
-            <p className="text-xs text-gray-400">
-              Wählen Sie die passende Option, um den richtigen Fragebogen zu starten:
-            </p>
+            <h4 className="text-sm font-bold text-[#20b2aa]">{t('zielgruppeTitel')}</h4>
+            <p className="text-xs text-gray-400">{t('zielgruppeText')}</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -68,9 +65,9 @@ export function NewCaseCard({ caseCode, locale }: NewCaseCardProps) {
             >
               <div>
                 <Users className="w-5 h-5 text-[#20b2aa] mb-2 group-hover:scale-105 transition-transform" />
-                <h5 className="font-bold text-xs text-white">Erwachsene & Senioren</h5>
+                <h5 className="font-bold text-xs text-white">{t('erwachseneTitel')}</h5>
                 <p className="text-[11px] text-gray-400 mt-1 leading-relaxed">
-                  Reguläres Begutachtungsverfahren (NBA) für Personen ab 18 Jahren.
+                  {t('erwachseneText')}
                 </p>
               </div>
             </button>
@@ -85,10 +82,8 @@ export function NewCaseCard({ caseCode, locale }: NewCaseCardProps) {
             >
               <div>
                 <Baby className="w-5 h-5 text-pink-400 mb-2 group-hover:scale-105 transition-transform" />
-                <h5 className="font-bold text-xs text-white">Kinder & Jugendliche</h5>
-                <p className="text-[11px] text-gray-400 mt-1 leading-relaxed">
-                  Spezial-Assessment unter Abzug des natürlichen Alters-Entwicklungsstands.
-                </p>
+                <h5 className="font-bold text-xs text-white">{t('kinderTitel')}</h5>
+                <p className="text-[11px] text-gray-400 mt-1 leading-relaxed">{t('kinderText')}</p>
               </div>
             </button>
           </div>

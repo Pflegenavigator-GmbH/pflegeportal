@@ -38,7 +38,8 @@
       "pflegekraefteMobil": "For professionals & services",
       "faq": "FAQ",
       "philosophie": "Philosophy & vision",
-      "presse": "Press & blog"
+      "presse": "Press & blog",
+      "emRente": "Reduced earning capacity pension"
     },
     "zurueck": "Back",
     "fall": {
@@ -224,5 +225,23 @@
     "nichtGefundenText": "We could not find this page.",
     "zurStartseite": "Go to the home page",
     "zurueck": "Back"
+  },
+  "akteTeilen": {
+    "appsTeilen": "Share via your own apps",
+    "datenschutz": "Data protection:",
+    "datenschutzText": "Your contact details are <b>not</b> stored in our database. They are used solely for this one-off delivery.",
+    "eigenverantwortung": "Your responsibility:",
+    "eigenverantwortungText": "This button opens the messaging app on your own device. Only share the link with people you trust.",
+    "empfaengerFehlt": "Please enter a recipient.",
+    "linkKopiert": "Link copied to the clipboard.",
+    "qrSpeichern": "Print / save QR code",
+    "senden": "Send",
+    "teilenTitel": "Share with relatives",
+    "titel": "Manage case access",
+    "untertitel": "Keep the access for yourself or share it securely with relatives.",
+    "versandFehler": "The message could not be sent. Please try again later.",
+    "backupSenden": "Send a backup to myself",
+    "sms": "SMS",
+    "email": "Email"
   }
 }

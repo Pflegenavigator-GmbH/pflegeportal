@@ -2,7 +2,7 @@
   "titel": "Reduced earning capacity pension",
   "untertitel": "Estimate the order of magnitude of your possible reduced earning capacity pension under SGB VI.",
   "hinweisTitel": "Important note on care levels",
-  "hinweis": "A care level does not increase the reduced earning capacity pension. SGB VI contains no supplement tied to a care level — care levels govern benefits of the long-term care insurance under SGB XI. What determines the amount are your earnings points, the supplementary period and the deduction.",
+  "hinweis": "You do not need a care level for the reduced earning capacity pension — and a care level does not increase it either. SGB VI contains no supplement tied to one; care levels govern benefits of the long-term care insurance under SGB XI. What determines the amount are your earnings points, the supplementary period and the deduction.",
   "schritt1": {
     "titel": "Basic data",
     "untertitel": "Basis for the supplementary period and the deduction",
@@ -17,7 +17,12 @@
     "platzhalter": "Please select...",
     "voll": "Full reduction (less than 3 hours a day)",
     "teilweise": "Partial reduction (3 to under 6 hours a day)",
-    "hinweis": "What counts is how many hours a day you can still work under normal labour market conditions. A partial reduction yields half the pension."
+    "hinweis": "What counts is how many hours a day you can still work under normal labour market conditions. A partial reduction yields half the pension.",
+    "berufsunfaehig": "Unable to work in my trained occupation (§ 240 SGB VI)",
+    "berufsschutzTitel": "Occupational protection applies",
+    "berufsschutzText": "Because you were born before 2 January 1961, a pension for occupational disability is also available. It is measured against your trained occupation rather than the general labour market — a lower hurdle. It yields half the pension.",
+    "berufsschutzEntfallenTitel": "No occupational protection",
+    "berufsschutzEntfallenText": "For anyone born on or after 2 January 1961 the legislator abolished the pension for occupational disability. What counts is solely how many hours you can still work on the general labour market, regardless of your trained occupation."
   },
   "schritt3": {
     "titel": "Insurance record",
@@ -49,7 +54,13 @@
     "abschlagWert": "−{prozent}% over {monate} months",
     "rentenartfaktor": "Pension type factor (§ 67 SGB VI)",
     "rentenwert": "Current pension value",
-    "stand": "Calculation values as of {stand}"
+    "stand": "Calculation values as of {stand}",
+    "keinAnspruchTitel": "No entitlement under § 240 SGB VI",
+    "keinAnspruchText": "Your birth cohort no longer has occupational protection. Check instead whether a full or partial reduction in earning capacity under § 43 SGB VI applies.",
+    "hinzuverdienst": "Annual earnings limit (§ 96a SGB VI)",
+    "hinzuverdienstHinweis": "You may earn up to this amount alongside the pension without it being reduced. For a partial reduction the limit depends on your earnings points; the average salary you entered is used here.",
+    "laeuftBis": "Pension paid at the latest until",
+    "laeuftBisHinweis": "Pensions for reduced earning capacity end when you reach the standard retirement age; the old-age pension then takes their place. Yours is {jahre} years and {monate} months."
   },
   "aktionen": {
     "antragTitel": "Prepare the application",

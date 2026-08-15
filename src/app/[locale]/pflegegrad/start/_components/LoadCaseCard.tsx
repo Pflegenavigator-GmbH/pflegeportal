@@ -60,7 +60,7 @@ export function LoadCaseCard({ onLoad, loading, externalError }: LoadCaseCardPro
           <Input
             id="caseCode"
             type="text"
-            placeholder="z.B. PF-A1B2-C3D4"
+            placeholder={t('fallcodePlatzhalter')}
             value={code}
             onChange={(e) => setCode(e.target.value.toUpperCase())}
             className="text-center font-mono text-lg tracking-wider bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-[#20b2aa]"

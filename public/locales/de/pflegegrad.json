@@ -26,7 +26,22 @@
       "sitzungFehler": "Fehler bei der Session-Prüfung.",
       "anlegenFehler": "Fehler beim Initialisieren des neuen Falls über die API.",
       "fallcodeErzeugt": "Kostenloser Fallcode generiert!"
-    }
+    },
+    "fallcodeTitel": "Ihr persönlicher Fallcode",
+    "fallcodeUntertitel": "Sichern Sie diesen Code für spätere Aufrufe",
+    "fallcodeLautet": "Ihr Fallcode lautet:",
+    "wichtig": "Wichtig:",
+    "fallcodeNotieren": "Notieren Sie sich diesen Code. Damit können Sie das Verfahren jederzeit unterbrechen und an jedem Gerät kostenfrei fortsetzen.",
+    "zielgruppeTitel": "Für wen wird die Pflege-Einstufung durchgeführt?",
+    "zielgruppeText": "Wählen Sie die passende Option, um den richtigen Fragebogen zu starten:",
+    "erwachseneTitel": "Erwachsene & Senioren",
+    "erwachseneText": "Reguläres Begutachtungsverfahren (NBA) für Personen ab 18 Jahren.",
+    "kinderTitel": "Kinder & Jugendliche",
+    "kinderText": "Spezial-Assessment unter Abzug des natürlichen Alters-Entwicklungsstands.",
+    "oder": "oder",
+    "rechtshinweis": "Dieser Pflegegrad-Rechner bietet eine mathematische Orientierungshilfe auf Basis des SGB XI. Er ersetzt keine medizinische Begutachtung oder verbindliche Rechtsberatung. Einstufungen werden rechtswirksam ausschließlich durch die zuständige Pflegekasse vorgenommen.",
+    "rechtshinweisTitel": "Wichtiger rechtlicher Hinweis:",
+    "fallcodePlatzhalter": "z.B. PF-A1B2-C3D4"
   },
   "modules": {
     "modul1": {
@@ -344,6 +359,36 @@
       "folge3": "Ihr Fallcode und ein bereits gekaufter Zugang bleiben erhalten.",
       "bestaetigen": "Ja, neu beginnen",
       "laeuft": "Antworten werden gelöscht…"
-    }
+    },
+    "keinPflegegrad": "Kein Pflegegrad",
+    "pflegegradN": "Pflegegrad {stufe}",
+    "punktwert": "Punktwert: {punkte} von 100.",
+    "erklaerungTitel": "Wie kommt mein Pflegegrad zustande? (Einfach erklärt)",
+    "erklaerungText": "Ein Pflegegrad wird im Gesetz nicht nach Minuten oder Stunden bemessen, sondern rein nach Ihrer verbleibenden <b>Eigenständigkeit im Alltag</b>. Das Begutachtungssystem verteilt Punkte in den unten stehenden Lebensbereichen. Ab 12,5 Punkten erhalten Sie Pflegegrad 1, ab 27 Punkten Pflegegrad 2, ab 47,5 Punkten Pflegegrad 3, ab 70 Punkten Pflegegrad 4 und ab 90 Punkten den höchsten Pflegegrad 5.",
+    "anspruecheTitel": "Leistungsansprüche & Kombinationspflege",
+    "pflegegeldLabel": "Pflegegeld (§ 37 SGB XI)",
+    "pflegegeldHinweis": "Bei privater Pflege durch Angehörige",
+    "entlastungLabel": "Entlastungsbetrag (§ 45b SGB XI)",
+    "entlastungHinweis": "Zweckgebunden für Betreuungsdienste",
+    "kombiRechner": "Sachleistungen aufteilen (Kombi-Rechner)",
+    "pg1Titel": "Ihre Ansprüche bei Pflegegrad 1",
+    "pg1EntlastungLabel": "Monatlicher Entlastungsbetrag (§ 45b SGB XI)",
+    "pg1Text": "Bei Pflegegrad 1 zahlt die Kasse noch kein direktes Pflegegeld aus. Sie erhalten jedoch den vollen Entlastungsbetrag. Dieser ist zweckgebunden und kann für zugelassene Alltagsbegleiter, Haushaltshilfen oder Tagespflege erstattet werden.",
+    "pg0Titel": "Hinweis zum aktuellen Punktestand",
+    "pg0Text": "Mit Ihrem errechneten Wert von {punkte} Punkten wird die gesetzliche Mindesthürde von 12,5 Punkten für eine Einstufung aktuell unterschritten. Sollte sich der Zustand im Alltag verschlechtern, empfiehlt es sich, die Evaluierung umgehend mit den neuen Gegebenheiten zu wiederholen.",
+    "moduleTitel": "Modul-Einstufung anpassen",
+    "moduleEditieren": "Klicken zum Editieren",
+    "fristenTitel": "Ihre Fristen",
+    "zusatzTitel": "Zusätzliche gesetzliche Hilfen",
+    "pdf": "PDF",
+    "teilen": "Teilen",
+    "briefe": "Briefe",
+    "gdbTitel": "Grad der Behinderung prüfen?",
+    "gdbText": "Erhalten Sie Steuerfreibeträge und Zusatzurlaub.",
+    "seitenTitel": "Ihre NBA-Leistungsanalyse",
+    "seitenUntertitel": "Ermittelt nach den Begutachtungs-Richtlinien",
+    "zusammenfassung": "Zusammenfassung",
+    "aktenOptionen": "Akten-Optionen",
+    "neuEvaluieren": "Neu evaluieren"
   }
 }

@@ -36,5 +36,41 @@
       "name": "General letter",
       "beschreibung": "Universal template for authorities and insurers"
     }
+  },
+  "formular": {
+    "absenderTitel": "1. Sender (insured person)",
+    "augeTitel": "Document preview",
+    "begruendung": "Reasons / specific circumstances (min. 10 characters)",
+    "begruendungPlatzhalter": "Briefly describe the limitations or the reason for the letter…",
+    "empfaengerTitel": "2. Recipient (authority / fund)",
+    "institution": "Name of the institution",
+    "name": "Full name",
+    "nichtBenoetigt": "Not required",
+    "pdfGenerieren": "Generate PDF",
+    "plz": "Postcode",
+    "strasse": "Street",
+    "strasseHausnummer": "Street and house number",
+    "titel": "DIN 5008 template: {typ}",
+    "untertitel": "Enter your details. Formatting and deadlines are applied automatically.",
+    "vorschauFuss": "* The generated text follows the official correspondence standard.",
+    "vorschauLeer": "Click “Preview text” to check the generated DIN draft before downloading.",
+    "vorschauText": "Preview text",
+    "ort": "Town",
+    "telefon": "Phone (optional)",
+    "email": "Email (optional)",
+    "inhaltTitel": "3. Content",
+    "betreff": "Subject line"
+  },
+  "vorschau": {
+    "akte": "Case correspondence: {code}",
+    "briefkopf": "Official document generator",
+    "drucken": "Print document now",
+    "druckenLaeuft": "Generating PDF…",
+    "hinweis": "The preview shows the document that will be generated and downloaded.",
+    "rechtsform": "Non-profit limited company (gUG)",
+    "schliessen": "Close",
+    "seite": "Page 1 of 1",
+    "stand": "As at {jahr}",
+    "titel": "Print preview (DIN 5008)"
   }
 }
