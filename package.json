@@ -34,7 +34,7 @@
     "date-fns": "^4.4.0",
     "framer-motion": "^13.1.1",
     "lucide-react": "^1.33.0",
-    "next": "16.3.1",
+    "next": "16.3.3",
     "next-intl": "^4.13.7",
     "pino": "^10.3.1",
     "puppeteer-core": "^25.8.0",
