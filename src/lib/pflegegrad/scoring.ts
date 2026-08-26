@@ -5,6 +5,7 @@
 // (gerätegebunden, manipulierbar, und Modul 6 nur als 0/1 gewertet). Diese
 // Datei ist die EINZIGE Wahrheit für die Umrechnung Antwort → Rohpunkte und
 // arbeitet ausschließlich auf den in der DB gespeicherten Antworten.
+import { ERWARTETE_FRAGEN } from '@/src/lib/pflegegrad/fragen';
 import { ModuleScores } from '@/src/types/pflegegrad';
 
 type ScoreMap = Record<string, number>;
@@ -84,4 +85,51 @@ export function computeModuleScores(rows: StoredAnswerRow[]): ModuleScores {
   }
 
   return scores;
+}
+
+/**
+ * Ermittelt, welche der Module 1–6 noch unvollständig beantwortet sind.
+ *
+ * Vollständigkeit lässt sich NICHT am Punktwert ablesen: Null Punkte sind ein
+ * gültiges Ergebnis — sie bedeuten volle Selbstständigkeit in allen Fragen des
+ * Moduls. Die frühere Prüfung `score === 0` hat genau diese Menschen als
+ * „unvollständig" geführt.
+ *
+ * Maßgeblich ist stattdessen, ob zu jeder erwarteten Frage eine Antwort
+ * vorliegt, die die Punktetabelle des Moduls überhaupt kennt. Eine Antwort mit
+ * unbekanntem Wert zählt nicht als beantwortet — sie würde sonst still mit
+ * null Punkten einfließen.
+ */
+export function bestimmeUnvollstaendigeModule(rows: StoredAnswerRow[]): number[] {
+  const antwortenJeModul = new Map<number, Record<string, unknown>>();
+
+  for (const row of rows) {
+    if (row.module_number >= 1 && row.module_number <= 6 && row.answers) {
+      antwortenJeModul.set(row.module_number, row.answers);
+    }
+  }
+
+  const unvollstaendig: number[] = [];
+
+  for (const modul of [1, 2, 3, 4, 5, 6]) {
+    const erwartet = ERWARTETE_FRAGEN[modul] ?? [];
+    const antworten = antwortenJeModul.get(modul);
+
+    if (!antworten) {
+      unvollstaendig.push(modul);
+      continue;
+    }
+
+    const map = MODULE_SCORE_MAPS[modul];
+    const alleBeantwortet = erwartet.every((frageId) => {
+      const wert = antworten[frageId];
+      if (typeof wert === 'string') return wert in map;
+      if (typeof wert === 'number') return String(wert) in map;
+      return false;
+    });
+
+    if (!alleBeantwortet) unvollstaendig.push(modul);
+  }
+
+  return unvollstaendig;
 }
