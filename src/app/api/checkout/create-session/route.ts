@@ -2,8 +2,9 @@
 import { NextResponse } from 'next/server';
 
 import { isValidLocale } from '@/src/i18n/config';
+import { requireCaseSession } from '@/src/lib/api/case-auth';
 import { handleApiError } from '@/src/lib/api/error-handler';
-import { ValidationError, NotFoundError } from '@/src/lib/api/errors';
+import { ValidationError } from '@/src/lib/api/errors';
 import { getBaseUrl } from '@/src/lib/env';
 import { logger } from '@/src/lib/logger';
 import { stripe } from '@/src/lib/stripe/server';
@@ -39,7 +40,13 @@ export async function POST(req: Request) {
       throw new ValidationError('Pflichtparameter caseCode oder paket fehlen oder sind ungültig.');
     }
 
-    const upperCode = caseCode.trim().toUpperCase();
+    // Der Fallcode allein genügt nicht: Ohne diese Prüfung könnte jeder, der
+    // einen fremden Code kennt, für diesen Fall einen Checkout auslösen und
+    // damit dessen Abrechnungszustand von außen anstoßen. `requireCaseSession`
+    // gleicht den Code gegen das HttpOnly-Cookie ab und liefert die caseId
+    // gleich mit — der spätere Existenz-Select entfällt dadurch.
+    const fallSession = await requireCaseSession(caseCode);
+    const upperCode = fallSession.caseCode;
     const locale = isValidLocale(body.locale) ? body.locale : 'de';
 
     const supabase = createAdminSupabaseClient();
@@ -70,18 +77,6 @@ export async function POST(req: Request) {
         await supabase.from('products').update({ is_active: false }).eq('id', 'beta_special');
         throw new ValidationError('Das exklusive Kontingent für das Beta-Special ist erschöpft.');
       }
-    }
-
-    // Überprüfung, ob der Fall existiert
-    const { data: currentCase, error: caseError } = await supabase
-      .from('cases')
-      .select('id')
-      .eq('case_code', upperCode)
-      .single();
-
-    if (caseError || !currentCase) {
-      logger.error({ caseCode: upperCode }, 'Fall wurde in der DB nicht gefunden');
-      throw new NotFoundError('Fall', upperCode);
     }
 
     // ============================================================================
@@ -164,7 +159,7 @@ export async function POST(req: Request) {
     const { error: updatePendingError } = await supabase
       .from('cases')
       .update({ stripe_session_id: session.id, billing_status: 'pending' })
-      .eq('id', currentCase.id);
+      .eq('id', fallSession.caseId);
 
     if (updatePendingError) {
       logger.error(

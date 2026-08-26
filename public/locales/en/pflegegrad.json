@@ -332,7 +332,7 @@
     "keineSitzung": "No active case session found. Please start again.",
     "keineSitzungKurz": "No active case session found.",
     "fortschrittGespeichert": "Progress saved.",
-    "speichernFehlgeschlagen": "Saving failed. The result is calculated locally only.",
+    "speichernFehlgeschlagen": "Saving failed. Your entries have been retained – please try again.",
     "zurueckgesetzt": "Assessment reset.",
     "zuruecksetzenFehler": "The assessment could not be reset. Please try again.",
     "ergebnisFehler": "The result could not be calculated.",

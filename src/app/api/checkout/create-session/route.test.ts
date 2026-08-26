@@ -13,6 +13,7 @@ const {
   supabaseSingleMock,
   supabaseMaybeSingleMock,
   handleApiErrorMock,
+  requireCaseSessionMock,
 } = vi.hoisted(() => ({
   stripeSessionsCreateMock: vi.fn(),
   supabaseFromMock: vi.fn(),
@@ -23,6 +24,7 @@ const {
   supabaseSingleMock: vi.fn(),
   supabaseMaybeSingleMock: vi.fn(),
   handleApiErrorMock: vi.fn(),
+  requireCaseSessionMock: vi.fn(),
 }));
 
 // 2. Stripe mocken
@@ -48,6 +50,12 @@ vi.mock('@/src/lib/api/error-handler', () => ({
   handleApiError: handleApiErrorMock,
 }));
 
+// 5. Fall-Session mocken. Die Route verlangt sie seit #100 zwingend: Ein
+//    bekannter Fallcode allein darf keinen Checkout mehr auslösen können.
+vi.mock('@/src/lib/api/case-auth', () => ({
+  requireCaseSession: requireCaseSessionMock,
+}));
+
 describe('Create Session API Route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -59,6 +67,37 @@ describe('Create Session API Route', () => {
     supabaseSelectMock.mockReturnThis();
     supabaseEqMock.mockReturnThis();
     supabaseInMock.mockReturnThis();
+
+    // Standardfall: gültige Session zum angefragten Code.
+    requireCaseSessionMock.mockImplementation(async (code: string) => ({
+      caseId: 'case-uuid-123',
+      caseCode: code.trim().toUpperCase(),
+      billingStatus: 'free',
+      productTier: null,
+      isUnlocked: false,
+    }));
+  });
+
+  it('weist einen fremden Fallcode ohne passende Session ab', async () => {
+    // Kernabsicherung aus #100: Wer den Code kennt, aber keine Session hat,
+    // darf für diesen Fall keinen Abrechnungsvorgang anstoßen.
+    const { UnauthorizedError } = await import('@/src/lib/api/errors');
+    requireCaseSessionMock.mockRejectedValueOnce(
+      new UnauthorizedError('Fall-Session fehlt oder passt nicht zum angeforderten Fall.')
+    );
+
+    const mockRequest = new Request('http://localhost/api/checkout/create-session', {
+      method: 'POST',
+      body: JSON.stringify({ caseCode: 'PF-FREM-DCOD', paket: 'standard_monthly' }),
+    });
+
+    await POST(mockRequest);
+
+    expect(stripeSessionsCreateMock).not.toHaveBeenCalled();
+    expect(handleApiErrorMock).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'UnauthorizedError' }),
+      'api.checkout.create-session'
+    );
   });
 
   it('sollte 400/Validierungsfehler auswerfen, wenn Parameter fehlen', async () => {

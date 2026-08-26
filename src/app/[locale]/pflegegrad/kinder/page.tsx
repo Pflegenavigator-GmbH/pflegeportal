@@ -37,6 +37,7 @@ import {
   RadioGroupItem,
 } from '@/src/components/ui';
 import { useStripeCheckout } from '@/src/hooks/useStripeCheckout';
+import { ladeFreischaltung } from '@/src/lib/billing/entitlement';
 import { logger } from '@/src/lib/logger';
 import {
   loadModuleAnswers,
@@ -53,6 +54,10 @@ import {
   getAssessmentCategories,
   KinderAssessmentResult,
 } from '@/src/lib/pflegegrad/kinder';
+import {
+  parseKinderModuleData,
+  serializeKinderModuleData,
+} from '@/src/lib/pflegegrad/kinder-storage';
 
 interface ChildInfo {
   name: string;
@@ -91,8 +96,9 @@ export default function KinderModusPage() {
   const [result, setResult] = useState<KinderAssessmentResult | null>(null);
   const { triggerCheckout, checkoutLoading } = useStripeCheckout();
 
-  // Bezahlschranken-State gekoppelt an deine API-Verifikation
-  const [isUnlocked] = useState(false);
+  // Reiner UX-State; geschützte Ressourcen prüfen die Freischaltung zusätzlich
+  // in ihren Server-Routen.
+  const [isUnlocked, setIsUnlocked] = useState(false);
 
   const caseCode = typeof window !== 'undefined' ? localStorage.getItem('case_code') : null;
 
@@ -107,11 +113,14 @@ export default function KinderModusPage() {
       return () => clearTimeout(timer);
     }
 
-    // 📥 Eventuell existierende Kinder-Antworten laden
-    loadModuleAnswers<Record<string, number>>(caseCode, 'kinder')
-      .then((kinderAnswers) => {
-        if (kinderAnswers && Object.keys(kinderAnswers).length > 0) {
-          setAnswers(kinderAnswers);
+    // 📥 Eventuell existierende Kinder-Antworten samt altersrelevanten
+    // Stammdaten laden. Alte Datensätze ohne Metadaten bleiben kompatibel.
+    loadModuleAnswers<Record<string, unknown>>(caseCode, 'kinder')
+      .then((storedData) => {
+        if (storedData && Object.keys(storedData).length > 0) {
+          const parsed = parseKinderModuleData(storedData, childInfo);
+          setChildInfo(parsed.childInfo);
+          setAnswers(parsed.answers);
           // Falls bereits Daten da sind, springen wir direkt zur Erfassung
           setStep('assessment');
         }
@@ -125,7 +134,19 @@ export default function KinderModusPage() {
         logger.info('Keine alten Antworten für den Kinder-Modus gefunden.');
       });
 
+    ladeFreischaltung(caseCode)
+      .then((freischaltung) => {
+        setIsUnlocked(freischaltung.status === 'freigeschaltet');
+      })
+      .catch((err) => {
+        logger.warn({ err }, 'Freischaltung für Kinder-Assessment konnte nicht geladen werden');
+        setIsUnlocked(false);
+      });
+
     return () => clearTimeout(timer);
+    // childInfo ist nur der Fallback für alte Datensätze. Lokale Änderungen
+    // dürfen diesen Initial-Ladevorgang nicht erneut auslösen.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [caseCode, locale, router, tMeldung]);
 
   const categories = getAssessmentCategories(childInfo.age);
@@ -139,7 +160,7 @@ export default function KinderModusPage() {
   const progress = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
 
   const handleAgeChange = (age: number) => {
-    const safeAge = isNaN(age) ? 0 : age;
+    const safeAge = Number.isFinite(age) ? Math.min(18, Math.max(0, age)) : 0;
     setChildInfo((prev) => ({
       ...prev,
       age: safeAge,
@@ -156,18 +177,23 @@ export default function KinderModusPage() {
       setCurrentCategory((prev) => prev + 1);
     } else {
       // 🚀 SPEICHERN: kompletter Kinder-Antwortstand in einem atomaren Request
-      if (caseCode) {
-        try {
-          await saveModuleAnswers(caseCode, 'kinder', answers);
-        } catch (err) {
-          if (err instanceof SessionExpiredError) {
-            toast.error(tMeldung('sitzungAbgelaufen'));
-            router.push(`/${locale}/pflegegrad/start`);
-            return;
-          }
-          logger.error({ err }, 'Fehler beim Sichern des Kinder-Assessments');
-          toast.error(tMeldung('speichernFehlgeschlagen'));
+      if (!caseCode) {
+        toast.error(tMeldung('keineSitzung'));
+        router.push(`/${locale}/pflegegrad/start`);
+        return;
+      }
+
+      try {
+        await saveModuleAnswers(caseCode, 'kinder', serializeKinderModuleData(childInfo, answers));
+      } catch (err) {
+        if (err instanceof SessionExpiredError) {
+          toast.error(tMeldung('sitzungAbgelaufen'));
+          router.push(`/${locale}/pflegegrad/start`);
+          return;
         }
+        logger.error({ err }, 'Fehler beim Sichern des Kinder-Assessments');
+        toast.error(tMeldung('speichernFehlgeschlagen'));
+        return;
       }
 
       // NBA-Bewertung inkl. Modulgewichtung, Höchstwertprinzip M2/M3 und
@@ -248,6 +274,7 @@ export default function KinderModusPage() {
               <Input
                 value={childInfo.name}
                 onChange={(e) => setChildInfo((prev) => ({ ...prev, name: e.target.value }))}
+                maxLength={100}
                 placeholder={t('vornamePlatzhalter')}
                 className="bg-slate-950 border-white/10 text-white h-11"
               />
