@@ -24,20 +24,46 @@ export const FRAGEN_MODUL_4_IDS = ['m4_1', 'm4_2', 'm4_3', 'm4_4', 'm4_5', 'm4_6
 export const FRAGEN_MODUL_5_IDS = ['m5_1', 'm5_2', 'm5_3', 'm5_4'] as const;
 
 /**
- * Modul 6 stand als einziges nicht hier, sondern nur in der Seite. Genau
- * diese Doppelung hat einen Absturz überdauert: Die Seite bot Optionswerte an,
- * die weder die Übersetzung noch die Punktetabelle kannte.
+ * Modul 6 hat als einziges zwei Bezeichner je Frage: eine ID für den
+ * Übersetzungsschlüssel (`m6_q1`) und einen fachlichen Speicherschlüssel
+ * (`haushalt`). Gespeichert wird der zweite — siehe
+ * `questionKeys: ALLTAGS_STRUKTUR.map((f) => f.key)` in der Modulseite.
+ *
+ * Die Trennung ist die Wurzel gleich zweier Fehler gewesen: Sie hat den
+ * Modul-6-Absturz überdauert, weil die Optionswerte nur in der Seite standen,
+ * und sie hat eine erste Fassung dieser Datei falsch werden lassen, die hier
+ * die Übersetzungs-IDs eintrug. Deshalb stehen beide Listen ausdrücklich
+ * nebeneinander, mit klaren Namen.
  */
-export const FRAGEN_MODUL_6_IDS = ['m6_q1', 'm6_q2', 'm6_q3', 'm6_q4', 'm6_q5'] as const;
+export const FRAGEN_MODUL_6_UEBERSETZUNGS_IDS = [
+  'm6_q1',
+  'm6_q2',
+  'm6_q3',
+  'm6_q4',
+  'm6_q5',
+] as const;
 
-/** Erwartete Fragen je Modul — Grundlage der Vollständigkeitsprüfung. */
+/** Die tatsächlich gespeicherten Schlüssel des Moduls 6. */
+export const FRAGEN_MODUL_6_KEYS = [
+  'haushalt',
+  'einkaufen',
+  'kochen',
+  'finanzen',
+  'entscheidungen',
+] as const;
+
+/**
+ * Erwartete Antwortschlüssel je Modul — Grundlage sowohl der
+ * Vollständigkeitsprüfung als auch der Punkteberechnung. Was hier nicht steht,
+ * zählt nicht.
+ */
 export const ERWARTETE_FRAGEN: Record<number, readonly string[]> = {
   1: FRAGEN_MODUL_1_IDS,
   2: FRAGEN_MODUL_2_IDS,
   3: FRAGEN_MODUL_3_IDS,
   4: FRAGEN_MODUL_4_IDS,
   5: FRAGEN_MODUL_5_IDS,
-  6: FRAGEN_MODUL_6_IDS,
+  6: FRAGEN_MODUL_6_KEYS,
 };
 
 /**

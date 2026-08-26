@@ -27,6 +27,26 @@ describe('computeModuleRawScore', () => {
     expect(computeModuleRawScore(6, answers)).toBe(4);
   });
 
+  it('zählt ausschließlich die fachlich erwarteten Fragen', () => {
+    // Die API prüft Schlüssel nur auf Form, nicht auf Zugehörigkeit. Ohne
+    // diese Begrenzung konnte eine gültige Fallsitzung ihre Punkte durch
+    // mitgesendete Fremdschlüssel beliebig hochschreiben.
+    const ehrlich = { m1_1: '0', m1_2: '0', m1_3: '0', m1_4: '0' };
+    const mitFremdschluesseln = { ...ehrlich, extra_1: '3', extra_2: '3', extra_3: '3' };
+
+    expect(computeModuleRawScore(1, mitFremdschluesseln)).toBe(0);
+    expect(computeModuleRawScore(1, mitFremdschluesseln)).toBe(computeModuleRawScore(1, ehrlich));
+  });
+
+  it('ignoriert modulfremde Beimischungen wie die Kinder-Stammdaten', () => {
+    // `serializeKinderModuleData` legt meta_-Felder neben die Antworten.
+    // Modul 7 wird ohnehin nicht bepunktet — die Begrenzung macht solche
+    // Beimischungen aber grundsätzlich unschädlich.
+    const answers = { m2_1: '3', m2_2: '0', meta_child_age: 3, meta_child_name: 'Test' };
+
+    expect(computeModuleRawScore(2, answers)).toBe(3);
+  });
+
   it('ignoriert unbekannte Antwortwerte defensiv', () => {
     expect(computeModuleRawScore(1, { m1_1: 'ungueltig', m1_2: '2' })).toBe(2);
   });
@@ -64,7 +84,15 @@ describe('bestimmeUnvollstaendigeModule', () => {
     3: { m3_1: '0', m3_2: '0', m3_3: '0', m3_4: '0' },
     4: { m4_1: '0', m4_2: '0', m4_3: '0', m4_4: '0', m4_5: '0', m4_6: '0' },
     5: { m5_1: '0', m5_2: '0', m5_3: '0', m5_4: '0' },
-    6: { m6_q1: 'selbst', m6_q2: 'ja', m6_q3: 'selbst', m6_q4: 'voll', m6_q5: 'selbst' },
+    // Modul 6 speichert unter den fachlichen Schlüsseln, nicht unter den
+    // Übersetzungs-IDs (m6_q1 …) — siehe FRAGEN_MODUL_6_KEYS.
+    6: {
+      haushalt: 'selbst',
+      einkaufen: 'ja',
+      kochen: 'selbst',
+      finanzen: 'voll',
+      entscheidungen: 'selbst',
+    },
   } as const;
 
   const alleZeilen = () =>
@@ -97,7 +125,7 @@ describe('bestimmeUnvollstaendigeModule', () => {
     // null Punkten ein und sähe aus wie eine gültige Antwort.
     const zeilen = alleZeilen();
     const modul6 = zeilen.find((z) => z.module_number === 6)!;
-    modul6.answers.m6_q5 = 'betreuung';
+    modul6.answers.entscheidungen = 'betreuung';
 
     expect(bestimmeUnvollstaendigeModule(zeilen)).toEqual([6]);
   });
