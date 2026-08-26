@@ -390,6 +390,10 @@ export interface Database {
         Args: Record<string, never>;
         Returns: Json;
       };
+      reset_adult_assessment: {
+        Args: { p_case_id: string };
+        Returns: undefined;
+      };
     };
     Enums: {
       [_ in never]: never;
