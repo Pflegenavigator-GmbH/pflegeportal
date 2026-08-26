@@ -6,7 +6,18 @@ import { ModuleScores, PflegegradErgebnis } from '@/src/types/pflegegrad';
 // Untergrenze je Pflegegrad — für die Puffer-/Ampelberechnung
 const PFLEGEGRAD_MIN: Record<number, number> = { 1: 12.5, 2: 27, 3: 47.5, 4: 70, 5: 90 };
 
-export function calculatePflegegrad(scores: Partial<ModuleScores>): PflegegradErgebnis {
+/**
+ * @param unvollstaendigeModule Module, zu denen noch Pflichtantworten fehlen —
+ *   zu ermitteln mit `bestimmeUnvollstaendigeModule` aus den gespeicherten
+ *   Antworten. Ohne Angabe bleibt `missingData` false: Der Punktwert allein
+ *   lässt keine Aussage über Vollständigkeit zu, denn null Punkte sind ein
+ *   gültiges Ergebnis (volle Selbstständigkeit). Wer die Aussage braucht,
+ *   muss die Antworten mitliefern.
+ */
+export function calculatePflegegrad(
+  scores: Partial<ModuleScores>,
+  unvollstaendigeModule: readonly number[] = []
+): PflegegradErgebnis {
   const fullScores: ModuleScores = {
     1: scores[1] ?? 0,
     2: scores[2] ?? 0,
@@ -51,7 +62,7 @@ export function calculatePflegegrad(scores: Partial<ModuleScores>): PflegegradEr
     maxOf23,
     trafficLight,
     buffer: Math.round(buffer * 10) / 10,
-    missingData: Object.values(fullScores).some((s) => s === 0),
+    missingData: unvollstaendigeModule.length > 0,
     benefits: {
       monthlyAmount:
         NBA_CONFIG.BENEFITS[careLevel as keyof typeof NBA_CONFIG.BENEFITS]?.monthly ?? 0,

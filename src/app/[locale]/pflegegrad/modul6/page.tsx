@@ -29,8 +29,8 @@ const ALLTAGS_STRUKTUR = [
   { id: 'm6_q1', key: 'haushalt', optionen: ['selbst', 'teilweise', 'nicht'] },
   { id: 'm6_q2', key: 'einkaufen', optionen: ['ja', 'online_begleitung', 'nicht'] },
   { id: 'm6_q3', key: 'kochen', optionen: ['selbst', 'teilweise', 'nicht'] },
-  { id: 'm6_q4', key: 'finanzen', optionen: ['selbst', 'teilweise', 'nicht'] },
-  { id: 'm6_q5', key: 'entscheidungen', optionen: ['selbst', 'beratung', 'betreuung'] },
+  { id: 'm6_q4', key: 'finanzen', optionen: ['voll', 'teilweise', 'nicht'] },
+  { id: 'm6_q5', key: 'entscheidungen', optionen: ['selbst', 'beratung', 'nicht'] },
 ] as const;
 
 export default function Modul6Page() {
