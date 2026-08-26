@@ -332,7 +332,7 @@
     "keineSitzung": "Keine aktive Fall-Session gefunden. Bitte starten Sie neu.",
     "keineSitzungKurz": "Keine aktive Fall-Session gefunden.",
     "fortschrittGespeichert": "Fortschritt gespeichert.",
-    "speichernFehlgeschlagen": "Speichern fehlgeschlagen. Das Ergebnis wird nur lokal berechnet.",
+    "speichernFehlgeschlagen": "Speichern fehlgeschlagen. Ihre Eingaben bleiben erhalten – bitte versuchen Sie es erneut.",
     "zurueckgesetzt": "Begutachtung zurückgesetzt.",
     "zuruecksetzenFehler": "Die Begutachtung konnte nicht zurückgesetzt werden. Bitte erneut versuchen.",
     "ergebnisFehler": "Das Ergebnis konnte nicht berechnet werden.",

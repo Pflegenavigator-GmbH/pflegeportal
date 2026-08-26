@@ -60,9 +60,19 @@ describe('Pflegegrad Rechner - Schweregrad-Modell', () => {
     expect(result.careLevel).toBe(2);
   });
 
-  it('markiert missingData, wenn mindestens ein Modul den Rohwert 0 hat', () => {
-    const result = calculatePflegegrad(createMockScores({ 1: 3 }));
-    expect(result.missingData).toBe(true);
+  it('meldet missingData nur für ausdrücklich unvollständige Module', () => {
+    // Früher galt hier `score === 0` als „fehlt". Das führte volle
+    // Selbstständigkeit — ein gültiges Ergebnis mit null Punkten — als
+    // unvollständig. Maßgeblich ist jetzt allein die übergebene Liste.
+    const offen = calculatePflegegrad(createMockScores({ 1: 3 }), [2, 3]);
+    expect(offen.missingData).toBe(true);
+  });
+
+  it('meldet kein missingData, wenn Module legitim null Punkte ergeben', () => {
+    const vollstaendigSelbststaendig = calculatePflegegrad(createMockScores({}), []);
+
+    expect(vollstaendigSelbststaendig.totalScore).toBe(0);
+    expect(vollstaendigSelbststaendig.missingData).toBe(false);
   });
 
   it('setzt die Ampel je nach Puffer über der Pflegegrad-Schwelle', () => {

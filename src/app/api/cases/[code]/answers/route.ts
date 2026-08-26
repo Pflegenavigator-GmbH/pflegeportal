@@ -10,6 +10,7 @@ import {
   ASSESSMENT_MODULES,
   isAssessmentModuleName,
 } from '@/src/lib/pflegegrad/assessment-modules';
+import { calculateAndPersistCaseResult } from '@/src/lib/pflegegrad/case-result';
 import { createAdminSupabaseClient } from '@/src/lib/supabase/admin';
 
 type AnswerValue = string | number | boolean;
@@ -173,6 +174,12 @@ export async function POST(
 
     if (error) throw error;
 
+    // Denormalisierte Statusfelder werden ausschließlich aus den soeben
+    // serverseitig gespeicherten Erwachsenen-Antworten abgeleitet.
+    if (moduleNumber >= 1 && moduleNumber <= 6) {
+      await calculateAndPersistCaseResult(supabase, session.caseId);
+    }
+
     return NextResponse.json({ success: true, data }, { status: 201 });
   } catch (err) {
     return handleApiError(err, 'api.cases.answers.post', code);
@@ -180,8 +187,8 @@ export async function POST(
 }
 
 /**
- * Setzt die Begutachtung zurück: löscht alle Modulantworten des Falls und
- * verwirft die daraus berechneten Werte.
+ * Setzt ausschließlich das Erwachsenen-Assessment (Module 1–6) zurück und
+ * verwirft die daraus berechneten Werte. Kinder und Tagebuch bleiben erhalten.
  *
  * Notwendig, weil die Antworten serverseitig liegen — ein Leeren des
  * localStorage im Browser setzt nichts zurück, die Module würden ihre alten
@@ -202,19 +209,9 @@ export async function DELETE(
     const session = await requireCaseSession(code);
     const supabase = createAdminSupabaseClient();
 
-    const { error: loeschFehler } = await supabase
-      .from('answers')
-      .delete()
-      .eq('case_id', session.caseId);
-
-    if (loeschFehler) throw loeschFehler;
-
-    // Die abgeleiteten Werte am Fall würden sonst ein Ergebnis anzeigen,
-    // zu dem es keine Antworten mehr gibt.
-    const { error: resetFehler } = await supabase
-      .from('cases')
-      .update({ care_level_guess: null, total_score: 0, traffic_light: null })
-      .eq('id', session.caseId);
+    const { error: resetFehler } = await supabase.rpc('reset_adult_assessment', {
+      p_case_id: session.caseId,
+    });
 
     if (resetFehler) throw resetFehler;
 
