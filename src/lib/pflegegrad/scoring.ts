@@ -5,6 +5,7 @@
 // (gerätegebunden, manipulierbar, und Modul 6 nur als 0/1 gewertet). Diese
 // Datei ist die EINZIGE Wahrheit für die Umrechnung Antwort → Rohpunkte und
 // arbeitet ausschließlich auf den in der DB gespeicherten Antworten.
+import { istErlaubteErwachsenenAntwort } from '@/src/lib/pflegegrad/answer-contract';
 import { ERWARTETE_FRAGEN } from '@/src/lib/pflegegrad/fragen';
 import { ModuleScores } from '@/src/types/pflegegrad';
 
@@ -13,15 +14,12 @@ type ScoreMap = Record<string, number>;
 // Standard-NBA-Schweregradskala (Modul 1, 2, 4, 5)
 const SCALE_0_3: ScoreMap = { '0': 0, '1': 1, '2': 2, '3': 3 };
 
-// Modul 3 (Verhalten) kennt nur drei Häufigkeitsstufen: nie / selten / häufig
-const SCALE_VERHALTEN: ScoreMap = { '0': 0, '1': 1, '3': 3 };
-
 // Modul 6 (Alltagsgestaltung): qualitative Antworten → 0 (selbstständig),
 // 1 (teilweise), 2 (unselbstständig). Die Fragebögen bieten je Frage genau
 // drei Stufen; die Schlüssel sind über alle fünf Fragen eindeutig.
 // ⚠️ FACHLICH ZU PRÜFEN: Best-Practice-Näherung an die NBA-Systematik —
 // bisher wurde Modul 6 nur binär (0/1) gewertet, obwohl die Matrix Rohwerte
-// bis 15 Punkte abbildet.
+// bis 10 Punkte abbildet.
 const SCALE_ALLTAG: ScoreMap = {
   selbst: 0,
   ja: 0,
@@ -35,7 +33,9 @@ const SCALE_ALLTAG: ScoreMap = {
 const MODULE_SCORE_MAPS: Record<number, ScoreMap> = {
   1: SCALE_0_3,
   2: SCALE_0_3,
-  3: SCALE_VERHALTEN,
+  // Die UI bietet auch hier dieselbe 0–3-Skala an; jeder angebotene Wert muss
+  // serverseitig bewertbar sein.
+  3: SCALE_0_3,
   4: SCALE_0_3,
   5: SCALE_0_3,
   6: SCALE_ALLTAG,
@@ -46,17 +46,14 @@ const MODULE_SCORE_MAPS: Record<number, ScoreMap> = {
  * erwarteten Fragen.
  *
  * Früher lief die Summe über `Object.values(answers)`, also über alles, was im
- * gespeicherten Objekt stand. Die API prüft Schlüssel nur auf Form (Zeichen,
- * Länge, Anzahl), nicht auf Zugehörigkeit zum Modul. Wer eine gültige
- * Fallsitzung hatte, konnte deshalb zusätzliche Schlüssel mitsenden und seine
- * Punkte beliebig hochschreiben:
+ * gespeicherten Objekt stand. Wer eine gültige Fallsitzung hatte, konnte
+ * deshalb zusätzliche Schlüssel mitsenden und seine Punkte hochschreiben:
  *
  *     { m1_1: '0', …, extra_1: '3', extra_2: '3', extra_3: '3' }  → 9 statt 0
  *
- * Das unterlief genau die Integrität, für die `/scores` entfernt wurde. Jetzt
- * ist `ERWARTETE_FRAGEN` maßgeblich: Was dort nicht steht, zählt nicht — egal
- * wie es in die Zeile gekommen ist. Damit sind auch beigemischte Felder
- * unschädlich, etwa die `meta_`-Stammdaten des Kinder-Assessments.
+ * Die API lehnt solche Daten inzwischen ab. Das Scoring begrenzt zusätzlich
+ * auf `ERWARTETE_FRAGEN`, damit auch historische oder direkt in die DB
+ * gelangte Fremdfelder unschädlich bleiben.
  *
  * Unbekannte Antwortwerte zählen weiterhin 0 (defensive Auswertung).
  */
@@ -73,9 +70,11 @@ export function computeModuleRawScore(
   let sum = 0;
   for (const frageId of erwartet) {
     const value = answers[frageId];
-    if (typeof value === 'string' && value in map) {
+    if (!istErlaubteErwachsenenAntwort(moduleNumber, frageId, value)) continue;
+
+    if (typeof value === 'string') {
       sum += map[value];
-    } else if (typeof value === 'number' && String(value) in map) {
+    } else if (typeof value === 'number') {
       sum += map[String(value)];
     }
   }
@@ -139,12 +138,9 @@ export function bestimmeUnvollstaendigeModule(rows: StoredAnswerRow[]): number[]
       continue;
     }
 
-    const map = MODULE_SCORE_MAPS[modul];
     const alleBeantwortet = erwartet.every((frageId) => {
       const wert = antworten[frageId];
-      if (typeof wert === 'string') return wert in map;
-      if (typeof wert === 'number') return String(wert) in map;
-      return false;
+      return istErlaubteErwachsenenAntwort(modul, frageId, wert);
     });
 
     if (!alleBeantwortet) unvollstaendig.push(modul);
