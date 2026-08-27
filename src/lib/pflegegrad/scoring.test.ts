@@ -12,8 +12,8 @@ describe('computeModuleRawScore', () => {
     expect(computeModuleRawScore(1, { m1_1: '3', m1_2: '2', m1_3: '0', m1_4: '1' })).toBe(6);
   });
 
-  it('nutzt für Modul 3 die Häufigkeitsskala (0/1/3)', () => {
-    expect(computeModuleRawScore(3, { m3_1: '3', m3_2: '1', m3_3: '0' })).toBe(4);
+  it('bewertet alle von der Modul-3-UI angebotenen Werte 0–3', () => {
+    expect(computeModuleRawScore(3, { m3_1: '3', m3_2: '2', m3_3: '1', m3_4: '0' })).toBe(6);
   });
 
   it('bewertet Modul 6 qualitativ (selbst=0, teilweise=1, nicht=2)', () => {

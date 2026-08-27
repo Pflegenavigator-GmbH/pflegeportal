@@ -6,6 +6,7 @@ import { handleApiError } from '@/src/lib/api/error-handler';
 import { ValidationError } from '@/src/lib/api/errors';
 import { isValidQuestionKey, withKey } from '@/src/lib/api/validation';
 import { logger } from '@/src/lib/logger';
+import { pruefeErwachsenenAntworten } from '@/src/lib/pflegegrad/answer-contract';
 import {
   ASSESSMENT_MODULES,
   isAssessmentModuleName,
@@ -131,6 +132,8 @@ export async function POST(
     if (body.answers !== undefined) {
       // Atomarer Bulk-Save: kompletter Modulstand in einem Request
       updatedAnswers = parseAnswersObject(body.answers);
+      const vertragsfehler = pruefeErwachsenenAntworten(moduleNumber, updatedAnswers, true);
+      if (vertragsfehler) throw new ValidationError(vertragsfehler);
     } else {
       // Legacy: Einzelantwort — Read-Modify-Write bleibt hier nötig,
       // neue Clients sollten den Bulk-Vertrag verwenden.
@@ -141,6 +144,13 @@ export async function POST(
       if (!isValidQuestionKey(body.questionKey)) {
         throw new ValidationError('Unzulässiger Frageschlüssel.');
       }
+
+      const vertragsfehler = pruefeErwachsenenAntworten(
+        moduleNumber,
+        { [body.questionKey]: body.answerValue },
+        false
+      );
+      if (vertragsfehler) throw new ValidationError(vertragsfehler);
 
       const { data: existingRecord } = await supabase
         .from('answers')
