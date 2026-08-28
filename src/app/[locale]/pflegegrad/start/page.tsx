@@ -4,7 +4,7 @@
 import { Shield, ArrowRight, Plus, ArrowLeft } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, use, useCallback } from 'react';
 import { toast } from 'sonner';
 
 import { validateAndStoreSession } from '@/src/app/actions/case-session';
@@ -23,7 +23,7 @@ import { EREIGNISSE } from '@/src/lib/analytics/events';
 import { verfolge, verfolgeEinmalig } from '@/src/lib/analytics/track';
 import { storeCaseCode } from '@/src/lib/case-storage';
 import { logger } from '@/src/lib/logger';
-import { hatErgebnisFuerAktuellenFall } from '@/src/lib/pflegegrad/ergebnis-storage';
+import { loadCaseStatus } from '@/src/lib/pflegegrad/client-api';
 import { createClient } from '@/src/lib/supabase/client';
 
 import { LoadCaseCard } from './_components/LoadCaseCard';
@@ -67,6 +67,15 @@ export default function PflegegradStartPage(props: PageProps) {
   const [supabase] = useState(() => createClient());
   const { triggerCheckout, checkoutLoading } = useStripeCheckout();
 
+  const resumeAssessment = useCallback(
+    async (verifiedCode: string) => {
+      const { assessment } = await loadCaseStatus(verifiedCode);
+      const destination = assessment.hasResult ? 'ergebnis' : `modul${assessment.nextModule ?? 1}`;
+      router.push(`/${locale}/pflegegrad/${destination}`);
+    },
+    [locale, router]
+  );
+
   useEffect(() => {
     if (searchParams.session_id && searchParams.check_code) {
       const checkCode = searchParams.check_code.trim().toUpperCase();
@@ -86,7 +95,13 @@ export default function PflegegradStartPage(props: PageProps) {
 
         if (status.isUnlocked) {
           toast.success(tMeldung('premiumFrei'));
-          router.push(`/${locale}/pflegegrad/modul1`);
+          void resumeAssessment(checkCode).catch((err) => {
+            logger.error(
+              { err, caseCode: checkCode },
+              'Wiedereinstieg nach Checkout fehlgeschlagen'
+            );
+            setError(tMeldung('sitzungFehler'));
+          });
         } else {
           toast.info(tMeldung('zahlungInArbeit'));
         }
@@ -112,6 +127,13 @@ export default function PflegegradStartPage(props: PageProps) {
 
         verfolge(EREIGNISSE.rechnerGestartet, { einstieg: 'geteilt' });
         toast.success(tMeldung('geteilterLinkGeladen'));
+        void resumeAssessment(sharedCode).catch((err) => {
+          logger.error(
+            { err, caseCode: sharedCode },
+            'Wiedereinstieg über geteilten Link fehlgeschlagen'
+          );
+          setError(tMeldung('sitzungFehler'));
+        });
       });
     }
 
@@ -122,7 +144,7 @@ export default function PflegegradStartPage(props: PageProps) {
       .then(({ data }) => {
         if (data) setDbProducts(data as ProductFromDb[]);
       });
-  }, [searchParams, locale, router, supabase, tMeldung]);
+  }, [searchParams, resumeAssessment, supabase, tMeldung]);
 
   const handleLoadCase = async (inputCode: string) => {
     setLoading(true);
@@ -150,14 +172,7 @@ export default function PflegegradStartPage(props: PageProps) {
       verfolge(EREIGNISSE.rechnerGestartet, { einstieg: 'geladen' });
 
       toast.success(tMeldung('willkommenZurueck'));
-      // Nur weiterleiten, wenn das Ergebnis zu DIESEM Fall gehört. Die reine
-      // Existenzprüfung von früher zeigte sonst den Pflegegrad des zuvor
-      // geladenen Falls.
-      if (hatErgebnisFuerAktuellenFall()) {
-        router.push(`/${locale}/pflegegrad/ergebnis`);
-      } else {
-        router.push(`/${locale}/pflegegrad/modul1`);
-      }
+      await resumeAssessment(verifiedCode);
     } catch {
       setError(tMeldung('sitzungFehler'));
     } finally {

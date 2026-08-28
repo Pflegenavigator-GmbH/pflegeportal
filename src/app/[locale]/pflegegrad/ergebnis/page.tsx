@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useMemo, useState, use } from 'react';
+import { useCallback, useEffect, useMemo, useState, use } from 'react';
 import { toast } from 'sonner';
 
 import { HandlungsEmpfehlungen } from '@/src/app/[locale]/pflegegrad/ergebnis/_component/HandlungsEmpfehlung';
@@ -43,7 +43,11 @@ import { useBescheidDatum } from '@/src/hooks/useBescheidDatum';
 import { usePdfDownload } from '@/src/hooks/usePdfDownload';
 import { useStripeCheckout } from '@/src/hooks/useStripeCheckout';
 import { logger } from '@/src/lib/logger';
-import { loadCaseResult, SessionExpiredError } from '@/src/lib/pflegegrad/client-api';
+import {
+  IncompleteAssessmentError,
+  loadCaseResult,
+  SessionExpiredError,
+} from '@/src/lib/pflegegrad/client-api';
 import { entferneErgebnis } from '@/src/lib/pflegegrad/ergebnis-storage';
 import { berechneFristen } from '@/src/lib/widerspruch/fristen';
 import { PflegegradErgebnis, EinstufungAmpel } from '@/src/types/pflegegrad';
@@ -63,12 +67,14 @@ const MVP_PRODUCTS = [
 export default function ErgebnisPage(props: PageProps) {
   const tMeldung = useTranslations('pflegegrad.meldungen');
   const t = useTranslations('pflegegrad.ergebnis');
+  const tCommon = useTranslations('common.buttons');
   const router = useRouter();
   const params = use(props.params);
   const locale = params?.locale || 'de';
 
   const [hasMounted, setHasMounted] = useState(false);
   const [ergebnis, setErgebnis] = useState<PflegegradErgebnis | null>(null);
+  const [loadError, setLoadError] = useState(false);
   const { triggerCheckout, checkoutLoading } = useStripeCheckout();
   const [isVerifyingGdb, setIsVerifyingGdb] = useState(false);
   const [resetDialogOffen, setResetDialogOffen] = useState(false);
@@ -101,10 +107,7 @@ export default function ErgebnisPage(props: PageProps) {
       : undefined,
   });
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setHasMounted(true);
-
+  const ladeErgebnis = useCallback(async () => {
     if (!caseCode) {
       logger.warn('Keine aktive Fall-Session gefunden. Leite um.');
       toast.error(tMeldung('keineSitzungKurz'));
@@ -112,23 +115,31 @@ export default function ErgebnisPage(props: PageProps) {
       return;
     }
 
-    // Server ist die einzige Wahrheit: Rohpunkte und Pflegegrad werden
-    // serverseitig aus den gespeicherten Antworten berechnet — kein
-    // localStorage, kein setTimeout-Lifecycle-Workaround mehr.
-    loadCaseResult(caseCode)
-      .then((berechnetesErgebnis) => {
-        setErgebnis(berechnetesErgebnis);
-      })
-      .catch((err) => {
-        if (err instanceof SessionExpiredError) {
-          toast.error(tMeldung('sitzungAbgelaufen'));
-          router.push(`/${locale}/pflegegrad/start`);
-          return;
-        }
-        logger.error({ err, caseCode }, 'Ergebnis konnte nicht geladen werden');
-        toast.error(tMeldung('ergebnisFehler'));
-      });
+    setLoadError(false);
+    try {
+      const berechnetesErgebnis = await loadCaseResult(caseCode);
+      setErgebnis(berechnetesErgebnis);
+    } catch (err) {
+      if (err instanceof SessionExpiredError) {
+        toast.error(tMeldung('sitzungAbgelaufen'));
+        router.push(`/${locale}/pflegegrad/start`);
+        return;
+      }
+      if (err instanceof IncompleteAssessmentError) {
+        router.replace(`/${locale}/pflegegrad/modul${err.nextModule}`);
+        return;
+      }
+      logger.error({ err, caseCode }, 'Ergebnis konnte nicht geladen werden');
+      setLoadError(true);
+      toast.error(tMeldung('ergebnisFehler'));
+    }
   }, [caseCode, locale, router, tMeldung]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setHasMounted(true);
+    void ladeErgebnis();
+  }, [ladeErgebnis]);
 
   /**
    * Setzt die Begutachtung zurück.
@@ -205,9 +216,21 @@ export default function ErgebnisPage(props: PageProps) {
   if (!ergebnis) {
     return (
       <div className="container mx-auto px-4 py-12 text-center text-white bg-[var(--color-surface)] min-h-screen flex flex-col justify-center items-center">
-        <AlertCircle className="w-16 h-16 text-orange-400 mb-4 animate-pulse" />
-        <h1 className="text-2xl font-bold mb-2">{t('ladenTitel')}</h1>
-        <p className="text-[var(--color-text-muted)] max-w-sm">{t('ladenText')}</p>
+        <AlertCircle
+          className={`w-16 h-16 text-orange-400 mb-4 ${loadError ? '' : 'animate-pulse'}`}
+        />
+        <h1 className="text-2xl font-bold mb-2">
+          {loadError ? tMeldung('ergebnisFehler') : t('ladenTitel')}
+        </h1>
+        {!loadError && <p className="text-[var(--color-text-muted)] max-w-sm">{t('ladenText')}</p>}
+        {loadError && (
+          <div className="flex flex-wrap justify-center gap-3 mt-5">
+            <Button onClick={() => void ladeErgebnis()}>{tCommon('retry')}</Button>
+            <Button variant="outline" onClick={() => router.push(`/${locale}/pflegegrad/start`)}>
+              {tCommon('back')}
+            </Button>
+          </div>
+        )}
       </div>
     );
   }

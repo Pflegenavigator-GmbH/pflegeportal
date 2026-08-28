@@ -16,9 +16,6 @@ vi.mock('@/src/lib/api/error-handler', () => ({ handleApiError: handleApiErrorMo
 vi.mock('@/src/lib/logger', () => ({
   logger: { info: loggerInfoMock, error: vi.fn(), warn: vi.fn() },
 }));
-vi.mock('@/src/lib/pflegegrad/case-result', () => ({
-  calculateAndPersistCaseResult: vi.fn(),
-}));
 vi.mock('@/src/lib/supabase/admin', () => ({
   createAdminSupabaseClient: vi.fn(() => ({ rpc: rpcMock })),
 }));

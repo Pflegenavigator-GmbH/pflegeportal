@@ -3,14 +3,16 @@
 
 import { cookies } from 'next/headers';
 
+import {
+  CASE_COOKIE,
+  evaluateCaseAccess,
+  isValidCaseCode,
+  normalizeCaseCode,
+} from '@/src/lib/cases/access-policy';
 import { logger } from '@/src/lib/logger';
 import { createAdminSupabaseClient } from '@/src/lib/supabase/admin';
 
-const CASE_COOKIE = 'pf_case_code';
-const BETA_ACCESS_MONTHS = 12;
-const CASE_CODE_PATTERN = /^[A-Z0-9][A-Z0-9_-]{3,63}$/;
-
-interface SessionStatus {
+export interface SessionStatus {
   /** Fall existiert in der DB und ist nicht abgelaufen → Session gültig */
   success: boolean;
   /** Premium-Features freigeschaltet (paid/free) — NICHT Voraussetzung für eine gültige Session */
@@ -22,7 +24,7 @@ interface SessionStatus {
 }
 
 export async function validateAndStoreSession(caseCode: string): Promise<SessionStatus> {
-  const cleanedCode = caseCode.trim().toUpperCase();
+  const cleanedCode = normalizeCaseCode(caseCode);
   logger.info({ caseCode: cleanedCode }, 'Validiere Fall-Session');
 
   const denied = (billingStatus: string, isExpired = false): SessionStatus => ({
@@ -33,7 +35,7 @@ export async function validateAndStoreSession(caseCode: string): Promise<Session
     caseCode: null,
   });
 
-  if (!CASE_CODE_PATTERN.test(cleanedCode)) {
+  if (!isValidCaseCode(cleanedCode)) {
     logger.warn({ caseCode: cleanedCode }, 'Fallcode mit ungültigem Format abgelehnt');
     return denied('invalid_format');
   }
@@ -54,22 +56,13 @@ export async function validateAndStoreSession(caseCode: string): Promise<Session
       return denied('not_found');
     }
 
-    // Beta-Tester haben exakt 12 Monate Zugriff
-    let isExpired = false;
-    if (currentCase.product_tier === 'beta' && currentCase.access_activated_at) {
-      const expirationDate = new Date(currentCase.access_activated_at);
-      expirationDate.setMonth(expirationDate.getMonth() + BETA_ACCESS_MONTHS);
-
-      if (new Date() > expirationDate) {
-        isExpired = true;
-        logger.info(
-          { caseCode: cleanedCode, activatedAt: currentCase.access_activated_at },
-          'Beta-Zugriff abgelaufen'
-        );
-      }
-    }
+    const { isExpired, isUnlocked } = evaluateCaseAccess(currentCase);
 
     if (isExpired) {
+      logger.info(
+        { caseCode: cleanedCode, activatedAt: currentCase.access_activated_at },
+        'Beta-Zugriff abgelaufen'
+      );
       cookieStore.delete(CASE_COOKIE);
       return {
         success: true, // Fall existiert — die UI soll den Ablauf erklären, nicht "ungültig" melden
@@ -91,9 +84,6 @@ export async function validateAndStoreSession(caseCode: string): Promise<Session
       maxAge: 60 * 60 * 24 * 30, // 30 Tage
       path: '/',
     });
-
-    const isUnlocked =
-      currentCase.billing_status === 'paid' || currentCase.billing_status === 'free';
 
     logger.debug({ caseCode: cleanedCode, isUnlocked }, 'Session-Cookie gesetzt');
 

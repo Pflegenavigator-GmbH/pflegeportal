@@ -8,16 +8,25 @@ import type { PflegegradErgebnis } from '@/src/types/pflegegrad';
 import type { Database } from '@/src/types/supabase';
 
 const ADULT_MODULE_NUMBERS = [1, 2, 3, 4, 5, 6] as const;
+export type AdultModuleNumber = (typeof ADULT_MODULE_NUMBERS)[number];
+
+export interface AdultAssessmentState {
+  completedModules: AdultModuleNumber[];
+  missingModules: AdultModuleNumber[];
+  nextModule: AdultModuleNumber | null;
+  hasResult: boolean;
+  result: PflegegradErgebnis;
+}
 
 /**
  * Berechnet das Erwachsenen-Ergebnis ausschließlich aus den serverseitig
  * gespeicherten Antworten. Vom Browser gelieferte Gesamtwerte werden nie
  * übernommen.
  */
-export async function calculateCaseResult(
+export async function loadAdultAssessmentState(
   supabase: SupabaseClient<Database>,
   caseId: string
-): Promise<PflegegradErgebnis> {
+): Promise<AdultAssessmentState> {
   const { data: rows, error } = await supabase
     .from('answers')
     .select('module_number, answers')
@@ -31,29 +40,28 @@ export async function calculateCaseResult(
     answers: (row.answers as Record<string, unknown> | null) ?? null,
   }));
 
-  // Vollständigkeit kommt aus denselben Zeilen — nicht aus dem Punktwert.
-  return calculatePflegegrad(computeModuleScores(zeilen), bestimmeUnvollstaendigeModule(zeilen));
+  // Fortschritt und Ergebnis entstehen aus demselben Snapshot der Antworten.
+  // Null Punkte bleiben dabei ein gültiger, vollständig beantworteter Stand.
+  const missingModules = bestimmeUnvollstaendigeModule(zeilen) as AdultModuleNumber[];
+  const completedModules = ADULT_MODULE_NUMBERS.filter(
+    (moduleNumber) => !missingModules.includes(moduleNumber)
+  );
+
+  return {
+    completedModules,
+    missingModules,
+    nextModule: missingModules[0] ?? null,
+    hasResult: missingModules.length === 0,
+    result: calculatePflegegrad(computeModuleScores(zeilen), missingModules),
+  };
 }
 
 /**
- * Aktualisiert die denormalisierten Such-/Statusfelder. Die Werte stammen
- * immer aus calculateCaseResult; diese Funktion akzeptiert keine Clientwerte.
+ * Kompatibler Ergebnis-Zugriff für Aufrufer, die keinen Fortschritt benötigen.
  */
-export async function calculateAndPersistCaseResult(
+export async function calculateCaseResult(
   supabase: SupabaseClient<Database>,
   caseId: string
 ): Promise<PflegegradErgebnis> {
-  const result = await calculateCaseResult(supabase, caseId);
-  const { error } = await supabase
-    .from('cases')
-    .update({
-      care_level_guess: result.careLevel,
-      total_score: result.totalScore,
-      traffic_light: result.trafficLight,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', caseId);
-
-  if (error) throw error;
-  return result;
+  return (await loadAdultAssessmentState(supabase, caseId)).result;
 }

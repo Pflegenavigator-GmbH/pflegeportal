@@ -1,12 +1,12 @@
 // src/api/cases/[code]/result/route.ts
 // Serverseitige, autoritative Pflegegrad-Berechnung: liest die gespeicherten
 // Antworten und berechnet Rohpunkte und Ergebnis deterministisch. GET bleibt
-// read-only; persistiert wird ausschließlich beim Speichern von Antworten.
+// read-only; die Antwortzeilen sind die einzige persistierte Wahrheit.
 import { NextRequest, NextResponse } from 'next/server';
 
 import { requireCaseSession } from '@/src/lib/api/case-auth';
 import { handleApiError } from '@/src/lib/api/error-handler';
-import { calculateCaseResult } from '@/src/lib/pflegegrad/case-result';
+import { loadAdultAssessmentState } from '@/src/lib/pflegegrad/case-result';
 import { createAdminSupabaseClient } from '@/src/lib/supabase/admin';
 
 export async function GET(
@@ -18,9 +18,20 @@ export async function GET(
     const session = await requireCaseSession(code);
     const supabase = createAdminSupabaseClient();
 
-    const ergebnis = await calculateCaseResult(supabase, session.caseId);
+    const assessment = await loadAdultAssessmentState(supabase, session.caseId);
 
-    return NextResponse.json({ success: true, ergebnis });
+    if (!assessment.hasResult) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Das Assessment ist noch nicht vollständig.',
+          nextModule: assessment.nextModule,
+        },
+        { status: 409 }
+      );
+    }
+
+    return NextResponse.json({ success: true, ergebnis: assessment.result });
   } catch (err) {
     return handleApiError(err, 'api.cases.result', code);
   }

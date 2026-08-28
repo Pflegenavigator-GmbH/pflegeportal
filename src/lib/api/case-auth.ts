@@ -2,13 +2,13 @@
 import { cookies } from 'next/headers';
 
 import { NotFoundError, UnauthorizedError, ValidationError } from '@/src/lib/api/errors';
+import {
+  CASE_COOKIE,
+  evaluateCaseAccess,
+  isValidCaseCode,
+  normalizeCaseCode,
+} from '@/src/lib/cases/access-policy';
 import { createAdminSupabaseClient } from '@/src/lib/supabase/admin';
-
-const CASE_COOKIE = 'pf_case_code';
-
-// Bewusst permissiv (die Code-Generierung liegt in der DB-RPC create_case),
-// aber streng genug, um Injection-/Enumeration-Rauschen früh abzuweisen.
-const CASE_CODE_PATTERN = /^[A-Z0-9][A-Z0-9_-]{3,63}$/;
 
 export interface CaseSession {
   caseId: string;
@@ -25,9 +25,9 @@ export interface CaseSession {
  * in korrekte HTTP-Statuscodes (400/401/404) übersetzt.
  */
 export async function requireCaseSession(expectedCode: string): Promise<CaseSession> {
-  const cleanedCode = expectedCode.trim().toUpperCase();
+  const cleanedCode = normalizeCaseCode(expectedCode);
 
-  if (!CASE_CODE_PATTERN.test(cleanedCode)) {
+  if (!isValidCaseCode(cleanedCode)) {
     throw new ValidationError('Ungültiges Fallcode-Format.');
   }
 
@@ -44,7 +44,7 @@ export async function requireCaseSession(expectedCode: string): Promise<CaseSess
   const supabase = createAdminSupabaseClient();
   const { data: currentCase, error } = await supabase
     .from('cases')
-    .select('id, case_code, billing_status, product_tier')
+    .select('id, case_code, billing_status, product_tier, access_activated_at')
     .eq('case_code', cleanedCode)
     .single();
 
@@ -52,11 +52,19 @@ export async function requireCaseSession(expectedCode: string): Promise<CaseSess
     throw new NotFoundError('Fall', cleanedCode);
   }
 
+  const access = evaluateCaseAccess(currentCase);
+  if (access.isExpired) {
+    throw new UnauthorizedError('Der zeitlich begrenzte Beta-Zugang ist abgelaufen.', {
+      caseCode: cleanedCode,
+      reason: 'beta_expired',
+    });
+  }
+
   return {
     caseId: currentCase.id,
     caseCode: currentCase.case_code,
     billingStatus: currentCase.billing_status,
     productTier: currentCase.product_tier,
-    isUnlocked: currentCase.billing_status === 'paid' || currentCase.billing_status === 'free',
+    isUnlocked: access.isUnlocked,
   };
 }

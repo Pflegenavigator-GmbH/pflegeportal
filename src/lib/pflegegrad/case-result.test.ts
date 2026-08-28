@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { calculateAndPersistCaseResult, calculateCaseResult } from './case-result';
+import { calculateCaseResult, loadAdultAssessmentState } from './case-result';
 
 vi.mock('server-only', () => ({}));
 
@@ -16,13 +16,11 @@ function createSupabaseMock() {
     eq: vi.fn().mockReturnThis(),
     in: inMock,
   };
-  const updateEqMock = vi.fn().mockResolvedValue({ error: null });
-  const updateMock = vi.fn().mockReturnValue({ eq: updateEqMock });
   const client = {
-    from: vi.fn((table: string) => (table === 'answers' ? answersBuilder : { update: updateMock })),
+    from: vi.fn(() => answersBuilder),
   };
 
-  return { client, inMock, updateMock, updateEqMock };
+  return { client, inMock };
 }
 
 describe('serverseitiges Fall-Ergebnis', () => {
@@ -46,20 +44,18 @@ describe('serverseitiges Fall-Ergebnis', () => {
     );
   });
 
-  it('persistiert nur das unmittelbar zuvor serverseitig berechnete Ergebnis', async () => {
-    const { client, updateMock, updateEqMock } = createSupabaseMock();
+  it('liefert Fortschritt und Ergebnis aus demselben Antwort-Snapshot', async () => {
+    const { client } = createSupabaseMock();
 
-    const result = await calculateAndPersistCaseResult(
-      client as unknown as Parameters<typeof calculateAndPersistCaseResult>[0],
+    const state = await loadAdultAssessmentState(
+      client as unknown as Parameters<typeof loadAdultAssessmentState>[0],
       'case-1'
     );
 
-    expect(updateMock).toHaveBeenCalledWith({
-      care_level_guess: result.careLevel,
-      total_score: result.totalScore,
-      traffic_light: result.trafficLight,
-      updated_at: expect.any(String),
-    });
-    expect(updateEqMock).toHaveBeenCalledWith('id', 'case-1');
+    expect(state.completedModules).toEqual([]);
+    expect(state.missingModules).toEqual([1, 2, 3, 4, 5, 6]);
+    expect(state.nextModule).toBe(1);
+    expect(state.hasResult).toBe(false);
+    expect(state.result.missingData).toBe(true);
   });
 });

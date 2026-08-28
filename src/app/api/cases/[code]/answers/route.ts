@@ -11,7 +11,6 @@ import {
   ASSESSMENT_MODULES,
   isAssessmentModuleName,
 } from '@/src/lib/pflegegrad/assessment-modules';
-import { calculateAndPersistCaseResult } from '@/src/lib/pflegegrad/case-result';
 import { createAdminSupabaseClient } from '@/src/lib/supabase/admin';
 
 type AnswerValue = string | number | boolean;
@@ -183,12 +182,6 @@ export async function POST(
       .select();
 
     if (error) throw error;
-
-    // Denormalisierte Statusfelder werden ausschließlich aus den soeben
-    // serverseitig gespeicherten Erwachsenen-Antworten abgeleitet.
-    if (moduleNumber >= 1 && moduleNumber <= 6) {
-      await calculateAndPersistCaseResult(supabase, session.caseId);
-    }
 
     return NextResponse.json({ success: true, data }, { status: 201 });
   } catch (err) {
