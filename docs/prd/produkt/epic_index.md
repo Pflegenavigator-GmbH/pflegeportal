@@ -15,10 +15,10 @@ gepflegt.
 |---|---|---|
 | [Pflegedienst-Zugang](epics/pflegedienst.md) | Freigabe je Patient, Rollen, Arbeiten am Patienten | **In Ausarbeitung — kritischer Pfad** |
 | [Pflegegrad-Ermittlung](epics/pflegegrad.md) | Den Pflegegrad belastbar einschätzen und die Einschätzung belegen | **In Ausarbeitung** |
-| Widerspruch & Briefe | Aus dem Ergebnis ein Schreiben an die Pflegekasse machen | Geplant |
+| [Widerspruch & Briefe](epics/widerspruch-briefe.md) | Aus dem Ergebnis ein Schreiben an die Pflegekasse machen | **In Ausarbeitung** |
 | Zugang & Abrechnung | Fallcode, Bezahlschranke, Lizenzen | Geplant |
 | Weitere Rechner | GdB, Erwerbsminderungsrente, später SGB XIV | Ruhend — siehe Richtung |
-| Vertrauen & Zugänglichkeit | Barrierefreiheit, Sprachen, Rechtstexte, Datenschutz | Geplant |
+| [Vertrauen & Zugänglichkeit](epics/vertrauen-zugaenglichkeit.md) | Einwilligung, Betroffenenrechte, Barrierefreiheit, Sprachen | **In Ausarbeitung** |
 
 ---
 
@@ -31,15 +31,17 @@ nachvollziehbarer Herleitung. Alles andere im Portal hängt daran.
 
 Ausgearbeitet, weil hier gearbeitet wird: → [epics/pflegegrad.md](epics/pflegegrad.md)
 
-### Widerspruch & Briefe — *geplant*
+### Widerspruch & Briefe — *in Ausarbeitung*
 
-Der Schritt nach dem Bescheid: Widerspruch, Höherstufungsantrag, Fristenberechnung,
-PDF-Erzeugung. **Weitgehend gebaut** (#3), aber nie abgenommen — die Akzeptanzkriterien stehen
-seit zwei Monaten unangetastet.
+Der Schritt nach dem Bescheid. **Weitgehend gebaut** (#3), aber nie beschrieben: Das Issue
+nennt zwei Brieftypen, im Code stehen acht — darunter Erbrecht und Betreuungsrecht, die in
+keinem Issue vorkommen.
 
-Capabilities: Vorlagenauswahl · Fristenberechnung · Gesetzeseinbindung · Erzeugung und Ausgabe
+Der zentrale Befund: **Der Widerspruch greift nicht auf die Modulwerte zu.** Damit bricht die
+Kette erheben → bewerten → herleiten → begründen an ihrem letzten Glied, und der Widerspruch
+bleibt ein Formbrief.
 
-Erste Aufgabe ist keine Umsetzung, sondern eine Bestandsaufnahme des Gebauten.
+→ [epics/widerspruch-briefe.md](epics/widerspruch-briefe.md)
 
 ### Zugang & Abrechnung — *geplant*
 
@@ -72,32 +74,19 @@ belastbar.
 
 Offen und übernommen: die Rechenregel des GdB-Rechners hat keine Deckung in der VersMedV (#26).
 
-### Vertrauen & Zugänglichkeit — *geplant*
+### Vertrauen & Zugänglichkeit — *in Ausarbeitung*
 
-Barrierefreiheit (#34), 35 Sprachen, RTL (#88), Rechtstexte, Datenschutzauskunft und -löschung,
-**Einwilligungsverwaltung**.
+Einwilligungsverwaltung, Betroffenenrechte, Barrierefreiheit (#34), Sprachen, RTL (#88).
 
-Querschnittsbereich: einzelne Features werden dort umgesetzt, wo sie wirken. Die
-Barrierefreiheit des Pflegegrad-Pfads steht deshalb im Pflegegrad-Epic, nicht hier.
+Querschnittsbereich: Features werden dort umgesetzt, wo sie wirken — die Lesbarkeit des
+Pflegegrad-Pfads steht als #111 in der Beta.
 
-**Einwilligungsverwaltung** ist neu und rückt nach vorn. Der DiPA-Kriterienkatalog des BfArM
-(`grant-docs` → `05_Dipa/`) verlangt sie normativ, und heute existiert nichts davon:
+**Der größte Posten ist die Einwilligungsverwaltung, und heute existiert davon nichts.** Was
+es gibt, ist ein Cookie-Banner im `localStorage`; der Kriterienkatalog verlangt Einwilligungen
+am pseudonymen Konto, je Zweck getrennt und widerruflich. Das blockiert F1.2 und F1.3 im
+Pflegegrad-Epic.
 
-- Einwilligungen mit dem Fallcode als pseudonymem Account verknüpfen (CNST_1.3 a)
-- Widerruf aus der Anwendung heraus, jederzeit (CNST_1.4)
-- Getrennte Einwilligungen je Zweck; die Zustimmung zu den Nutzungsbedingungen **nicht**
-  mitbündeln (CNST_1.2)
-- Eigene, folgenlos verweigerbare Einwilligung für Weiterentwicklungsdaten (CNST_3.1)
-- Abfrage der Einwilligungsfähigkeit, sonst Einwilligung eines Erziehungsberechtigten
-  (CNST_1.6 a) — betrifft den Kinder-Pfad
-- Löschkonzept für den Widerrufsfall (CNST_2.5 a, CNST_3.3)
-
-Das ist keine Nacharbeit an einem Cookie-Banner, sondern ein eigener Fachbereich. Er blockiert
-F1.2 und F1.3 im Pflegegrad-Epic.
-
-**Zeitkritisch:** Das BFSG gilt seit dem 28.06.2025 auch für Dienstleistungen im
-elektronischen Geschäftsverkehr an Verbraucher. Ob die Kleinstunternehmer-Ausnahme trägt, ist
-offen — siehe [richtung.md](richtung.md).
+→ [epics/vertrauen-zugaenglichkeit.md](epics/vertrauen-zugaenglichkeit.md)
 
 ---
 

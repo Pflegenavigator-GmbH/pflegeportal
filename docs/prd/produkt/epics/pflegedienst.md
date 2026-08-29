@@ -53,6 +53,43 @@ sich hier ohnehin nichts ausliefern. Und nichts aus der B2C-Beta ist verloren: L
 
 ---
 
+## Einrichtungsarten: offen im Datenmodell, geschlossen in der Rechtskonstruktion
+
+Absehbar sollen neben ambulanten Diensten auch **stationäre Einrichtungen** und später
+**Krankenhäuser** Zugang bekommen. Die drei sind nicht dasselbe Problem mit anderem Etikett.
+
+Das Zonenmodell trägt, *weil* die Einrichtung im Portal keine eigenen Aufzeichnungen führt.
+Genau daran unterscheiden sie sich:
+
+| Art | Zulassung | Eigene Dokumentation | Zone 3 vermeidbar |
+|---|---|---|---|
+| Ambulanter Dienst | § 72 SGB XI | eigene Pflicht, im eigenen System | ja |
+| Stationäre Einrichtung | § 72 SGB XI | gesetzlich verlangt, Qualitätsprüfung nach § 113 SGB XI | schwieriger |
+| Krankenhaus | § 108 SGB V | § 630f BGB, zehn Jahre, nicht abdingbar | **nein** |
+
+**Die tragende Grenze ist der Gegenstand, nicht die Einrichtungsart.** Solange das Portal
+ausschließlich das Pflegegrad-Verfahren führt und nie die eigene Dokumentation der Einrichtung,
+trägt das Zonenmodell für alle drei. Für ein Krankenhaus wäre der Anwendungsfall das
+**Entlassmanagement nach § 39 Abs. 1a SGB V** — beim Übergang nach Hause einen Antrag
+vorbereiten. Das ist Zone 2, sauber.
+
+**Was daraus für die Umsetzung folgt:**
+
+- **Datenmodell jetzt offen halten.** Die Tabelle heißt `organisationen` und trägt eine *Art*
+  plus ein Feld für das jeweilige Zulassungsmerkmal — nicht `pflegedienste` mit fest
+  verdrahtetem § 72 SGB XI. Kostet heute nichts, später eine Migration.
+- **Rechtskonstruktion jetzt geschlossen halten.** Zonen, Einwilligungswortlaut und
+  Rollenmodell gelten für den zugelassenen ambulanten Dienst. Sie vorab für drei
+  Einrichtungsarten zu verallgemeinern, ergäbe ein Modell, das auf keine zutrifft.
+- **Vertretung hat dort einen anderen Rechtsgrund.** In stationärer Pflege und im Krankenhaus
+  ist die **rechtliche Betreuung** der Regelfall, nicht die Vollmacht — eine Betreuerin handelt
+  kraft gerichtlicher Bestellung, nicht kraft Erklärung der betroffenen Person. Der Ablauf in
+  F1.1 bildet das nicht ab.
+- **Rollen sind je Art andere.** Wohnbereichsleitung, Sozialdienst, Entlassmanagement haben im
+  hier beschriebenen Modell keine Entsprechung.
+
+---
+
 ## Nicht-Ziele der ersten Auslieferung
 
 - **Keine laufende Dokumentation durch den Dienst** (Zone 3) — siehe oben
