@@ -73,10 +73,26 @@ Offen und übernommen: die Rechenregel des GdB-Rechners hat keine Deckung in der
 
 ### Vertrauen & Zugänglichkeit — *geplant*
 
-Barrierefreiheit (#34), 35 Sprachen, RTL (#88), Rechtstexte, Datenschutzauskunft und -löschung.
+Barrierefreiheit (#34), 35 Sprachen, RTL (#88), Rechtstexte, Datenschutzauskunft und -löschung,
+**Einwilligungsverwaltung**.
 
 Querschnittsbereich: einzelne Features werden dort umgesetzt, wo sie wirken. Die
 Barrierefreiheit des Pflegegrad-Pfads steht deshalb im Pflegegrad-Epic, nicht hier.
+
+**Einwilligungsverwaltung** ist neu und rückt nach vorn. Der DiPA-Kriterienkatalog des BfArM
+(`grant-docs` → `05_Dipa/`) verlangt sie normativ, und heute existiert nichts davon:
+
+- Einwilligungen mit dem Fallcode als pseudonymem Account verknüpfen (CNST_1.3 a)
+- Widerruf aus der Anwendung heraus, jederzeit (CNST_1.4)
+- Getrennte Einwilligungen je Zweck; die Zustimmung zu den Nutzungsbedingungen **nicht**
+  mitbündeln (CNST_1.2)
+- Eigene, folgenlos verweigerbare Einwilligung für Weiterentwicklungsdaten (CNST_3.1)
+- Abfrage der Einwilligungsfähigkeit, sonst Einwilligung eines Erziehungsberechtigten
+  (CNST_1.6 a) — betrifft den Kinder-Pfad
+- Löschkonzept für den Widerrufsfall (CNST_2.5 a, CNST_3.3)
+
+Das ist keine Nacharbeit an einem Cookie-Banner, sondern ein eigener Fachbereich. Er blockiert
+F1.2 und F1.3 im Pflegegrad-Epic.
 
 **Zeitkritisch:** Das BFSG gilt seit dem 28.06.2025 auch für Dienstleistungen im
 elektronischen Geschäftsverkehr an Verbraucher. Ob die Kleinstunternehmer-Ausnahme trägt, ist

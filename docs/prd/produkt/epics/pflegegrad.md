@@ -71,9 +71,24 @@ Die Fähigkeit, den Zustand einer Person strukturiert aufzunehmen.
 ### F1.2 — Kinder-Erhebung
 
 **Zweck** Denselben Weg für Kinder abbilden, mit eigenem Modulzuschnitt.
-**Umfang** Gebaut.
-**Fertig, wenn** — erledigt.
-**Hängt an** —
+
+**Umfang** Erhebung gebaut. **Die Einwilligungsführung fehlt.**
+
+Der DiPA-Kriterienkatalog des BfArM verlangt als MUSS (CNST_1.6 a): Vor der Einholung der
+Einwilligung muss die Einwilligungsfähigkeit der betroffenen Person abgefragt werden; besteht
+sie nicht, muss auf das Erfordernis der Einwilligung eines Erziehungsberechtigten verwiesen und
+diese abgefragt werden. Der Kinder-Pfad fragt heute weder das eine noch das andere — er setzt
+lediglich `pflege_zielgruppe = 'kind'` im `localStorage`.
+
+Greift nur, sofern der Hersteller die Nutzung durch unter 16-Jährige nicht ausdrücklich
+ausschließt. Genau das tut der Kinder-Pfad nicht — er lädt dazu ein.
+
+**Fertig, wenn** vor der ersten Frage die Einwilligungsfähigkeit abgefragt wird und bei
+fehlender Einwilligungsfähigkeit die Einwilligung eines Erziehungsberechtigten eingeholt und
+mit dem Fall verknüpft ist.
+
+**Hängt an** der Einwilligungsverwaltung (Epic *Vertrauen & Zugänglichkeit*) · der DiPA-Frage
+in [richtung.md](../richtung.md)
 
 ### F1.3 — Erweiterte Erhebung hinter der Bezahlschranke
 
@@ -94,14 +109,21 @@ Bezahlschranke vor Fragen, die bereits im Browser stehen, ist keine Schranke. Di
 Fragen müssen also über die API kommen, so wie die Rohpunkte seit #98–#100 serverseitig
 berechnet werden.
 
+**Was der DiPA-Kriterienkatalog dazu vorgibt:** Die Zustimmung zu den Nutzungsbedingungen darf
+**nicht** mit der datenschutzrechtlichen Einwilligung in ein Häkchen gebündelt werden —
+CNST_1.2 verbietet Erklärungen, die über die zulässigen Zwecke hinausgehen. Beides wird
+gebraucht, aber als getrennte Handlungen. Und jede Einwilligung muss mit dem Fallcode als
+pseudonymem Account verknüpft werden (CNST_1.3 a), damit sie widerrufbar bleibt.
+
 **Fertig, wenn**
 - ein nicht freigeschalteter Fall die erweiterten Fragen weder abrufen noch beantworten kann,
   auch nicht unter Umgehung der Oberfläche
 - der Übergang von frei zu kostenpflichtig im Fluss erklärt ist, nicht nur versperrt
 - die freie Einschätzung ohne die erweiterten Fragen ein gültiges Ergebnis liefert
+- Nutzungsbedingungen und Einwilligung getrennt bestätigt und am Fall festgehalten werden
 
-**Hängt an** dem offenen Schnitt (unten) · F2.2, weil eine ungeprüfte Rechnung nichts ist,
-wofür man Geld nehmen sollte
+**Hängt an** dem offenen Schnitt (unten) · der Einwilligungsverwaltung (Epic *Vertrauen &
+Zugänglichkeit*) · F2.2, weil eine ungeprüfte Rechnung nichts ist, wofür man Geld nehmen sollte
 
 > **Der Schnitt ist offen und wird nicht hier entschieden.** Er ist zugleich die Grenze des
 > Produkts, das als digitale Pflegeanwendung gelistet werden soll — siehe
