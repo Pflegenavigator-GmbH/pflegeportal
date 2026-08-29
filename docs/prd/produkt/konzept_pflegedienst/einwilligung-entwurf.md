@@ -3,9 +3,21 @@
 **Projekt** PflegeNavigator EU
 **Für** André Schulze, Rodrigue Lawson
 **Status** Juristischer Entwurf zur Vorlage bei der Datenschutzbeauftragten / RA Tim Gruner
-**Fassung** v0.2 · 29.08.2026
+**Fassung** v0.3 · 29.08.2026
 
-> **Änderungen gegenüber v0.1** — vier Punkte, die den Entwurf tragen oder brechen:
+> **Änderungen in v0.3** — nach fachlicher Rückmeldung, fünf Korrekturen:
+> **(a)** Die Zusage „die Abrechnung sieht keine Gesundheitsdaten" war unzutreffend und ist
+> ersetzt — auch ein Verfahrensstand hat Gesundheitsbezug.
+> **(b)** Das Schema hält jetzt fest, **wer** erklärt hat; ohne das ist der Vertretungsfall
+> nicht nachweisbar.
+> **(c)** `on delete cascade` entfernt: Eine Löschung nach Art. 17 hätte den Nachweis nach
+> Art. 5 Abs. 2 mit vernichtet.
+> **(d)** Die Bedingung, die Zone 2 ohne Papierbeleg verhinderte, ist entfernt — sie
+> verdrahtete eine Formfrage, die ausdrücklich offen ist.
+> **(e)** Abschnitt 7 behauptet nicht länger pauschal, der Dienst bestimme keine Zwecke. Die
+> Verantwortlichkeit ist **je Verarbeitungsvorgang** zu bestimmen.
+>
+> **Änderungen in v0.2** — vier Punkte, die den Entwurf tragen oder brechen:
 > 1. **Zweiter Weg ergänzt.** v0.1 kannte nur den Fall, dass die betroffene Person eine
 >    Einladung erzeugt. Am 29.08.2026 wurde entschieden, dass **auch der Pflegedienst die Akte
 >    anlegen kann**. Dieser Weg braucht ein eigenes Verfahren — Abschnitt 4.
@@ -65,6 +77,9 @@ er damit tun darf.
 
 **Sie müssen das nicht.** Das Portal funktioniert für Sie genauso, wenn Sie nichts freigeben.
 
+<!-- Diese Zusage bindet die Technik: Sie ist nur wahr, solange die Freischaltung des Falls
+     nicht an der Lizenz des Pflegedienstes hängt. Siehe Abschnitt 7, Freiwilligkeit. -->
+
 **Sie können es jederzeit rückgängig machen.** Ein Klick in Ihrem Bereich genügt. Der
 Pflegedienst kann dann sofort nichts mehr sehen. Sie müssen das niemandem begründen.
 
@@ -85,9 +100,10 @@ Pflegedienst kann dann sofort nichts mehr sehen. Sie müssen das niemandem begr�
 > **Wozu:** damit der Pflegedienst mich auf die Begutachtung durch den Medizinischen Dienst
 > vorbereiten und beraten kann.
 >
-> **Wer im Pflegedienst:** nur die Pflegedienstleitung und die Pflegekraft, die mich betreut.
-> Die Inhaberin oder der Inhaber des Dienstes sieht meine Gesundheitsdaten **nicht**. Die
-> Abrechnung sieht nur, wie weit mein Verfahren ist — keine Gesundheitsdaten.
+> **Wer im Pflegedienst:** nur die Pflegedienstleitung und die Pflegekraft, die mich betreut,
+> sehen meine Angaben. Die Inhaberin oder der Inhaber des Dienstes sieht sie **nicht**. Die
+> Abrechnung sieht nur, dass ein Verfahren läuft und wie weit es ist — keine Werte, keine
+> Tagebucheinträge, keinen Pflegegrad.
 
 #### ☐ Kästchen 2 — Der Pflegedienst darf in meinem Namen handeln *(Zone 2)*
 
@@ -186,12 +202,20 @@ nichts.
 | **Pflegekraft** | ja | ja | nein | nur zugewiesene Fälle |
 | **Abrechnung** | **nein** | nein | nein | nur Verfahrensstand |
 
-Dass die Inhaberin keine Gesundheitsdaten sieht, ist keine Nachlässigkeit, sondern der Kern:
-Wer die Organisation verwaltet, braucht dafür keine Pflegedaten. Art. 5 Abs. 1 lit. c DSGVO.
+Dass die Inhaberin keine Pflegedaten sieht, ist keine Nachlässigkeit, sondern der Kern: Wer
+die Organisation verwaltet, braucht dafür keine Angaben zur Pflege. Art. 5 Abs. 1 lit. c DSGVO.
 
-**Für die Oberfläche folgt daraus:** Die Fallübersicht zeigt **grundsätzlich nur den
-Verfahrensstand**. Gesundheitsdaten erscheinen erst nach dem Öffnen eines einzelnen Falls und
-nur für Rollen, die sie sehen dürfen.
+**Für die Oberfläche folgt daraus:** Die Fallübersicht zeigt **nur den Verfahrensstand**.
+Werte, Tagebucheinträge und der Pflegegrad erscheinen erst nach dem Öffnen eines einzelnen
+Falls und nur für Rollen, die sie sehen dürfen.
+
+> **Genau formuliert — und das ist keine Wortklauberei.** Auch der bloße Verfahrensstand hat
+> Gesundheitsbezug: Dass eine benennbare Person ein laufendes Pflegegradverfahren hat, sagt
+> etwas über ihren Zustand. Die Zusage kann deshalb nicht „keine Gesundheitsdaten" lauten,
+> sondern nur: **kein über das für die Arbeitssteuerung unvermeidbare Minimum hinausgehender
+> Gesundheitsbezug in der Übersicht.** Eine Einwilligung, die mehr zusagt, als das System
+> halten kann, ist nicht informiert erteilt — und Informiertheit ist
+> Wirksamkeitsvoraussetzung.
 
 ---
 
@@ -204,8 +228,23 @@ Nachweisbarkeit nach Art. 7 Abs. 1 DSGVO:
 ```sql
 create table einwilligungen (
     id                    uuid primary key default gen_random_uuid(),
-    case_id               uuid not null references cases(id) on delete cascade,
-    organisation_id       uuid not null references organisationen(id) on delete cascade,
+    -- KEIN cascade: Der Nachweis muss eine Löschung des Falls überdauern, sonst
+    -- vernichtet Art. 17 den Beleg für eine Verarbeitung, die stattgefunden hat.
+    case_id               uuid references cases(id) on delete set null,
+    case_code_hash        text not null,  -- Zuordnung ohne Fallbezug, für Art. 5 Abs. 2
+    organisation_id       uuid references organisationen(id) on delete set null,
+
+    -- WER hat erklärt? Bei den Fragen 5 bis 7 die einzige Angabe, die zählt.
+    erklaerende_rolle     text not null check (erklaerende_rolle in (
+                            'person_selbst',
+                            'unterstuetzt_bei_eigener_eingabe',
+                            'bevollmaechtigte',
+                            'betreuerin')),
+    -- nur bei 'betreuerin' zu füllen
+    betreuung_gericht     text,
+    betreuung_az          text,
+    betreuung_aufgabenkreise text[],
+    betreuung_befristet_bis  date,
     zone_1_einsicht       boolean not null default false,
     zone_2_vertretung     boolean not null default false,
     -- Beleg der Vollmacht; für Zone 2 zwingend, sofern Papierform gefordert wird
@@ -218,8 +257,8 @@ create table einwilligungen (
     erteilt_am            timestamptz not null default now(),
     gueltig_bis           timestamptz,
     widerrufen_am         timestamptz,
-    constraint zone2_braucht_beleg
-      check (not zone_2_vertretung or vollmacht_beleg_pfad is not null)
+    widerrufen_durch      text check (widerrufen_durch in (
+                            'person_selbst', 'bevollmaechtigte', 'betreuerin', 'system'))
 );
 
 create index on einwilligungen (case_id) where widerrufen_am is null;
@@ -230,8 +269,24 @@ create index on einwilligungen (case_id) where widerrufen_am is null;
 > IP-Adresse arbeitet dagegen. Der Nachweis wird durch Fassungsstand, Zeitpunkt und den Beleg
 > geführt — das genügt Art. 7 Abs. 1 und minimiert mehr.
 >
-> **Ergänzt:** `erteilt_ueber` für den zweiten Weg, `gueltig_bis` als Antwort auf das
-> Widerrufsproblem aus Abschnitt 3, und eine Bedingung, die Zone 2 ohne Beleg verhindert.
+> **Ergänzt:** `erteilt_ueber` für den zweiten Weg und `gueltig_bis` als Antwort auf das
+> Widerrufsproblem aus Abschnitt 3.
+>
+> **Ergänzt in v0.3 — der Nachweis des Vertretungsfalls.** Die vorige Fassung hielt fest,
+> *dass* eingewilligt wurde, aber nicht, **wer erklärt hat**. Bei den Fragen 5 bis 7 ist das
+> die einzige Angabe, die zählt: Ohne sie ist der Nachweis nach Art. 7 Abs. 1 im
+> Vertretungsfall nicht führbar, und Einwilligung, Vertretungsmacht und Portalberechtigung
+> lassen sich im Schema nicht auseinanderhalten.
+>
+> **Geändert in v0.3 — kein `on delete cascade`.** Ein Löschverlangen nach Art. 17 hätte den
+> Beleg für eine Verarbeitung vernichtet, die stattgefunden hat. Die Nachweiszeile läuft
+> deshalb ohne Fallbezug weiter, gebunden nur an einen Hashwert. Der Zielkonflikt zwischen
+> Art. 17 und Art. 5 Abs. 2 ist damit entschieden — er gehört so ins Löschkonzept und auf die
+> Vorlage.
+>
+> **Entfernt in v0.3 — `zone2_braucht_beleg`.** Die Bedingung verdrahtete die Papierform,
+> obwohl Abschnitt 3 die Formfrage ausdrücklich als offen führt und verlangt, sie zu
+> beantworten, *bevor gebaut wird*. Sie kommt zurück, wenn die Antwort da ist.
 
 ### B. Zugriffe protokollieren
 
@@ -273,12 +328,30 @@ beschränkt. Der `SUPABASE_SERVICE_ROLE_KEY` bleibt serverseitig.
 
 **Die Schlussfolgerung — und sie ist eine Annahme, keine Feststellung:**
 
-> Da der Pflegedienst keine eigenen Aufzeichnungen führt und die Zwecke der Verarbeitung nicht
-> bestimmt, bleibt die betroffene Person alleinige Verantwortliche für die Akte.
+> Da der Pflegedienst keine eigenen Aufzeichnungen führt, bleibt die betroffene Person
+> Verantwortliche für die Akte.
 
 v0.1 führte diesen Satz als „Ergebnis". Er ist die **tragende, ungeprüfte These des gesamten
 Entwurfs**. Hält sie nicht, rückt Zone 2 in Zone 3, und der Vertragsapparat nach Art. 28 wird
 sofort erforderlich — mit jedem Pflegedienst einzeln.
+
+**Und die These ist zu grob geschnitten.** Eine frühere Fassung schrieb, der Dienst „bestimme
+die Zwecke der Verarbeitung nicht". Das ist als Pauschalaussage nicht haltbar: Nach den
+Leitlinien 07/2020 des Europäischen Datenschutzausschusses ist Verantwortlichkeit
+**vorgangsbezogen** zu bestimmen — maßgeblich ist, wer Zwecke und **wesentliche** Mittel
+festlegt. Wenn ein Dienst Modulwerte zur Vorbereitung einer Begutachtung liest, verfolgt er
+dabei durchaus einen eigenen Zweck.
+
+Die Zonen 1 bis 3 sind für den ersten Zugriff eine brauchbare Ordnung, aber sie sind **keine
+Rollenzuweisung**. Vier Aufgaben sind nicht vier Verarbeitungsvorgänge, sondern eher zehn. Die
+Vorlage an die Datenschutzbeauftragte enthält deshalb eine Matrix je Vorgang statt einer
+Aussage je Zone.
+
+**Freiwilligkeit hat eine technische Bedingung.** Der Einwilligungstext sagt zu: „Das Portal
+funktioniert für Sie genauso, wenn Sie nichts freigeben." Das ist nur wahr, solange die
+Freischaltung des Falls **nicht** an der Lizenz des Pflegedienstes hängt. Andernfalls kostet
+ein Widerruf den Zugang zu Funktionen, und die Einwilligung ist nicht mehr freiwillig im Sinne
+des Art. 7 Abs. 4 DSGVO. Das gilt für den Widerruf ebenso wie für das Auslaufen der Lizenz.
 
 **Eine dritte Möglichkeit, die v0.1 nicht kannte:** Der Kriterienkatalog stellt fest, dass
 **gemeinsame Verantwortung nach Art. 26 DSGVO für digitale Pflegeanwendungen ausdrücklich

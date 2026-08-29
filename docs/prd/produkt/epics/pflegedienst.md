@@ -116,7 +116,7 @@ in einer Wohnung statt, nicht am Bildschirm.
 - Weg B: Der Dienst legt an — mit einem Verfahren, das die Einwilligung außerhalb des Portals
   einholt und im Portal belegt
 - **Der Übergang von B nach A**: Die Person übernimmt ihre Akte. Der Wechsel der
-  Verantwortlichkeit ist der rechtlich heikle Moment und muss protokolliert werden
+  Zugangs- und Zurechnungslage ist zu protokollieren
 - Ein Widerruf der Freigabe beendet den Zugriff des Dienstes, ohne die Akte zu löschen
 
 **Fertig, wenn** beide Wege bestehen, der Übergang protokolliert ist und zu jedem Zeitpunkt
@@ -202,9 +202,14 @@ Patienten hinweg.
 
 **Zweck** Eine Leitung muss sehen, welche Fälle anstehen — ohne in jede Akte zu schauen.
 
-**Festgelegt am 29.08.2026: Die Übersicht zeigt grundsätzlich nur den Verfahrensstand.**
-Gesundheitsdaten — Modulwerte, Tagebucheinträge, der Pflegegrad selbst — erscheinen erst nach
-dem Öffnen eines einzelnen Falls, und nur für Rollen, die sie sehen dürfen.
+**Festgelegt am 29.08.2026: Die Übersicht zeigt nur den Verfahrensstand.** Modulwerte,
+Tagebucheinträge und der Pflegegrad erscheinen erst nach dem Öffnen eines einzelnen Falls, und
+nur für Rollen, die sie sehen dürfen.
+
+> **Korrektur vom 29.08.2026.** Eine frühere Fassung formulierte das Ziel als „keine
+> Gesundheitsdaten in der Übersicht". Das ist nicht erreichbar: Dass eine benennbare Person ein
+> laufendes Pflegegradverfahren hat, ist selbst gesundheitsbezogen. Ein Abnahmekriterium, das
+> „keine Gesundheitsdaten" verlangt, wäre nie erfüllbar gewesen.
 
 Das folgt aus Art. 5 Abs. 1 lit. c DSGVO: Eine Liste, die nebenbei die Pflegegrade aller
 Patienten zeigt, verarbeitet mehr, als für den Zweck „sehen, was ansteht" nötig ist.
@@ -216,7 +221,9 @@ Patienten zeigt, verarbeitet mehr, als für den Zweck „sehen, was ansteht" nö
 - Für die Rolle Abrechnung ist die Liste die **einzige** Ansicht; das Öffnen eines Falls ist
   ihr verwehrt
 
-**Fertig, wenn** die Übersicht auch über die Schnittstelle keine Gesundheitsdaten liefert.
+**Fertig, wenn** die Übersicht auch über die Schnittstelle keinen Gesundheitsbezug liefert,
+der über das für die Arbeitssteuerung unvermeidbare Minimum hinausgeht — kein Pflegegrad, keine
+Modulwerte, keine Tagebuchinhalte.
 
 ---
 

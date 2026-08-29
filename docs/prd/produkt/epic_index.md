@@ -16,7 +16,7 @@ gepflegt.
 | [Pflegedienst-Zugang](epics/pflegedienst.md) | Freigabe je Patient, Rollen, Arbeiten am Patienten | **In Ausarbeitung — kritischer Pfad** |
 | [Pflegegrad-Ermittlung](epics/pflegegrad.md) | Den Pflegegrad belastbar einschätzen und die Einschätzung belegen | **In Ausarbeitung** |
 | [Widerspruch & Briefe](epics/widerspruch-briefe.md) | Aus dem Ergebnis ein Schreiben an die Pflegekasse machen | **In Ausarbeitung** |
-| Zugang & Abrechnung | Fallcode, Bezahlschranke, Lizenzen | Geplant |
+| [Zugang & Abrechnung](epics/zugang-abrechnung.md) | Konten, Rollen, Freischaltung, Lizenz | **In Ausarbeitung** |
 | Weitere Rechner | GdB, Erwerbsminderungsrente, später SGB XIV | Ruhend — siehe Richtung |
 | [Vertrauen & Zugänglichkeit](epics/vertrauen-zugaenglichkeit.md) | Einwilligung, Betroffenenrechte, Barrierefreiheit, Sprachen | **In Ausarbeitung** |
 
@@ -43,15 +43,20 @@ bleibt ein Formbrief.
 
 → [epics/widerspruch-briefe.md](epics/widerspruch-briefe.md)
 
-### Zugang & Abrechnung — *geplant*
+### Zugang & Abrechnung — *in Ausarbeitung*
 
 Fallcode ohne Konto, Bezahlschranke, Einzelkauf, später die Lizenz für Pflegedienste.
 
 Capabilities: Fall anlegen und wiederaufnehmen · Freischaltung · Einzelkauf · Lizenz (offen)
 
 Die Frage, wo die Bezahlschranke steht, wird nicht hier entschieden, sondern im jeweiligen
-Fachbereich — für die erweiterte Erhebung in [Pflegegrad-Ermittlung](epics/pflegegrad.md).
-Dieses Epic liefert das Mittel, nicht die Grenze.
+Fachbereich. Dieses Epic liefert das Mittel, nicht die Grenze.
+
+**Der Kern: Heute gibt es keine Authentifizierung.** Mit dem Pflegedienst-Zugang entstehen zwei
+Anmeldemodelle nebeneinander — anonymer Fallcode für Patientinnen, benannte Konten für
+Einrichtungen. Beides ist vorgegeben, nicht gewählt.
+
+→ [epics/zugang-abrechnung.md](epics/zugang-abrechnung.md)
 
 ### Pflegedienst-Zugang — *in Ausarbeitung, kritischer Pfad*
 

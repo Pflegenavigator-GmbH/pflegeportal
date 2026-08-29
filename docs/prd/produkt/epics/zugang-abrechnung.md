@@ -32,7 +32,7 @@ nebeneinander bestehen:
 | Identität | keine, pseudonymer Fallcode | benanntes Konto mit Anmeldung |
 | Berechtigung | Kenntnis des Codes | Rolle **und** Freigabe für den Fall |
 | Nachvollziehbarkeit | keine, gewollt | personengenau, verpflichtend |
-| Grundlage | Art. 9 Abs. 2 lit. a DSGVO | dieselbe Einwilligung, mittelbar |
+| Grundlage | Art. 9 Abs. 2 lit. a DSGVO — **heute nicht eingeholt** | dieselbe Einwilligung, mittelbar |
 
 **Das ist kein Übergangszustand.** Die Anonymität der betroffenen Person ist keine Bequemlichkeit,
 sondern Vorgabe: Der BfArM-Kriterienkatalog verlangt in CNST_1.3 a ausdrücklich einen
@@ -125,9 +125,18 @@ Oberflächenlogik.
 mit gültiger Freigabe eine Lizenz hat? Oder bleibt die Freischaltung am Fall und die Lizenz
 regelt nur den Zugang der Einrichtung?
 
-Beides ist vertretbar, aber es muss **eines** sein. Zwei nebeneinander laufende Quellen für
-„ist freigeschaltet" erzeugen genau die Art von Fehler, die niemand bemerkt, bis jemand
-umsonst arbeitet oder umsonst bezahlt.
+> **Korrektur vom 29.08.2026: Das ist keine reine Produktfrage.** Schaltet die Lizenz des
+> Dienstes den Fall frei, hängt die Nutzbarkeit der eigenen Akte an einer Freigabe zugunsten
+> genau dieses Dienstes. Ein Widerruf kostet dann den Zugang zu Funktionen — und damit ist die
+> Einwilligung nicht mehr freiwillig im Sinne des **Art. 7 Abs. 4 DSGVO**. Der
+> Einwilligungstext sagt zu: „Das Portal funktioniert für Sie genauso, wenn Sie nichts
+> freigeben." Diese Zusage bindet die Technik.
+>
+> F2.3 zieht die Linie bereits für das **Ende** einer Lizenz („was bezahlt wurde, bleibt
+> bezahlt"), aber nicht für den **Widerruf**. Beides muss gleich behandelt werden.
+
+Zwei nebeneinander laufende Quellen für „ist freigeschaltet" erzeugen zudem genau die Art von
+Fehler, die niemand bemerkt, bis jemand umsonst arbeitet oder umsonst bezahlt.
 
 **Umfang**
 - Eine einzige serverseitige Antwort auf die Frage, ob ein Fall freigeschaltet ist
@@ -215,6 +224,6 @@ uns selbst — Datenminimierung nach Art. 5 Abs. 1 lit. c DSGVO endet nicht am e
 | Frage | Wer beantwortet sie | Blockiert |
 |---|---|---|
 | Welches Lizenzmodell? | Geschäftsführung, nach #105 | F3.1, und damit F2.2 |
-| Schaltet eine Lizenz den Fall frei, oder nur den Zugang der Einrichtung? | Produkt | F2.2 — es muss eines sein |
+| Schaltet eine Lizenz den Fall frei, oder nur den Zugang der Einrichtung? | **Datenschutzbeauftragte(r)** — vorentschieden durch Art. 7 Abs. 4 | F2.2 |
 | Darf ein Verwaltungszugang Gesundheitsdaten sehen? | Datenschutzbeauftragte(r) | F3.2 |
 | Wie erfährt die betroffene Person, dass eine Freigabe endet? | Produkt | F2.3 |

@@ -311,6 +311,31 @@ sie geklärt ist, gilt dieser Pfad als Mindestumfang — er führt zur kostenpfl
 
 ---
 
+## Die Rollenabfrage im Trichter
+
+Der Trichter fragt heute nur „Erwachsene oder Kind". Er müsste stattdessen die **Rolle** der
+bedienenden Person kennen, und zwar in drei Ausprägungen:
+
+| Auswahl | Was rechtlich vorliegt |
+|---|---|
+| Ich fülle das für mich selbst aus | Einwilligung der betroffenen Person |
+| Ich helfe jemandem beim Ausfüllen — **die Person weiß davon und ist einverstanden** | weiterhin Einwilligung der betroffenen Person; die helfende Person tritt nicht als Vertreterin auf |
+| Ich handle **für** jemanden, der das nicht selbst kann | Vertretung — Vollmacht oder rechtliche Betreuung erforderlich |
+
+**Die mittlere Zeile ist der wichtige Zugewinn.** Sie deckt den häufigsten Fall ab — eine
+Tochter sitzt neben ihrer Mutter und bedient das Gerät —, ohne dafür ein Vertretungsverhältnis
+zu konstruieren, das gar nicht besteht. Das ist rechtlich sauberer und produktseitig einfacher
+als die bisherige Annahme, jede Angehörige handle als Vertreterin.
+
+Nur die dritte Zeile löst den Nachweisapparat aus. Die Auswahl wird mit der Einwilligung
+gespeichert (`erklaerende_rolle`, siehe
+[einwilligung-entwurf.md](../konzept_pflegedienst/einwilligung-entwurf.md)).
+
+**Wichtig:** Eine Selbsterklärung im Trichter begründet keine Vertretungsmacht. Sie hält nur
+fest, was behauptet wurde. Was daraus folgt, ist Gegenstand von #105.
+
+---
+
 ## Geprüft und angenommen
 
 | Aussage | Herkunft | Stand |

@@ -133,9 +133,21 @@ Rechtsfolge, nicht über die Notwendigkeit — siehe [releases.md](../releases.m
 seit dem 29.08.2026 auf **Deutsch und Englisch**; die übrigen werden später nachgezogen.
 
 Das ist eine sinnvolle Entscheidung, hat aber eine Kehrseite: 32 Sprachfassungen stehen
-ausgeliefert im Netz, ohne dass jemand ihre fachliche Richtigkeit prüft. Bei Texten über
-Pflegegrade, Fristen und Leistungsbeträge ist eine unbelegte Übersetzung nicht neutral —
-sie ist eine Fehlerquelle in einer Sprache, in der niemand im Team gegenlesen kann.
+ausgeliefert im Netz, ohne dass jemand sie gegenliest.
+
+**Und das ist nicht nur eine Frage der Fachrichtigkeit, sondern der Wirksamkeit.** Art. 12
+Abs. 1 DSGVO verlangt Informationen in präziser, transparenter, verständlicher und leicht
+zugänglicher Form; der Kriterienkatalog wiederholt das in CNST_1.5. Eine maschinell übersetzte,
+von niemandem geprüfte Einwilligungs- oder Informationsfassung erfüllt das nicht. **Wer auf
+Arabisch einwilligt, willigt dann nicht informiert ein** — und eine nicht informierte
+Einwilligung ist keine.
+
+Derselbe Maßstab trifft die Lesbarkeit: Verständlichkeit ist Wirksamkeitsvoraussetzung, und 27
+von 34 Textelementen unter 16 px stehen dem entgegen. Beides gehört zusammen.
+
+**Der saubere Schnitt ist eng:** Erklärungspflichtige Strecken — Einwilligung,
+Nutzungsbedingungen, Datenschutzhinweise, Betroffenenrechte — nur in geprüften Sprachen
+anbieten. Der übrige Inhalt kann breiter stehen.
 
 **Zu entscheiden:** Bleiben die 32 sichtbar, oder werden sie bis zur Prüfung ausgeblendet?
 Für die Beta spricht einiges dafür, sie zurückzunehmen — auch weil #106 die Sprachauszeichnung
@@ -159,6 +171,7 @@ Arabisch und Persisch und damit F4.1.
 | Das RTL-Fundament ist gebaut | `i18n/rtl.ts`, `rtl.test.ts`, `layout.tsx:62` | geprüft |
 | Die Akzeptanzkriterien von #34 sind fachlich brauchbar | Durchsicht des Issues | **angenommen** — nicht gegen die Norm geprüft |
 | Die 32 nicht gepflegten Sprachfassungen sind fachlich korrekt | keine | **angenommen** — niemand hat sie geprüft |
+| Erklärungspflichtige Texte in ungeprüfter Übersetzung erfüllen Art. 12 Abs. 1 nicht | Art. 12 Abs. 1 DSGVO, CNST_1.5 | **angenommen** — mit #105 zu bestätigen |
 
 ---
 
