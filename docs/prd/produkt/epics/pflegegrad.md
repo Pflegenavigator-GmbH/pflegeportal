@@ -90,17 +90,37 @@ mit dem Fall verknüpft ist.
 **Hängt an** der Einwilligungsverwaltung (Epic *Vertrauen & Zugänglichkeit*) · der DiPA-Frage
 in [richtung.md](../richtung.md)
 
-### F1.3 — Erweiterte Erhebung hinter der Bezahlschranke
+### F1.3 — Vollständige Erhebung hinter der Bezahlschranke
 
-**Zweck** Die ausführliche Erhebung wird die kostenpflichtige Leistung. Die kurze Einschätzung
-bleibt frei und führt hin.
+**Zweck** Die Erhebung nach dem vollständigen amtlichen Kriterienkatalog wird die
+kostenpflichtige Leistung. Die heutige Kurzeinschätzung bleibt frei und führt hin.
+
+**Der Schnitt ist damit festgelegt** — und er ist fachlich begründet, nicht willkürlich:
+
+| | frei | kostenpflichtig |
+|---|---|---|
+| Kriterien | 28 (4 / 5 / 4 / 6 / 4 / 5 je Modul) | der vollständige amtliche Katalog |
+| Bewertung | Näherung über den Rohpunkte-Anteil | die **amtlichen Punktschwellen** |
+| Aussage | Orientierung | belastbare Einschätzung, widerspruchsfähig |
+
+Die Zahlen der freien Fassung stehen in `MODULE_MAX_RAW` (`nba.ts:37`); der Abstand zum
+amtlichen Katalog ist dort selbst vermerkt („z. B. Modul 3: 4 statt 13").
+
+> **Was dieser Schnitt nebenbei löst.** Die Näherung `severityFraction` existiert nur, *weil*
+> die App weniger Kriterien abfragt als der amtliche Katalog — mit dem vollständigen Katalog
+> sind die amtlichen Punktschwellen unmittelbar anwendbar. Damit betrifft die offene Prüfung
+> aus F2.2 nur noch die **freie** Fassung. Die kostenpflichtige Leistung ruht auf der Norm
+> selbst, nicht auf einer Näherung. Für die DiPA-Absicht ist genau das die tragfähigere
+> Grundlage — die Bezahlschranke trennt dann Orientierung von Erhebung, nicht mehr und
+> weniger vom selben.
 
 **Umfang**
-- Schnitt zwischen freier Kurzeinschätzung und erweiterter Erhebung festlegen (offen, siehe unten)
-- Erweiterte Fragen **serverseitig ausliefern und speichern**
+- Vollständiger Kriterienkatalog je Modul erfasst und hinterlegt
+- Bewertung der Vollfassung über die amtlichen Punktschwellen statt über die Näherung
+- Fragen und Antworten der Vollfassung **serverseitig ausliefern und speichern**
 - Serverseitige Durchsetzung der Freischaltung bei jedem Abruf und jeder Antwort
-- Bezahlschranke im Fluss, an der Grenze, nicht erst am Ergebnis
-- Die freie Einschätzung muss für sich brauchbar bleiben und darf nicht als Köder wirken
+- Einstieg über die Ergebnisseite (F3.4), nicht über einen Sprung im Trichter
+- Die freie Einschätzung bleibt für sich brauchbar und darf nicht als Köder wirken
 
 **Der Punkt, der die Umsetzung bestimmt:** Die Modulseiten sind heute reine Client-Seiten, die
 Antworten liegen im `localStorage`. `entitlement.ts` ist ausdrücklich nur Oberflächenlogik —
@@ -186,25 +206,35 @@ fehlende Antwort.
 
 Die Fähigkeit, die Einschätzung so auszugeben, dass sie den nächsten Schritt trägt.
 
-### F3.1 — Nachvollziehbare Herleitung
+### F3.1 — Nachvollziehbare Herleitung · *weitgehend gebaut*
+
+> **Korrektur vom 29.08.2026.** Eine frühere Fassung dieses Features behauptete, das Ergebnis
+> zeige seine Herleitung nicht. Das war falsch und aus dem Typ geschlossen, ohne die laufende
+> Seite anzusehen. Die Prüfung an einem echten Fall hat das Gegenteil ergeben.
 
 **Zweck** Zeigen, wie das Ergebnis zustande kam.
 
-**Umfang**
-- Rohpunkte je Modul, daraus die gewichteten Punkte
-- Das Höchstwertprinzip zwischen Modul 2 und 3 als das, was es ist: eine Auswahl, keine Summe
-- Die Schwelle, an der der Pflegegrad kippt, und der Abstand dorthin
-- Ein Satz, der sagt, was der Rechner ist und was nicht
+**Was bereits steht** — geprüft an Fall `PF-C1HB-FH1I` auf der Ergebnisseite:
 
-**Im Weg steht ein Fehler:** `PflegegradErgebnis.weightedScores` ist auf die Module 1 bis 5
-typisiert (`src/types/pflegegrad.ts:29`). Modul 6 fließt in die Gesamtsumme ein, wird aber
-nicht ausgegeben. Eine Aufschlüsselung aus diesem Feld wäre still unvollständig.
+- Punktwert und Gesamtskala („Punktwert: 50.0 von 100.")
+- Alle fünf Schwellen im Klartext erklärt
+- Je Modul der Rohwert **und** die gewichteten Punkte („40.0 Pkt. · Rohwert: 18")
+- Das Höchstwertprinzip ausdrücklich benannt: „Höchstwertprinzip aktiv (Vergleich Modul 2:
+  0 Pkt. vs Modul 3: 0 Pkt.) → Fließt nicht in die Gesamtwertung ein."
+- Ein einordnender Abschnitt „Wie kommt mein Pflegegrad zustande? (Einfach erklärt)"
+- Bei Unterschreiten der Schwelle ein Hinweis auf den Abstand dorthin
 
-**Fertig, wenn** aus dem Ergebnis erkennbar ist, welches Modul den Ausschlag gab, und
-`weightedScores` alle sechs Module führt.
+Das ist mehr, als das Feature verlangt hatte.
 
-**Hängt an** F2.2 — eine Herleitung zu zeigen, die auf einer ungeprüften Näherung ruht, macht
-die Sache schlimmer, nicht besser.
+**Was offen bleibt** — ein einzelner Fehler, jetzt sichtbar statt erschlossen: Die Module 1
+bis 5 weisen ihre gewichteten Punkte aus, **Modul 6 zeigt nur „Erfasst"**. Ursache ist
+`PflegegradErgebnis.weightedScores` in `src/types/pflegegrad.ts:29`, das auf die Module 1 bis 5
+typisiert ist. Modul 6 fließt in die Summe ein, hat aber keinen ausgebbaren Wert.
+
+**Fertig, wenn** `weightedScores` alle sechs Module führt und Modul 6 seine gewichteten Punkte
+wie die übrigen ausweist.
+
+**Hängt an** — (klein und unabhängig; die Verlässlichkeit der gezeigten Zahlen hängt an F2.2)
 
 ### F3.2 — Leistungsbeträge mit Fundstelle
 
@@ -226,6 +256,32 @@ stehen deutsche Zeichenketten fest im Code — `'Pflegehilfsmittel (42€)'`,
 Zeichenkette mehr in `src/lib/` liegt.
 
 **Hängt an** — (unabhängig umsetzbar)
+
+### F3.4 — Einstieg in die vollständige Erhebung vom Ergebnis aus
+
+**Zweck** Die Ergebnisseite ist die Stelle, an der jemand weiß, was er hat — und ob es reicht.
+Genau dort gehört das Angebot hin, es genauer zu erfahren.
+
+**Umfang**
+- Schaltfläche auf der Ergebnisseite, die die vollständige Erhebung startet
+- Davor die Bezahlschranke; der Kauf schaltet den Fall frei, nicht das Gerät
+- Nach Freischaltung führt die Schaltfläche unmittelbar in die erste Frage der Vollfassung
+- Der Nutzen wird benannt, bevor bezahlt wird: mehr Kriterien, amtliche Punktschwellen,
+  belastbar für einen Widerspruch — nicht „mehr Details"
+- Fortsetzbar: Wer die Vollfassung beginnt und unterbricht, findet sie über den Fallcode wieder
+
+**Der Zeitpunkt ist der Punkt.** Am Anfang des Trichters weiß niemand, wofür er zahlen soll.
+Nach dem Ergebnis schon — besonders, wenn der Wert knapp unter einer Schwelle liegt. Die
+Ergebnisseite weist diesen Abstand bereits aus.
+
+**Fertig, wenn**
+- die Schaltfläche für einen nicht freigeschalteten Fall die Bezahlschranke öffnet
+- ein freigeschalteter Fall unmittelbar in die Vollfassung gelangt
+- der Weg auf einem zweiten Gerät mit demselben Fallcode weitergeht
+- ohne Freischaltung kein Zugriff auf Fragen oder Antworten der Vollfassung möglich ist,
+  auch nicht unter Umgehung der Oberfläche
+
+**Hängt an** F1.3 · F1.4 und #99, weil hier zum ersten Mal Bezahltes verloren gehen kann
 
 ### F3.3 — Übergang zum Widerspruch
 

@@ -13,10 +13,10 @@ gepflegt.
 
 | Epic | Zweck | Stufe |
 |---|---|---|
+| [Pflegedienst-Zugang](epics/pflegedienst.md) | Freigabe je Patient, Rollen, Arbeiten am Patienten | **In Ausarbeitung — kritischer Pfad** |
 | [Pflegegrad-Ermittlung](epics/pflegegrad.md) | Den Pflegegrad belastbar einschätzen und die Einschätzung belegen | **In Ausarbeitung** |
 | Widerspruch & Briefe | Aus dem Ergebnis ein Schreiben an die Pflegekasse machen | Geplant |
 | Zugang & Abrechnung | Fallcode, Bezahlschranke, Lizenzen | Geplant |
-| Pflegedienst-Zugang | Freigabe je Patient für Pflegedienste, mit Rollen | Ruhend — blockiert durch #105 |
 | Weitere Rechner | GdB, Erwerbsminderungsrente, später SGB XIV | Ruhend — siehe Richtung |
 | Vertrauen & Zugänglichkeit | Barrierefreiheit, Sprachen, Rechtstexte, Datenschutz | Geplant |
 
@@ -51,15 +51,16 @@ Die Frage, wo die Bezahlschranke steht, wird nicht hier entschieden, sondern im 
 Fachbereich — für die erweiterte Erhebung in [Pflegegrad-Ermittlung](epics/pflegegrad.md).
 Dieses Epic liefert das Mittel, nicht die Grenze.
 
-### Pflegedienst-Zugang — *ruhend*
+### Pflegedienst-Zugang — *in Ausarbeitung, kritischer Pfad*
 
-Freigabe je Patient über den QR-Code, Rollen innerhalb der Einrichtung, getrennte
-Verantwortlichkeiten in drei Zonen.
+Freigabe je Patient, Rollen innerhalb der Einrichtung, getrennte Verantwortlichkeiten in drei
+Zonen, Erfassung unterwegs.
 
-Der Entwurf liegt vor: `pflegenavigator-grant-docs` →
-`07_Architekturentscheidungen/Compliance/Zugangskonzept/`. Ausgearbeitet wird erst, wenn die
-acht Punkte aus #105 beantwortet sind — der ganze Schnitt ruht auf einer ungeprüften Annahme
-zur Verantwortlichkeit.
+**Neu eingeordnet am 29.08.2026:** Pflegedienste sind voraussichtlich die **ersten Nutzer**.
+Damit rückt dieses Epic von der letzten auf die erste Position, und #105 ist keine
+Nebenfrage mehr, sondern die Sperre, die als Erstes fallen muss.
+
+→ [epics/pflegedienst.md](epics/pflegedienst.md)
 
 ### Weitere Rechner — *ruhend*
 
