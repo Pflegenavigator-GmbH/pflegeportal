@@ -101,11 +101,30 @@ heute geteilten Fallcodes. Zugriffsprotokoll je Freigabe.
 
 **Zweck** Nicht jede Person im Dienst darf dasselbe.
 
-**Umfang** Vier Rollen aus dem Zugangskonzept — Leitung, Fachkraft, Verwaltung, Lesezugriff.
-Die Rolle *in der Einrichtung* bleibt strikt getrennt von der Freigabe *für einen Fall*.
+**Festgelegt am 29.08.2026.** Die Rolle *in der Einrichtung* bleibt strikt getrennt von der
+Freigabe *für einen Fall*: Ohne Freigabe der betroffenen Person sieht auch die
+Pflegedienstleitung nichts.
 
-**Offen** Welche Rolle welche der fünf Aufgaben ausführen darf. Nicht aus der Architektur
-ableitbar — gehört in ein Gespräch mit einem Pflegedienst.
+| Rolle | Gesundheitsdaten lesen | In fremdem Namen handeln | Organisation verwalten | Umfang |
+|---|---|---|---|---|
+| Inhaberin / Inhaber | **nein** | nein | ja | Verträge und Konten |
+| Pflegedienstleitung | ja | ja | ja | alle freigegebenen Fälle |
+| Pflegekraft | ja | ja | nein | nur zugewiesene Fälle |
+| Abrechnung | **nein** | nein | nein | nur Verfahrensstand |
+
+Bemerkenswert ist die erste Zeile: **Wer die Organisation verwaltet, sieht keine Pflegedaten.**
+Das ist keine Lücke, sondern Art. 5 Abs. 1 lit. c DSGVO — für Verträge und Konten braucht es
+keine Gesundheitsdaten. Für die Umsetzung heißt das, dass „Admin" hier gerade **nicht**
+allmächtig ist; ein Rollenmodell, das aus Bequemlichkeit alles an die Inhaberin gibt, wäre ein
+Verstoß.
+
+**Umfang**
+- Vier Rollen mit den Rechten aus der Tabelle
+- Zuweisung einzelner Fälle an Pflegekräfte
+- Jede Rolle wird serverseitig durchgesetzt, nicht in der Oberfläche
+
+**Fertig, wenn** eine Inhaberin auch bei direktem Zugriff auf die Schnittstelle keine
+Gesundheitsdaten erhält und eine Pflegekraft keinen Fall sieht, der ihr nicht zugewiesen ist.
 
 ---
 
@@ -146,11 +165,21 @@ Patienten hinweg.
 
 **Zweck** Eine Leitung muss sehen, welche Fälle anstehen — ohne in jede Akte zu schauen.
 
-**Umfang** Liste der freigegebenen Fälle mit Stand, Pflegegrad und anstehenden Fristen. Nur
-Fälle mit gültiger Freigabe.
+**Festgelegt am 29.08.2026: Die Übersicht zeigt grundsätzlich nur den Verfahrensstand.**
+Gesundheitsdaten — Modulwerte, Tagebucheinträge, der Pflegegrad selbst — erscheinen erst nach
+dem Öffnen eines einzelnen Falls, und nur für Rollen, die sie sehen dürfen.
 
-**Offen** Ob die Übersicht Gesundheitsdaten zeigen darf oder nur Verfahrensstände. Gehört zu
-#105.
+Das folgt aus Art. 5 Abs. 1 lit. c DSGVO: Eine Liste, die nebenbei die Pflegegrade aller
+Patienten zeigt, verarbeitet mehr, als für den Zweck „sehen, was ansteht" nötig ist.
+
+**Umfang**
+- Liste der Fälle mit gültiger Freigabe: Verfahrensstand, anstehende Fristen, zugewiesene
+  Pflegekraft
+- Kein Pflegegrad, keine Modulwerte, keine Tagebuchinhalte in der Liste
+- Für die Rolle Abrechnung ist die Liste die **einzige** Ansicht; das Öffnen eines Falls ist
+  ihr verwehrt
+
+**Fertig, wenn** die Übersicht auch über die Schnittstelle keine Gesundheitsdaten liefert.
 
 ---
 
@@ -170,12 +199,38 @@ Fälle mit gültiger Freigabe.
 
 ---
 
+## Größenordnung
+
+Erster Kooperationspartner ist die **Pflegedienst Lirio GmbH, Bielefeld** — damit gibt es ein
+reales Testfeld statt einer Annahme.
+
+Der Drei-Jahres-Plan rechnet mit durchschnittlich **150 DiPA-berechtigten Nutzenden im Monat im
+zweiten Jahr** und **900 im dritten**. Eine typische Patientenzahl je Dienst ist damit nicht
+bestimmt — sie schwankt vom Kleinstbetrieb bis zur Kette.
+
+**Für das Lizenzmodell folgt daraus:** kein Festbetrag, der beide Enden trifft. Der Vorschlag
+aus dem Konzept ist eine Institutionslizenz je Haus oder Fachabteilung, deren Preis sich am
+tatsächlichen Fallaufkommen orientiert. Als Alternative wird die Einbindung über einen
+Einweisungsbetrag nach § 39a SGB XI genannt (bis zu 30 € je Patient) — **Fundstelle und Höhe
+sind zu prüfen**, bevor damit gerechnet wird.
+
+Für F2.3 heißt eine dreistellige Fallzahl je Dienst: Die Übersicht braucht Filter, Sortierung
+und Seitenaufteilung, nicht nur eine Liste.
+
+---
+
 ## Offene Fragen
 
 | Frage | Wer beantwortet sie | Blockiert |
 |---|---|---|
-| Welche Form braucht die Einwilligung, wenn der Dienst die Akte anlegt? | Datenschutzbeauftragte(r) | F1.1, und damit den Start |
-| Kommt Zone 3 in die erste Auslieferung, mit allem, was daran hängt? | Geschäftsführung | den Zuschnitt und den Termin |
-| Welche Rolle darf welche Aufgabe? | Gespräch mit einem Pflegedienst | F1.3 |
-| Darf die Fallübersicht Gesundheitsdaten zeigen? | Datenschutzbeauftragte(r) | F2.3 |
-| Wie viele Patienten hat ein Dienst typischerweise im Portal? | Gespräch mit einem Pflegedienst | Zuschnitt von F2.3 und das Lizenzmodell |
+| Bleibt die betroffene Person auch bei Zone 2 alleinige Verantwortliche? | Datenschutzbeauftragte(r) | den gesamten Zuschnitt |
+| Welche Form braucht die Vollmacht — Portal oder Unterschrift auf Papier? | Datenschutzbeauftragte(r) | F1.1; Papier erzwingt ein Upload-Verfahren |
+| Genügt beim Anlegen durch den Dienst eine Einwilligung auf Papier vor der Erfassung? | Datenschutzbeauftragte(r) | F1.1, und damit den Start |
+| Wie lange dürfen Einwilligungs- und Zugriffsprotokolle aufbewahrt werden? | Datenschutzbeauftragte(r) | das Löschkonzept |
+| Fundstelle und Höhe des Einweisungsbetrags nach § 39a SGB XI | Recherche | das Lizenzmodell |
+
+**Beantwortet am 29.08.2026:** Rollenmodell (F1.3), Inhalt der Fallübersicht (F2.3),
+Zone 3 später, beide Wege zur Akte.
+
+Der ausgearbeitete Wortlaut für Einwilligung und Vollmacht liegt in
+[konzept_pflegedienst/einwilligung-entwurf.md](../konzept_pflegedienst/einwilligung-entwurf.md).
