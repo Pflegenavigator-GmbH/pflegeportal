@@ -81,7 +81,7 @@ sehen.
 - Erstes Mitglied entsteht mit der Organisation und trägt die Rolle Inhaberin
 - Mitglieder werden eingeladen, nicht selbst angelegt
 - Rollen nach dem Modell in [pflegedienst.md](pflegedienst.md) — die Inhaberin sieht **keine**
-  Gesundheitsdaten
+  Pflegedaten, die Abrechnung nur den Verfahrensstand
 - Ausscheiden entzieht den Zugriff sofort; das Zugriffsprotokoll bleibt erhalten
 - Zuweisung einzelner Fälle an Pflegekräfte
 

@@ -8,7 +8,7 @@
 > **ausgefüllter Vorschlag** statt als offene Bitte; § 203 StGB ist als eigener Punkt
 > aufgenommen.
 
-Siebzehn Fragen. Die erste trägt alle anderen.
+Zwanzig Fragen. Die erste trägt alle anderen; die Punkte 18 und 19 kommen zeitlich zuerst.
 
 **Mitzugeben:**
 
