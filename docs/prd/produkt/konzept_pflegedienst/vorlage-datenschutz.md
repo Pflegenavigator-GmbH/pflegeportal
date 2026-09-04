@@ -1,8 +1,11 @@
 # Vorlage an die Datenschutzbeauftragte
 
-**PflegeNavigator EU** · Fassung v0.2 · 29.08.2026 · zur Übergabe
+**PflegeNavigator EU** · Fassung v0.3 · 29.08.2026 · zur Übergabe
 
-> **Änderungen gegenüber v0.1** — nach fachlicher Rückmeldung:
+> **v0.3** — Verweise auf das Zugangskonzept nachgezogen (dort steht die Rollenmatrix jetzt
+> ebenfalls, als Abschnitt 3).
+>
+> **v0.2** — nach fachlicher Rückmeldung:
 > Frage 1 ist neu gefasst (vorgangsbezogen statt zonenbezogen) und um eine Matrix ergänzt;
 > vier Fragen sind hinzugekommen (14 bis 17); die Aufbewahrungsfristen kommen jetzt als
 > **ausgefüllter Vorschlag** statt als offene Bitte; § 203 StGB ist als eigener Punkt
@@ -14,7 +17,7 @@ Zwanzig Fragen. Die erste trägt alle anderen; die Punkte 18 und 19 kommen zeitl
 
 | Unterlage | Wo |
 |---|---|
-| Zugangskonzept für Pflegedienste, v0.2 (9 Seiten) | `grant-docs` → `07_Architekturentscheidungen/Compliance/Zugangskonzept/` |
+| Zugangskonzept für Pflegedienste, v0.3 (11 Seiten) | `grant-docs` → `07_Architekturentscheidungen/Compliance/Zugangskonzept/` |
 | Entwurf Einwilligung und Vollmacht, v0.3 | `pflegeportal` → `docs/prd/produkt/konzept_pflegedienst/einwilligung-entwurf.md` |
 | Laufendes Ticket mit Verlauf | Issue #105 |
 
