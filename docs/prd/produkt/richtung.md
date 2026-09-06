@@ -4,7 +4,14 @@ Dieses Dokument beantwortet genau eine Frage:
 
 > **Wohin geht das Produkt, wer zahlt dafür, und was ruht solange?**
 
-**Stand:** 29.08.2026 · festgehalten nach der Bestandsaufnahme der 19 offenen Issues
+**Stand:** 06.09.2026 · ursprünglich festgehalten am 29.08.2026, überarbeitet nach dem
+Rechtsgutachten vom 06.09.2026
+
+> **Was das Gutachten hier geändert hat:** Die DiPA-Absicht trägt nicht (§ 40a Abs. 1a S. 2
+> SGB XI), der BfArM-Datenschutzkatalog ist damit kein verbindlicher Maßstab mehr, die
+> Refinanzierung über § 39a entfällt, und das Zugangsmodell heißt richtig „Konto ohne
+> Passwort". Widerlegte Aussagen sind in der Tabelle *Geprüft und angenommen* durchgestrichen
+> stehen geblieben, nicht gelöscht.
 
 ---
 
@@ -52,38 +59,91 @@ Zu klären mit jemandem, der Pflegesatzverhandlungen kennt.
 
 ---
 
-## Die DiPA-Absicht
+## Die DiPA-Absicht — **die Annahme trägt nicht**
 
-Die erweiterte Erhebung zum Pflegegrad soll hinter die Bezahlschranke. Der Grund ist nicht
-allein der Umsatz, sondern die angestrebte Aufnahme als **digitale Pflegeanwendung** nach
-§ 40a SGB XI.
+> **Prüfergebnis vom 06.09.2026.** Die tragende Annahme dieses Abschnitts ist widerlegt. Der
+> gesamte frühere Text steht unter *Was hier vorher stand* am Ende, damit nachvollziehbar
+> bleibt, worauf frühere Entscheidungen aufsetzten.
 
-Damit ist die Bezahlschranke keine reine Preisentscheidung mehr: **Sie zieht die Grenze des
-Produkts, das gelistet werden soll.** Was davor liegt, ist Einstieg; was dahinter liegt, ist
-der Gegenstand des Verfahrens. Diese Grenze muss deshalb fachlich begründet sein und nicht
-danach gezogen werden, was sich gut verkauft.
+Geplant war: Die erweiterte Erhebung geht hinter die Bezahlschranke, und die Schranke ist
+zugleich die **Grenze des als digitale Pflegeanwendung zu listenden Produkts**.
 
-**Die tragende offene Frage bleibt:** Ob eine Pflegegrad-Einschätzung mit Antragshilfe
-überhaupt eine digitale Pflegeanwendung im Sinne des § 40a SGB XI ist. Die Vorschrift zielt
-auf einen **pflegerischen Nutzen** — der Kriterienkatalog bestätigt diese Zweckbindung
-beiläufig (CNST_3.1 spricht von „zur Erzielung positiver Versorgungseffekte oder eines
-pflegerischen Nutzens erforderlichen Daten"), beantwortet die Frage aber nicht. Sie liegt in
-der DiPAV und in § 40a selbst, nicht im Datenschutzkatalog.
+**Das geht nicht.** § 40a Abs. 1a S. 2 SGB XI nimmt ausdrücklich aus: Anwendungen zur
+Arbeitsorganisation ambulanter Pflegeeinrichtungen, zur Wissensvermittlung, Information oder
+Kommunikation, **zur Beantragung oder Verwaltung von Leistungen** sowie Anwendungen, die
+ausschließlich auf Auskunft oder Beratung zur Inanspruchnahme von Sozialleistungen gerichtet
+sind.
 
-Ein Werkzeug, das bei einem Antrag hilft, wirkt verwaltend. Pflegetagebuch und Anleitungen für
-Angehörige stehen der Vorschrift näher als der Rechner. Fällt die Annahme, ist die
-Bezahlschranke immer noch sinnvoll — aber sie liegt woanders, und ein anderer Teil des Portals
-wird zum DiPA-Gegenstand.
+Damit ist der kostenpflichtige Teil — vollständige Erhebung, Antrag, Widerspruch — genau der
+Bereich, den die Vorschrift ausschließt. Die Bezahlschranke wäre die Grenze zu einem **nicht
+listungsfähigen** Bereich.
 
-### Was der Kriterienkatalog vorgibt
+| Funktion | Einordnung |
+|---|---|
+| Pflegegrad-Einschätzung mit Antragserzeugung | Beantragung von Leistungen — ausgeschlossen |
+| Widerspruchsgenerator, Fristenlogik | Beantragung/Verwaltung — ausgeschlossen |
+| GdB-Rechner | Auskunft/Beratung zu Sozialleistungen — ausgeschlossen |
+| Leistungsübersicht und Beträge | Information — ausgeschlossen |
+| Fallübersicht für den Pflegedienst | Arbeitsorganisation ambulanter Dienste — ausgeschlossen |
+| Pflegetagebuch | offen — als Beobachtungsinstrument nicht per se ausgeschlossen |
+| Anleitungen für Angehörige | erfasst, **wenn** als Intervention mit belegbarer Entlastungswirkung ausgestaltet (Abs. 1a S. 1) |
+
+**Was daraus folgt:**
+
+1. **Die Bezahlschranke ist wieder eine reine Preisentscheidung.** Sie kann und muss nach
+   Produktlogik gezogen werden, nicht nach Listungsfähigkeit. Das vereinfacht F1.3 im
+   [Pflegegrad-Epic](epics/pflegegrad.md) — die dortige Begründung „für die DiPA-Absicht die
+   tragfähigere Grundlage" ist gegenstandslos.
+2. **Eine Listung bleibt möglich, aber nur für ein abgetrenntes Modul.** Kandidat ist das
+   Pflegetagebuch, verzahnt mit strukturierten Anleitungen für pflegende Angehörige, mit
+   belegbarer Entlastungswirkung nach § 40a Abs. 1a S. 1. Der **Nutzenbeleg** nach DiPAV ist
+   dabei der eigentliche Aufwand, nicht der Datenschutz.
+3. **Die Refinanzierung über § 39a fällt weg.** Die 30 € sind monatlich, nicht je Patient —
+   und an eine **gelistete** DiPA gebunden (§ 40b Abs. 1 Nr. 2). Ohne Listung kein Anspruch.
+4. **Die Barrierefreiheit hängt nicht mehr am BFSG.** § 40a Abs. 4 verpflichtet DiPA-Hersteller
+   unmittelbar; die Kleinstunternehmer-Ausnahme wäre für diesen Pfad irrelevant. Für den
+   heutigen Zuschnitt bleibt die BFSG-Frage aber bestehen.
+5. **Zum Stand des Verfahrens:** Bis heute ist keine einzige DiPA gelistet. Eine Beratung beim
+   BfArM vor einer Antragstellung ist der wirtschaftlichere Weg.
+
+> **Grenze dieser Feststellung.** Die Fundstelle stammt aus dem Rechtsgutachten vom 06.09.2026
+> und bezieht sich auf die Fassung des Gesetzes zur Befugniserweiterung und Entbürokratisierung
+> in der Pflege, in Kraft seit 01.07.2026. Sie ist dort als gegen die Primärquelle verifiziert
+> gekennzeichnet. **Vor einer Umstellung des Geschäftsmodells sollte jemand den Wortlaut einmal
+> selbst im Gesetzestext nachlesen** — daran hängt eine Erlösannahme.
+
+### Was hier vorher stand
+
+*Bis zum 06.09.2026 galt:* Die Bezahlschranke zieht die Grenze des zu listenden Produkts; ob
+eine Pflegegrad-Einschätzung mit Antragshilfe § 40a SGB XI überhaupt erfüllt, war als tragende
+offene Annahme geführt. Die damalige Vermutung — „ein Werkzeug, das bei einem Antrag hilft,
+wirkt verwaltend; Pflegetagebuch und Anleitungen stehen der Vorschrift näher" — hat sich als
+zutreffend erwiesen.
+
+### Was der Kriterienkatalog vorgibt — **Status: Orientierung, nicht Maßstab**
 
 Quelle: `pflegenavigator-grant-docs` → `05_Dipa/diga-dipa-datenschutzkriterien.pdf`, BfArM,
-Version 1.0 vom 24.04.2024. Normativ mit MUSS/SOLL-Semantik nach RFC 2119.
+Version 1.0 vom 24.04.2024.
 
-**Der Fallcode ist das richtige Modell.** Der Katalog geht selbst vom pseudonymen
-Freischaltcode aus und verlangt ihn sogar: „Im Zusammenhang mit der Abgabe einer Einwilligung
-MUSS ein pseudonymer Benutzeraccount … angelegt werden" (CNST_1.3 a). Die Architektur ohne
-Konto ist damit kein Behelf, sondern die vorgesehene Bauform.
+> **Prüfergebnis vom 06.09.2026 — und das ist der folgenreichste methodische Punkt.** Dieser
+> Katalog gilt für digitale Pflegeanwendungen. Da das Produkt nach dem Abschnitt oben derzeit
+> keine ist und keine werden kann, ist er **kein verbindlicher Maßstab**, sondern eine
+> freiwillig herangezogene Orientierung.
+>
+> Die folgenden Vorgaben bleiben inhaltlich sinnvoll und werden weiter verfolgt. Sie tragen
+> aber nur noch, soweit sie sich **unmittelbar aus der DSGVO** ergeben — nicht, weil ein
+> Kriterium es verlangt. Wo dieses Dokument oder die Epics „CNST_x" als Begründung anführen,
+> ist das ab sofort als Herkunftsangabe zu lesen, nicht als Rechtspflicht.
+
+**Ein Argument fällt damit ganz weg.** Bisher stand hier: Der Katalog verlange den pseudonymen
+Zugang ausdrücklich (CNST_1.3 a), die Architektur ohne Konto sei deshalb „kein Behelf, sondern
+die vorgesehene Bauform". Ohne die DiPA-Vorgabe entfällt diese Rechtfertigung — und damit die
+Begründung für ein schwaches Zugangsmittel.
+
+**Hinzu kommt eine Richtigstellung.** Das Modell ist nicht „pseudonymer Zugang ohne Konto",
+sondern **ein Konto ohne Passwort**: Der Fallcode ist Kennung und Geheimnis in einem, und seine
+Kenntnis genügt für den Zugriff. Das ist datenschutzrechtlich etwas anderes und
+sicherheitstechnisch schwächer. Siehe [zugang-abrechnung.md](epics/zugang-abrechnung.md).
 
 **Aber Einwilligungen müssen daran hängen.** Alle abgegebenen Einwilligungen MÜSSEN mit diesem
 Account verknüpft sein, damit sie widerrufbar bleiben (CNST_1.3 a, CNST_1.4). Heute wird im
@@ -213,8 +273,8 @@ wartet.
 | Wiederkehrende Zahlung ist technisch vorbereitet | `create-session/route.ts` | geprüft |
 | Es gibt keine Zustimmung zu den Nutzungsbedingungen | Durchsicht 29.08.2026 — weder im Trichter noch im Checkout, `consent_collection` nicht gesetzt | geprüft |
 | Der Trichter unterscheidet nicht, ob jemand für sich oder für eine andere Person handelt | `NewCaseCard.tsx`, `pflege_zielgruppe` nur im `localStorage` | geprüft |
-| Die erweiterte Erhebung ist Gegenstand der DiPA-Listung | Festlegung 29.08.2026 | **angenommen** |
-| Der pseudonyme Fallcode ist die vom Katalog vorgesehene Bauform | CNST_1.3 a | geprüft |
+| ~~Die erweiterte Erhebung ist Gegenstand der DiPA-Listung~~ | Festlegung 29.08.2026 | **widerlegt 06.09.2026** — § 40a Abs. 1a S. 2 SGB XI |
+| ~~Der pseudonyme Fallcode ist die vom Katalog vorgesehene Bauform~~ | CNST_1.3 a | **hinfällig 06.09.2026** — Katalog nicht anwendbar; das Modell ist ein Konto ohne Passwort |
 | Einwilligungen müssen mit dem pseudonymen Account verknüpft sein | CNST_1.3 a, CNST_1.4 | geprüft |
 | AGB-Zustimmung darf nicht mit der Einwilligung gebündelt werden | CNST_1.2 | geprüft |
 | Der Widerruf durch einen Vertreter ist im pseudonymen Modell nicht vorgesehen | Erläuterung zu CNST_1.4 | geprüft |
@@ -229,10 +289,11 @@ wartet.
 | Auf Datenschutzvorfälle kann nur in der Anwendung selbst hingewiesen werden | Erläuterung zu CTRL_3.2 | geprüft |
 | Jedes Release ist der Zertifizierungsstelle zu melden | Erläuterung zu CTRL_2.2/2.3 | geprüft |
 | Der heutige Betrieb erfüllt AV_1.1 und AV_1.3 | nicht untersucht | **angenommen** — dringend zu prüfen |
-| Eine Pflegegrad-Einschätzung erfüllt § 40a SGB XI | im Katalog nicht behandelt; liegt in DiPAV und § 40a | **angenommen** — tragend, siehe oben |
+| Eine Pflegegrad-Einschätzung erfüllt § 40a SGB XI | § 40a Abs. 1a S. 2 SGB XI, Rechtsgutachten 06.09.2026 | **nein** — der Produktkern ist ausdrücklich ausgenommen |
 | Eine Angehörige kann nicht wirksam in die Verarbeitung der Gesundheitsdaten einer erwachsenen Person einwilligen | Art. 9 Abs. 2 lit. a DSGVO | **angenommen** — Punkt 7 bei #105 |
 | Beim Kinder-Pfad handeln Sorgeberechtigte als gesetzliche Vertreter | § 1629 BGB | **angenommen** — mit #105 zu prüfen |
-| Förderung nach § 8 SGB XI könnte greifen | Erinnerung an eine befristete Regelung | **angenommen** — Fundstelle ungeprüft |
+| Förderung nach § 8 SGB XI könnte greifen | Erinnerung an eine befristete Regelung | **angenommen** — Fundstelle weiterhin ungeprüft |
+| Die 30 € nach § 39a sind ein Betrag je Patient | frühere Annahme | **widerlegt 06.09.2026** — 30 € **monatlich**, gebunden an eine gelistete DiPA (§ 40b Abs. 1 Nr. 2) |
 | Das BFSG gilt seit dem 28.06.2025 auch für dieses Portal | § 1 BFSG | **angenommen** — hängt an der Kleinstunternehmer-Ausnahme |
 
 ---

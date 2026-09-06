@@ -276,5 +276,7 @@ und Seitenaufteilung, nicht nur eine Liste.
 **Beantwortet am 29.08.2026:** Rollenmodell (F1.3), Inhalt der Fallübersicht (F2.3),
 Zone 3 später, beide Wege zur Akte.
 
-Der ausgearbeitete Wortlaut für Einwilligung und Vollmacht liegt in
+Alle extern zu klärenden Fragen stehen gesammelt im **Gutachtenauftrag**
+(`grant-docs` → `07_Architekturentscheidungen/Compliance/Gutachtenauftrag/`), der Wortlaut für
+Einwilligung und Vollmacht in
 [konzept_pflegedienst/einwilligung-entwurf.md](../konzept_pflegedienst/einwilligung-entwurf.md).

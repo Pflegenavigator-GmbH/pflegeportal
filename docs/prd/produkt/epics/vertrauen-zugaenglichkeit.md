@@ -31,6 +31,13 @@ Was es gibt, ist ein Cookie-Banner: `src/lib/consent.ts` verwaltet die Kategorie
 sauber gebaut und erfüllt seinen Zweck — aber es ist eine **andere Sache** als die
 Einwilligung in die Verarbeitung von Gesundheitsdaten.
 
+> **Status des BfArM-Kriterienkatalogs seit dem 06.09.2026.** Der Katalog gilt für digitale
+> Pflegeanwendungen. Da das Produkt nach § 40a Abs. 1a S. 2 SGB XI derzeit keine ist und keine
+> werden kann, ist er **kein verbindlicher Maßstab**, sondern freiwillige Orientierung. Die
+> Vorgaben bleiben inhaltlich sinnvoll, tragen aber nur, soweit sie sich unmittelbar aus der
+> DSGVO ergeben. „CNST_x" ist ab sofort Herkunftsangabe, nicht Rechtspflicht. Siehe
+> [richtung.md](../richtung.md).
+
 Der BfArM-Kriterienkatalog verlangt Einwilligungen, die am pseudonymen Konto hängen, je Zweck
 getrennt sind und aus der Anwendung heraus widerrufen werden können. Ein Wert im `localStorage`
 leistet keines davon: Er ist an das Gerät gebunden, nicht an den Fall, und beim nächsten

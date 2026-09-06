@@ -4,7 +4,7 @@ Dieses Dokument beantwortet genau eine Frage:
 
 > **Was muss wahr sein, damit wir eine Stufe erreicht haben?**
 
-**Stand:** 29.08.2026
+**Stand:** 06.09.2026 · überarbeitet nach dem Rechtsgutachten vom 06.09.2026
 
 ---
 
@@ -14,7 +14,7 @@ Am 29.08.2026 wurde festgelegt, dass **Pflegedienste voraussichtlich die ersten 
 und dass beide Stränge **parallel** laufen.
 
 ```
-B2C   Stufe 0 (live) ──▶ Beta ──▶ Release 1.0 ──▶ DiPA-Listung
+B2C   Stufe 0 (live) ──▶ Beta ──▶ Release 1.0 ──▶ (DiPA nur für ein eigenes Modul)
 B2B   #105 ───────────▶ Stufe A (Zone 1+2) ──▶ Stufe B (Zone 3)
 ```
 
@@ -138,14 +138,20 @@ Sprachen auf Deutsch erscheinen.
 Heute wird sie nirgends eingeholt — weder im Trichter noch im Checkout
 (`consent_collection` ist in der Stripe-Sitzung nicht gesetzt).
 
-**Getrennt** von der datenschutzrechtlichen Einwilligung halten (CNST_1.2 verbietet die
-Bündelung). Für die Beta genügt die Zustimmung; die vollständige Einwilligungsverwaltung
-gehört zur DiPA-Stufe.
+**Getrennt** von der datenschutzrechtlichen Einwilligung halten — das folgt aus Art. 7 Abs. 4
+DSGVO (Kopplungsverbot); CNST_1.2 sagt dasselbe, bindet seit dem 06.09.2026 aber nicht mehr.
+Für die Beta genügt die Zustimmung.
+
+> **Nachtrag 06.09.2026:** Die Einwilligungsverwaltung gehört **nicht** erst zur DiPA-Stufe.
+> Ohne Einwilligung nach Art. 9 Abs. 2 lit. a fehlt der laufenden Verarbeitung von
+> Gesundheitsdaten die Rechtsgrundlage — unabhängig von jeder Listung. Das rückt sie in die
+> Beta.
 
 ### B4 — Kinder-Pfad absichern
 
 Der Pfad lädt zur Erfassung von Kinderdaten ein und fragt weder Einwilligungsfähigkeit noch
-die Einwilligung eines Erziehungsberechtigten (CNST_1.6 a). Solange das offen ist, ist die
+die Einwilligung eines Erziehungsberechtigten (Art. 8 DSGVO, § 1629 BGB; CNST_1.6 a sagt
+dasselbe, bindet aber nicht mehr). Solange das offen ist, ist die
 Mindestmaßnahme ein Hinweis, dass die Erfassung durch einen Sorgeberechtigten erfolgen muss.
 
 ### B5 — Aussage und Wirklichkeit in Deckung bringen
@@ -203,7 +209,21 @@ Geld nehmen.
 
 ---
 
-## DiPA-Listung — eigene Größenordnung
+## DiPA-Listung — **für den heutigen Zuschnitt aussichtslos**
+
+> **Prüfergebnis vom 06.09.2026.** Diese Stufe ist für den derzeitigen Produktkern nicht
+> erreichbar: § 40a Abs. 1a S. 2 SGB XI nimmt Anwendungen zur Beantragung oder Verwaltung von
+> Leistungen, zur Wissensvermittlung und zur Information ausdrücklich aus — also Trichter,
+> Antrag, Widerspruch, GdB-Rechner und Leistungsübersicht.
+>
+> Erreichbar bleibt sie für ein **abgetrenntes Modul**: Pflegetagebuch, verzahnt mit
+> strukturierten Anleitungen für pflegende Angehörige und belegbarer Entlastungswirkung nach
+> § 40a Abs. 1a S. 1. Der Nutzenbeleg nach DiPAV ist dabei der eigentliche Aufwand.
+>
+> Der folgende Abschnitt beschreibt weiterhin, *was* eine Listung verlangt — er gilt dann für
+> dieses Modul, nicht für das Portal als Ganzes. Siehe [richtung.md](richtung.md).
+
+### Was eine Listung verlangt
 
 **Zweck der Stufe:** Aufnahme in das Verzeichnis nach § 40a SGB XI.
 

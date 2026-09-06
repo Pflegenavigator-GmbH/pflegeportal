@@ -3,8 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { withEdgeCache } from '@/src/lib/redis/with-edge-cache';
 
-export const runtime = 'edge';
-
 interface GesetzParagraph {
   sgb: string;
   paragraph: string;
