@@ -43,12 +43,16 @@ export default async function ImpressumPage(props: PageProps) {
           </CardHeader>
           <CardContent className="pt-5 space-y-4 text-xs sm:text-sm text-gray-300">
             <div className="space-y-1">
+              <p className="font-bold text-white text-lg">PflegeNavigator EU</p>
+              <p className="pt-2">Verantwortlich: André Schulz</p>
+              {/*
               <p className="font-bold text-white text-lg">PflegeNavigator EU gUG (in Gründung)</p>
               <p className="text-gray-400 text-xs">(haftungsbeschränkt)</p>
               <p className="pt-2">Geschäftsführer: André Schulz</p>
               <p>Amtsgericht: Bielefeld</p>
               <p>HRB: [Nummer eintragen]</p>
               <p>USt-IdNr.: [Nummer eintragen]</p>
+              */}
             </div>
 
             <div className="h-px bg-white/5 my-4" />
