@@ -1,3 +1,4 @@
+// src/app/[locale]/layout.tsx
 import type { Viewport } from 'next';
 import { notFound } from 'next/navigation';
 import Script from 'next/script';
@@ -10,7 +11,6 @@ import '../i18n.css';
 
 import { AccessibilityMenu } from '@/src/components/a11y/AccessibilityMenu';
 import { Analytics } from '@/src/components/analytics/Analytics';
-import AvatarStage from '@/src/components/Avatar/AvatarStage';
 import BetaBanner from '@/src/components/BetaBanner';
 import { CookieBanner } from '@/src/components/legal/CookieBanner';
 import AppFooterChrome from '@/src/components/navigation/AppFooterChrome';
@@ -110,7 +110,7 @@ export default async function LocaleLayout({
 
         {/* Ohne Übersetzungen, deshalb bewusst außerhalb. */}
         <Analytics />
-        <AvatarStage />
+        {/*<AvatarStage />*/}
       </body>
     </html>
   );
