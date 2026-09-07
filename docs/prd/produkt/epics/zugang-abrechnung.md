@@ -29,20 +29,30 @@ nebeneinander bestehen:
 
 | | Patientin | Mitglied einer Einrichtung |
 |---|---|---|
-| Identität | keine, pseudonymer Fallcode | benanntes Konto mit Anmeldung |
+| Identität | keine; Fallcode als Kennung **und** Geheimnis | benanntes Konto mit Anmeldung |
 | Berechtigung | Kenntnis des Codes | Rolle **und** Freigabe für den Fall |
 | Nachvollziehbarkeit | keine, gewollt | personengenau, verpflichtend |
 | Grundlage | Art. 9 Abs. 2 lit. a DSGVO — **heute nicht eingeholt** | dieselbe Einwilligung, mittelbar |
 
-**Das ist kein Übergangszustand.** Die Anonymität der betroffenen Person ist keine Bequemlichkeit,
-sondern Vorgabe: Der BfArM-Kriterienkatalog verlangt in CNST_1.3 a ausdrücklich einen
-pseudonymen Zugang. Die Nachvollziehbarkeit auf Seiten der Einrichtung ist ebenso verpflichtend
-— Art. 5 Abs. 2 DSGVO. Beides zugleich zu bauen ist die eigentliche Aufgabe dieses Epics.
+**Korrektur vom 06.09.2026 — das Modell heißt anders, als hier stand.** Es ist kein
+„pseudonymer Zugang ohne Konto", sondern **ein Konto ohne Passwort**: Der Fallcode ist Kennung
+und Geheimnis zugleich, und seine bloße Kenntnis genügt für den Vollzugriff auf eine
+Gesundheitsakte. Damit ist er ein *Bearer Credential*, kein Pseudonym.
+
+**Und die Rechtfertigung dafür ist entfallen.** Hier stand, die Anonymität sei Vorgabe, weil
+der BfArM-Kriterienkatalog in CNST_1.3 a einen pseudonymen Zugang verlange. Dieser Katalog gilt
+für digitale Pflegeanwendungen — das Produkt ist keine und kann nach § 40a Abs. 1a S. 2 SGB XI
+derzeit keine werden (siehe [richtung.md](../richtung.md)). Das schwache Zugangsmittel steht
+damit ohne äußere Begründung da und ist an Art. 32 DSGVO zu messen.
+
+Die Nachvollziehbarkeit auf Seiten der Einrichtung bleibt verpflichtend — Art. 5 Abs. 2 DSGVO,
+unabhängig vom Katalog. Beide Modelle nebeneinander zu bauen bleibt die Aufgabe dieses Epics.
 
 **Die Brücke ist die Freigabe**, nichts sonst. Ein Mitglied bekommt niemals den Fallcode zu
 sehen.
 
-> **Ein offener Widerspruch zur DiPA-Stufe.** Kriterium DMN_4.1 b verlangt, dass der Zugriff
+> **Ein Vorbehalt aus dem Kriterienkatalog — Status seit 06.09.2026 nur noch Orientierung,
+> sachlich aber weiter zutreffend.** Kriterium DMN_4.1 b verlangt, dass der Zugriff
 > auf ein Konto über einen **bei der Kontoanlage erfassten Authentisierungsfaktor** erfolgt,
 > und DMN_4.1 c, dass der Freischaltcode nach Einlösung gelöscht wird. Der Fallcode ist beides
 > in einem. Für die DiPA-Listung müsste auch die Patientenseite ein echtes Konto bekommen —
@@ -214,7 +224,8 @@ uns selbst — Datenminimierung nach Art. 5 Abs. 1 lit. c DSGVO endet nicht am e
 | `pflegedienste` ist ein öffentliches Verzeichnis, keine Mandantentabelle | `types/supabase.ts` — Name, Anschrift, Telefon, Bewertung | geprüft |
 | Die Freischaltung hängt heute am Fall | `cases.billing_status`, `product_tier`, `access_unlocked_at` | geprüft |
 | Wiederkehrende Zahlung ist vorbereitet | `create-session/route.ts`, `mode: 'subscription'` | geprüft |
-| Der Fallcode erfüllt DMN_4.1 b und c nicht | Kriterienkatalog gegen `case-auth.ts` | **angenommen** — betrifft die DiPA-Stufe |
+| Der Fallcode erfüllt DMN_4.1 b und c nicht | Kriterienkatalog gegen `case-auth.ts` | geprüft — der Katalog bindet zwar nicht mehr, der Befund bleibt |
+| Der Fallcode ist ein Bearer Credential und an Art. 32 DSGVO zu messen | Rechtsgutachten 06.09.2026 | geprüft |
 | Zwei Anmeldemodelle lassen sich sauber nebeneinander betreiben | Architekturvorschlag | **angenommen** — tragend für F1.3 |
 
 ---

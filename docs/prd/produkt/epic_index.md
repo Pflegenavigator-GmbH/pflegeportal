@@ -87,8 +87,10 @@ Querschnittsbereich: Features werden dort umgesetzt, wo sie wirken — die Lesba
 Pflegegrad-Pfads steht als #111 in der Beta.
 
 **Der größte Posten ist die Einwilligungsverwaltung, und heute existiert davon nichts.** Was
-es gibt, ist ein Cookie-Banner im `localStorage`; der Kriterienkatalog verlangt Einwilligungen
-am pseudonymen Konto, je Zweck getrennt und widerruflich. Das blockiert F1.2 und F1.3 im
+es gibt, ist ein Cookie-Banner im `localStorage`. Verlangt sind Einwilligungen am Fall, je
+Zweck getrennt und widerruflich — das folgt unmittelbar aus Art. 7 und 9 DSGVO. (Der
+BfArM-Kriterienkatalog, der hier früher als Begründung stand, ist seit dem 06.09.2026 nur noch
+freiwillige Orientierung; siehe [richtung.md](richtung.md).) Das blockiert F1.2 und F1.3 im
 Pflegegrad-Epic.
 
 → [epics/vertrauen-zugaenglichkeit.md](epics/vertrauen-zugaenglichkeit.md)
