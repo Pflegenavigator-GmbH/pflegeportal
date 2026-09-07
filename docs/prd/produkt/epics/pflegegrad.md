@@ -74,7 +74,9 @@ Die Fähigkeit, den Zustand einer Person strukturiert aufzunehmen.
 
 **Umfang** Erhebung gebaut. **Die Einwilligungsführung fehlt.**
 
-Der DiPA-Kriterienkatalog des BfArM verlangt als MUSS (CNST_1.6 a): Vor der Einholung der
+Die Anforderung folgt aus Art. 8 DSGVO und § 1629 BGB. Der BfArM-Kriterienkatalog formuliert
+sie ausdrücklich (CNST_1.6 a) — er bindet seit dem 06.09.2026 zwar nicht mehr (siehe
+[richtung.md](../richtung.md)), gibt den Maßstab aber zutreffend wieder: Vor der Einholung der
 Einwilligung muss die Einwilligungsfähigkeit der betroffenen Person abgefragt werden; besteht
 sie nicht, muss auf das Erfordernis der Einwilligung eines Erziehungsberechtigten verwiesen und
 diese abgefragt werden. Der Kinder-Pfad fragt heute weder das eine noch das andere — er setzt
@@ -110,9 +112,13 @@ amtlichen Katalog ist dort selbst vermerkt („z. B. Modul 3: 4 statt 13").
 > die App weniger Kriterien abfragt als der amtliche Katalog — mit dem vollständigen Katalog
 > sind die amtlichen Punktschwellen unmittelbar anwendbar. Damit betrifft die offene Prüfung
 > aus F2.2 nur noch die **freie** Fassung. Die kostenpflichtige Leistung ruht auf der Norm
-> selbst, nicht auf einer Näherung. Für die DiPA-Absicht ist genau das die tragfähigere
-> Grundlage — die Bezahlschranke trennt dann Orientierung von Erhebung, nicht mehr und
-> weniger vom selben.
+> selbst, nicht auf einer Näherung.
+>
+> **Korrektur vom 06.09.2026.** Hier stand zusätzlich, das sei „für die DiPA-Absicht die
+> tragfähigere Grundlage". Das ist gegenstandslos: § 40a Abs. 1a S. 2 SGB XI schließt genau
+> den kostenpflichtigen Bereich aus. Die Bezahlschranke ist wieder eine reine
+> Produktentscheidung — was den Schnitt nicht schlechter macht, ihm aber die rechtliche
+> Begründung nimmt. Siehe [richtung.md](../richtung.md).
 
 **Umfang**
 - Vollständiger Kriterienkatalog je Modul erfasst und hinterlegt
@@ -129,11 +135,12 @@ Bezahlschranke vor Fragen, die bereits im Browser stehen, ist keine Schranke. Di
 Fragen müssen also über die API kommen, so wie die Rohpunkte seit #98–#100 serverseitig
 berechnet werden.
 
-**Was der DiPA-Kriterienkatalog dazu vorgibt:** Die Zustimmung zu den Nutzungsbedingungen darf
-**nicht** mit der datenschutzrechtlichen Einwilligung in ein Häkchen gebündelt werden —
-CNST_1.2 verbietet Erklärungen, die über die zulässigen Zwecke hinausgehen. Beides wird
-gebraucht, aber als getrennte Handlungen. Und jede Einwilligung muss mit dem Fallcode als
-pseudonymem Account verknüpft werden (CNST_1.3 a), damit sie widerrufbar bleibt.
+**Zwei Vorgaben für die Einwilligung:** Die Zustimmung zu den Nutzungsbedingungen darf
+**nicht** mit der datenschutzrechtlichen Einwilligung in ein Häkchen gebündelt werden — das
+folgt aus dem Kopplungsverbot des Art. 7 Abs. 4 DSGVO. Beides wird gebraucht, aber als
+getrennte Handlungen. Und jede Einwilligung muss am Fall hängen, damit sie widerrufbar bleibt
+(Art. 7 Abs. 3 DSGVO). Der BfArM-Katalog sagt beides ebenfalls (CNST_1.2, CNST_1.3 a), bindet
+aber seit dem 06.09.2026 nicht mehr.
 
 **Fertig, wenn**
 - ein nicht freigeschalteter Fall die erweiterten Fragen weder abrufen noch beantworten kann,
@@ -145,10 +152,10 @@ pseudonymem Account verknüpft werden (CNST_1.3 a), damit sie widerrufbar bleibt
 **Hängt an** dem offenen Schnitt (unten) · der Einwilligungsverwaltung (Epic *Vertrauen &
 Zugänglichkeit*) · F2.2, weil eine ungeprüfte Rechnung nichts ist, wofür man Geld nehmen sollte
 
-> **Der Schnitt ist offen und wird nicht hier entschieden.** Er ist zugleich die Grenze des
-> Produkts, das als digitale Pflegeanwendung gelistet werden soll — siehe
-> [richtung.md](../richtung.md). Ob eine Pflegegrad-Einschätzung mit Antragshilfe § 40a SGB XI
-> überhaupt erfüllt, ist die tragende offene Frage. Sie gehört vor die Umsetzung.
+> **Der Schnitt ist offen und wird nicht hier entschieden** — aber er ist seit dem 06.09.2026
+> **frei von rechtlichen Nebenbedingungen.** Die frühere Fassung band ihn an die DiPA-Listung;
+> diese Bindung ist entfallen (§ 40a Abs. 1a S. 2 SGB XI). Der Schnitt kann jetzt nach
+> Produktlogik gezogen werden.
 
 ### F1.4 — Fall wiederaufnehmen
 
@@ -231,8 +238,15 @@ bis 5 weisen ihre gewichteten Punkte aus, **Modul 6 zeigt nur „Erfasst"**. Urs
 `PflegegradErgebnis.weightedScores` in `src/types/pflegegrad.ts:29`, das auf die Module 1 bis 5
 typisiert ist. Modul 6 fließt in die Summe ein, hat aber keinen ausgebbaren Wert.
 
-**Fertig, wenn** `weightedScores` alle sechs Module führt und Modul 6 seine gewichteten Punkte
-wie die übrigen ausweist.
+**Zweiter Punkt, aus dem Rechtsgutachten vom 06.09.2026:** Die Seite zeigt je Modul einen
+**„Rohwert"** ohne Angabe der Bezugsskala. Auf der amtlichen Skala des Moduls 4 bedeutet ein
+Wert von 18 etwas völlig anderes als in unserem verkürzten Fragebogen, wo er die volle
+Ausprägung ist. Der Gutachter hat die Zahl genau so missverstanden — und eine Gutachterin des
+Medizinischen Dienstes würde es ebenso. Die Rechnung ist intern richtig, die **Beschriftung
+führt in die Irre**.
+
+**Fertig, wenn** `weightedScores` alle sechs Module führt, Modul 6 seine gewichteten Punkte
+wie die übrigen ausweist und jeder angezeigte Rohwert seine Skala nennt.
 
 **Hängt an** — (klein und unabhängig; die Verlässlichkeit der gezeigten Zahlen hängt an F2.2)
 

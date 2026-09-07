@@ -3,8 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { withEdgeCache } from '@/src/lib/redis/with-edge-cache';
 
-export const runtime = 'edge';
-
 interface GesetzInfo {
   sgb: string;
   name: string;
@@ -146,7 +144,8 @@ async function handleGet(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json(response, { status: 200, headers: getCorsHeaders() });
   } catch (error) {
-    // runtime = 'edge': console ist hier die passende (Node-freie) Log-Senke
+    // TODO: Seit dem Wegfall der Edge-Runtime steht `logger` zur Verfügung;
+    // console bleibt vorerst, damit dieser Umbau nur den Betriebsort betrifft.
     console.error('Gesetze LIST error:', error);
     return NextResponse.json(
       { error: 'Interner Serverfehler' },

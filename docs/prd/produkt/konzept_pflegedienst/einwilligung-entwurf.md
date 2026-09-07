@@ -41,6 +41,13 @@ Grundlage: **Art. 7 und 9 DSGVO**, **§ 40a SGB XI** i. V. m. DiPAV, **§ 164 BG
 *Prüfkriterien für die von DiGA und DiPA nachzuweisenden Anforderungen an den Datenschutz*
 (BfArM, V1.0 vom 24.04.2024, im Folgenden „Kriterienkatalog").
 
+> **Status des BfArM-Kriterienkatalogs seit dem 06.09.2026.** Der Katalog gilt für digitale
+> Pflegeanwendungen. Da das Produkt nach § 40a Abs. 1a S. 2 SGB XI derzeit keine ist und keine
+> werden kann, ist er **kein verbindlicher Maßstab**, sondern freiwillige Orientierung. Die
+> Vorgaben bleiben inhaltlich sinnvoll, tragen aber nur, soweit sie sich unmittelbar aus der
+> DSGVO ergeben. „CNST_x" ist ab sofort Herkunftsangabe, nicht Rechtspflicht. Siehe
+> [richtung.md](../richtung.md).
+
 Zwingend zu erfüllen:
 
 1. **Kein Kopplungsverbot** (Art. 7 Abs. 4 DSGVO). Die Nutzung des Portals darf nicht davon
