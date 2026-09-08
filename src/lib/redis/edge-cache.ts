@@ -15,8 +15,6 @@
  * bedient (spart die Function-Invocation), der Eintrag aber von der Route
  * geschrieben.
  */
-import { sauberFuerLog } from '@/src/lib/log-safe';
-
 import { redis } from './client';
 
 interface CacheRegel {
@@ -78,7 +76,12 @@ export async function leseCache(key: string): Promise<GecachteAntwort | null> {
   } catch (error) {
     // Sichtbar machen statt still schlucken: signalisiert eine Redis-Störung.
     // console statt pino (Edge-Runtime). Fällt auf "kein Treffer" zurück.
-    console.error('[edge-cache] Lesen fehlgeschlagen:', sauberFuerLog(key), error);
+    //
+    // Der Schlüssel wird bewusst NICHT geloggt: Er enthält Pfad und Query der
+    // Anfrage und ist damit nutzergesteuert (CodeQL js/log-injection). Für die
+    // Diagnose genügt hier, dass Redis gestört ist — bei einer Störung trifft
+    // es ohnehin jeden Schlüssel.
+    console.error('[edge-cache] Lesen fehlgeschlagen.', error);
     return null;
   }
 }
@@ -99,6 +102,11 @@ export async function schreibeCache(
   } catch (error) {
     // Best effort, aber nicht lautlos — eine anhaltende Redis-Störung soll
     // in den Logs auffallen. console statt pino (Edge-Runtime).
-    console.error('[edge-cache] Schreiben fehlgeschlagen:', sauberFuerLog(key), error);
+    //
+    // Geloggt wird `regel.pfad` statt des Schlüssels: Der Schlüssel trägt Pfad
+    // und Query der Anfrage und ist nutzergesteuert, `regel.pfad` dagegen ein
+    // Literal aus CACHE_REGELN. Damit bleibt erkennbar, welche Routenfamilie
+    // betroffen ist, ohne dass Nutzereingaben ins Log fließen.
+    console.error('[edge-cache] Schreiben fehlgeschlagen für Regel', regel.pfad, error);
   }
 }
