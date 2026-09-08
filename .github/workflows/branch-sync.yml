@@ -1,0 +1,96 @@
+# .github/workflows/branch-sync.yml
+# Wacht darüber, dass main ausschließlich aus develop wächst.
+
+name: Branch Sync Guard
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+# Nur Lesen: Der Job stellt fest, er repariert nicht.
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    name: main stammt aus develop
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Volle Historie: --is-ancestor braucht die Vorfahren beider Zweige.
+          fetch-depth: 0
+          # Das Token bleibt nicht in .git/config zurück. Der Job schreibt
+          # nichts; ein liegengebliebenes Token wäre nur Angriffsfläche.
+          persist-credentials: false
+
+      - name: Prüfen, ob develop ein Vorfahre von main ist
+        id: pruefung
+        env:
+          MAIN_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          git fetch --quiet origin develop
+
+          if git merge-base --is-ancestor origin/develop "$MAIN_SHA"; then
+            echo "ergebnis=verbunden" >> "$GITHUB_OUTPUT"
+            echo "✅ develop ist Vorfahre von main — die Zweige sind verbunden."
+            exit 0
+          fi
+
+          # Ab hier: etwas ist auf main gelandet, das nicht aus develop stammt,
+          # ODER develop ist seit dem Merge weitergelaufen. Das zweite ist der
+          # Normalfall und harmlos; das erste ist der Vorfall von oben.
+          BASIS="$(git merge-base origin/develop "$MAIN_SHA")"
+          DEVELOP_SHA="$(git rev-parse origin/develop)"
+
+          if [ "$BASIS" = "$MAIN_SHA" ]; then
+            echo "ergebnis=enthalten" >> "$GITHUB_OUTPUT"
+            echo "✅ main ist in develop enthalten — nichts zu tun."
+            exit 0
+          fi
+
+          echo "ergebnis=divergiert" >> "$GITHUB_OUTPUT"
+
+          echo "::error::main und develop sind divergiert."
+          echo ""
+          echo "Gemeinsame Basis : $BASIS"
+          echo "main             : $MAIN_SHA"
+          echo "develop          : $DEVELOP_SHA"
+          echo ""
+          echo "Nur auf main (nicht in develop):"
+          git log --oneline "origin/develop..$MAIN_SHA" | sed 's/^/  /'
+          echo ""
+          echo "Ursache ist fast immer eine dieser drei:"
+          echo "  • Der PR nach main wurde mit Squash oder Rebase zusammengeführt"
+          echo "    statt mit einem Merge-Commit. Dabei geht der Elternteil zu"
+          echo "    develop verloren."
+          echo "  • Es wurde direkt auf main committet."
+          echo "  • Der PR kam nicht aus develop (das fängt sonst"
+          echo "    branch-restrictions.yml ab)."
+          echo ""
+          echo "Vorgehen: Feststellen, ob main etwas hält, das develop fehlt."
+          echo "  git diff --diff-filter=A --name-only origin/develop origin/main"
+          echo "Hält main nichts Eigenes, nimmt develop die Historie auf, ohne"
+          echo "den Baum anzufassen:"
+          echo "  git checkout develop && git merge -s ours origin/main"
+          exit 1
+
+      # Die Zusammenfassung liest das Ergebnis des Prüfschritts, statt die
+      # Prüfung zu wiederholen — sonst driften beide Stellen auseinander.
+      - name: Zusammenfassung schreiben
+        if: always()
+        env:
+          ERGEBNIS: ${{ steps.pruefung.outputs.ergebnis }}
+        run: |
+          {
+            echo "### Branch Sync Guard"
+            echo ""
+            case "$ERGEBNIS" in
+              verbunden) echo "✅ develop ist Vorfahre von main." ;;
+              enthalten) echo "✅ main ist in develop enthalten." ;;
+              *)         echo "❌ main und develop sind divergiert — siehe Protokoll." ;;
+            esac
+          } >> "$GITHUB_STEP_SUMMARY"
