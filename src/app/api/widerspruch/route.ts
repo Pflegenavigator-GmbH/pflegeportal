@@ -1,6 +1,7 @@
 // src/app/api/widerspruch/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
+import { logger } from '@/src/lib/logger';
 import { calculatePflegegrad } from '@/src/lib/pflegegrad/rechner';
 import {
   berechneFrist,
@@ -93,7 +94,7 @@ export async function POST(request: NextRequest) {
       ],
     });
   } catch (error) {
-    console.error('Widerspruch-Fehler:', error);
+    logger.error({ err: error }, 'Widerspruch-Fehler');
     return NextResponse.json({ error: 'Interner Server-Fehler' }, { status: 500 });
   }
 }

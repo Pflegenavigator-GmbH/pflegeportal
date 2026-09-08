@@ -23,9 +23,9 @@ vi.mock('next/headers', () => ({
   }),
 }));
 
-// 3. Supabase-Client mocken (Fluent API: from → select → eq → single)
-vi.mock('@/src/lib/supabase/server', () => ({
-  createServerSupabaseClient: vi.fn().mockResolvedValue({
+// 3. Supabase-Admin-Client mocken (Fluent API: from → select → eq → single)
+vi.mock('@/src/lib/supabase/admin', () => ({
+  createAdminSupabaseClient: vi.fn().mockReturnValue({
     from: vi.fn().mockReturnValue({
       select: vi.fn().mockReturnValue({
         eq: supabaseEqMock,

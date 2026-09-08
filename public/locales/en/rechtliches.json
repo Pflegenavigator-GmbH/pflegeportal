@@ -1,0 +1,58 @@
+{
+  "sprachhinweis": {
+    "titel": "Available in German only",
+    "text": "The legal texts of PflegeNavigator EU are maintained in German only. The German version is the authoritative one."
+  },
+  "loeschen": {
+    "warnungTitel": "Irreversible action: deletion cannot be undone.",
+    "warnungText": "Submitting this request permanently deletes all calculations, the scores of the 6 modules and your history.",
+    "kartenTitel": "Deletion request (step {schritt} of 3)",
+    "fallcodeLabel": "Case code to delete (e.g. PF-ABC123)",
+    "fallcodePlatzhalter": "PF-...",
+    "grundLabel": "Reason for the deletion request (optional, for our statistics)",
+    "gruende": {
+      "nichtMehr": "I no longer need the care file",
+      "unsicher": "I have general data protection concerns",
+      "anderes": "Another administrative reason"
+    },
+    "emailLabel": "Email address for the deletion confirmation",
+    "emailPlatzhalter": "name@example.com",
+    "bestaetigung": "I expressly confirm that this action is irreversible and that the right to erasure (Art. 17) is hereby exercised with final effect.",
+    "weiter": "Next",
+    "zurueck": "Back",
+    "absendenLaeuft": "Deleting...",
+    "absenden": "Delete my data irreversibly now",
+    "erfolgTitel": "Deletion request registered.",
+    "erfolgText": "Your records are being removed in the background",
+    "frist": "Deletion and replication can take up to 30 days.",
+    "zumDatenschutz": "To the privacy policy",
+    "zurStartseite": "To the home page"
+  },
+  "auskunft": {
+    "titel": "Data access request under Art. 15 GDPR",
+    "untertitel": "Request the complete records held for your file, both locally and on the server",
+    "schritt": "Step {schritt} of 2",
+    "kartenTitel": "Enter your case details",
+    "fallcodeLabel": "Your case code (e.g. PF-ABC123)",
+    "fallcodePlatzhalter": "PF-...",
+    "weiterZurVerifizierung": "Continue to verification",
+    "emailLabel": "Email address for the encrypted data file",
+    "emailPlatzhalter": "name@example.com",
+    "versicherung": "I confirm that I am the holder of this case code, or that I have valid authorisation from the data subject.",
+    "zurueck": "Back",
+    "absendenLaeuft": "Submitting...",
+    "absenden": "Submit the access request",
+    "erfolgToast": "Your access request has been recorded.",
+    "fehlerToast": "The request could not be submitted. Please contact support.",
+    "erfolgTitel": "Request received.",
+    "erfolgText": "The statutory response period under Art. 12 (3) GDPR has started",
+    "emailProtokoll": "Confirmation will be sent to: {email}",
+    "frist": "Response within 30 days at the latest, usually much sooner",
+    "zurUebersicht": "Back to the overview",
+    "rechteTitel": "Your rights under Chapter 3 GDPR",
+    "rechte": {
+      "art15": "<b>Art. 15:</b> Full right of access to your data and to the criteria used",
+      "art17": "<b>Art. 17:</b> Right to erasure (“right to be forgotten”)"
+    }
+  }
+}

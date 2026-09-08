@@ -5,16 +5,26 @@ import { launchPDFBrowser, sanitizeFilename } from './puppeteer';
 
 vi.mock('puppeteer-core');
 
+// @sparticuz/chromium liefert im Serverless-Zweig Pfad und Flags.
+vi.mock('@sparticuz/chromium', () => ({
+  default: {
+    args: ['--single-process', '--no-sandbox'],
+    executablePath: vi.fn().mockResolvedValue('/var/task/chromium'),
+  },
+}));
+
 describe('PDF Puppeteer Utils', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     delete process.env.PUPPETEER_EXECUTABLE_PATH;
+    // Serverless-Signale zurücksetzen, damit lokale Pfade deterministisch greifen.
+    delete process.env.AWS_LAMBDA_FUNCTION_NAME;
+    delete process.env.VERCEL;
+    Object.defineProperty(process, 'platform', { value: 'darwin', writable: true });
   });
 
   describe('launchPDFBrowser', () => {
-    it('sollte den Browser mit den korrekten Argumenten starten', async () => {
-      // Wir casten nur das Mock-Objekt auf Partial<Browser>,
-      // da ein echter Browser hunderte Methoden hat, die wir hier nicht alle brauchen.
+    it('startet lokal headless mit den erwarteten Flags', async () => {
       const mockBrowser = { close: vi.fn() } as unknown as Browser;
       vi.mocked(puppeteer.launch).mockResolvedValue(mockBrowser);
 
@@ -28,29 +38,53 @@ describe('PDF Puppeteer Utils', () => {
       );
     });
 
-    it('sollte bei Fehlern den Fehler weiterwerfen', async () => {
+    it('reicht Fehler weiter', async () => {
       vi.mocked(puppeteer.launch).mockRejectedValue(new Error('Browser failed'));
 
       await expect(launchPDFBrowser()).rejects.toThrow('Browser failed');
     });
 
-    it('wählt chromium unter Linux aus', async () => {
-      // 1. Wir definieren den Mock explizit
+    it('wählt lokal unter Linux das System-Chromium', async () => {
       const launchSpy = vi.mocked(puppeteer.launch);
       launchSpy.mockResolvedValue({} as Browser);
-
       Object.defineProperty(process, 'platform', { value: 'linux', writable: true });
 
       await launchPDFBrowser();
 
-      // 2. Jetzt kannst du den Spy direkt prüfen
+      expect(launchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ executablePath: '/usr/bin/chromium', headless: true })
+      );
+    });
+
+    it('nutzt in der Serverless-Umgebung @sparticuz/chromium', async () => {
+      const launchSpy = vi.mocked(puppeteer.launch);
+      launchSpy.mockResolvedValue({} as Browser);
+      // Vercel/Lambda-Signal — der /usr/bin/chromium-Pfad existiert dort nicht.
+      process.env.AWS_LAMBDA_FUNCTION_NAME = 'pdf-generate';
+      Object.defineProperty(process, 'platform', { value: 'linux', writable: true });
+
+      await launchPDFBrowser();
+
       expect(launchSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          executablePath: '/usr/bin/chromium',
+          executablePath: '/var/task/chromium',
+          headless: 'shell',
+          args: expect.arrayContaining(['--single-process']),
         })
       );
+    });
 
-      Object.defineProperty(process, 'platform', { value: 'darwin', writable: true });
+    it('lässt PUPPETEER_EXECUTABLE_PATH Vorrang haben — auch serverless', async () => {
+      const launchSpy = vi.mocked(puppeteer.launch);
+      launchSpy.mockResolvedValue({} as Browser);
+      process.env.PUPPETEER_EXECUTABLE_PATH = '/opt/custom/chrome';
+      process.env.AWS_LAMBDA_FUNCTION_NAME = 'pdf-generate';
+
+      await launchPDFBrowser();
+
+      expect(launchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ executablePath: '/opt/custom/chrome', headless: true })
+      );
     });
   });
 

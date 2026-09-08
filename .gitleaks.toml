@@ -1,0 +1,27 @@
+# .gitleaks.toml
+# Konfiguration für das Secret-Scanning (CI-Job `secrets-scan`).
+
+# Alle mitgelieferten Regeln von Gitleaks bleiben aktiv — hier wird nur
+# ergänzt, nichts ersetzt.
+[extend]
+useDefault = true
+
+[allowlist]
+description = """
+Platzhalter in .env.example.
+
+Die Datei ist absichtlich eingecheckt und dokumentiert, welche Variablen die
+Anwendung braucht. Ihre Werte sind Attrappen mit Zählmustern
+(sk_test_1234…, whsec_123456…, brevo_test_1…), die Gitleaks' Muster für
+Stripe- und generische API-Schlüssel erwartungsgemäß treffen — acht Funde,
+alle unecht.
+
+Ohne diese Ausnahme wäre der CI-Job dauerhaft rot und würde damit genau das
+verlieren, wofür er da ist: Aufmerksamkeit für einen echten Fund.
+
+⚠️ In .env.example gehören ausschließlich Attrappen. Echte Zugangsdaten
+stehen in .env.local (nicht versioniert) und in den Vercel-Umgebungsvariablen.
+Diese Ausnahme gilt nur für diesen einen Dateipfad — jede andere Datei wird
+weiterhin vollständig geprüft, auch eine versehentlich eingecheckte .env.
+"""
+paths = ['''^\.env\.example$''']

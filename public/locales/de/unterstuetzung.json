@@ -1,0 +1,40 @@
+{
+  "titel": "Unterstützung & Pflegenetzwerk",
+  "untertitel": "Regionale Dienstleister, kostenlose Pflegekurse und Notfall-Schnittstellen",
+  "diensteTitel": "Ambulante Pflegedienste vor Ort",
+  "diensteHinweis": "Suchen Sie nach Postleitzahl oder Stadt — die Liste zeigt registrierte Dienste in Ihrer Nähe",
+  "suchePlatzhalter": "PLZ oder Stadt eingeben (z.B. 33607 oder Berlin)...",
+  "keineDienste": "Keine registrierten Dienste für diese Eingabe gefunden.",
+  "diensteFehler": "Fehler beim Abruf der Pflegedienste.",
+  "schulungTitel": "Schulungen für Angehörige (§ 45 SGB XI)",
+  "gesetzesAnspruch": "Gesetzes-Anspruch:",
+  "schulungText": "Pflegekassen bieten Angehörigen unentgeltliche Schulungskurse an, um die Pflege zu erleichtern.",
+  "schulungAnfragen": "Schulungsplatz anfragen",
+  "kurse": {
+    "drk": {
+      "name": "Deutsches Rotes Kreuz",
+      "ort": "Deutschlandweit",
+      "kosten": "0 € (Kassenleistung § 45)",
+      "dauer": "Kompaktkurse / Online"
+    },
+    "johanniter": {
+      "name": "Johanniter Unfallhilfe",
+      "ort": "Deutschlandweit",
+      "kosten": "0 € (Kassenleistung § 45)",
+      "dauer": "Abendkurse / Präsenz"
+    }
+  },
+  "notfallTitel": "Medizinische Notsituationen & Krisendienste",
+  "notruf": {
+    "rettung": "Rettungsdienst & Notarzt",
+    "rettungHinweis": "Bei akuter Lebensgefahr",
+    "bereitschaft": "Ärztlicher Bereitschaftsdienst",
+    "bereitschaftHinweis": "Außerhalb der Praxisöffnungszeiten",
+    "seelsorge": "Telefonseelsorge / Krisenhilfe",
+    "seelsorgeHinweis": "Kostenfreie psychosoziale Beratung"
+  },
+  "assistentTitel": "Live-Pflegeassistent",
+  "assistentLaedt": "Kompiliere Audio-Schnittstelle...",
+  "assistentBegruessung": "Hallo! Ich helfe Ihnen bei Fragen zu Pflegediensten, Kursen oder Notfallkontakten. Was möchten Sie wissen?",
+  "zurueck": "Zurück zur Hauptübersicht"
+}

@@ -3,36 +3,46 @@
 
 import { useSyncExternalStore } from 'react';
 
-import { logger } from '@/src/lib/logger';
+import {
+  abonniereEinwilligung,
+  hatAnalyticsEinwilligung,
+  leseRohwert,
+  parseEinwilligung,
+  type Einwilligung,
+} from '@/src/lib/consent';
 
-const subscribe = (listener: () => void) => {
-  window.addEventListener('consentChange', listener);
-  window.addEventListener('storage', listener);
-  return () => {
-    window.removeEventListener('consentChange', listener);
-    window.removeEventListener('storage', listener);
-  };
-};
-
-const getSnapshot = () => localStorage.getItem('user_consent');
-const getServerSnapshot = () => null;
-
-export function parseConsentString(consentString: string | null) {
-  if (!consentString) {
-    logger.debug('Keine Consent-Daten im localStorage gefunden');
-    return false;
-  }
-
-  try {
-    const parsed = JSON.parse(consentString);
-    return Boolean(parsed.analytics);
-  } catch (error) {
-    logger.error({ error, consentString }, 'Fehler beim Parsen der Consent-Daten aus localStorage');
-    return false;
-  }
+interface ConsentErgebnis {
+  /** Darf Analyse & Statistik laufen? Die einzige Frage fürs Tracking. */
+  hasAnalyticsConsent: boolean;
+  /** Vollständige Auswahl, oder `null`, wenn noch nicht entschieden wurde. */
+  einwilligung: Einwilligung | null;
+  /** Wurde überhaupt schon entschieden? Steuert die Anzeige des Banners. */
+  hatEntschieden: boolean;
 }
 
-export function useConsent() {
-  const consentString = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  return { hasAnalyticsConsent: parseConsentString(consentString) };
+/**
+ * Liest die Einwilligung reaktiv.
+ *
+ * `useSyncExternalStore` statt useState+useEffect: der Wert steht schon beim
+ * ersten Rendern fest, und eine Änderung — auch aus einem anderen Tab —
+ * kommt sofort an. Genau das ist die Zusage von Art. 7 Abs. 3 DSGVO: ein
+ * Widerruf wirkt unmittelbar, nicht erst beim nächsten Seitenaufruf.
+ *
+ * Der Snapshot ist der Rohstring; das Parsen passiert danach (siehe
+ * `leseRohwert`).
+ */
+export function useConsent(): ConsentErgebnis {
+  const roh = useSyncExternalStore(
+    abonniereEinwilligung,
+    leseRohwert,
+    // Serverseitig gibt es keinen Speicher — konservativ „nicht entschieden",
+    // damit ohne Einwilligung nichts geladen wird.
+    () => null
+  );
+
+  return {
+    hasAnalyticsConsent: hatAnalyticsEinwilligung(roh),
+    einwilligung: parseEinwilligung(roh),
+    hatEntschieden: parseEinwilligung(roh) !== null,
+  };
 }

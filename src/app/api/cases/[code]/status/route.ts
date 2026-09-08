@@ -1,9 +1,10 @@
 // src/app/api/cases/[code]/status/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
+import { requireCaseSession } from '@/src/lib/api/case-auth';
 import { handleApiError } from '@/src/lib/api/error-handler';
 import { ValidationError, NotFoundError } from '@/src/lib/api/errors';
-import { createServerSupabaseClient } from '@/src/lib/supabase/server';
+import { createAdminSupabaseClient } from '@/src/lib/supabase/admin';
 
 export async function GET(
   _request: NextRequest,
@@ -15,13 +16,15 @@ export async function GET(
       throw new ValidationError('Das eingegebene Fallcode-Format ist ungültig.');
     }
 
-    const supabase = await createServerSupabaseClient();
+    const session = await requireCaseSession(code);
+
+    const supabase = createAdminSupabaseClient();
     const { data: currentCase, error } = await supabase
       .from('cases')
       .select(
         'id, case_code, status, billing_status, product_tier, access_unlocked_at, care_level_guess, total_score, traffic_light'
       )
-      .eq('case_code', code.toUpperCase())
+      .eq('id', session.caseId)
       .single();
 
     if (error || !currentCase) {

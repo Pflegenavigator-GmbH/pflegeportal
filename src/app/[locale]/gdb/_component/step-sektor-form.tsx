@@ -1,15 +1,15 @@
 // src/app/[locale]/gdb/_component/step-sektor-form.tsx
 import { ArrowLeft } from 'lucide-react';
 
-import { Button } from '@/src/components/ui/button';
 import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
-import { Label } from '@/src/components/ui/label';
+  Label,
+} from '@/src/components/ui';
 import { GdBSektor } from '@/src/types/gdb';
 
 interface Props {

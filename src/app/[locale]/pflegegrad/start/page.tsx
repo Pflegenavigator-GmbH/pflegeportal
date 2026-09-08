@@ -9,16 +9,21 @@ import { toast } from 'sonner';
 
 import { validateAndStoreSession } from '@/src/app/actions/case-session';
 import { PaywallModal } from '@/src/components/modal/PaywallModal';
-import { Button } from '@/src/components/ui/button';
 import {
+  Button,
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
   CardFooter,
-} from '@/src/components/ui/card';
+} from '@/src/components/ui';
+import { useStripeCheckout } from '@/src/hooks/useStripeCheckout';
+import { EREIGNISSE } from '@/src/lib/analytics/events';
+import { verfolge, verfolgeEinmalig } from '@/src/lib/analytics/track';
 import { storeCaseCode } from '@/src/lib/case-storage';
+import { logger } from '@/src/lib/logger';
+import { hatErgebnisFuerAktuellenFall } from '@/src/lib/pflegegrad/ergebnis-storage';
 import { createClient } from '@/src/lib/supabase/client';
 
 import { LoadCaseCard } from './_components/LoadCaseCard';
@@ -32,7 +37,12 @@ interface ProductFromDb {
 
 interface PageProps {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ session_id?: string; check_code?: string; error?: string }>;
+  searchParams: Promise<{
+    session_id?: string;
+    check_code?: string;
+    error?: string;
+    case?: string;
+  }>;
 }
 
 export default function PflegegradStartPage(props: PageProps) {
@@ -43,6 +53,7 @@ export default function PflegegradStartPage(props: PageProps) {
   // Namensraum-Weichen aktivieren
   const tStart = useTranslations('pflegegrad.start');
   const tCommon = useTranslations('common.buttons');
+  const tMeldung = useTranslations('pflegegrad.start.meldungen');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -54,6 +65,7 @@ export default function PflegegradStartPage(props: PageProps) {
   const [isBetaExpired, setIsBetaExpired] = useState(false);
 
   const [supabase] = useState(() => createClient());
+  const { triggerCheckout, checkoutLoading } = useStripeCheckout();
 
   useEffect(() => {
     if (searchParams.session_id && searchParams.check_code) {
@@ -65,14 +77,41 @@ export default function PflegegradStartPage(props: PageProps) {
         // localStorage + Event → AppHeaderChrome aktualisiert sich sofort
         storeCaseCode(checkCode);
 
+        // Einmalig je Stripe-Sitzung: Ohne diesen Riegel zählt ein Reload den
+        // Kauf erneut, denn session_id bleibt in der URL stehen, solange die
+        // Freischaltung noch aussteht.
+        verfolgeEinmalig(EREIGNISSE.kaufErfolgreich, searchParams.session_id ?? 'unbekannt', {
+          freigeschaltet: Boolean(status.isUnlocked),
+        });
+
         if (status.isUnlocked) {
-          toast.success('Premium-Optionen erfolgreich freigeschaltet!');
+          toast.success(tMeldung('premiumFrei'));
           router.push(`/${locale}/pflegegrad/modul1`);
         } else {
-          toast.info(
-            'Zahlung wird noch verarbeitet. Ihr Fall ist geladen — Premium schaltet sich in Kürze frei.'
-          );
+          toast.info(tMeldung('zahlungInArbeit'));
         }
+      });
+    } else if (searchParams.case) {
+      // Geteilte Links (QR-Code, E-Mail, SMS) laden den Fall direkt
+      const sharedCode = searchParams.case.trim().toUpperCase();
+
+      validateAndStoreSession(sharedCode).then((status) => {
+        if (!status.success) {
+          setError(tMeldung('geteilterLinkUngueltig'));
+          return;
+        }
+
+        setCaseCode(sharedCode);
+        storeCaseCode(sharedCode);
+
+        if (status.isExpired) {
+          setIsBetaExpired(true);
+          setShowPaywall(true);
+          return;
+        }
+
+        verfolge(EREIGNISSE.rechnerGestartet, { einstieg: 'geteilt' });
+        toast.success(tMeldung('geteilterLinkGeladen'));
       });
     }
 
@@ -83,7 +122,7 @@ export default function PflegegradStartPage(props: PageProps) {
       .then(({ data }) => {
         if (data) setDbProducts(data as ProductFromDb[]);
       });
-  }, [searchParams, locale, router, supabase]);
+  }, [searchParams, locale, router, supabase, tMeldung]);
 
   const handleLoadCase = async (inputCode: string) => {
     setLoading(true);
@@ -93,7 +132,7 @@ export default function PflegegradStartPage(props: PageProps) {
       const status = await validateAndStoreSession(verifiedCode);
 
       if (!status.success) {
-        setError('Fallcode nicht gefunden. Bitte prüfen Sie die Eingabe.');
+        setError(tMeldung('fallcodeUnbekannt'));
         setLoading(false);
         return;
       }
@@ -108,14 +147,19 @@ export default function PflegegradStartPage(props: PageProps) {
         return;
       }
 
-      toast.success('Willkommen zurück! Daten geladen.');
-      if (localStorage.getItem('pflegegrad-ergebnis')) {
+      verfolge(EREIGNISSE.rechnerGestartet, { einstieg: 'geladen' });
+
+      toast.success(tMeldung('willkommenZurueck'));
+      // Nur weiterleiten, wenn das Ergebnis zu DIESEM Fall gehört. Die reine
+      // Existenzprüfung von früher zeigte sonst den Pflegegrad des zuvor
+      // geladenen Falls.
+      if (hatErgebnisFuerAktuellenFall()) {
         router.push(`/${locale}/pflegegrad/ergebnis`);
       } else {
         router.push(`/${locale}/pflegegrad/modul1`);
       }
     } catch {
-      setError('Fehler bei der Session-Prüfung.');
+      setError(tMeldung('sitzungFehler'));
     } finally {
       setLoading(false);
     }
@@ -140,31 +184,17 @@ export default function PflegegradStartPage(props: PageProps) {
       storeCaseCode(resData.caseCode);
 
       setIsNewCase(true);
-      toast.success('Kostenloser Fallcode generiert!');
+      verfolge(EREIGNISSE.rechnerGestartet, { einstieg: 'neu' });
+      toast.success(tMeldung('fallcodeErzeugt'));
     } catch (err) {
-      console.error(err);
-      setError('Fehler beim Initialisieren des neuen Falls über die API.');
+      logger.error({ err }, 'Fehler beim Initialisieren des neuen Falls über die API');
+      setError(tMeldung('anlegenFehler'));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCheckout = async (paketId: string) => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/checkout/create-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ caseCode, paket: paketId }),
-      });
-      const session = await response.json();
-      if (session.url) router.push(session.url);
-    } catch {
-      toast.error('Fehler bei der Stripe-Weiterleitung.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleCheckout = (paketId: string) => triggerCheckout(caseCode, paketId);
 
   return (
     <main className="min-h-screen bg-slate-900 py-12 px-4 text-white">
@@ -188,7 +218,7 @@ export default function PflegegradStartPage(props: PageProps) {
                 <div className="w-full border-t border-white/10"></div>
               </div>
               <div className="relative flex justify-center">
-                <span className="bg-slate-900 px-4 text-sm text-gray-500">oder</span>
+                <span className="bg-slate-900 px-4 text-sm text-gray-500">{tStart('oder')}</span>
               </div>
             </div>
 
@@ -231,17 +261,14 @@ export default function PflegegradStartPage(props: PageProps) {
             products={dbProducts}
             onCheckout={handleCheckout}
             onClose={() => setShowPaywall(false)}
-            loading={loading}
+            loading={checkoutLoading}
           />
         )}
 
         <div className="mt-8 pt-6 border-t border-white/10 flex items-start gap-3 text-gray-400 text-xs leading-relaxed">
           <Shield className="w-5 h-5 flex-shrink-0 text-gray-500 mt-0.5" />
           <p>
-            <strong>Wichtiger rechtlicher Hinweis:</strong> Dieser Pflegegrad-Rechner bietet eine
-            mathematische Orientierungshilfe auf Basis des SGB XI. Er ersetzt keine medizinische
-            Begutachtung oder verbindliche Rechtsberatung. Einstufungen werden rechtswirksam
-            ausschließlich durch die zuständige Pflegekasse vorgenommen.
+            <strong>{tStart('rechtshinweisTitel')}</strong> {tStart('rechtshinweis')}
           </p>
         </div>
       </div>

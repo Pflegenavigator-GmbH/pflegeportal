@@ -5,17 +5,17 @@ import { KeyRound, ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
-import { Button } from '@/src/components/ui/button';
 import {
+  Button,
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
   CardFooter,
-} from '@/src/components/ui/card';
-import { Input } from '@/src/components/ui/input';
-import { Label } from '@/src/components/ui/label';
+  Input,
+  Label,
+} from '@/src/components/ui';
 
 interface LoadCaseCardProps {
   onLoad: (code: string) => Promise<void>;
@@ -60,7 +60,7 @@ export function LoadCaseCard({ onLoad, loading, externalError }: LoadCaseCardPro
           <Input
             id="caseCode"
             type="text"
-            placeholder="z.B. PF-A1B2-C3D4"
+            placeholder={t('fallcodePlatzhalter')}
             value={code}
             onChange={(e) => setCode(e.target.value.toUpperCase())}
             className="text-center font-mono text-lg tracking-wider bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-[#20b2aa]"

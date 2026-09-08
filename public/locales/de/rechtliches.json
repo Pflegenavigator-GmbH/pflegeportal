@@ -1,0 +1,58 @@
+{
+  "sprachhinweis": {
+    "titel": "Nur auf Deutsch verfügbar",
+    "text": "Die Rechtstexte des PflegeNavigator EU werden ausschließlich auf Deutsch geführt. Maßgeblich ist die deutsche Fassung."
+  },
+  "loeschen": {
+    "warnungTitel": "Destruktive Operation: Die Löschung ist unumkehrbar!",
+    "warnungText": "Mit Ausführung dieses Antrags werden alle Berechnungen, Punktwerte der 6 Module und Verläufe unwiderruflich gelöscht.",
+    "kartenTitel": "Löschantrag (Schritt {schritt} von 3)",
+    "fallcodeLabel": "Zu löschender Fallcode (z.B. PF-ABC123)",
+    "fallcodePlatzhalter": "PF-...",
+    "grundLabel": "Grund für das Löschbegehren (Optional für die System-Statistik)",
+    "gruende": {
+      "nichtMehr": "Ich benötige das Pflege-Dossier nicht mehr",
+      "unsicher": "Ich habe generelle Datenschutz-Bedenken",
+      "anderes": "Anderer administrativer Grund"
+    },
+    "emailLabel": "E-Mail für die Löschbestätigung",
+    "emailPlatzhalter": "name@beispiel.de",
+    "bestaetigung": "Ich bestätige ausdrücklich, dass dieser Vorgang unwiderruflich ist und das Recht auf Vergessenwerden (Art. 17) hiermit final vollzogen werden soll.",
+    "weiter": "Weiter",
+    "zurueck": "Zurück",
+    "absendenLaeuft": "Bereinige Tabellen...",
+    "absenden": "Daten jetzt unwiderruflich löschen",
+    "erfolgTitel": "Löschauftrag erfolgreich registriert!",
+    "erfolgText": "Das System bereinigt die Relationen im Hintergrund",
+    "frist": "Maximale Lösch- und Replikationslatenz: bis zu 30 Tage.",
+    "zumDatenschutz": "Zum Datenschutz",
+    "zurStartseite": "Zur Startseite"
+  },
+  "auskunft": {
+    "titel": "Datenauskunft nach Art. 15 DSGVO",
+    "untertitel": "Fordern Sie die vollständigen, lokal und serverseitig hinterlegten Maschinen-Datensätze Ihrer Akte an",
+    "schritt": "Schritt {schritt} von 2",
+    "kartenTitel": "Verfahrensdaten eingeben",
+    "fallcodeLabel": "Zugeordneter Fallcode (z.B. PF-ABC123)",
+    "fallcodePlatzhalter": "PF-...",
+    "weiterZurVerifizierung": "Weiter zur Verifizierung",
+    "emailLabel": "Zustelladresse für verschlüsseltes Daten-Dossier (E-Mail)",
+    "emailPlatzhalter": "name@beispiel.de",
+    "versicherung": "Ich versichere, dass ich Inhaber dieses Fallcodes bin oder eine rechtsgültige Vollmacht der betroffenen Person vorliegt.",
+    "zurueck": "Zurück",
+    "absendenLaeuft": "Protokolliere...",
+    "absenden": "Auskunftsanspruch geltend machen",
+    "erfolgToast": "Auskunftsantrag revisionssicher protokolliert.",
+    "fehlerToast": "Fehler bei der Übermittlung. Bitte wenden Sie sich an den Support.",
+    "erfolgTitel": "Antrag revisionssicher eingegangen!",
+    "erfolgText": "Gesetzliche Bearbeitungsfrist nach Art. 12 Abs. 3 DSGVO läuft",
+    "emailProtokoll": "E-Mail-Protokoll hinterlegt für: {email}",
+    "frist": "Maximale Bearbeitungsdauer: 30 Tage (Regelfall deutlich schneller)",
+    "zurUebersicht": "Zurück zur Übersicht",
+    "rechteTitel": "Gesetzlicher Rechte-Spiegel (Kapitel 3 DSGVO)",
+    "rechte": {
+      "art15": "<b>Art. 15:</b> Umfassendes Recht auf Dateneinsicht und Kriterienauskunft",
+      "art17": "<b>Art. 17:</b> Recht auf sofortige Datenlöschung („Vergessenwerden“)"
+    }
+  }
+}

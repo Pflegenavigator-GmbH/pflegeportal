@@ -1,0 +1,54 @@
+{
+  "titel": "Care diary",
+  "untertitel": "Complete daily records of care as your main evidence for the assessment appointment.",
+  "neuerEintrag": "New entry",
+  "fallcodeFehlt": "Please load a case code.",
+  "formular": {
+    "datum": "Date",
+    "wasNicht": "What could not be done independently?",
+    "wasNichtHinweis": "Please describe what could not be managed alone.",
+    "wasNichtPlatzhalter": "e.g. needed help getting up, showering or cooking…",
+    "spracheingabe": "Voice input",
+    "werGeholfen": "Who helped today?",
+    "helfer": {
+      "niemand": "Nobody (managed independently)",
+      "angehoerige": "Main carer (relative)",
+      "pflegedienst": "Care service (professional)",
+      "andere": "Someone else (neighbours/friends)"
+    },
+    "schmerzen": "Pain today:",
+    "schlaf": "How was the night’s sleep?",
+    "besonderheiten": "Notable events",
+    "sturz": "Fall / accident",
+    "krankenhaus": "Hospital",
+    "arzttermin": "Doctor’s appointment",
+    "bettlaegerig": "Confined to bed",
+    "medikamente": "Medication check carried out by the care service?",
+    "abbrechen": "Cancel editing",
+    "speicherFehler": "Error while saving",
+    "neu": "New diary entry",
+    "bearbeiten": "Edit entry",
+    "sichern": "Save entry",
+    "speichert": "Saving…",
+    "schlafWerte": {
+      "Gut": "Good",
+      "Unterbrochen": "Interrupted",
+      "Schlecht": "Poor"
+    }
+  },
+  "liste": {
+    "leer": "No entries yet.",
+    "pdfExport": "Export PDF",
+    "pdfLaeuft": "The PDF is being compiled on the server…",
+    "pdfFertig": "Dossier downloaded successfully.",
+    "pdfFehler": "Error while generating the PDF.",
+    "lizenzPruefen": "Verifying document licence…",
+    "lizenzFehler": "Connection error while checking the licence.",
+    "eintragEntfernt": "Entry removed successfully.",
+    "loeschFehler": "Error while deleting the entry.",
+    "markeSturz": "Fall",
+    "markeKlinik": "Hospital",
+    "markeMed": "Med ✓",
+    "loeschBestaetigung": "Do you want to delete this diary entry permanently?"
+  }
+}

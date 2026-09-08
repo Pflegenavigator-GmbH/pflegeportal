@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export const runtime = 'edge';
-
 // 1. Interfaces bleiben für deine App identisch (wichtig für die Abwärtskompatibilität!)
 interface AvatarChatRequest {
   message: string;

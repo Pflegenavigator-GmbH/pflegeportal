@@ -4,6 +4,7 @@
 import {
   ArrowLeft,
   BookOpen,
+  Briefcase,
   Copy,
   FileText,
   FolderLock,
@@ -20,32 +21,40 @@ import {
   Users,
   Calculator,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import { clearCaseSession, validateAndStoreSession } from '@/src/app/actions/case-session';
 import LanguageSwitcher from '@/src/components/i18n/LanguageSwitcher';
-import { AccessShareModal } from '@/src/components/modal/AccessShareModal';
-import { Button } from '@/src/components/ui/button';
 import {
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/src/components/ui/dropdown-menu';
-import { Input } from '@/src/components/ui/input';
+  Input,
+} from '@/src/components/ui';
 import {
   CASE_CODE_EVENT,
-  clearCaseCode,
+  clearCaseData,
   getStoredCaseCode,
   storeCaseCode,
 } from '@/src/lib/case-storage';
 
 import styles from '../../styles/layout.module.css';
+
+// Dynamisch geladen: zieht qrcode.react erst ins Bundle, wenn das Modal
+// tatsächlich geöffnet wird — nicht in jeden Seiten-Chunk über den Header.
+const AccessShareModal = dynamic(
+  () => import('@/src/components/modal/AccessShareModal').then((m) => m.AccessShareModal),
+  { ssr: false }
+);
 
 interface AppHeaderChromeProps {
   locale: string;
@@ -54,6 +63,8 @@ interface AppHeaderChromeProps {
 export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const t = useTranslations('common.header');
+  const tA11y = useTranslations('common.accessibility');
   const [caseCode, setCaseCode] = useState<string | null>(null);
   const [inputCode, setInputCode] = useState('');
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -83,31 +94,31 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
     try {
       const session = await validateAndStoreSession(cleanedCode);
       if (session.success && session.isExpired) {
-        toast.error('Dieser Beta-Zugang ist nach 12 Monaten abgelaufen.');
+        toast.error(t('fehler.abgelaufen'));
       } else if (session.success) {
         // Schreibt localStorage + feuert das Event → syncCaseCode aktualisiert den State
         storeCaseCode(cleanedCode);
         // Hard-Reload, damit Server Components das neue Cookie mitbekommen
         window.location.reload();
       } else {
-        toast.error('Fallcode nicht gefunden.');
+        toast.error(t('fehler.codeUnbekannt'));
       }
     } catch {
-      toast.error('Verbindungsfehler.');
+      toast.error(t('fehler.verbindung'));
     } finally {
       setIsChecking(false);
     }
   };
 
   const handleSessionReset = async () => {
-    if (!confirm('Möchten Sie die aktuelle Fall-Session wirklich schließen?')) return;
+    if (!confirm(t('fall.schliessenBestaetigung'))) return;
     setIsResetting(true);
     try {
       await clearCaseSession(); // Server: HTTP-only-Cookie entwerten
-      clearCaseCode(); // Client: localStorage + Event
+      clearCaseData(); // Client: alle fallbezogenen Daten + Event
       window.location.assign(`/${locale}/pflegegrad/start`);
     } catch {
-      toast.error('Fehler beim Beenden.');
+      toast.error(t('fehler.beenden'));
       setIsResetting(false);
     }
   };
@@ -129,13 +140,17 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className={styles.mobileMenuBtn}
-              aria-label="Menü öffnen"
+              aria-label={tA11y('openMenu')}
             >
               <Menu className="w-4 h-4" />
             </button>
 
             {!istStartseite && (
-              <button onClick={() => router.back()} className={styles.mobileMenuBtn} title="Zurück">
+              <button
+                onClick={() => router.back()}
+                className={styles.mobileMenuBtn}
+                title={t('zurueck')}
+              >
                 <ArrowLeft className="w-4 h-4" />
               </button>
             )}
@@ -155,19 +170,19 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
               <DropdownMenuTrigger
                 className={`${styles.navLink} ${pathname.includes('/briefe') || pathname.includes('/tagebuch') || pathname.includes('/pflegegrad') ? styles.navLinkActive : ''}`}
               >
-                <Wrench className="w-4 h-4" /> Für Betroffene{' '}
+                <Wrench className="w-4 h-4" /> {t('gruppen.betroffene')}{' '}
                 <ChevronDown className="w-3 h-3 opacity-70" />
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56 bg-[#0a1c3a] border-white/10 text-white p-2">
                 <DropdownMenuLabel className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-2 py-1">
-                  Assistenten
+                  {t('labels.assistenten')}
                 </DropdownMenuLabel>
                 <DropdownMenuItem asChild>
                   <Link
                     href={`/${locale}/pflegegrad/start`}
                     className="cursor-pointer font-medium p-2 hover:bg-white/5 flex items-center gap-2"
                   >
-                    <Calculator className="w-4 h-4 text-[#4a90e2]" /> Pflegegrad-Rechner
+                    <Calculator className="w-4 h-4 text-[#4a90e2]" /> {t('links.pflegegrad')}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
@@ -175,7 +190,15 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
                     href={`/${locale}/briefe`}
                     className="cursor-pointer font-medium p-2 hover:bg-white/5 flex items-center gap-2"
                   >
-                    <FileText className="w-4 h-4 text-[#4a90e2]" /> Brief-Zentrum
+                    <FileText className="w-4 h-4 text-[#4a90e2]" /> {t('links.briefe')}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link
+                    href={`/${locale}/em-rente`}
+                    className="cursor-pointer font-medium p-2 hover:bg-white/5 flex items-center gap-2"
+                  >
+                    <Briefcase className="w-4 h-4 text-[#4a90e2]" /> {t('links.emRente')}
                   </Link>
                 </DropdownMenuItem>
                 {caseCode && (
@@ -184,7 +207,7 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
                       href={`/${locale}/tagebuch`}
                       className="cursor-pointer font-medium p-2 hover:bg-white/5 flex items-center gap-2"
                     >
-                      <BookOpen className="w-4 h-4 text-[#4a90e2]" /> Pflegetagebuch
+                      <BookOpen className="w-4 h-4 text-[#4a90e2]" /> {t('links.tagebuch')}
                     </Link>
                   </DropdownMenuItem>
                 )}
@@ -198,19 +221,19 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
               <DropdownMenuTrigger
                 className={`${styles.navLink} ${pathname.includes('/pflegekraefte') ? styles.navLinkActive : ''}`}
               >
-                <Users className="w-4 h-4" /> Für Fachkräfte{' '}
+                <Users className="w-4 h-4" /> {t('gruppen.fachkraefte')}{' '}
                 <ChevronDown className="w-3 h-3 opacity-70" />
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56 bg-[#0a1c3a] border-white/10 text-white p-2">
                 <DropdownMenuLabel className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-2 py-1">
-                  Institutionen
+                  {t('labels.institutionen')}
                 </DropdownMenuLabel>
                 <DropdownMenuItem asChild>
                   <Link
                     href={`/${locale}/pflegekraefte`}
                     className="cursor-pointer font-medium p-2 hover:bg-white/5 flex items-center gap-2"
                   >
-                    <Users className="w-4 h-4 text-[#4a90e2]" /> Pflegedienste & Berater
+                    <Users className="w-4 h-4 text-[#4a90e2]" /> {t('links.pflegekraefte')}
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -223,7 +246,7 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
               href={`/${locale}/faq`}
               className={`${styles.navLink} ${pathname.includes('/faq') ? styles.navLinkActive : ''}`}
             >
-              <HelpCircle className="w-4 h-4" /> FAQ
+              <HelpCircle className="w-4 h-4" /> {t('links.faq')}
             </Link>
 
             <span aria-hidden className="w-px h-4 bg-white/10 hidden md:block" />
@@ -233,18 +256,19 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
               <DropdownMenuTrigger
                 className={`${styles.navLink} ${pathname.includes('/ueber-uns') || pathname.includes('/philosophie') || pathname.includes('/presse') ? styles.navLinkActive : ''}`}
               >
-                <Info className="w-4 h-4" /> Über uns <ChevronDown className="w-3 h-3 opacity-70" />
+                <Info className="w-4 h-4" /> {t('gruppen.ueberUns')}{' '}
+                <ChevronDown className="w-3 h-3 opacity-70" />
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56 bg-[#0a1c3a] border-white/10 text-white p-2">
                 <DropdownMenuLabel className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-2 py-1">
-                  Hintergrund
+                  {t('labels.hintergrund')}
                 </DropdownMenuLabel>
                 <DropdownMenuItem asChild>
                   <Link
                     href={`/${locale}/philosophie`}
                     className="cursor-pointer font-medium p-2 hover:bg-white/5 flex items-center gap-2"
                   >
-                    <Info className="w-4 h-4 text-[#4a90e2]" /> Philosophie & Vision
+                    <Info className="w-4 h-4 text-[#4a90e2]" /> {t('links.philosophie')}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
@@ -252,7 +276,7 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
                     href={`/${locale}/presse`}
                     className="cursor-pointer font-medium p-2 hover:bg-white/5 flex items-center gap-2"
                   >
-                    <Newspaper className="w-4 h-4 text-[#4a90e2]" /> Presse & Blog
+                    <Newspaper className="w-4 h-4 text-[#4a90e2]" /> {t('links.presse')}
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -266,7 +290,7 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
                 <div className={styles.caseBadge}>
                   <FolderLock className="w-4 h-4 flex-shrink-0" />
                   <span className={`${styles.caseText} ${caseCode ? styles.caseTextActive : ''}`}>
-                    {caseCode ?? 'Kein Fall'}
+                    {caseCode ?? t('fall.keiner')}
                   </span>
                 </div>
               </DropdownMenuTrigger>
@@ -277,7 +301,7 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
                 {!caseCode ? (
                   <div className="space-y-2">
                     <DropdownMenuLabel className="text-xs text-gray-400 p-0 font-bold">
-                      Fallcode eingeben
+                      {t('fall.codeEingeben')}
                     </DropdownMenuLabel>
                     <Input
                       placeholder="PF-XXXX-XXXX"
@@ -295,7 +319,7 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
                       className="w-full bg-[#4a90e2] text-[#0a1c3a] font-bold h-9 text-xs"
                     >
                       <KeyRound className="w-3.5 h-3.5 mr-2" />{' '}
-                      {isChecking ? 'Prüfe...' : 'Akte öffnen'}
+                      {isChecking ? t('fall.pruefe') : t('fall.oeffnen')}
                     </Button>
                   </div>
                 ) : (
@@ -310,16 +334,16 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
                       }}
                       className="w-full flex cursor-pointer items-center rounded-sm p-2 text-sm text-left font-semibold hover:bg-white/5"
                     >
-                      <Share2 className="w-4 h-4 mr-2 text-[#4a90e2]" /> Akte teilen / sichern
+                      <Share2 className="w-4 h-4 mr-2 text-[#4a90e2]" /> {t('fall.teilen')}
                     </button>
                     <DropdownMenuItem
                       onClick={() => {
                         navigator.clipboard.writeText(caseCode);
-                        toast.success('Code kopiert');
+                        toast.success(t('fall.kopiert'));
                       }}
                       className="cursor-pointer font-semibold p-2 hover:bg-white/5"
                     >
-                      <Copy className="w-4 h-4 mr-2" /> Code kopieren
+                      <Copy className="w-4 h-4 mr-2" /> {t('fall.kopieren')}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator className="bg-white/10" />
                     <DropdownMenuItem
@@ -328,7 +352,7 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
                       className="cursor-pointer text-rose-400 font-bold p-2 hover:bg-rose-500/10"
                     >
                       <Trash2 className="w-4 h-4 mr-2" />{' '}
-                      {isResetting ? 'Wird beendet...' : 'Fall schließen'}
+                      {isResetting ? t('fall.wirdBeendet') : t('fall.schliessen')}
                     </DropdownMenuItem>
                   </>
                 )}
@@ -347,14 +371,21 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="text-[#4a90e2] hover:bg-white/5 p-2.5 rounded-xl flex items-center gap-3 transition-colors"
               >
-                <Calculator className="w-4 h-4" /> Pflegegrad-Rechner
+                <Calculator className="w-4 h-4" /> {t('links.pflegegrad')}
               </Link>
               <Link
                 href={`/${locale}/briefe`}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="text-[#4a90e2] hover:bg-white/5 p-2.5 rounded-xl flex items-center gap-3 transition-colors"
               >
-                <FileText className="w-4 h-4" /> Brief-Zentrum
+                <FileText className="w-4 h-4" /> {t('links.briefe')}
+              </Link>
+              <Link
+                href={`/${locale}/em-rente`}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="hover:text-white hover:bg-white/5 p-2.5 rounded-xl flex items-center gap-3 transition-colors text-gray-300"
+              >
+                <Briefcase className="w-4 h-4" /> {t('links.emRente')}
               </Link>
               {caseCode && (
                 <Link
@@ -362,7 +393,7 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="hover:text-white hover:bg-white/5 p-2.5 rounded-xl flex items-center gap-3 transition-colors text-gray-300"
                 >
-                  <BookOpen className="w-4 h-4" /> Pflegetagebuch
+                  <BookOpen className="w-4 h-4" /> {t('links.tagebuch')}
                 </Link>
               )}
               <div className="h-px bg-white/5 my-1" />
@@ -371,7 +402,7 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="hover:text-white hover:bg-white/5 p-2.5 rounded-xl flex items-center gap-3 transition-colors text-gray-300"
               >
-                <Users className="w-4 h-4" /> Für Fachkräfte & Dienste
+                <Users className="w-4 h-4" /> {t('links.pflegekraefteMobil')}
               </Link>
               <div className="h-px bg-white/5 my-1" />
               <Link
@@ -379,21 +410,21 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="hover:text-white hover:bg-white/5 p-2.5 rounded-xl flex items-center gap-3 transition-colors text-gray-300"
               >
-                <HelpCircle className="w-4 h-4" /> FAQ
+                <HelpCircle className="w-4 h-4" /> {t('links.faq')}
               </Link>
               <Link
                 href={`/${locale}/philosophie`}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="hover:text-white hover:bg-white/5 p-2.5 rounded-xl flex items-center gap-3 transition-colors text-gray-300"
               >
-                <Info className="w-4 h-4" /> Philosophie & Vision
+                <Info className="w-4 h-4" /> {t('links.philosophie')}
               </Link>
               <Link
                 href={`/${locale}/presse`}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="hover:text-white hover:bg-white/5 p-2.5 rounded-xl flex items-center gap-3 transition-colors text-gray-300"
               >
-                <Newspaper className="w-4 h-4" /> Presse & Blog
+                <Newspaper className="w-4 h-4" /> {t('links.presse')}
               </Link>
             </nav>
           </div>

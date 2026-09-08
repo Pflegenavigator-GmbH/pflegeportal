@@ -5,212 +5,272 @@
     "label": "Simple Language",
     "description": "Easy words and short sentences"
   },
+  "start": {
+    "loadTitle": "Load an existing case",
+    "loadDescription": "Do you already have a case code?",
+    "loadInputLabel": "Enter case code",
+    "loadButton": "Load case and check",
+    "loadButtonLoading": "Checking status...",
+    "newTitle": "Start a new case",
+    "newDescription": "Begin a free care level assessment",
+    "newText": "Start a completely anonymous and free assessment. An encrypted code is generated under which your entries are stored in line with the GDPR.",
+    "newButton": "Start for free",
+    "newButtonLoading": "Creating...",
+    "meldungen": {
+      "zahlungInArbeit": "Payment is still being processed. Your case is loaded — premium will unlock shortly.",
+      "premiumFrei": "Premium options unlocked successfully.",
+      "geteilterLinkUngueltig": "The shared case code is invalid or has expired.",
+      "geteilterLinkGeladen": "Case loaded from shared link.",
+      "fallcodeUnbekannt": "Case code not found. Please check your entry.",
+      "willkommenZurueck": "Welcome back — your data has been loaded.",
+      "sitzungFehler": "Could not verify the session.",
+      "anlegenFehler": "Could not create a new case.",
+      "fallcodeErzeugt": "Free case code generated."
+    },
+    "fallcodeTitel": "Your personal case code",
+    "fallcodeUntertitel": "Keep this code for later visits",
+    "fallcodeLautet": "Your case code is:",
+    "wichtig": "Important:",
+    "fallcodeNotieren": "Write this code down. It lets you pause the assessment at any time and continue free of charge on any device.",
+    "zielgruppeTitel": "Who is the care assessment for?",
+    "zielgruppeText": "Choose the option that applies so the right questionnaire starts:",
+    "erwachseneTitel": "Adults and older people",
+    "erwachseneText": "Standard assessment procedure (NBA) for people aged 18 and over.",
+    "kinderTitel": "Children and adolescents",
+    "kinderText": "Special assessment that discounts the development normal for the child’s age.",
+    "oder": "or",
+    "rechtshinweis": "This care level calculator offers mathematical guidance based on SGB XI. It does not replace a medical assessment or binding legal advice. Only the responsible care fund can make a legally effective classification.",
+    "rechtshinweisTitel": "Important legal notice:",
+    "fallcodePlatzhalter": "e.g. PF-A1B2-C3D4"
+  },
   "modules": {
-    "mobilitaet": {
-      "title": "Mobility",
-      "subtitle": "Walking and Moving",
-      "simple": "Can you walk well? Or do you need help walking?",
+    "modul1": {
+      "title": "Module 1: Mobility",
+      "weight": "Weighting in the overall assessment: 10%",
+      "zurueck": "Back to the start",
+      "weiter": "Continue to module 2",
       "questions": {
-        "laufen": {
-          "label": "Walking and Running",
-          "simple": "Can you walk alone?",
-          "options": {
-            "selbst": "I can walk alone",
-            "hilfe": "I sometimes need help",
-            "nicht": "I cannot walk alone"
-          }
+        "m1_1": {
+          "label": "Can you get up and move about on your own?",
+          "hilfe": "Getting up from a bed or chair and moving around inside the home."
         },
-        "treppen": {
-          "label": "Climbing Stairs",
-          "simple": "Can you climb stairs?",
-          "options": {
-            "selbst": "No problems",
-            "teilweise": "I need help",
-            "nicht": "Not possible"
-          }
+        "m1_2": {
+          "label": "Do you need help walking or standing?",
+          "hilfe": "Keeping your balance safely in a room."
         },
-        "rollstuhl": {
-          "label": "Wheelchair",
-          "simple": "Do you need a wheelchair?",
-          "options": {
-            "nein": "No",
-            "manchmal": "Sometimes",
-            "immer": "Always"
-          }
+        "m1_3": {
+          "label": "Can you climb stairs?",
+          "hilfe": "Managing steps, with a handrail if needed."
+        },
+        "m1_4": {
+          "label": "Do you depend on a wheelchair?",
+          "hilfe": "Using one to get around in everyday life."
         }
       }
     },
-    "koerperpflege": {
-      "title": "Personal Care",
-      "subtitle": "Washing and Dressing",
-      "simple": "Can you wash and dress yourself?",
+    "modul2": {
+      "title": "Module 2: Cognition and communication",
+      "weight": "Weighting: 15% (or module 3, whichever scores higher)",
+      "zurueck": "Back to module 1",
+      "weiter": "Continue to module 3",
       "questions": {
-        "waschen": {
-          "label": "Washing Body",
-          "simple": "Can you wash yourself alone?",
-          "options": {
-            "selbst": "Yes, alone",
-            "teilweise": "Sometimes need help",
-            "nicht": "Always need help"
-          }
+        "m2_1": {
+          "label": "Recognising people close to you",
+          "hilfe": "Are family members or neighbours identified without doubt?"
         },
-        "zaehne": {
-          "label": "Brushing Teeth",
-          "simple": "Can you brush your teeth?",
-          "options": {
-            "selbst": "Yes",
-            "teilweise": "Sometimes",
-            "nicht": "No"
-          }
+        "m2_2": {
+          "label": "Orientation to place",
+          "hilfe": "Can the person find their way around their own home or familiar surroundings?"
         },
-        "anziehen": {
-          "label": "Dressing and Undressing",
-          "simple": "Can you dress yourself?",
-          "options": {
-            "selbst": "Yes",
-            "teilweise": "Sometimes",
-            "nicht": "No"
-          }
+        "m2_3": {
+          "label": "Orientation to time",
+          "hilfe": "Can the time of day, day of the week and season be named correctly?"
+        },
+        "m2_4": {
+          "label": "Remembering important events",
+          "hilfe": "Are significant events or arrangements (e.g. doctor appointments) retained?"
+        },
+        "m2_5": {
+          "label": "Directing everyday activities",
+          "hilfe": "Can multi-step everyday activities be planned and carried out independently?"
         }
       }
     },
-    "ernaehrung": {
-      "title": "Nutrition",
-      "subtitle": "Eating and Drinking",
-      "simple": "Can you eat and drink alone?",
+    "modul3": {
+      "title": "Module 3: Behaviour and mental health",
+      "weight": "Weighting: 15% (compared with module 2 — the higher score counts)",
+      "zurueck": "Back to module 2",
+      "weiter": "Continue to module 4",
       "questions": {
-        "essen": {
-          "label": "Eating",
-          "simple": "Can you eat alone?",
-          "options": {
-            "selbst": "Yes",
-            "teilweise": "Sometimes need help",
-            "nicht": "Need help"
-          }
+        "m3_1": {
+          "label": "Motor-driven behaviour",
+          "hilfe": "E.g. aimless pacing, getting up and sitting down repeatedly, tendency to wander off."
         },
-        "trinken": {
-          "label": "Drinking",
-          "simple": "Can you drink alone?",
-          "options": {
-            "selbst": "Yes",
-            "teilweise": "Sometimes",
-            "nicht": "Need help"
-          }
+        "m3_2": {
+          "label": "Restlessness at night",
+          "hilfe": "Is the day-night rhythm disturbed? Is there wandering or calling out at night?"
+        },
+        "m3_3": {
+          "label": "Self-harming and self-aggressive behaviour",
+          "hilfe": "E.g. scratching, striking objects, refusing food or fluids."
+        },
+        "m3_4": {
+          "label": "Resistance to care",
+          "hilfe": "Is there verbal or physical resistance during personal hygiene or dressing?"
         }
       }
     },
-    "toilette": {
-      "title": "Toilet",
-      "subtitle": "Using the toilet",
-      "simple": "Can you use the toilet alone?",
+    "modul4": {
+      "title": "Module 4: Self-care",
+      "weight": "Weighting: 40% — the most important category in the assessment",
+      "zurueck": "Back to module 3",
+      "weiter": "Continue to module 5",
       "questions": {
-        "toilette": {
-          "label": "Toilet Use",
-          "simple": "Can you go to the toilet alone?",
-          "options": {
-            "selbst": "Yes",
-            "teilweise": "Sometimes",
-            "nicht": "Need help"
-          }
+        "m4_1": {
+          "label": "Washing the upper body and intimate area",
+          "hilfe": "Can you wash yourself at the basin or in the shower without help?"
         },
-        "inkontinenz": {
-          "label": "Incontinence Help",
-          "simple": "Do you need diapers?",
-          "options": {
-            "nein": "No",
-            "manchmal": "Sometimes",
-            "immer": "Yes, always"
-          }
+        "m4_2": {
+          "label": "Brushing teeth, combing hair, shaving",
+          "hilfe": "Can you carry out daily mouth and hair care yourself?"
+        },
+        "m4_3": {
+          "label": "Preparing food into bite-sized pieces and eating",
+          "hilfe": "Can you cut bread, bring food to your mouth, chew and swallow?"
+        },
+        "m4_4": {
+          "label": "Using a toilet or commode",
+          "hilfe": "Can you sit down, stand up, adjust your clothing and clean yourself?"
+        },
+        "m4_5": {
+          "label": "Dressing and undressing the upper body",
+          "hilfe": "Can you put on and take off shirts, jumpers or underwear on your own?"
+        },
+        "m4_6": {
+          "label": "Dressing and undressing the lower body",
+          "hilfe": "Can you put on trousers, socks and shoes without help?"
         }
       }
     },
-    "schlaf": {
-      "title": "Sleep",
-      "subtitle": "Waking up at night",
-      "simple": "Do you need help at night?",
+    "modul5": {
+      "title": "Module 5: Coping with illness and treatment",
+      "weight": "Weighting: 20% — managing therapeutic measures independently",
+      "zurueck": "Back to module 4",
+      "weiter": "Continue to module 6",
       "questions": {
-        "nacht": {
-          "label": "Night Help",
-          "simple": "Do you wake up at night? Do you need help then?",
-          "options": {
-            "nein": "No",
-            "manchmal": "Sometimes",
-            "oft": "Often"
-          }
+        "m5_1": {
+          "label": "Medication",
+          "hilfe": "Can medication be taken independently, on time and at the right dose?"
+        },
+        "m5_2": {
+          "label": "Injections, infusions, suctioning",
+          "hilfe": "Can medical measures (e.g. insulin injections or measurements) be carried out independently?"
+        },
+        "m5_3": {
+          "label": "Doctor and therapy appointments",
+          "hilfe": "Can appointments be arranged and the journey to the practice managed independently?"
+        },
+        "m5_4": {
+          "label": "Following diets and restrictions",
+          "hilfe": "Can prescribed health requirements be followed independently in everyday life?"
         }
       }
     },
-    "haushalt": {
-      "title": "Household",
-      "subtitle": "Housework",
-      "simple": "Can you do housework?",
+    "modul6": {
+      "title": "Module 6: Everyday life",
+      "weight": "Legal context: safeguarding an SGB XI appeal",
+      "zurueck": "Back to module 5",
+      "zurueckKurz": "Back",
+      "widerspruchTitel": "Relevance for an appeal:",
+      "widerspruchText": "This module does not change the calculated points directly, but it forms the legal basis for an appeal if the Medical Service recorded the care situation incompletely.",
+      "auswertungHinweis": "When you start the evaluation, your data is calculated according to the SGB XI guidelines and compared with the state-specific relief amounts.",
+      "berechnet": "Calculating…",
+      "auswertungStarten": "Start evaluation",
+      "fussnote": "© 2026 PflegeNavigator EU gUG • All calculations are based on the statutory thresholds of the Federal Ministry of Health.",
       "questions": {
-        "einkaufen": {
-          "label": "Shopping",
-          "simple": "Can you go shopping?",
-          "options": {
-            "selbst": "Yes",
-            "teilweise": "Sometimes",
-            "nicht": "No"
+        "m6_q1": {
+          "label": "1. Who takes care of the housekeeping (cleaning, laundry)?",
+          "optionen": {
+            "selbst": {
+              "titel": "The person concerned, alone",
+              "beschreibung": "Carries out all cleaning tasks independently."
+            },
+            "teilweise": {
+              "titel": "With regular support",
+              "beschreibung": "Light tasks alone, heavier ones (e.g. curtains, vacuuming) with help."
+            },
+            "nicht": {
+              "titel": "Fully taken over by others",
+              "beschreibung": "The household is run entirely by relatives or services."
+            }
           }
         },
-        "kochen": {
-          "label": "Cooking",
-          "simple": "Can you cook?",
-          "options": {
-            "selbst": "Yes",
-            "teilweise": "Sometimes",
-            "nicht": "No"
-          }
-        }
-      }
-    },
-    "kognitive": {
-      "title": "Thinking and Remembering",
-      "subtitle": "Dementia and Confusion",
-      "simple": "Do you have memory problems?",
-      "questions": {
-        "gedaechtnis": {
-          "label": "Memory",
-          "simple": "Do you forget things?",
-          "options": {
-            "nein": "No",
-            "manchmal": "Sometimes",
-            "oft": "Often"
+        "m6_q2": {
+          "label": "2. How independently can everyday shopping be done?",
+          "optionen": {
+            "ja": {
+              "titel": "Fully independently",
+              "beschreibung": "Visits shops alone and carries the goods home."
+            },
+            "online_begleitung": {
+              "titel": "Only accompanied or online",
+              "beschreibung": "Needs help carrying items or someone to come along to the shop."
+            },
+            "nicht": {
+              "titel": "No longer possible alone",
+              "beschreibung": "Errands are handled entirely by others."
+            }
           }
         },
-        "verwirrung": {
-          "label": "Confusion",
-          "simple": "Are you sometimes confused?",
-          "options": {
-            "nein": "No",
-            "manchmal": "Sometimes",
-            "oft": "Often"
-          }
-        }
-      }
-    },
-    "kommunikation": {
-      "title": "Communication",
-      "subtitle": "Speaking and Understanding",
-      "simple": "Can you speak and understand well?",
-      "questions": {
-        "sprechen": {
-          "label": "Speaking",
-          "simple": "Can you speak well?",
-          "options": {
-            "ja": "Yes",
-            "teilweise": "Sometimes difficult",
-            "nein": "No"
+        "m6_q3": {
+          "label": "3. Can hot and cold meals be prepared reliably?",
+          "optionen": {
+            "selbst": {
+              "titel": "Yes, entirely self-sufficient",
+              "beschreibung": "Plans, cooks, serves and cleans the kitchen independently."
+            },
+            "teilweise": {
+              "titel": "With occasional support",
+              "beschreibung": "Help needed with cutting, lifting heavy pots or organising the steps."
+            },
+            "nicht": {
+              "titel": "Fully provided by others",
+              "beschreibung": "Meals have to be prepared or delivered ready to eat (meals on wheels)."
+            }
           }
         },
-        "verstehen": {
-          "label": "Understanding",
-          "simple": "Do you understand others?",
-          "options": {
-            "ja": "Yes",
-            "teilweise": "Sometimes",
-            "nein": "No"
+        "m6_q4": {
+          "label": "4. Are financial matters and dealings with authorities managed?",
+          "optionen": {
+            "voll": {
+              "titel": "Fully independently",
+              "beschreibung": "Handles transfers, contracts, cash and post without errors."
+            },
+            "teilweise": {
+              "titel": "With advisory support",
+              "beschreibung": "Needs help with complex forms or someone to keep track of deadlines."
+            },
+            "nicht": {
+              "titel": "Full representation required",
+              "beschreibung": "Matters are handed over completely under a power of attorney."
+            }
+          }
+        },
+        "m6_q5": {
+          "label": "5. Can decisions about the future be made?",
+          "optionen": {
+            "selbst": {
+              "titel": "Yes, entirely on their own responsibility",
+              "beschreibung": "Makes medical and organisational decisions confidently and alone."
+            },
+            "beratung": {
+              "titel": "Only after detailed advice",
+              "beschreibung": "Weighs up options with relatives, but decides the essentials alone."
+            },
+            "nicht": {
+              "titel": "Not possible alone",
+              "beschreibung": "Needs a legal guardian or comprehensive help with decisions."
+            }
           }
         }
       }
@@ -219,5 +279,116 @@
   "progress": {
     "step": "Step {{current}} of {{total}}",
     "percent": "{{percent}}% complete"
+  },
+  "bewertungen": {
+    "0": "No impairment (independent)",
+    "1": "Slight impairment (largely independent)",
+    "2": "Moderate impairment (largely dependent)",
+    "3": "Severe impairment (dependent)"
+  },
+  "kinder": {
+    "titel": "Children's mode 🌟",
+    "untertitel": "Special assessment for determining care needs in infants, toddlers and adolescents under SGB XI.",
+    "altersvergleichTitel": "Age-group comparison:",
+    "altersvergleichText": "Deducts the natural, age-related care needs of healthy children.",
+    "babyschutzTitel": "Infant protection:",
+    "babyschutzText": "Accounts for the flat upgrade for children under 18 months.",
+    "analyseStarten": "Start assessment",
+    "stammdatenTitel": "Child's details",
+    "stammdatenBeschreibung": "Loads the age-appropriate comparison matrices.",
+    "vorname": "First name (optional)",
+    "vornamePlatzhalter": "e.g. Lea",
+    "alter": "Age in years",
+    "sonderregelTitel": "Special rule active:",
+    "sonderregelText": "Under 18 months the flat one-level upgrade applies. Care level 1 is excluded by law (direct entry at level 2).",
+    "zurueck": "Back",
+    "fragenLaden": "Load questions",
+    "vergleichsmatrix": "Comparison matrix for age group: {gruppe}",
+    "naechsterBereich": "Next section",
+    "auswerten": "Evaluate assessment",
+    "assistentTitel": "Children's assistant",
+    "assistentText": "I help you record everything correctly for {name}.",
+    "ihrKind": "your child",
+    "aktuelleMatrix": "Current matrix: {alter} years ({gruppe})",
+    "gesperrtTitel": "Legally sound MD report locked",
+    "gesperrtText": "The raw data has been recorded. Unlock the professional SGB XI evaluation matrix and the ready-made application PDF for your care insurer.",
+    "vorteil1": "Full comparison against the official children's reference tables.",
+    "vorteil2": "Ready-drafted PDF cover letter for the initial application.",
+    "verbindungAufbau": "Connecting…",
+    "freischalten": "Unlock dossier (paid)",
+    "eingabenKorrigieren": "Correct entries",
+    "entschluesselt": "Children's analysis unlocked 🌟",
+    "keinPflegegrad": "No care level",
+    "voraussichtlich": "Expected: care level {grad}",
+    "systempunkte": "Points achieved: {punkte} / {maximum}",
+    "rechtlicherHintergrundTitel": "Legal background (§ 15 (6)/(7) SGB XI):",
+    "rechtlicherHintergrundText": "For children, the additional effort is measured against a healthy child of the same age.",
+    "babyregelAngewandt": "As your child is under 18 months, only the age-independent areas were assessed and the flat one-level upgrade is already included.",
+    "alleBereiche": "All six statutory areas of life were assessed using the official module weightings.",
+    "briefErstellen": "Create application letter in the letter centre"
+  },
+  "meldungen": {
+    "sitzungAbgelaufen": "Your case session has expired. Please load your case again.",
+    "keineSitzung": "No active case session found. Please start again.",
+    "keineSitzungKurz": "No active case session found.",
+    "fortschrittGespeichert": "Progress saved.",
+    "speichernFehlgeschlagen": "Saving failed. Your entries have been retained – please try again.",
+    "zurueckgesetzt": "Assessment reset.",
+    "zuruecksetzenFehler": "The assessment could not be reset. Please try again.",
+    "ergebnisFehler": "The result could not be calculated.",
+    "linkKopiert": "Link copied to clipboard.",
+    "teilenFehler": "Sharing failed."
+  },
+  "ergebnis": {
+    "ladenTitel": "Calculating evaluation matrix…",
+    "ladenText": "Your answers are being compared against the SGB XI thresholds.",
+    "ampel": {
+      "gruen": "Safely above the statutory threshold",
+      "gelb": "Just above the statutory threshold (borderline)",
+      "rot": "Below the statutory minimum threshold"
+    },
+    "lizenzPruefen": "Verifying licence rights for add-on modules…",
+    "lizenzFehler": "Connection error while checking the licence.",
+    "gdbPruefen": "Checking…",
+    "gdbRechner": "Disability degree calculator",
+    "reset": {
+      "titel": "Start the assessment again?",
+      "beschreibung": "You will answer all questions from the six modules again from the beginning. Your previous answers will be permanently deleted and cannot be restored.",
+      "folge1": "All answers from modules 1 to 6 will be deleted.",
+      "folge2": "The calculated result will be discarded.",
+      "folge3": "Your case code and any purchased access remain intact.",
+      "bestaetigen": "Yes, start again",
+      "laeuft": "Deleting answers…"
+    },
+    "keinPflegegrad": "No care level",
+    "pflegegradN": "Care level {stufe}",
+    "punktwert": "Score: {punkte} out of 100.",
+    "erklaerungTitel": "How is my care level determined? (In plain terms)",
+    "erklaerungText": "The law does not measure a care level in minutes or hours, but purely by how much <b>independence in everyday life</b> you retain. The assessment system awards points across the areas listed below. From 12.5 points you receive care level 1, from 27 points level 2, from 47.5 points level 3, from 70 points level 4, and from 90 points the highest level 5.",
+    "anspruecheTitel": "Benefits and combined care",
+    "pflegegeldLabel": "Care allowance (§ 37 SGB XI)",
+    "pflegegeldHinweis": "For care provided privately by relatives",
+    "entlastungLabel": "Relief amount (§ 45b SGB XI)",
+    "entlastungHinweis": "Earmarked for support services",
+    "kombiRechner": "Split benefits in kind (combined care calculator)",
+    "pg1Titel": "Your entitlements at care level 1",
+    "pg1EntlastungLabel": "Monthly relief amount (§ 45b SGB XI)",
+    "pg1Text": "At care level 1 the fund does not yet pay a care allowance directly. You do, however, receive the full relief amount. It is earmarked and can be reimbursed for approved everyday companions, home help or day care.",
+    "pg0Titel": "Note on your current score",
+    "pg0Text": "With your calculated score of {punkte} points you currently fall below the statutory threshold of 12.5 points for a care level. Should your situation deteriorate in everyday life, it is worth repeating the assessment promptly with the new circumstances.",
+    "moduleTitel": "Adjust module ratings",
+    "moduleEditieren": "Click to edit",
+    "fristenTitel": "Your deadlines",
+    "zusatzTitel": "Additional statutory support",
+    "pdf": "PDF",
+    "teilen": "Share",
+    "briefe": "Letters",
+    "gdbTitel": "Check your degree of disability?",
+    "gdbText": "You may be entitled to tax allowances and extra leave.",
+    "seitenTitel": "Your NBA assessment results",
+    "seitenUntertitel": "Determined according to the official assessment guidelines",
+    "zusammenfassung": "Summary",
+    "aktenOptionen": "Case options",
+    "neuEvaluieren": "Reassess"
   }
 }

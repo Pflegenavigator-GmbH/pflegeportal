@@ -1,7 +1,7 @@
 // src/app/api/gesetze/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
-export const runtime = 'edge';
+import { withEdgeCache } from '@/src/lib/redis/with-edge-cache';
 
 interface GesetzInfo {
   sgb: string;
@@ -115,7 +115,7 @@ const SUCH_INDEX = [
 /**
  * GET: Liste aller verfügbaren Gesetze
  */
-export async function GET(request: NextRequest): Promise<NextResponse> {
+async function handleGet(request: NextRequest): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url);
     const detail = searchParams.get('detail');
@@ -144,6 +144,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json(response, { status: 200, headers: getCorsHeaders() });
   } catch (error) {
+    // TODO: Seit dem Wegfall der Edge-Runtime steht `logger` zur Verfügung;
+    // console bleibt vorerst, damit dieser Umbau nur den Betriebsort betrifft.
     console.error('Gesetze LIST error:', error);
     return NextResponse.json(
       { error: 'Interner Serverfehler' },
@@ -151,6 +153,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     );
   }
 }
+
+// Öffentlicher, für alle identischer Gesetzestext → über den Edge-Cache
+// ausgeliefert. Der Wrapper schreibt bei einem Miss in Redis und setzt
+// X-Cache: MISS; den HIT bedient die Middleware.
+export const GET = withEdgeCache(handleGet);
 
 /**
  * POST: Suche in Gesetzen

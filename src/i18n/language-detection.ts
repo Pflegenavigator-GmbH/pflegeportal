@@ -3,6 +3,7 @@
 /**
  * Language detection utilities for automatic language selection
  */
+import { locales } from './config';
 import { supportedLanguages } from './languages';
 
 export type LanguageInfo = {
@@ -143,8 +144,15 @@ const languageCodeMap: Record<string, string> = {
 
 const STORAGE_KEY = 'pflegenavigator-language';
 
+/**
+ * Prüft gegen die AKTIVEN Sprachen, nicht gegen den Gesamtkatalog.
+ *
+ * Sonst würde ein Browser mit `Accept-Language: tr` als „unterstützt" gelten
+ * und auf /tr geleitet — eine Route, die es nicht gibt, weil Türkisch mangels
+ * echter Übersetzung nicht ausgeliefert wird.
+ */
 export function isSupportedLanguage(code: string): boolean {
-  return supportedLanguages.some((lang) => lang.code === code.toLowerCase());
+  return (locales as readonly string[]).includes(code.toLowerCase());
 }
 
 export function getLanguageInfo(code: string) {

@@ -28,14 +28,12 @@ export default function Startseite() {
   const t = useTranslations('startseite');
 
   const [hatAktiveSession, setHatAktiveSession] = useState(false);
-  const [caseCode, setCaseCode] = useState<string | null>(null);
 
   useEffect(() => {
     const storedCode = typeof window !== 'undefined' ? localStorage.getItem('case_code') : null;
     if (storedCode) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setHatAktiveSession(true);
-      setCaseCode(storedCode.toUpperCase());
     }
   }, []);
 
@@ -46,7 +44,11 @@ export default function Startseite() {
     { id: 'tagebuch', icon: BookOpen, path: './tagebuch' },
     { id: 'qr', icon: QrCode, path: '#' },
     { id: 'multi', icon: Smartphone, path: '#' },
-  ];
+    // `as const` ist hier nicht Kosmetik: Erst dadurch ist `fkt.id` ein
+    // Literal-Typ, und `t(`features.items.${fkt.id}.title`)` lässt sich
+    // gegen die vorhandenen Schlüssel prüfen. Ohne das wäre es `string`
+    // und die Prüfung liefe ins Leere.
+  ] as const;
 
   return (
     <div className={pageStyles.pageContainer}>
@@ -110,7 +112,11 @@ export default function Startseite() {
         </section>
 
         {/* ⚖️ TRIAGE-RIEGEL: Der direkte, leicht verständliche Systemvergleich */}
-        <div className={pageStyles.promiseBox} role="note" aria-label="Leistungsversprechen">
+        <div
+          className={pageStyles.promiseBox}
+          role="note"
+          aria-label={t('abschnitte.leistungsversprechen')}
+        >
           <Clock className="w-5 h-5 text-[#4a90e2] flex-shrink-0" />
           <p className={pageStyles.promiseText}>
             {t.rich('promise.text', {
@@ -137,7 +143,7 @@ export default function Startseite() {
                 role="link"
                 tabIndex={0}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') fkt.path !== '#' && router.push(fkt.path);
+                  if (e.key === 'Enter' && fkt.path !== '#') router.push(fkt.path);
                 }}
               >
                 <div className={pageStyles.cardMeta}>
@@ -183,7 +189,7 @@ export default function Startseite() {
         <div
           className={pageStyles.footerRegister}
           role="region"
-          aria-label="Sicherheitszertifikate"
+          aria-label={t('abschnitte.sicherheitszertifikate')}
         >
           <div className={pageStyles.registerCard}>
             <Users className="w-5 h-5 text-[#4a90e2] flex-shrink-0" />

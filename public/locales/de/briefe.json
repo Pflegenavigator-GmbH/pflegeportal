@@ -1,0 +1,76 @@
+{
+  "titel": "Rechtssicheres Brief-Zentrum",
+  "untertitel": "Erstellen Sie rechtlich fundierte Anträge, Widersprüche und Mitteilungen nach aktuellen SGB- und BGB-Richtlinien.",
+  "hinweisTitel": "Hinweis zur Dokumenten-Validierung:",
+  "hinweisText": "Alle Schreiben basieren auf den gesetzlichen Standards für das Jahr 2026. Für komplexe Individualfälle haftet die gUG nicht. Einschreiben mit Rückschein wird dringend empfohlen.",
+  "kategorien": {
+    "antrag-pflegegrad": {
+      "name": "Antrag Pflegegrad",
+      "beschreibung": "Erstbeantragung bei der Pflegekasse"
+    },
+    "widerspruch-pflegegrad": {
+      "name": "Widerspruch Pflegegrad",
+      "beschreibung": "Widerspruch gegen Pflegekassen-Bescheid"
+    },
+    "versorgungsamt": {
+      "name": "Versorgungsamt",
+      "beschreibung": "Anfragen und Feststellungsanträge"
+    },
+    "em-rente": {
+      "name": "Erwerbsminderungsrente",
+      "beschreibung": "Antrag bei der Deutschen Rentenversicherung"
+    },
+    "schwerbehindertenausweis": {
+      "name": "Schwerbehindertenausweis",
+      "beschreibung": "GdB-Antrag beim Versorgungsamt"
+    },
+    "betreuungsrecht": {
+      "name": "Betreuungsrecht",
+      "beschreibung": "Vorsorgevollmacht & Patientenverfügung"
+    },
+    "erbrecht": {
+      "name": "Erbrecht",
+      "beschreibung": "Testament- und Pflichtteilsansprüche"
+    },
+    "allgemein": {
+      "name": "Allgemeiner Brief",
+      "beschreibung": "Universelle Vorlage für Behörden & Kassen"
+    }
+  },
+  "formular": {
+    "absenderTitel": "1. Absender (Versicherter)",
+    "augeTitel": "Virtuelles Dokumenten-Auge",
+    "begruendung": "Begründung / Spezifischer Sachverhalt (min. 10 Zeichen)",
+    "begruendungPlatzhalter": "Beschreiben Sie hier kurz die Einschränkungen oder den Grund des Schreibens…",
+    "empfaengerTitel": "2. Empfänger (Behörde/Kasse)",
+    "institution": "Name der Institution",
+    "name": "Vollständiger Name",
+    "nichtBenoetigt": "Nicht benötigt",
+    "pdfGenerieren": "PDF generieren",
+    "plz": "PLZ",
+    "strasse": "Straße",
+    "strasseHausnummer": "Straße & Hausnummer",
+    "titel": "DIN 5008 Vorlage: {typ}",
+    "untertitel": "Tragen Sie Ihre Daten ein. Die Formatierung und Fristen-Zuweisung erfolgt vollautomatisch im Backend.",
+    "vorschauFuss": "* Generierter Text entspricht dem offiziellen Schriftsatz-Standard.",
+    "vorschauLeer": "Klicken Sie auf Vorschau Text, um den generierten DIN-Entwurf vorab zu prüfen.",
+    "vorschauText": "Vorschau Text",
+    "ort": "Ort",
+    "telefon": "Telefon (optional)",
+    "email": "E-Mail (optional)",
+    "inhaltTitel": "3. Inhaltliche Spezifikation",
+    "betreff": "Betreffzeile"
+  },
+  "vorschau": {
+    "akte": "Verfahrenskorrespondenz Akte: {code}",
+    "briefkopf": "Offizieller Dokumenten-Generator",
+    "drucken": "Jetzt Dokument drucken",
+    "druckenLaeuft": "Erzeuge PDF…",
+    "hinweis": "Die Vorschau zeigt das Dokument, das erzeugt und heruntergeladen wird.",
+    "rechtsform": "Gemeinnützige Unternehmergesellschaft",
+    "schliessen": "Schließen",
+    "seite": "Seite 1 von 1",
+    "stand": "Stand: {jahr}",
+    "titel": "Amtliche Druckvorschau (DIN 5008)"
+  }
+}

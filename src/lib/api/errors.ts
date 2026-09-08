@@ -105,6 +105,37 @@ export class NotFoundError extends PflegeNavigatorError {
   }
 }
 
+export class UnauthorizedError extends PflegeNavigatorError {
+  constructor(message: string, context?: Record<string, unknown>) {
+    super(
+      {
+        code: ErrorCode.UNAUTHORIZED,
+        message,
+        userMessage: 'Keine gültige Fall-Session. Bitte laden Sie Ihren Fall erneut.',
+        statusCode: 401,
+        retryable: false,
+        logLevel: 'info',
+      },
+      context
+    );
+    this.name = 'UnauthorizedError';
+  }
+}
+
+export class RateLimitError extends PflegeNavigatorError {
+  constructor(message: string = 'Zu viele Anfragen') {
+    super({
+      code: ErrorCode.RATE_LIMIT,
+      message,
+      userMessage: 'Zu viele Anfragen. Bitte warten Sie einen Moment.',
+      statusCode: 429,
+      retryable: true,
+      logLevel: 'warning',
+    });
+    this.name = 'RateLimitError';
+  }
+}
+
 export class DatabaseError extends PflegeNavigatorError {
   // LÖSUNG: 'unknown' verwenden und unten typsicher abfragen
   constructor(message: string, originalError?: unknown) {

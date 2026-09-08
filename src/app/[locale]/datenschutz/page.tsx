@@ -11,13 +11,15 @@ import {
   FileText,
   ArrowRight,
   ArrowLeft,
+  BarChart3,
   Trash2,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { use } from 'react';
 
-import { Button } from '@/src/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { CookieEinstellungenButton } from '@/src/components/legal/CookieEinstellungenButton';
+import { Sprachhinweis } from '@/src/components/rechtliches/Sprachhinweis';
+import { Button, Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui';
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -31,6 +33,7 @@ export default function DatenschutzPage(props: PageProps) {
   return (
     <div className="min-h-screen bg-slate-900 text-white font-sans py-12 px-4">
       <div className="max-w-3xl mx-auto space-y-8">
+        <Sprachhinweis />
         {/* Header Chrome */}
         <div className="text-center space-y-3">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#0f2744] to-[#20b2aa] rounded-2xl shadow-xl border border-white/10">
@@ -67,7 +70,9 @@ export default function DatenschutzPage(props: PageProps) {
             <p className="flex items-start gap-2">
               <span className="text-[#20b2aa]">✓</span>
               <span>
-                Zweckbindung: Keine kommerzielle Datenweitergabe, kein Tracking, kein Werbe-Verkauf.
+                Zweckbindung: Keine kommerzielle Datenweitergabe, kein Werbe-Tracking, kein
+                Werbe-Verkauf. Die anonyme Reichweitenmessung läuft nur mit Ihrer Einwilligung
+                (siehe unten).
               </span>
             </p>
           </CardContent>
@@ -165,6 +170,52 @@ export default function DatenschutzPage(props: PageProps) {
               Netzknoten-Standort (AWS Frankfurt Registry), vollständig isoliert vom
               US-Mutterkonzern (EU-Data-Boundary-Standard).
             </p>
+          </CardContent>
+        </Card>
+
+        {/* Reichweitenmessung */}
+        <Card className="bg-white/5 border-white/10 text-white shadow-xl">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-sm font-bold text-white">
+              <BarChart3 className="w-4 h-4 text-[#20b2aa]" /> Reichweitenmessung (Umami)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-xs text-gray-300 space-y-3">
+            <p>
+              <span className="font-bold text-white">Zweck:</span> Wir werten anonym aus, wie unsere
+              Seiten genutzt werden, um Verständlichkeit und Ablauf zu verbessern.
+            </p>
+            <p>
+              <span className="font-bold text-white">Rechtsgrundlage:</span> Ihre Einwilligung nach
+              Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TTDSG. Ohne Ihre Zustimmung wird kein
+              Analyse-Skript geladen und keine Verbindung zum Analyse-Dienst aufgebaut.
+            </p>
+            <p>
+              <span className="font-bold text-white">Anbieter und Ort:</span> Umami, betrieben in
+              der EU-Region. Es werden keine Cookies gesetzt und keine geräteübergreifenden Profile
+              gebildet.
+            </p>
+            <div className="bg-slate-950/40 border border-white/5 p-4 rounded-xl">
+              <p className="font-bold text-white mb-2">Erfasst werden ausschließlich:</p>
+              <ul className="list-disc list-inside space-y-1 text-gray-400">
+                <li>Der aufgerufene Seitenpfad — ohne Parameter, also ohne Ihren Fallcode</li>
+                <li>Verweisende Seite, grobe Herkunftsregion, Browser- und Gerätetyp</li>
+                <li>
+                  Drei Ereignisse ohne Personenbezug: Rechner gestartet, Checkout aufgerufen, Kauf
+                  erfolgreich
+                </li>
+              </ul>
+            </div>
+            <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl">
+              <p className="font-bold text-emerald-400 mb-1">Ihr Widerrufsrecht:</p>
+              <p className="text-gray-300 mb-3">
+                Sie können Ihre Einwilligung jederzeit mit Wirkung für die Zukunft widerrufen. Die
+                Erfassung endet sofort — nicht erst beim nächsten Seitenaufruf.
+              </p>
+              <CookieEinstellungenButton className="inline-flex items-center justify-center h-11 px-5 rounded-xl bg-[#20b2aa] text-slate-950 text-xs font-bold hover:bg-[#3ddbd0] transition-colors">
+                Cookie-Einstellungen ändern
+              </CookieEinstellungenButton>
+            </div>
           </CardContent>
         </Card>
 

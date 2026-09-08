@@ -316,8 +316,14 @@ export class SupabaseUsageMonitor {
     message: string,
     priority: 'high' | 'normal'
   ): Promise<void> {
-    const escapedTitle = title.replace(/[_*\[\]()~`>#+=|{}.!-]/g, '\\$&');
-    const escapedMessage = message.replace(/[_*\[\]()~`>#+=|{}.!-]/g, '\\$&');
+    // Erst Backslashes escapen, dann die MarkdownV2-Sonderzeichen — sonst
+    // können bereits vorhandene Backslashes das Escaping wieder aushebeln
+    // (CodeQL: js/incomplete-sanitization)
+    const escapeMarkdownV2 = (value: string): string =>
+      value.replace(/\\/g, '\\\\').replace(/[_*[\]()~`>#+=|{}.!-]/g, '\\$&');
+
+    const escapedTitle = escapeMarkdownV2(title);
+    const escapedMessage = escapeMarkdownV2(message);
 
     const fullMessage = `*${escapedTitle}*\n\n${escapedMessage}`;
 

@@ -1,0 +1,38 @@
+{
+  "titel": "Help and knowledge centre",
+  "untertitel": "SGB XI reference, deadline rules and digital advice",
+  "suchePlatzhalter": "Search the knowledge base (e.g. appeal)…",
+  "sektionOeffnen": "Open section",
+  "faqTitel": "Frequently asked questions",
+  "hotlineTitel": "Official federal care hotline",
+  "hotlineZeiten": "Monday to Friday, 9 am – 6 pm • Neutral and free of charge",
+  "zurueck": "Back to the home page",
+  "themen": {
+    "rechner": {
+      "titel": "Care level calculator",
+      "beschreibung": "Check your prospects in advance"
+    },
+    "widerspruch": {
+      "titel": "Appeal centre",
+      "beschreibung": "Create appeals that meet the deadline"
+    },
+    "dienste": {
+      "titel": "Services and networks",
+      "beschreibung": "Find home care support near you"
+    }
+  },
+  "fragen": {
+    "pflegegrad": {
+      "frage": "What is a care level?",
+      "antwort": "The care level reflects how independent a person is. It ranges from level 1 (slight impairment) to level 5 (most severe impairment)."
+    },
+    "dauer": {
+      "frage": "How long does the application take?",
+      "antwort": "Once the application is received, the fund must issue a written decision within 25 working days. If it misses the deadline, it must pay €70 for each begun week of delay under § 18 (3b) SGB XI."
+    },
+    "widerspruch": {
+      "frage": "How does an appeal work?",
+      "antwort": "After you receive the rejection, a strict deadline of one calendar month applies for submitting the appeal in writing."
+    }
+  }
+}

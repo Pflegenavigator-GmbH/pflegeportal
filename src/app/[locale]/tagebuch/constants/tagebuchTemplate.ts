@@ -1,4 +1,15 @@
 // src/app/[locale]/tagebuch/_constants/tagebuchTemplate.ts
+//
+// BEWUSST NICHT ÜBERSETZT.
+//
+// Dieses Template erzeugt das PDF, das als Beweismittel nach § 14 SGB XI beim
+// Medizinischen Dienst oder im Widerspruchsverfahren eingereicht wird. Adressat
+// ist eine deutsche Behörde — ein englisches Pflegetagebuch wäre dort im besten
+// Fall wertlos und im schlechtesten Fall schädlich für den Fall des Nutzers.
+//
+// Die Oberfläche folgt der gewählten Sprache (public/locales/*/tagebuch.json),
+// das Dokument bleibt deutsch. Auch die gespeicherten Werte ("Hauptpflegeperson",
+// "Gut"/"Unterbrochen"/"Schlecht") sind aus demselben Grund Daten, keine Anzeige.
 import { TagebuchData } from '@/src/types/tagebuch';
 
 export function generateTagebuchHtml(entries: TagebuchData, caseCode: string): string {
@@ -8,7 +19,7 @@ export function generateTagebuchHtml(entries: TagebuchData, caseCode: string): s
   );
 
   const entriesHtml = sortedEntries
-    .map(([_, entry]) => {
+    .map(([, entry]) => {
       const highlights = [
         entry.sturz
           ? '<span style="color:#991b1b;font-weight:bold;background:#fee2e2;padding:2px 6px;border-radius:4px;margin-right:4px;">⚠ Sturz</span>'

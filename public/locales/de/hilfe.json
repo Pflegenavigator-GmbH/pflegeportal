@@ -1,0 +1,38 @@
+{
+  "titel": "Hilfe- & Wissenszentrum",
+  "untertitel": "SGB XI Direkt-Katalog, Fristregeln und digitale Beratung",
+  "suchePlatzhalter": "Wissen durchsuchen (z.B. Widerspruch)…",
+  "sektionOeffnen": "Sektion öffnen",
+  "faqTitel": "Häufig gestellte Fragen",
+  "hotlineTitel": "Offizielle Bundes-Pflegehotline",
+  "hotlineZeiten": "Montag bis Freitag von 09:00 bis 18:00 Uhr • Neutral & Gebührenfrei",
+  "zurueck": "Zurück zur Startseite",
+  "themen": {
+    "rechner": {
+      "titel": "Pflegegrad-Rechner",
+      "beschreibung": "Prüfen Sie vorab Ihre Erfolgsaussichten"
+    },
+    "widerspruch": {
+      "titel": "Widerspruchszentrum",
+      "beschreibung": "Automatisierte Fristenwahrungen erstellen"
+    },
+    "dienste": {
+      "titel": "Dienste & Netzwerke",
+      "beschreibung": "Finden Sie ambulante Hilfe vor Ort"
+    }
+  },
+  "fragen": {
+    "pflegegrad": {
+      "frage": "Was ist ein Pflegegrad?",
+      "antwort": "Der Pflegegrad spiegelt den Grad der Selbstständigkeit einer Person wider. Das Spektrum reicht von Stufe 1 (geringe Beeinträchtigung) bis Stufe 5 (schwerste Beeinträchtigung)."
+    },
+    "dauer": {
+      "frage": "Wie lange läuft das Antragsverfahren?",
+      "antwort": "Nach Eingang des Antrags muss die Kasse innerhalb von 25 Werktagen einen schriftlichen Bescheid erlassen. Überschreitet sie die Frist, muss sie nach § 18 Abs. 3b SGB XI 70 Euro für jede begonnene Woche der Verzögerung zahlen."
+    },
+    "widerspruch": {
+      "frage": "Wie funktioniert der Widerspruch?",
+      "antwort": "Nach Erhalt des Ablehnungsbescheids läuft eine strikte Frist von einem Kalendermonat, in dem der Widerspruch schriftlich eingereicht werden muss."
+    }
+  }
+}

@@ -3,14 +3,14 @@
 
 import { ExternalLink, FileCheck } from 'lucide-react';
 
-import { Button } from '@/src/components/ui/button';
 import {
+  Button,
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
-} from '@/src/components/ui/card';
+} from '@/src/components/ui';
 import type { Tool } from '@/src/data/pflegekraefte.tools';
 
 type Props = {

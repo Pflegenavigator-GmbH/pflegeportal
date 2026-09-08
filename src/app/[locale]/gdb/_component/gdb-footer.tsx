@@ -1,11 +1,21 @@
-// src/app/[locale]/gdb/_component/gdb_footer.tsx
+// src/app/[locale]/gdb/_component/gdb-footer.tsx
+import { RechtshinweisFuss } from '@/src/components/layout/SeitenFuss';
+
+/**
+ * Rechtlicher Hinweis unter dem GdB-Rechner.
+ *
+ * Nutzt dieselbe Form wie die Hinweise unter dem EM-Renten-Rechner und
+ * Modul 6. Vorher fehlte hier der Abstand nach oben komplett, wodurch die
+ * Trennlinie direkt am Inhalt klebte.
+ *
+ * Der Text ist noch fest deutsch — der GdB-Bereich hängt an Issue #26 und ist
+ * bislang nicht übersetzbar gemacht.
+ */
 export function GdbFooter() {
   return (
-    <footer className="pt-6 border-t border-white/10 text-center text-gray-500 text-xs max-w-2xl mx-auto leading-relaxed">
-      <p>
-        <strong>Gesetzlicher Hinweis:</strong> Dieser GdB-Rechner simuliert das behördliche
-        Feststellungsverfahren nach den versorgungsmedizinischen Grundsätzen.
-      </p>
-    </footer>
+    <RechtshinweisFuss>
+      <strong>Gesetzlicher Hinweis:</strong> Dieser GdB-Rechner simuliert das behördliche
+      Feststellungsverfahren nach den versorgungsmedizinischen Grundsätzen.
+    </RechtshinweisFuss>
   );
 }

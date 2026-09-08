@@ -1,7 +1,7 @@
 // src/app/api/gesetz/[sgb]/[paragraph]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
-export const runtime = 'edge';
+import { withEdgeCache } from '@/src/lib/redis/with-edge-cache';
 
 interface GesetzParagraph {
   sgb: string;
@@ -170,7 +170,7 @@ const GESETZES_DATENBANK: Record<string, Record<string, GesetzParagraph>> = {
 
 type Params = { sgb: string; paragraph: string };
 
-export async function GET(
+async function handleGet(
   request: NextRequest,
   { params }: { params: Promise<Params> }
 ): Promise<NextResponse> {
@@ -227,6 +227,9 @@ export async function GET(
     );
   }
 }
+
+// Öffentlicher Gesetzestext, für alle Aufrufer identisch → Edge-Cache.
+export const GET = withEdgeCache(handleGet);
 
 export async function OPTIONS(): Promise<NextResponse> {
   return new NextResponse(null, {

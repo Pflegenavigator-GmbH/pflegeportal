@@ -18,11 +18,12 @@ export interface Database {
           care_level_guess: number | null;
           total_score: number;
           traffic_light: 'gruen' | 'gelb' | 'rot' | null;
-          billing_status: 'pending' | 'paid' | 'free' | 'failed';
+          billing_status: 'pending' | 'paid' | 'free' | 'failed' | 'expired';
           stripe_session_id: string | null;
           product_tier: 'beta' | 'standard' | 'profi';
           access_unlocked_at: string | null;
           access_activated_at: string | null;
+          bescheid_datum: string | null;
         };
         Insert: {
           id?: string;
@@ -38,11 +39,12 @@ export interface Database {
           care_level_guess?: number | null;
           total_score?: number;
           traffic_light?: 'gruen' | 'gelb' | 'rot' | null;
-          billing_status?: 'pending' | 'paid' | 'free' | 'failed';
+          billing_status?: 'pending' | 'paid' | 'free' | 'failed' | 'expired';
           stripe_session_id?: string | null;
           product_tier?: 'beta' | 'standard' | 'profi';
           access_unlocked_at?: string | null;
           access_activated_at?: string | null;
+          bescheid_datum?: string | null;
         };
         Update: {
           id?: string;
@@ -58,12 +60,14 @@ export interface Database {
           care_level_guess?: number | null;
           total_score?: number;
           traffic_light?: 'gruen' | 'gelb' | 'rot' | null;
-          billing_status?: 'pending' | 'paid' | 'free' | 'failed';
+          billing_status?: 'pending' | 'paid' | 'free' | 'failed' | 'expired';
           stripe_session_id?: string | null;
           product_tier?: 'beta' | 'standard' | 'profi';
           access_unlocked_at?: string | null;
           access_activated_at?: string | null;
+          bescheid_datum?: string | null;
         };
+        Relationships: [];
       };
       answers: {
         Row: {
@@ -93,6 +97,7 @@ export interface Database {
           completed_at?: string;
           created_at?: string;
         };
+        Relationships: [];
       };
       documents: {
         Row: {
@@ -131,6 +136,7 @@ export interface Database {
           uploaded_at?: string;
           expires_at?: string;
         };
+        Relationships: [];
       };
       feedback: {
         Row: {
@@ -163,6 +169,7 @@ export interface Database {
           umgesetzt?: boolean;
           created_at?: string;
         };
+        Relationships: [];
       };
       payments: {
         Row: {
@@ -195,6 +202,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       products: {
         Row: {
@@ -204,6 +212,7 @@ export interface Database {
           currency: string;
           interval: 'one_time' | 'monthly' | 'yearly';
           is_active: boolean;
+          paket: 'beta_special' | 'standard_monthly' | 'standard_yearly' | 'profi_monthly' | null;
         };
         Insert: {
           id: string;
@@ -212,6 +221,7 @@ export interface Database {
           currency?: string;
           interval?: 'one_time' | 'monthly' | 'yearly';
           is_active?: boolean;
+          paket?: 'beta_special' | 'standard_monthly' | 'standard_yearly' | 'profi_monthly' | null;
         };
         Update: {
           id?: string;
@@ -220,7 +230,9 @@ export interface Database {
           currency?: string;
           interval?: 'one_time' | 'monthly' | 'yearly';
           is_active?: boolean;
+          paket?: 'beta_special' | 'standard_monthly' | 'standard_yearly' | 'profi_monthly' | null;
         };
+        Relationships: [];
       };
       system_logs: {
         Row: {
@@ -253,6 +265,7 @@ export interface Database {
           created_at?: string;
           expires_at?: string;
         };
+        Relationships: [];
       };
       // Ergänzung innerhalb von Database['public']['Tables']
       pflegedienste: {
@@ -286,6 +299,58 @@ export interface Database {
           bewertung?: number;
           created_at?: string;
         };
+        Relationships: [];
+      };
+      posts: {
+        Row: {
+          id: string;
+          locale: string;
+          title: string;
+          slug: string;
+          subtitle: string | null;
+          summary: string | null;
+          content: Json | null;
+          content_html: string | null;
+          category: 'produktlaunch' | 'recht' | 'statistik' | 'migration';
+          seo_meta: Json | null;
+          status: 'draft' | 'review' | 'published' | 'archived';
+          published_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          locale?: string;
+          title: string;
+          slug: string;
+          subtitle?: string | null;
+          summary?: string | null;
+          content?: Json | null;
+          content_html?: string | null;
+          category: 'produktlaunch' | 'recht' | 'statistik' | 'migration';
+          seo_meta?: Json | null;
+          status?: 'draft' | 'review' | 'published' | 'archived';
+          published_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          locale?: string;
+          title?: string;
+          slug?: string;
+          subtitle?: string | null;
+          summary?: string | null;
+          content?: Json | null;
+          content_html?: string | null;
+          category?: 'produktlaunch' | 'recht' | 'statistik' | 'migration';
+          seo_meta?: Json | null;
+          status?: 'draft' | 'review' | 'published' | 'archived';
+          published_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
       };
       pflegestuetzpunkte: {
         Row: {
@@ -312,7 +377,29 @@ export interface Database {
           telefon?: string | null;
           created_at?: string;
         };
+        Relationships: [];
       };
+    };
+    // Views/Functions/Enums sind Pflichtfelder des GenericSchema von
+    // supabase-js v2 — ohne sie kollabieren alle Tabellen-Typen zu `never`.
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      create_case: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      reset_adult_assessment: {
+        Args: { p_case_id: string };
+        Returns: undefined;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
     };
   };
 }

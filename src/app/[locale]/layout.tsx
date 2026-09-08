@@ -1,5 +1,7 @@
+// src/app/[locale]/layout.tsx
 import type { Viewport } from 'next';
 import { notFound } from 'next/navigation';
+import Script from 'next/script';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { Toaster } from 'sonner';
@@ -7,12 +9,15 @@ import { Toaster } from 'sonner';
 import '../globals.css';
 import '../i18n.css';
 
+import { AccessibilityMenu } from '@/src/components/a11y/AccessibilityMenu';
+import { Analytics } from '@/src/components/analytics/Analytics';
 import BetaBanner from '@/src/components/BetaBanner';
 import { CookieBanner } from '@/src/components/legal/CookieBanner';
 import AppFooterChrome from '@/src/components/navigation/AppFooterChrome';
 import AppHeaderChrome from '@/src/components/navigation/AppHeaderChrome';
 import { isValidLocale } from '@/src/i18n/config';
 import { isRTL } from '@/src/i18n/rtl';
+import { A11Y_INIT_SCRIPT } from '@/src/lib/a11y';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -52,8 +57,31 @@ export default async function LocaleLayout({
   const dir = isRTL(locale) ? 'rtl' : 'ltr';
 
   return (
-    <html lang={locale} dir={dir} className="h-full scroll-smooth">
+    <html
+      lang={locale}
+      dir={dir}
+      className="h-full scroll-smooth"
+      // Sagt Next, dass das weiche Scrollen gewollt ist. Ohne dieses Attribut
+      // warnt der Router und schaltet es bei Routenwechseln nicht ab — dann
+      // „gleitet" ein Seitenwechsel sichtbar nach oben.
+      data-scroll-behavior="smooth"
+      // Default-Werte serverseitig rendern → Standardfall matcht exakt.
+      // Das Init-Script überschreibt nur bei abweichender Nutzerwahl;
+      // suppressHydrationWarning ist das Sicherheitsnetz für diese Fälle.
+      data-font-size="normal"
+      data-contrast="normal"
+      data-motion="system"
+      suppressHydrationWarning
+    >
       <body className="antialiased bg-[#0a1c3a] text-white min-h-screen flex flex-col font-sans">
+        {/* No-FOUC: setzt die A11y-Attribute vor dem ersten Paint.
+            Über next/script statt eines nackten <script>: React führt
+            Skript-Elemente beim reinen Client-Rendern nicht aus und warnt
+            deshalb. `beforeInteractive` hängt es in den <head>, wo es sogar
+            früher läuft — das ist für ein No-FOUC-Skript genau richtig. */}
+        <Script id="a11y-init" strategy="beforeInteractive">
+          {A11Y_INIT_SCRIPT}
+        </Script>
         <NextIntlClientProvider messages={messages} locale={locale}>
           <Toaster closeButton richColors position="top-right" />
           <BetaBanner />
@@ -72,8 +100,17 @@ export default async function LocaleLayout({
           </main>
 
           <AppFooterChrome locale={locale} />
+          <AccessibilityMenu />
+
+          {/* Muss INNERHALB des Providers stehen: Der Banner nutzt
+              useTranslations. Außerhalb lief er nur, solange seine Texte
+              hartkodiert waren — mit Übersetzungen bricht die ganze Seite. */}
+          <CookieBanner />
         </NextIntlClientProvider>
-        <CookieBanner />
+
+        {/* Ohne Übersetzungen, deshalb bewusst außerhalb. */}
+        <Analytics />
+        {/*<AvatarStage />*/}
       </body>
     </html>
   );

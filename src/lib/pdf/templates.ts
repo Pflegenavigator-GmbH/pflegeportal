@@ -44,21 +44,36 @@ export function buildStandardPdfHtml({
   `;
 }
 
+export interface PdfMargin {
+  top: string;
+  right: string;
+  bottom: string;
+  left: string;
+}
+
 interface CompilePdfOptions {
   page: Page;
   footerText?: string;
+  /** Footer mit Seitenzahlen anzeigen (bei formellen Briefen ggf. unerwünscht) */
+  showFooter?: boolean;
+  margin?: PdfMargin;
 }
 
+const DEFAULT_MARGIN: PdfMargin = { top: '25mm', right: '20mm', bottom: '25mm', left: '20mm' };
+
 /**
- * Übernimmt das physische Rendering des PDF-Dokuments mit festen DIN-A4 Metriken
+ * Übernimmt das physische Rendering des PDF-Dokuments mit DIN-A4 Metriken.
+ * Footer und Ränder sind optional überschreibbar.
  */
 export async function compilePageToA4Buffer({
   page,
   footerText,
+  showFooter = true,
+  margin = DEFAULT_MARGIN,
 }: CompilePdfOptions): Promise<Uint8Array> {
   const footerTemplate = `
     <div style="font-size: 9px; width: 100%; text-align: center; color: #64748b; font-family: Arial, sans-serif; padding-top: 5px; border-top: 1px solid #e2e8f0; margin: 0 15mm;">
-      ${footerText || 'PflegeNavigator EU gUG — Orientierungshilfe nach § 14 SGB XI'} 
+      ${footerText || 'PflegeNavigator EU gUG — Orientierungshilfe nach § 14 SGB XI'}
       <div style="float: right;"><span class="pageNumber"></span> / <span class="totalPages"></span></div>
     </div>
   `;
@@ -66,14 +81,9 @@ export async function compilePageToA4Buffer({
   return await page.pdf({
     format: 'A4',
     printBackground: true,
-    displayHeaderFooter: true,
-    footerTemplate,
+    displayHeaderFooter: showFooter,
+    footerTemplate: showFooter ? footerTemplate : '<div></div>',
     headerTemplate: '<div></div>',
-    margin: {
-      top: '25mm',
-      right: '20mm',
-      bottom: '25mm',
-      left: '20mm',
-    },
+    margin,
   });
 }

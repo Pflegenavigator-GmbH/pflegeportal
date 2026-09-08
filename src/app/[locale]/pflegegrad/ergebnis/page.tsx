@@ -14,29 +14,39 @@ import {
   ChevronDown,
   Info,
   CheckCircle2,
+  CalendarClock,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, use } from 'react';
+import { useTranslations } from 'next-intl';
+import { useEffect, useMemo, useState, use } from 'react';
 import { toast } from 'sonner';
 
 import { HandlungsEmpfehlungen } from '@/src/app/[locale]/pflegegrad/ergebnis/_component/HandlungsEmpfehlung';
 import { ModulListe } from '@/src/app/[locale]/pflegegrad/ergebnis/_component/ModulListe';
-import { validateAndStoreSession } from '@/src/app/actions/case-session';
+import { BescheidDatumAbfrage, FristenMonitor } from '@/src/components/fristen';
+import { BestaetigungsDialog } from '@/src/components/modal/BestaetigungsDialog';
 import { PaywallModal } from '@/src/components/modal/PaywallModal';
-import { Button } from '@/src/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/src/components/ui/dropdown-menu';
+} from '@/src/components/ui';
+import { useBescheidDatum } from '@/src/hooks/useBescheidDatum';
 import { usePdfDownload } from '@/src/hooks/usePdfDownload';
+import { useStripeCheckout } from '@/src/hooks/useStripeCheckout';
 import { logger } from '@/src/lib/logger';
-import { calculatePflegegrad } from '@/src/lib/pflegegrad/rechner';
-import { ModuleScores, PflegegradErgebnis, EinstufungAmpel } from '@/src/types/pflegegrad';
+import { loadCaseResult, SessionExpiredError } from '@/src/lib/pflegegrad/client-api';
+import { entferneErgebnis } from '@/src/lib/pflegegrad/ergebnis-storage';
+import { berechneFristen } from '@/src/lib/widerspruch/fristen';
+import { PflegegradErgebnis, EinstufungAmpel } from '@/src/types/pflegegrad';
 
 import { NBA_MODULE_METADATA } from './_constants/moduleMetadata';
 
@@ -51,14 +61,18 @@ const MVP_PRODUCTS = [
 ];
 
 export default function ErgebnisPage(props: PageProps) {
+  const tMeldung = useTranslations('pflegegrad.meldungen');
+  const t = useTranslations('pflegegrad.ergebnis');
   const router = useRouter();
   const params = use(props.params);
   const locale = params?.locale || 'de';
 
   const [hasMounted, setHasMounted] = useState(false);
   const [ergebnis, setErgebnis] = useState<PflegegradErgebnis | null>(null);
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const { triggerCheckout, checkoutLoading } = useStripeCheckout();
   const [isVerifyingGdb, setIsVerifyingGdb] = useState(false);
+  const [resetDialogOffen, setResetDialogOffen] = useState(false);
+  const [resetLaeuft, setResetLaeuft] = useState(false);
 
   const [caseCode] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
@@ -67,122 +81,111 @@ export default function ErgebnisPage(props: PageProps) {
     return null;
   });
 
+  const {
+    bescheidDatum,
+    speichereBescheidDatum,
+    speichert: speichertDatum,
+  } = useBescheidDatum(caseCode);
+
+  // Fristen ergeben sich rein rechnerisch aus dem Bescheiddatum — kein
+  // Serveraufruf nötig, die Anzeige folgt der Eingabe unmittelbar.
+  const fristenUebersicht = useMemo(() => berechneFristen({ bescheidDatum }), [bescheidDatum]);
+
   const { downloadPdf, loadingPdf, showPaywall, setShowPaywall } = usePdfDownload({
     caseCode,
     elementId: 'nba-analysis-content',
     documentTitle: `PflegeGutachten_${caseCode?.toUpperCase()}`,
     footerText: 'PflegeNavigator EU gUG — Offizielles Orientierungsgutachten nach § 14 SGB XI',
     fallbackHtml: ergebnis
-      ? `<h2>Zusammenfassung</h2><p>Errechneter Pflegegrad: ${ergebnis.careLevel}</p>`
+      ? `<h2>{t('zusammenfassung')}</h2><p>Errechneter Pflegegrad: ${ergebnis.careLevel}</p>`
       : undefined,
   });
 
   useEffect(() => {
-    const timer = setTimeout(async () => {
-      setHasMounted(true);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setHasMounted(true);
 
-      if (!caseCode) {
-        logger.warn('Keine aktive Fall-Session im LocalStorage gefunden. Leite um.');
-        toast.error('Keine aktive Fall-Session gefunden.');
-        router.push(`/${locale}/pflegegrad/start`);
-        return;
-      }
+    if (!caseCode) {
+      logger.warn('Keine aktive Fall-Session gefunden. Leite um.');
+      toast.error(tMeldung('keineSitzungKurz'));
+      router.push(`/${locale}/pflegegrad/start`);
+      return;
+    }
 
-      try {
-        const session = await validateAndStoreSession(caseCode);
-        if (!session.success || !session.isUnlocked) {
-          logger.warn({ caseCode }, 'Client-Session auf der Ergebnisseite nicht freigeschaltet');
+    // Server ist die einzige Wahrheit: Rohpunkte und Pflegegrad werden
+    // serverseitig aus den gespeicherten Antworten berechnet — kein
+    // localStorage, kein setTimeout-Lifecycle-Workaround mehr.
+    loadCaseResult(caseCode)
+      .then((berechnetesErgebnis) => {
+        setErgebnis(berechnetesErgebnis);
+      })
+      .catch((err) => {
+        if (err instanceof SessionExpiredError) {
+          toast.error(tMeldung('sitzungAbgelaufen'));
+          router.push(`/${locale}/pflegegrad/start`);
+          return;
         }
-      } catch (sessionErr) {
-        logger.error(
-          { err: sessionErr },
-          'Fehler bei der Server-Session-Synchronisation im Frontend'
-        );
-      }
+        logger.error({ err, caseCode }, 'Ergebnis konnte nicht geladen werden');
+        toast.error(tMeldung('ergebnisFehler'));
+      });
+  }, [caseCode, locale, router, tMeldung]);
 
-      const m1 = Number(localStorage.getItem('modul1_rohpunkte') || '0');
-      const m2 = Number(localStorage.getItem('modul2_rohpunkte') || '0');
-      const m3 = Number(localStorage.getItem('modul3_rohpunkte') || '0');
-      const m4 = Number(localStorage.getItem('modul4_rohpunkte') || '0');
-      const m5 = Number(localStorage.getItem('modul5_rohpunkte') || '0');
-      const m6 = Number(localStorage.getItem('modul6_answers') ? 1 : 0);
+  /**
+   * Setzt die Begutachtung zurück.
+   *
+   * Der Löschauftrag geht an den Server: Die Antworten liegen in der
+   * `answers`-Tabelle, nicht im Browser. Ein reines Leeren des localStorage
+   * (so lief es früher) hat nichts zurückgesetzt — die Module luden ihre
+   * alten Antworten anschließend wieder vom Server.
+   */
+  const handleReEvaluateFromScratch = async () => {
+    if (!caseCode) return;
 
-      const scores: Partial<ModuleScores> = { 1: m1, 2: m2, 3: m3, 4: m4, 5: m5, 6: m6 };
-      const berechnetesErgebnis = calculatePflegegrad(scores);
-      setErgebnis(berechnetesErgebnis);
+    setResetLaeuft(true);
+    try {
+      const antwort = await fetch(`/api/cases/${caseCode.toUpperCase()}/answers`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
 
-      localStorage.setItem('pflegegrad-ergebnis', JSON.stringify(berechnetesErgebnis));
-    }, 0);
+      if (!antwort.ok) throw new Error(`Status ${antwort.status}`);
 
-    return () => clearTimeout(timer);
-  }, [caseCode, locale, router]);
-
-  const handleReEvaluateFromScratch = () => {
-    if (
-      confirm(
-        'Möchten Sie die aktuelle Einstufung wirklich zurücksetzen und alle Fragen von vorne beantworten? Ihre bisherigen Modul-Antworten werden überschrieben.'
-      )
-    ) {
-      logger.info({ caseCode }, 'Trigger Re-Evaluation: Säubere lokalen Cache und starte neu');
+      // Zwischenstände früherer Versionen mit aufräumen
       for (let i = 1; i <= 6; i++) {
         localStorage.removeItem(`modul${i}_rohpunkte`);
         localStorage.removeItem(`modul${i}_answers`);
       }
-      localStorage.removeItem('pflegegrad-ergebnis');
-      toast.success('Evaluierung zurückgesetzt.');
-      router.push(`/${locale}/pflegegrad/fragen/modul1`);
+      entferneErgebnis();
+
+      logger.info({ caseCode }, 'Begutachtung zurückgesetzt, starte neu bei Modul 1');
+      toast.success(tMeldung('zurueckgesetzt'));
+
+      // Ladezustand bewusst aktiv lassen — die Navigation folgt unmittelbar.
+      router.push(`/${locale}/pflegegrad/modul1`);
+    } catch (error) {
+      logger.error({ error, caseCode }, 'Begutachtung konnte nicht zurückgesetzt werden');
+      toast.error(tMeldung('zuruecksetzenFehler'));
+      setResetLaeuft(false);
+      setResetDialogOffen(false);
     }
   };
 
-  const handleCheckoutSubmit = async (paketId: string) => {
-    if (!caseCode) return;
-    setCheckoutLoading(true);
-    logger.info({ caseCode, paketId }, 'Starte Stripe Checkout Erstellung aus der Paywall heraus');
-    const toastId = toast.loading('Sicheres Bezahlfenster wird geladen...');
-
-    try {
-      const res = await fetch('/api/checkout/create-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          caseCode: caseCode.toUpperCase(),
-          paket: paketId,
-        }),
-      });
-
-      if (!res.ok) throw new Error();
-      const data = await res.json();
-
-      if (data.url) {
-        window.location.href = data.url;
-      }
-    } catch (err) {
-      logger.error({ err, caseCode }, 'Stripe Session-Erstellung serverseitig fehlgeschlagen');
-      toast.error('Verbindungsfehler zu Stripe.', { id: toastId });
-    } finally {
-      setCheckoutLoading(false);
-    }
-  };
+  const handleCheckoutSubmit = (paketId: string) => triggerCheckout(caseCode, paketId);
 
   const handleGdbNavigation = async () => {
     if (!caseCode) return;
     setIsVerifyingGdb(true);
     logger.debug({ caseCode }, 'Verifiziere GdB-Lizenzfreigabe');
-    const verificationToast = toast.loading('Verifiziere aktive Lizenzrechte für Zusatzmodule...');
+    const verificationToast = toast.loading(t('lizenzPruefen'));
 
     try {
-      const checkRes = await fetch('/api/pdf/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      // Leichtgewichtige Statusabfrage — kein Puppeteer, kein Cache-Eintrag
+      const checkRes = await fetch(`/api/cases/${caseCode.toUpperCase()}/access`, {
         credentials: 'include',
-        body: JSON.stringify({
-          caseCode: caseCode.toUpperCase(),
-          html: '<li>Lizenzprüfung GdB</li>',
-          title: 'CHECK',
-        }),
       });
+      const accessData = checkRes.ok ? await checkRes.json() : null;
 
-      if (checkRes.status === 402) {
+      if (checkRes.status === 402 || (accessData && !accessData.isUnlocked)) {
         logger.info({ caseCode }, 'Lizenz fehlt für GdB-Zusatzmodul. Zeige Paywall.');
         toast.dismiss(verificationToast);
         setShowPaywall(true);
@@ -194,19 +197,17 @@ export default function ErgebnisPage(props: PageProps) {
       router.push(`/${locale}/gdb`);
     } catch (err) {
       logger.error({ err }, 'GdB Lizenzcheck-Verbindung abgebrochen');
-      toast.error('Verbindungsfehler bei der Lizenzprüfung.', { id: verificationToast });
+      toast.error(t('lizenzFehler'), { id: verificationToast });
       setIsVerifyingGdb(false);
     }
   };
 
   if (!ergebnis) {
     return (
-      <div className="container mx-auto px-4 py-12 text-center text-white bg-slate-900 min-h-screen flex flex-col justify-center items-center">
+      <div className="container mx-auto px-4 py-12 text-center text-white bg-[var(--color-surface)] min-h-screen flex flex-col justify-center items-center">
         <AlertCircle className="w-16 h-16 text-orange-400 mb-4 animate-pulse" />
-        <h1 className="text-2xl font-bold mb-2">Berechne Auswertungs-Matrix...</h1>
-        <p className="text-gray-400 max-w-sm">
-          Die SGB XI Schwellenwerte werden mit Ihren Angaben abgeglichen.
-        </p>
+        <h1 className="text-2xl font-bold mb-2">{t('ladenTitel')}</h1>
+        <p className="text-[var(--color-text-muted)] max-w-sm">{t('ladenText')}</p>
       </div>
     );
   }
@@ -219,19 +220,19 @@ export default function ErgebnisPage(props: PageProps) {
       bg: 'bg-emerald-500/10',
       text: 'text-emerald-400',
       border: 'border-emerald-500/30',
-      label: 'Sicher über der gesetzlichen Schwelle',
+      label: t('ampel.gruen'),
     },
     gelb: {
       bg: 'bg-amber-500/10',
       text: 'text-amber-400',
       border: 'border-amber-500/30',
-      label: 'Knapp über der gesetzlichen Schwelle (Grenzfall)',
+      label: t('ampel.gelb'),
     },
     rot: {
       bg: 'bg-rose-500/10',
       text: 'text-rose-400',
       border: 'border-rose-500/30',
-      label: 'Unterhalb der gesetzlichen Mindest-Schwelle',
+      label: t('ampel.rot'),
     },
   };
 
@@ -245,23 +246,21 @@ export default function ErgebnisPage(props: PageProps) {
           text: `Voraussichtlicher Pflegegrad: ${ergebnis.careLevel} mit ${ergebnis.totalScore} Punkten.`,
           url: window.location.href,
         })
-        .catch(() => toast.error('Teilen fehlgeschlagen.'));
+        .catch(() => toast.error(tMeldung('teilenFehler')));
     } else {
-      toast.info('Link in die Zwischenablage kopiert.');
+      toast.info(tMeldung('linkKopiert'));
       navigator.clipboard.writeText(window.location.href);
     }
   };
 
   return (
-    <main className="min-h-screen bg-slate-900 py-12 px-4 text-white font-sans">
+    <main className="min-h-screen bg-[var(--color-surface)] py-12 px-4 text-white font-sans">
       <div id="nba-analysis-content" className="container mx-auto max-w-3xl space-y-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Ihre NBA-Leistungsanalyse</h1>
-            <p className="text-sm text-gray-400 mt-1">
-              Ermittelt nach den Begutachtungs-Richtlinien
-            </p>
+            <h1 className="text-3xl font-bold tracking-tight">{t('seitenTitel')}</h1>
+            <p className="text-sm text-[var(--color-text-muted)] mt-1">{t('seitenUntertitel')}</p>
           </div>
 
           {/* 📁 NEUES AKTEN-DROPDOWN-MENÜ */}
@@ -269,25 +268,25 @@ export default function ErgebnisPage(props: PageProps) {
             {hasMounted && caseCode && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <div className="text-xs font-mono bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1.5 rounded-full text-gray-300 flex items-center gap-2 cursor-pointer transition-colors select-none">
-                    <FolderLock className="w-3.5 h-3.5 text-[#20b2aa]" />
+                  <div className="text-xs font-mono bg-[var(--surface-1)] hover:bg-white/10 border border-[var(--border-subtle)] px-3 py-1.5 rounded-full text-[var(--color-text-subtle)] flex items-center gap-2 cursor-pointer transition-colors select-none">
+                    <FolderLock className="w-3.5 h-3.5 text-[var(--color-accent)]" />
                     <span>Akte: {caseCode.toUpperCase()}</span>
-                    <ChevronDown className="w-3 h-3 text-gray-500" />
+                    <ChevronDown className="w-3 h-3 text-[var(--color-text-faint)]" />
                   </div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
-                  className="bg-slate-900 border-white/10 text-white w-56"
+                  className="bg-[var(--color-surface)] border-[var(--border-subtle)] text-white w-56"
                   align="end"
                 >
-                  <DropdownMenuLabel className="text-xs text-gray-400">
-                    Akten-Optionen
+                  <DropdownMenuLabel className="text-xs text-[var(--color-text-muted)]">
+                    {t('aktenOptionen')}
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-white/5" />
+                  <DropdownMenuSeparator className="bg-[var(--surface-1)]" />
                   <DropdownMenuItem
-                    onClick={handleReEvaluateFromScratch}
+                    onClick={() => setResetDialogOffen(true)}
                     className="text-rose-400 focus:text-rose-400 focus:bg-rose-500/10 cursor-pointer"
                   >
-                    <RefreshCw className="w-3.5 h-3.5 mr-2" /> Neu evaluieren
+                    <RefreshCw className="w-3.5 h-3.5 mr-2" /> {t('neuEvaluieren')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -296,7 +295,9 @@ export default function ErgebnisPage(props: PageProps) {
         </div>
 
         {/* Ampel-Card */}
-        <Card className={`bg-white/5 border-2 ${aktuelleAmpel.border} text-white shadow-2xl`}>
+        <Card
+          className={`bg-[var(--surface-1)] border-2 ${aktuelleAmpel.border} text-white shadow-2xl`}
+        >
           <div className="p-8 sm:p-10 flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="space-y-3 text-center sm:text-left">
               <span
@@ -305,10 +306,12 @@ export default function ErgebnisPage(props: PageProps) {
                 {aktuelleAmpel.label}
               </span>
               <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight">
-                {ergebnis.careLevel === 0 ? 'Kein Pflegegrad' : `Pflegegrad ${ergebnis.careLevel}`}
+                {ergebnis.careLevel === 0
+                  ? t('keinPflegegrad')
+                  : t('pflegegradN', { stufe: ergebnis.careLevel })}
               </h2>
-              <p className="text-sm text-gray-400 max-w-md">
-                Punktwert: {ergebnis.totalScore.toFixed(1)} von 100.
+              <p className="text-sm text-[var(--color-text-muted)] max-w-md">
+                {t('punktwert', { punkte: ergebnis.totalScore.toFixed(1) })}
               </p>
             </div>
             <div
@@ -320,20 +323,13 @@ export default function ErgebnisPage(props: PageProps) {
         </Card>
 
         {/* ℹ️ BARRIEREFREIE PARAGRAPHEN-ERKLÄRUNG FÜR SENIOREN */}
-        <Card className="bg-white/[0.02] border border-white/5 text-white shadow-md p-5 rounded-2xl">
+        <Card className="bg-[var(--surface-hairline)] border border-[var(--border-faint)] text-white shadow-md p-5 rounded-2xl">
           <div className="flex gap-3">
-            <Info className="w-5 h-5 text-[#20b2aa] flex-shrink-0 mt-0.5" />
+            <Info className="w-5 h-5 text-[var(--color-accent)] flex-shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <h4 className="text-sm font-bold text-gray-200">
-                Wie kommt mein Pflegegrad zustande? (Einfach erklärt)
-              </h4>
-              <p className="text-xs text-gray-400 leading-relaxed">
-                Ein Pflegegrad wird im Gesetz nicht nach Minuten oder Stunden bemessen, sondern rein
-                nach Ihrer verbleibenden
-                <strong> Eigenständigkeit im Alltag</strong>. Das Begutachtungssystem verteilt
-                Punkte in den unten stehenden Lebensbereichen. Ab 12.5 Punkten erhalten Sie
-                Pflegegrad 1, ab 27 Punkten Pflegegrad 2, ab 47.5 Punkten Pflegegrad 3, ab 70
-                Punkten Pflegegrad 4 und ab 90 Punkten den höchsten Pflegegrad 5.
+              <h4 className="text-sm font-bold text-gray-200">{t('erklaerungTitel')}</h4>
+              <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
+                {t.rich('erklaerungText', { b: (inhalt) => <strong>{inhalt}</strong> })}
               </p>
             </div>
           </div>
@@ -345,26 +341,30 @@ export default function ErgebnisPage(props: PageProps) {
 
         {/* ZUSTAND A: KLASSISCHE KOMBINATIONSPFLEGE (Pflegegrad 2 bis 5) */}
         {ergebnis.careLevel >= 2 && (
-          <Card className="bg-white/5 border-white/10 text-white shadow-xl">
-            <CardHeader className="border-b border-white/5 pb-4">
+          <Card className="bg-[var(--surface-1)] border-[var(--border-subtle)] text-white shadow-xl">
+            <CardHeader className="border-b border-[var(--border-faint)] pb-4">
               <CardTitle className="text-lg font-bold flex items-center gap-2">
-                <Coins className="w-5 h-5 text-[#20b2aa]" /> Leistungsansprüche & Kombinationspflege
+                <Coins className="w-5 h-5 text-[var(--color-accent)]" /> {t('anspruecheTitel')}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <div className="grid gap-4 sm:grid-cols-2 mb-4">
-                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-xl">
-                  <span className="text-xs text-gray-400">Pflegegeld (SGB XI § 37)</span>
+                <div className="p-4 bg-[var(--surface-hairline)] border border-[var(--border-faint)] rounded-xl">
+                  <span className="text-xs text-[var(--color-text-muted)]">
+                    {t('pflegegeldLabel')}
+                  </span>
                   <p className="text-2xl font-bold">{ergebnis.benefits.monthlyAmount} €</p>
-                  <p className="text-[10px] text-gray-500 mt-1">
-                    Bei privater Pflege durch Angehörige
+                  <p className="text-[10px] text-[var(--color-text-faint)] mt-1">
+                    {t('pflegegeldHinweis')}
                   </p>
                 </div>
-                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-xl">
-                  <span className="text-xs text-gray-400">Entlastungsbetrag (SGB XI § 45b)</span>
+                <div className="p-4 bg-[var(--surface-hairline)] border border-[var(--border-faint)] rounded-xl">
+                  <span className="text-xs text-[var(--color-text-muted)]">
+                    {t('entlastungLabel')}
+                  </span>
                   <p className="text-2xl font-bold">{ergebnis.benefits.reliefBudget} €</p>
-                  <p className="text-[10px] text-gray-500 mt-1">
-                    Zweckgebunden für Betreuungsdienste
+                  <p className="text-[10px] text-[var(--color-text-faint)] mt-1">
+                    {t('entlastungHinweis')}
                   </p>
                 </div>
               </div>
@@ -375,7 +375,7 @@ export default function ErgebnisPage(props: PageProps) {
                 onClick={() => router.push(`/${locale}/kombileistungen`)}
                 className="w-full h-12 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
               >
-                <Calculator className="w-4 h-4 mr-2" /> Sachleistungen aufteilen (Kombi-Rechner)
+                <Calculator className="w-4 h-4 mr-2" /> {t('kombiRechner')}
               </Button>
             </CardContent>
           </Card>
@@ -383,22 +383,20 @@ export default function ErgebnisPage(props: PageProps) {
 
         {/* ZUSTAND B: SONDERFALL PFLEGEGRAD 1 (Kein Kombi-Budget vorhanden) */}
         {ergebnis.careLevel === 1 && (
-          <Card className="bg-white/5 border-white/10 text-white shadow-xl">
-            <CardHeader className="border-b border-white/5 pb-4">
+          <Card className="bg-[var(--surface-1)] border-[var(--border-subtle)] text-white shadow-xl">
+            <CardHeader className="border-b border-[var(--border-faint)] pb-4">
               <CardTitle className="text-lg font-bold flex items-center gap-2 text-amber-400">
-                <Info className="w-5 h-5" /> Ihre Ansprüche bei Pflegegrad 1
+                <Info className="w-5 h-5" /> {t('pg1Titel')}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
-              <div className="p-4 bg-white/[0.02] border border-white/5 rounded-xl">
-                <span className="text-xs text-gray-400">
-                  Monatlicher Entlastungsbetrag (§ 45b SGB XI)
+              <div className="p-4 bg-[var(--surface-hairline)] border border-[var(--border-faint)] rounded-xl">
+                <span className="text-xs text-[var(--color-text-muted)]">
+                  {t('pg1EntlastungLabel')}
                 </span>
                 <p className="text-2xl font-bold text-white">{ergebnis.benefits.reliefBudget} €</p>
-                <p className="text-[11px] text-gray-400 mt-1.5 leading-relaxed">
-                  Bei Pflegegrad 1 zahlt die Kasse noch kein direktes Pflegegeld aus. Sie erhalten
-                  jedoch den vollen Entlastungsbetrag. Dieser ist zweckgebunden und kann für
-                  zugelassene Alltagsbegleiter, Haushaltshilfen oder Tagespflege erstattet werden.
+                <p className="text-[11px] text-[var(--color-text-muted)] mt-1.5 leading-relaxed">
+                  {t('pg1Text')}
                 </p>
               </div>
             </CardContent>
@@ -410,12 +408,9 @@ export default function ErgebnisPage(props: PageProps) {
           <Card className="bg-rose-500/5 border border-rose-500/20 text-white shadow-xl p-6 rounded-2xl flex gap-4 items-start">
             <AlertCircle className="w-6 h-6 text-rose-400 flex-shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <h4 className="font-bold text-sm text-rose-400">Hinweis zum aktuellen Punktestand</h4>
-              <p className="text-xs text-gray-400 leading-relaxed">
-                Mit Ihrem errechneten Wert von {ergebnis.totalScore} Punkten wird die gesetzliche
-                Mindesthürde von 12,5 Punkten für eine Einstufung aktuell unterschritten. Sollte
-                sich der Zustand im Alltag verschlechtern, empfiehlt es sich, die Evaluierung
-                umgehend mit den neuen Gegebenheiten zu wiederholen.
+              <h4 className="font-bold text-sm text-rose-400">{t('pg0Titel')}</h4>
+              <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
+                {t('pg0Text', { punkte: ergebnis.totalScore })}
               </p>
             </div>
           </Card>
@@ -424,29 +419,48 @@ export default function ErgebnisPage(props: PageProps) {
         {/* Modul-Liste */}
         <div className="space-y-3">
           <div className="flex justify-between items-center px-1">
-            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">
-              Modul-Einstufung anpassen
+            <h3 className="text-sm font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
+              {t('moduleTitel')}
             </h3>
-            <span className="text-xs text-[#20b2aa]">Klicken zum Editieren</span>
+            <span className="text-xs text-[var(--color-accent)]">{t('moduleEditieren')}</span>
           </div>
           <ModulListe metadata={NBA_MODULE_METADATA} ergebnis={ergebnis} locale={locale} />
         </div>
 
         <HandlungsEmpfehlungen ergebnis={ergebnis} />
 
+        {/* Fristen-Monitor: Nach dem Ergebnis entscheidet sich, ob widersprochen
+            wird — hier ist die Widerspruchsfrist relevant, nicht erst im
+            Widerspruchs-Zentrum. Das Datum wird bewusst erfragt, nie geraten. */}
+        <Card className="bg-white/5 border-white/10 text-white shadow-xl">
+          <CardHeader>
+            <CardTitle className="text-base font-bold flex items-center gap-2">
+              <CalendarClock className="w-5 h-5 text-[var(--color-accent)]" /> {t('fristenTitel')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <BescheidDatumAbfrage
+              wert={bescheidDatum}
+              onChange={speichereBescheidDatum}
+              gespeichertWird={speichertDatum}
+            />
+            <FristenMonitor uebersicht={fristenUebersicht} />
+          </CardContent>
+        </Card>
+
         {/* Zusatzleistungen anzeigen (Wohnraum, Hilfsmittel), falls im Rechner-Ergebnis vorhanden */}
         {ergebnis.benefits.additionalBenefits.length > 0 && (
           <div className="space-y-2">
-            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider px-1">
-              Zusätzliche gesetzliche Hilfen
+            <h4 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider px-1">
+              {t('zusatzTitel')}
             </h4>
             <div className="grid gap-2 sm:grid-cols-2">
               {ergebnis.benefits.additionalBenefits.map((benefit, idx) => (
                 <div
                   key={idx}
-                  className="p-3 bg-white/[0.02] border border-white/5 rounded-xl text-xs text-gray-300 flex items-center gap-2"
+                  className="p-3 bg-[var(--surface-hairline)] border border-[var(--border-faint)] rounded-xl text-xs text-[var(--color-text-subtle)] flex items-center gap-2"
                 >
-                  <CheckCircle2 className="w-4 h-4 text-[#20b2aa] flex-shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-[var(--color-accent)] flex-shrink-0" />
                   <span>{benefit}</span>
                 </div>
               ))}
@@ -460,42 +474,40 @@ export default function ErgebnisPage(props: PageProps) {
             variant="outline"
             onClick={downloadPdf}
             disabled={loadingPdf}
-            className="h-14 border-white/10 text-white hover:bg-white/5 shadow-md"
+            className="h-14 border-[var(--border-subtle)] text-white hover:bg-[var(--surface-1)] shadow-md"
           >
-            <Download className="w-4 h-4 mr-2" /> PDF
+            <Download className="w-4 h-4 mr-2" /> {t('pdf')}
           </Button>
           <Button
             variant="outline"
             onClick={shareErgebnis}
-            className="h-14 border-white/10 text-white hover:bg-white/5 shadow-md"
+            className="h-14 border-[var(--border-subtle)] text-white hover:bg-[var(--surface-1)] shadow-md"
           >
-            <Share2 className="w-4 h-4 mr-2" /> Teilen
+            <Share2 className="w-4 h-4 mr-2" /> {t('teilen')}
           </Button>
           <Button
             onClick={() => router.push(`/${locale}/briefe`)}
-            className="h-14 bg-[#20b2aa] hover:bg-[#3ddbd0] text-white font-bold shadow-xl"
+            className="h-14 bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[var(--color-on-accent)] font-bold shadow-xl"
           >
-            <FileText className="w-4 h-4 mr-2" /> Briefe
+            <FileText className="w-4 h-4 mr-2" /> {t('briefe')}
           </Button>
         </div>
 
         {/* GdB-Weiche */}
-        <Card className="bg-gradient-to-r from-white/5 to-transparent border-white/10 text-white p-5 rounded-xl shadow-xl">
+        <Card className="bg-gradient-to-r from-white/5 to-transparent border-[var(--border-subtle)] text-white p-5 rounded-xl shadow-xl">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-center sm:text-left">
               <h4 className="font-bold text-sm flex items-center gap-2">
-                <Accessibility className="w-4 h-4 text-[#20b2aa]" /> Grad der Behinderung prüfen?
+                <Accessibility className="w-4 h-4 text-[var(--color-accent)]" /> {t('gdbTitel')}
               </h4>
-              <p className="text-gray-400 text-xs">
-                Erhalten Sie Steuerfreibeträge und Zusatzurlaub.
-              </p>
+              <p className="text-[var(--color-text-muted)] text-xs">{t('gdbText')}</p>
             </div>
             <Button
               onClick={handleGdbNavigation}
               disabled={isVerifyingGdb}
-              className="bg-[#20b2aa] hover:bg-[#3ddbd0] text-slate-950 font-bold text-xs h-10 rounded-xl"
+              className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[var(--color-on-accent)] font-bold text-xs h-10 rounded-xl"
             >
-              {isVerifyingGdb ? 'Prüfe...' : 'GdB-Rechner'}
+              {isVerifyingGdb ? t('gdbPruefen') : t('gdbRechner')}
             </Button>
           </div>
         </Card>
@@ -510,6 +522,19 @@ export default function ErgebnisPage(props: PageProps) {
             loading={checkoutLoading}
           />
         )}
+
+        <BestaetigungsDialog
+          offen={resetDialogOffen}
+          onAbbrechen={() => setResetDialogOffen(false)}
+          onBestaetigen={handleReEvaluateFromScratch}
+          destruktiv
+          titel={t('reset.titel')}
+          beschreibung={t('reset.beschreibung')}
+          folgen={[t('reset.folge1'), t('reset.folge2'), t('reset.folge3')]}
+          bestaetigenText={t('reset.bestaetigen')}
+          laeuft={resetLaeuft}
+          laeuftText={t('reset.laeuft')}
+        />
       </div>
     </main>
   );
