@@ -37,13 +37,13 @@ type Props = {
 
 export default function RootLayout({ children }: Props) {
   return (
-      <>
-        {children}
-        <Script
-            src="https://cloud.umami.is/script.js"
-            data-website-id="b7e85a8a-1267-4a42-b561-9b9a5acb5bb6"
-            strategy="afterInteractive"
-        />
-      </>
+    <>
+      {children}
+      <Script
+        src="https://cloud.umami.is/script.js"
+        data-website-id="b7e85a8a-1267-4a42-b561-9b9a5acb5bb6"
+        strategy="afterInteractive"
+      />
+    </>
   );
 }
