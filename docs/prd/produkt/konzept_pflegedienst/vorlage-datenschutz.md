@@ -20,7 +20,7 @@ deshalb ab sofort die **einzige** Fassung; Änderungen gehören dorthin.
 |---|---|---|
 | **A** | Datenschutzbeauftragte, RA Gruner | 21 — *der frühere Inhalt dieser Datei, plus das Recht auf Berichtigung* |
 | **B** | Pflegefachliche Begutachtung | 4 — Rechenmodell, GdB-Regel, Fristangabe, Praxistauglichkeit der Schreiben |
-| **C** | Beratung zum BfArM-Verfahren | 1 — erfüllt das Produkt § 40a SGB XI? |
+| **C** | Beratung zum BfArM-Verfahren | ~~1~~ — **beantwortet**: Produktkern nicht listungsfähig |
 | **D** | Sozialrecht und Betriebswirtschaft | 3 — Refinanzierung, § 39a SGB XI, Leistungsbeträge 2026 |
 | **E** | *intern* | 8 Entscheidungen, die blockieren, aber im Haus getroffen werden |
 | **F** | *intern* | Betriebsort der Verarbeitung — unsere Aufgabe, nicht die eines Gutachters |
