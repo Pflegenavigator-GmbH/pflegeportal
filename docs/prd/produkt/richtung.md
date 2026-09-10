@@ -302,7 +302,7 @@ wartet.
 
 | Frage | Wer beantwortet sie | Blockiert |
 |---|---|---|
-| Erfüllt eine Pflegegrad-Einschätzung mit Antragshilfe § 40a SGB XI? | Beratung zum BfArM-Verfahren | die Lage der Bezahlschranke |
+| ~~Erfüllt eine Pflegegrad-Einschätzung mit Antragshilfe § 40a SGB XI?~~ | **beantwortet 06.09.2026: nein** — § 40a Abs. 1a S. 2 SGB XI nimmt den Produktkern aus | — |
 | Trägt die Kleinstunternehmer-Ausnahme des BFSG? Weniger als zehn Beschäftigte **und** höchstens zwei Millionen Euro Umsatz? | Geschäftsführung | Einordnung von #34 |
 | Die acht Punkte der datenschutzrechtlichen Abnahme | Datenschutzbeauftragte(r) | #6, #105, Vertretung im B2C-Betrieb |
 | Welches Lizenzmodell, und wie refinanziert der Dienst es? | Geschäftsführung mit fachlicher Beratung | Pflegedienst-Zugang |

@@ -375,6 +375,6 @@ Durchlaufs — und der Zuschnitt aller anderen Features.
 |---|---|---|
 | Hält die Näherung über den Rohpunkte-Anteil gegen die Begutachtungs-Richtlinie? | fachliche Beratung | F2.2, und damit F1.3 und F3.1 |
 | Wo verläuft der Schnitt zwischen freier und erweiterter Erhebung? | Produkt, gebunden an die DiPA-Frage | F1.3 |
-| Erfüllt eine Pflegegrad-Einschätzung § 40a SGB XI? | Beratung zum BfArM-Verfahren | die Lage des Schnitts |
+| ~~Erfüllt eine Pflegegrad-Einschätzung § 40a SGB XI?~~ | **beantwortet 06.09.2026: nein** — § 40a Abs. 1a S. 2 SGB XI nimmt den Produktkern aus | — die Schnittlage ist damit frei |
 | Welche Leistungsbeträge gelten 2026, mit Fundstelle? | recherchierbar | F3.2 |
 | Trägt die Kleinstunternehmer-Ausnahme des BFSG? | Geschäftsführung | Umfang von F4.1 |

@@ -136,11 +136,33 @@ Rechtsfolge, nicht über die Notwendigkeit — siehe [releases.md](../releases.m
 
 **Zweck** Klarheit darüber, welche Sprachen das Portal wirklich bedient.
 
-**Der Befund:** In `public/locales` liegen **34 Sprachen** von `ar` bis `uk`. Der Fokus liegt
-seit dem 29.08.2026 auf **Deutsch und Englisch**; die übrigen werden später nachgezogen.
+> **Korrektur vom 08.09.2026 — der Befund war falsch, und zwar zu unseren Gunsten.**
+> Hier stand: „32 Sprachfassungen stehen ausgeliefert im Netz, ohne dass jemand sie
+> gegenliest." Das trifft nicht zu. Der Schluss war vom **Bestand** der Ordner unter
+> `public/locales` auf den **Auslieferungszustand** gezogen — beides ist nicht dasselbe.
+>
+> `src/i18n/languages.ts` trägt genau zwei Einträge mit `aktiv: true` (`de`, `en`);
+> `src/i18n/config.ts` leitet `locales` aus diesem Filter ab und erzeugt für jede nicht
+> aktive Sprache bewusst einen 404. Am 08.09.2026 gegen die Live-Seite geprüft: `/de` und
+> `/en` antworten mit 200, `/fr`, `/tr`, `/ar` und `/pl` mit 404.
+>
+> Derselbe Fehlschluss steht als B-07 im Rechtsgutachten vom 06.09.2026, mit Risiko HOCH und
+> der Empfehlung „ausblenden". Das Gutachten sagt an anderer Stelle ausdrücklich, dass ihm
+> der Quellcode nicht vorlag — es konnte den Unterschied nicht sehen. **Der Punkt ist
+> erledigt, bevor er begonnen wurde.**
+>
+> Was bleibt, ist kleiner und anderer Art: 33 Ordner mit 6 bis 40 % Füllstand liegen im Repo,
+> ohne dass eine Regel sagt, wann eine Sprache freigeschaltet werden darf. Genau diese Regel
+> ist der eigentliche Inhalt von F4.1.
 
-Das ist eine sinnvolle Entscheidung, hat aber eine Kehrseite: 32 Sprachfassungen stehen
-ausgeliefert im Netz, ohne dass jemand sie gegenliest.
+**Der Befund:** In `public/locales` liegen **35 Sprachordner** von `ar` bis `uk`; gemessen an
+Deutsch mit 985 Schlüsseln erreicht allein Englisch die Vollständigkeit, Französisch kommt auf
+40 %, 32 weitere auf 21 % oder darunter, Arabisch auf 6 %. **Ausgeliefert werden zwei.**
+
+Die Gefahr liegt damit nicht im Bestand, sondern im Freischalten: Ein Wort — `aktiv: true` —
+stellt eine unfertige Fassung ins Netz. Der Code beschreibt das im Kommentar selbst als
+„Ein-Wort-Änderung, sobald echte Übersetzungen vorliegen". Was fehlt, ist die Festlegung, was
+*echt* heißt.
 
 **Und das ist nicht nur eine Frage der Fachrichtigkeit, sondern der Wirksamkeit.** Art. 12
 Abs. 1 DSGVO verlangt Informationen in präziser, transparenter, verständlicher und leicht
@@ -156,9 +178,10 @@ von 34 Textelementen unter 16 px stehen dem entgegen. Beides gehört zusammen.
 Nutzungsbedingungen, Datenschutzhinweise, Betroffenenrechte — nur in geprüften Sprachen
 anbieten. Der übrige Inhalt kann breiter stehen.
 
-**Zu entscheiden:** Bleiben die 32 sichtbar, oder werden sie bis zur Prüfung ausgeblendet?
-Für die Beta spricht einiges dafür, sie zurückzunehmen — auch weil #106 die Sprachauszeichnung
-ohnehin nur für Deutsch und Englisch aufbaut.
+**Fertig, wenn** eine schriftliche Freischaltregel gilt, die mindestens verlangt:
+vollständige Schlüsselabdeckung, gegengelesene erklärungspflichtige Texte mit Name und Datum
+der prüfenden Person, und bei RTL-Sprachen die Durchsicht aus F4.2. Ohne erfüllte Regel bleibt
+`aktiv: false` — der heutige Zustand ist damit nicht Zufall, sondern Vorgabe.
 
 ### F4.2 — Rechts-nach-links
 
@@ -174,10 +197,11 @@ Arabisch und Persisch und damit F4.1.
 |---|---|---|
 | Es gibt keine Einwilligungsverwaltung; `consent.ts` ist ein Cookie-Banner im `localStorage` | Durchsicht 29.08.2026 | geprüft |
 | Auskunft und Löschung haben Seiten; Berichtigung, Einschränkung und Übertragbarkeit nicht | `[locale]/datenschutz/` | geprüft |
-| 34 Sprachfassungen liegen ausgeliefert vor | `public/locales` | geprüft |
+| ~~34 Sprachfassungen liegen ausgeliefert vor~~ | `public/locales` | **widerlegt 08.09.2026** — zwei sind aktiv, 33 antworten mit 404 |
+| Ausgeliefert werden ausschließlich `de` und `en` | `i18n/languages.ts`, Live-Prüfung 08.09.2026 | geprüft |
 | Das RTL-Fundament ist gebaut | `i18n/rtl.ts`, `rtl.test.ts`, `layout.tsx:62` | geprüft |
 | Die Akzeptanzkriterien von #34 sind fachlich brauchbar | Durchsicht des Issues | **angenommen** — nicht gegen die Norm geprüft |
-| Die 32 nicht gepflegten Sprachfassungen sind fachlich korrekt | keine | **angenommen** — niemand hat sie geprüft |
+| Die 33 nicht ausgelieferten Sprachfassungen sind fachlich korrekt | keine | **unbekannt** — niemand hat sie geprüft, und niemand liest sie |
 | Erklärungspflichtige Texte in ungeprüfter Übersetzung erfüllen Art. 12 Abs. 1 nicht | Art. 12 Abs. 1 DSGVO, CNST_1.5 | **angenommen** — mit #105 zu bestätigen |
 
 ---
@@ -187,6 +211,7 @@ Arabisch und Persisch und damit F4.1.
 | Frage | Wer beantwortet sie | Blockiert |
 |---|---|---|
 | Trägt die Kleinstunternehmer-Ausnahme des BFSG? | Geschäftsführung | Umfang von F3.2 |
-| Bleiben die 32 ungeprüften Sprachfassungen sichtbar? | Produkt | F4.1 |
+| ~~Bleiben die 32 ungeprüften Sprachfassungen sichtbar?~~ | **beantwortet 08.09.2026: sie sind es nie gewesen** | — |
+| Woran erkennen wir, dass eine Sprache freigeschaltet werden darf? | Produkt | F4.1 |
 | Genügt das erneute Ausfüllen als Recht auf Berichtigung? | Datenschutzbeauftragte(r) | F2.1 |
 | Wie lange werden Einwilligungen nach Widerruf aufbewahrt? | Datenschutzbeauftragte(r) — Teil von #105 | Löschkonzept |

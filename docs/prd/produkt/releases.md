@@ -233,7 +233,7 @@ Kapiteln.
 
 | Punkt | Woher |
 |---|---|
-| **Erfüllt das Produkt überhaupt § 40a SGB XI?** | tragende offene Frage — vor allem anderen |
+| ~~Erfüllt das Produkt überhaupt § 40a SGB XI?~~ | **beantwortet 06.09.2026: nein** — § 40a Abs. 1a S. 2 SGB XI nimmt den Produktkern aus; erreichbar nur für ein abgetrenntes Modul |
 | **Betrieb gegen AV_1.1 und AV_1.3 prüfen** — Verarbeitung in der EU, Schlüssel beim Hersteller | Kap. 11 · siehe unten |
 | **Kontomodell umbauen** — Zugriff über einen eigenen Authentisierungsfaktor, Freischaltcode nach Einlösung gelöscht | DMN_4.1 b, c |
 | **Einwilligungsverwaltung vollständig** — je Zweck getrennt, widerrufbar, am Konto | CNST_1.2–1.6, CNST_3.1 |

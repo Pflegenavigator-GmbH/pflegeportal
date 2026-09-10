@@ -15,6 +15,7 @@ Neu hier? `produktstruktur.md` erklärt das Ebenenmodell.
 | Wie ist die Dokumentation gegliedert? | `produktstruktur.md` |
 | Welche Epics gibt es? | `produkt/epic_index.md` |
 | Woran wird gerade gearbeitet? | `produkt/epics/pflegegrad.md` |
+| Was muss zuerst getan sein? | `stories/p0.md` |
 
 ---
 

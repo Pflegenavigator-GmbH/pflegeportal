@@ -33,6 +33,29 @@ Deshalb liegt auch ein ganzes Epic in **einer** Datei, mit Capabilities und Feat
 Abschnitte. Ein Ordner je Feature lohnt sich erst, wenn ein Feature mehr trägt, als ein
 Abschnitt fasst.
 
+### Die eine Ausnahme: `stories/`
+
+Ein Story-Entwurf, der noch nicht abgestimmt ist, kann nicht als Issue leben — ein Issue ist
+öffentlich, wird zugewiesen und erzeugt Erwartung. `stories/` ist deshalb die **Werkbank vor
+dem Issue**, nicht eine Ebene darunter:
+
+| | `stories/<block>.md` | GitHub Issue |
+|---|---|---|
+| Zustand | Entwurf, noch verhandelbar | zugeschnitten, zugewiesen |
+| Gilt | bis das Issue existiert | ab dann allein |
+| Gepflegt | nein, sobald das Issue steht | ja |
+
+Die Datei trägt dann die Issue-Nummer und wird zur Historie. Zwei Wahrheiten entstehen dabei
+nicht, weil immer nur eine der beiden gepflegt wird.
+
+**Eine Datei je Block, nicht je Story.** Elf Dateien, die elf Issues nacherzählen, wären die
+zweite Wahrheit, die der Abschnitt oben ausschließt — sie driften ab der ersten Änderung am
+Issue. Die Blockdatei trägt stattdessen das, was ein Issue nicht leisten kann: warum der
+Schnitt so ausfiel, was herausfiel und warum.
+
+Derzeit: [stories/p0.md](stories/p0.md) — elf Stories, seit dem 08.09.2026 als #131–#139,
+#107 und #118 geschnitten.
+
 > Das Schwesterrepository `lexcare_ai_prd` geht bis auf Story- und Task-Ebene und legt je
 > Knoten eine Datei an. Das ist dort richtig: LexCare AI ist ein eigenständiges Produkt mit
 > deutlich größerem Zuschnitt. Für die Oberfläche des Portals wäre dieselbe Tiefe Ballast.
