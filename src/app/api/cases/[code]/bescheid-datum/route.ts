@@ -46,11 +46,14 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     if (error) throw error;
 
-    logger.info({ caseCode: code, gesetzt: wert !== null }, 'Bescheiddatum am Fall aktualisiert');
+    logger.info(
+      { caseId: session.caseId, gesetzt: wert !== null },
+      'Bescheiddatum am Fall aktualisiert'
+    );
 
     return NextResponse.json({ success: true, data: { bescheidDatum: wert } });
   } catch (err) {
-    return handleApiError(err, 'api.cases.bescheid-datum.put', code);
+    return handleApiError(err, 'api.cases.bescheid-datum.put');
   }
 }
 
@@ -78,6 +81,6 @@ export async function GET(
       data: { bescheidDatum: data?.bescheid_datum ?? null },
     });
   } catch (err) {
-    return handleApiError(err, 'api.cases.bescheid-datum.get', code);
+    return handleApiError(err, 'api.cases.bescheid-datum.get');
   }
 }

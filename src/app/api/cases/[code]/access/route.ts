@@ -21,6 +21,6 @@ export async function GET(
       productTier: session.productTier,
     });
   } catch (err) {
-    return handleApiError(err, 'api.cases.access.get', code);
+    return handleApiError(err, 'api.cases.access.get');
   }
 }

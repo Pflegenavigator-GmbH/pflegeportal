@@ -56,11 +56,9 @@ describe('DELETE /api/cases/[code]/answers', () => {
     );
 
     expect(response.status).toBe(500);
-    expect(handleApiErrorMock).toHaveBeenCalledWith(
-      databaseError,
-      'api.cases.answers.delete',
-      'PF-1234-5678'
-    );
+    // Der Fallcode wird nicht an den Error-Handler durchgereicht — er landete
+    // sonst im Laufzeit-Log und in system_logs (Issue #145).
+    expect(handleApiErrorMock).toHaveBeenCalledWith(databaseError, 'api.cases.answers.delete');
     expect(loggerInfoMock).not.toHaveBeenCalled();
   });
 });

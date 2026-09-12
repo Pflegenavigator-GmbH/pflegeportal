@@ -22,6 +22,6 @@ export async function GET(
 
     return NextResponse.json({ success: true, ergebnis });
   } catch (err) {
-    return handleApiError(err, 'api.cases.result', code);
+    return handleApiError(err, 'api.cases.result');
   }
 }
