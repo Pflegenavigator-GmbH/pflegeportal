@@ -13,7 +13,8 @@ export interface SystemLogEintrag {
   metadata?: Record<string, unknown>;
   /**
    * Fallbezug für die Auswertung — die interne `case_id`, NIE der Fallcode.
-   * Landet in `metadata.caseId`, bis `system_logs` eine eigene Spalte hat.
+   * Landet in der Spalte `case_id` (Fremdschlüssel, `on delete set null`):
+   * Wird der Fall gelöscht, verschwindet der Verweis von selbst.
    */
   caseId?: string;
 }
@@ -37,7 +38,8 @@ export async function schreibeSystemLog(eintrag: SystemLogEintrag): Promise<void
       level,
       source,
       message: schwaerzeFallcodes(message),
-      metadata: schwaerzeFallcodesInJson({ ...metadata, ...(caseId ? { caseId } : {}) }) as Json,
+      metadata: schwaerzeFallcodesInJson(metadata ?? {}) as Json,
+      case_id: caseId ?? null,
     });
 
     if (error) throw error;

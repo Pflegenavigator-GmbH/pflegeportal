@@ -6,8 +6,8 @@
 --   2. 202609110001 ist eingespielt — sie sichert den Fallbezug aus
 --      system_logs.case_code, bevor diese Spalte hier verschwindet.
 --
--- system_logs.case_code: nach 202609110001 leer; Fallbezug steht in
---   metadata.caseId.
+-- system_logs.case_code: nach 202609110001 leer; Fallbezug steht in der
+--   Spalte case_id (angelegt in 202609110000).
 -- feedback.case_code: im Bestand nie gesetzt (Prüfung vom 11.09.2026:
 --   0 Zeilen), im Code von keiner Stelle geschrieben. Ein Zugangsmittel neben
 --   Rückmeldungstexten wäre fachlich ohne Zweck.

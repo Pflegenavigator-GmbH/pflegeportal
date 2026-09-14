@@ -238,6 +238,7 @@ export interface Database {
           source: string;
           message: string;
           metadata: Json;
+          case_id: string | null;
           created_at: string;
           expires_at: string;
         };
@@ -247,6 +248,7 @@ export interface Database {
           source: string;
           message: string;
           metadata?: Json;
+          case_id?: string | null;
           created_at?: string;
           expires_at?: string;
         };
@@ -256,6 +258,7 @@ export interface Database {
           source?: string;
           message?: string;
           metadata?: Json;
+          case_id?: string | null;
           created_at?: string;
           expires_at?: string;
         };

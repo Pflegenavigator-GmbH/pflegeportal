@@ -46,7 +46,7 @@ describe('schreibeSystemLog (#145)', () => {
     expect(insertMock.mock.calls[0][0]).not.toHaveProperty('case_code');
   });
 
-  it('legt den Fallbezug als caseId in die Metadaten', async () => {
+  it('schreibt den Fallbezug in die Spalte case_id, nicht in die Metadaten', async () => {
     await schreibeSystemLog({
       level: 'info',
       source: 'stripe.webhook',
@@ -55,10 +55,15 @@ describe('schreibeSystemLog (#145)', () => {
       metadata: { session_id: 'cs_123' },
     });
 
-    expect(insertMock.mock.calls[0][0].metadata).toEqual({
-      session_id: 'cs_123',
-      caseId: '0b0f1e2a-uuid',
-    });
+    const zeile = insertMock.mock.calls[0][0];
+    expect(zeile.case_id).toBe('0b0f1e2a-uuid');
+    expect(zeile.metadata).toEqual({ session_id: 'cs_123' });
+  });
+
+  it('setzt case_id auf null, wenn kein Fallbezug besteht', async () => {
+    await schreibeSystemLog({ level: 'error', source: 'api.test', message: 'x' });
+
+    expect(insertMock.mock.calls[0][0].case_id).toBeNull();
   });
 
   it('wirft nicht, wenn die Datenbank den Eintrag ablehnt', async () => {

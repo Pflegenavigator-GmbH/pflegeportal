@@ -6,8 +6,9 @@
 -- Seit dem Code-Stand dieses Issues schreibt die Anwendung ihn nicht mehr;
 -- diese Migration räumt den Bestand.
 --
--- VORAUSSETZUNG: erst einspielen, NACHDEM die Anwendung mit dem Code-Stand
--- von #145 Phase A ausgeliefert ist — sonst entstehen parallel neue Einträge.
+-- VORAUSSETZUNG: erst einspielen, NACHDEM (a) 202609110000 die Spalte
+-- case_id angelegt hat und (b) die Anwendung mit dem Code-Stand von #145
+-- Phase A ausgeliefert ist — sonst entstehen parallel neue Einträge.
 --
 -- BESTAND (Prüfung vom 11.09.2026):
 --   system_logs.case_code gesetzt ............ 20 Zeilen
@@ -19,7 +20,7 @@
 --
 -- LÖSCHENTSCHEIDUNG (11.09.2026): schwärzen, nicht löschen. Die Zeilen
 -- bleiben erhalten, nur das Zugangsmittel verschwindet. Der Fallbezug wird
--- vorher als metadata.caseId gesichert — das geht nur, solange
+-- vorher in die Spalte case_id übernommen — das geht nur, solange
 -- cases.case_code noch im Klartext existiert (vor Phase B).
 --
 -- Hinweis: Sämtliche Zeilen liegen bereits hinter ihrem eigenen expires_at.
@@ -40,16 +41,23 @@ begin
   ) <> 'jsonb' then
     raise exception 'system_logs.metadata ist nicht jsonb — Migration vor dem Einspielen anpassen';
   end if;
+  if not exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public' and table_name = 'system_logs' and column_name = 'case_id'
+  ) then
+    raise exception 'system_logs.case_id fehlt — zuerst 202609110000 einspielen';
+  end if;
 end
 $$;
 
--- 1. Fallbezug sichern: case_code → metadata.caseId (nur wo noch nicht gesetzt).
+-- 1. Fallbezug sichern: case_code → Spalte case_id (nur wo noch nicht gesetzt).
 update public.system_logs as l
-set metadata = coalesce(l.metadata, '{}'::jsonb) || jsonb_build_object('caseId', c.id)
+set case_id = c.id
 from public.cases as c
 where l.case_code is not null
-  and upper(l.case_code) = upper(c.case_code)
-  and not (coalesce(l.metadata, '{}'::jsonb) ? 'caseId');
+  and l.case_id is null
+  and upper(l.case_code) = upper(c.case_code);
 
 -- 2. Codes in Meldungstext und Metadaten schwärzen — dasselbe Muster und
 --    derselbe Ersatzwert wie src/lib/log-schwaerzung.ts.
