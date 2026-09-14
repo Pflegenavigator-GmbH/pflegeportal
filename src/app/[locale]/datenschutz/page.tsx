@@ -20,6 +20,7 @@ import { use } from 'react';
 import { CookieEinstellungenButton } from '@/src/components/legal/CookieEinstellungenButton';
 import { Sprachhinweis } from '@/src/components/rechtliches/Sprachhinweis';
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui';
+import { KONTAKT_EMAIL } from '@/src/lib/kontakt';
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -119,11 +120,9 @@ export default function DatenschutzPage(props: PageProps) {
             <p>Heeper Straße 205, 33607 Bielefeld</p>
             <p className="flex items-center gap-1.5 pt-2">
               <Mail className="w-3.5 h-3.5 text-[#20b2aa]" />
-              <a
-                href="mailto:datenschutz@pflegenavigatoreu.com"
-                className="text-[#20b2aa] hover:underline"
-              >
-                datenschutz@pflegenavigatoreu.com
+              {/* Bis 14.09.2026 stand hier datenschutz@… — eine Adresse, die es nicht gibt (#146). */}
+              <a href={`mailto:${KONTAKT_EMAIL}`} className="text-[#20b2aa] hover:underline">
+                {KONTAKT_EMAIL}
               </a>
             </p>
           </CardContent>
