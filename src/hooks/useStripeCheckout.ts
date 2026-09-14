@@ -35,7 +35,7 @@ export function useStripeCheckout(): UseStripeCheckoutReturn {
       const toastId = toast.loading('Sicheres Bezahlfenster von Stripe wird geladen...');
 
       try {
-        logger.info({ caseCode, paketId }, 'Initialisiere Stripe Checkout Session');
+        logger.info({ paketId }, 'Initialisiere Stripe Checkout Session');
 
         const res = await fetch('/api/checkout/create-session', {
           method: 'POST',
@@ -67,7 +67,7 @@ export function useStripeCheckout(): UseStripeCheckoutReturn {
           throw new Error('Keine valide Checkout-URL empfangen.');
         }
       } catch (error) {
-        logger.error({ error, caseCode }, 'Stripe-Checkout-Fehler');
+        logger.error({ error }, 'Stripe-Checkout-Fehler');
         toast.error('Verbindungsfehler zu Stripe. Bitte versuchen Sie es erneut.', { id: toastId });
       } finally {
         setCheckoutLoading(false);

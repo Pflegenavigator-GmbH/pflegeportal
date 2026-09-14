@@ -54,12 +54,8 @@ describe('AntragPflegegradGenerator', () => {
 
       expect(logger.info).toHaveBeenCalledTimes(1);
 
-      expect(logger.info).toHaveBeenCalledWith(
-        {
-          caseCode: 'Pflegegrad-Erstantrag',
-        },
-        'Generiere Pflegegrad-Brief via DDD-Template'
-      );
+      // Weder Betreff noch Fallcode im Log (Issue #145) — nur die Meldung.
+      expect(logger.info).toHaveBeenCalledWith('Generiere Pflegegrad-Brief via DDD-Template');
 
       expect(generatePflegegradTemplate).toHaveBeenCalledTimes(1);
 

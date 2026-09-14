@@ -5,6 +5,7 @@ import Stripe from 'stripe';
 import { logger } from '@/src/lib/logger';
 import { stripe } from '@/src/lib/stripe/server';
 import { createAdminSupabaseClient } from '@/src/lib/supabase/admin';
+import { schreibeSystemLog } from '@/src/lib/system-log';
 
 type ErlaubtesPaket = 'beta_special' | 'standard_monthly' | 'standard_yearly' | 'profi_monthly';
 
@@ -43,17 +44,12 @@ export async function POST(req: NextRequest) {
     const error = err as Error;
     logger.error({ error: error.message }, 'Krypto-Signaturprüfung fehlgeschlagen');
 
-    try {
-      const supabase = createAdminSupabaseClient();
-      await supabase.from('system_logs').insert({
-        level: 'error',
-        source: 'stripe.webhook.signature',
-        message: `Signaturprüfung fehlgeschlagen: ${error.message}`,
-        metadata: { error: error.message },
-      });
-    } catch (logErr) {
-      logger.error({ logErr }, 'Fatal: Schreiben in system_logs fehlgeschlagen');
-    }
+    await schreibeSystemLog({
+      level: 'error',
+      source: 'stripe.webhook.signature',
+      message: `Signaturprüfung fehlgeschlagen: ${error.message}`,
+      metadata: { error: error.message },
+    });
 
     return NextResponse.json({ error: 'Ungültige Signatur' }, { status: 400 });
   }
@@ -62,11 +58,14 @@ export async function POST(req: NextRequest) {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
+    // Der Fallcode kommt hier noch aus den Stripe-Metadaten (Ablösung: #142).
+    // Er dient ausschließlich der Suche und wird an keiner Stelle protokolliert —
+    // Fallbezug im Log ist die case_id (Issue #145).
     const caseCode = session.metadata?.case_code;
     const rohesPaket = session.metadata?.paket;
 
     logger.info(
-      { sessionId: session.id, caseCode, paket: rohesPaket },
+      { sessionId: session.id, paket: rohesPaket },
       'Verarbeite checkout.session.completed'
     );
 
@@ -83,11 +82,10 @@ export async function POST(req: NextRequest) {
         { sessionId: session.id, paket: rohesPaket },
         'Unbekanntes Paket in Stripe-Metadaten — Event wird ignoriert'
       );
-      await supabase.from('system_logs').insert({
+      await schreibeSystemLog({
         level: 'error',
         source: 'stripe.webhook.paket',
         message: `Unbekanntes Paket "${rohesPaket}" für Session ${session.id}`,
-        case_code: caseCode.toUpperCase(),
         metadata: { session_id: session.id, paket: rohesPaket ?? null },
       });
       return NextResponse.json({ received: true, ignored: 'unknown_paket' }, { status: 200 });
@@ -118,7 +116,7 @@ export async function POST(req: NextRequest) {
         .maybeSingle();
 
       if (caseError) throw caseError;
-      if (!caseDb) throw new Error(`Fallcode ${upperCode} nicht gefunden.`);
+      if (!caseDb) throw new Error('Fall zu den Stripe-Metadaten nicht gefunden.');
 
       const isFreeAccess = session.payment_status === 'no_payment_required';
       const finalStatus = isFreeAccess ? 'free' : 'paid';
@@ -146,19 +144,22 @@ export async function POST(req: NextRequest) {
 
       if (paymentError) throw paymentError;
 
-      await supabase.from('system_logs').insert({
+      await schreibeSystemLog({
         level: 'info',
         source: 'stripe.webhook',
-        message: `Fall ${upperCode} erfolgreich freigeschaltet via Webhook (${finalStatus}).`,
-        case_code: upperCode,
+        message: `Fall erfolgreich freigeschaltet via Webhook (${finalStatus}).`,
+        caseId: caseDb.id,
         metadata: { session_id: session.id, betrag: betragBerechnet },
       });
 
-      logger.info({ caseCode: upperCode }, 'Webhook-Verarbeitung erfolgreich abgeschlossen');
+      logger.info(
+        { caseId: caseDb.id, sessionId: session.id },
+        'Webhook-Verarbeitung erfolgreich abgeschlossen'
+      );
     } catch (dbErr: unknown) {
       const error = dbErr as Error;
       logger.error(
-        { error: error.message, caseCode: upperCode },
+        { error: error.message, sessionId: session.id },
         'Kritischer Fehler bei DB-Synchronisation'
       );
       return NextResponse.json(
@@ -190,18 +191,20 @@ export async function POST(req: NextRequest) {
 
       if (updateError) throw updateError;
 
-      await supabase.from('system_logs').insert({
+      await schreibeSystemLog({
         level: 'info',
         source: 'stripe.webhook.subscription',
-        message: `Abo für Fall ${upperCode} beendet — Zugang geschlossen.`,
-        case_code: upperCode,
+        message: 'Abo beendet — Zugang geschlossen.',
         metadata: { subscription_id: subscription.id },
       });
 
-      logger.info({ caseCode: upperCode }, 'Abo-Kündigung verarbeitet');
+      logger.info({ subscriptionId: subscription.id }, 'Abo-Kündigung verarbeitet');
     } catch (dbErr: unknown) {
       const error = dbErr as Error;
-      logger.error({ error: error.message, caseCode: upperCode }, 'Fehler bei Abo-Kündigung');
+      logger.error(
+        { error: error.message, subscriptionId: subscription.id },
+        'Fehler bei Abo-Kündigung'
+      );
       return NextResponse.json({ error: 'DB-Fehler' }, { status: 500 });
     }
   } else {

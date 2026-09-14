@@ -88,6 +88,6 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: unknown) {
-    return handleApiError(error, 'api.send-access', caseCode);
+    return handleApiError(error, 'api.send-access');
   }
 }

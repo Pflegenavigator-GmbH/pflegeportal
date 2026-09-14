@@ -40,10 +40,13 @@ const localStorageMock = {
         return Object.keys(localStorageDaten).length;
     },
 };
-Object.defineProperty(window, 'localStorage', {
-    value: localStorageMock,
-    configurable: true,
-});
+// Nur unter jsdom: Tests mit `// @vitest-environment node` haben kein `window`.
+if (typeof window !== 'undefined') {
+    Object.defineProperty(window, 'localStorage', {
+        value: localStorageMock,
+        configurable: true,
+    });
+}
 
 // 3. Fetch global mocken (nützlich für API-Tests)
 global.fetch = vi.fn();
