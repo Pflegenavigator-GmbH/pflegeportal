@@ -51,6 +51,42 @@ unabhängig vom Katalog. Beide Modelle nebeneinander zu bauen bleibt die Aufgabe
 **Die Brücke ist die Freigabe**, nichts sonst. Ein Mitglied bekommt niemals den Fallcode zu
 sehen.
 
+### Harte Produktanforderung — festgelegt am 11.09.2026
+
+> **PflegeNavigator erhebt für Fallzugang und Wiederherstellung keine Identitäts- oder
+> Kontaktdaten. Insbesondere werden dafür weder Name noch E-Mail-Adresse noch Telefonnummer
+> benötigt oder gespeichert.**
+
+**Was sie ausdrücklich nicht sagt:** dass PflegeNavigator keine personenbezogenen Daten
+verarbeitet. Das Portal verarbeitet zwangsläufig Gesundheitsdaten nach Art. 9 DSGVO.
+Ausgeschlossen sind nur *zusätzliche, unmittelbar identifizierende* Kontakt- und
+Identitätsdaten für Zugang und Wiederherstellung. Der Fehlschluss „kontaktfrei, also anonym,
+also keine personenbezogenen Daten" würde Einwilligung, Verarbeitungsverzeichnis,
+Folgenabschätzung und Betroffenenrechte scheinbar entbehrlich machen — nichts davon entfällt.
+
+**Geltungsbereich:** der Zugang zur Fallakte, nicht das Unternehmen. Ein
+Zahlungsdienstleister erhebt für die Zahlung zwangsläufig Zahlungsdaten; getrennt bleiben muss
+die Fallakte von dieser Identität.
+
+**Wie sie umgesetzt wird** — ADR-0002 in `pflegenavigator-grant-docs` →
+`07_Architekturentscheidungen/ADR/ARD-0002/`:
+
+| Lage | Mechanismus | Issue |
+|---|---|---|
+| Weiterarbeiten auf demselben Gerät | echte serverseitige Sitzung, undurchsichtiger Nachweis | #135 |
+| anderes Gerät, Sitzung verloren | nutzerverwaltetes Wiederherstellungsgeheimnis, einmal verwendbar, danach ersetzt | #134 |
+| zusätzliches Gerät | kurzlebiges Verbindungsgeheimnis aus einer bestehenden Sitzung | eigenes Issue |
+
+**Der Preis, ausdrücklich:** Gehen Sitzung und Wiederherstellungsgeheimnis verloren, kann der
+Fall nicht wiederhergestellt werden. Zahlungsnachweise, Rechnungsdaten, Identitäten beim
+Zahlungsdienstleister und sonstige Identitätsnachweise berechtigen den Support **nicht** zur
+Wiederherstellung einer Fallakte. Inaktive Fälle werden nach einer im Löschkonzept
+festgelegten Frist gelöscht.
+
+Die Zeile *Identität* der Tabelle oben beschreibt den Stand vor der Umsetzung: Der Fallcode
+bleibt nicht Kennung und Geheimnis zugleich, sondern wird durch Sitzung und
+Wiederherstellungsgeheimnis ersetzt.
+
 > **Ein Vorbehalt aus dem Kriterienkatalog — Status seit 06.09.2026 nur noch Orientierung,
 > sachlich aber weiter zutreffend.** Kriterium DMN_4.1 b verlangt, dass der Zugriff
 > auf ein Konto über einen **bei der Kontoanlage erfassten Authentisierungsfaktor** erfolgt,

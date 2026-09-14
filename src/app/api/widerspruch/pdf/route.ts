@@ -196,6 +196,6 @@ export async function POST(request: NextRequest): Promise<Response> {
       },
     });
   } catch (error) {
-    return handleApiError(error, 'api.widerspruch.pdf', caseCode);
+    return handleApiError(error, 'api.widerspruch.pdf');
   }
 }

@@ -23,7 +23,9 @@ interface SessionStatus {
 
 export async function validateAndStoreSession(caseCode: string): Promise<SessionStatus> {
   const cleanedCode = caseCode.trim().toUpperCase();
-  logger.info({ caseCode: cleanedCode }, 'Validiere Fall-Session');
+  // Den Fallcode an keiner Stelle protokollieren — er ist das Zugangsmittel
+  // (Issue #145). Fallbezug im Log ist die case_id, sobald der Fall gefunden ist.
+  logger.info('Validiere Fall-Session');
 
   const denied = (billingStatus: string, isExpired = false): SessionStatus => ({
     success: false,
@@ -34,7 +36,7 @@ export async function validateAndStoreSession(caseCode: string): Promise<Session
   });
 
   if (!CASE_CODE_PATTERN.test(cleanedCode)) {
-    logger.warn({ caseCode: cleanedCode }, 'Fallcode mit ungültigem Format abgelehnt');
+    logger.warn('Fallcode mit ungültigem Format abgelehnt');
     return denied('invalid_format');
   }
 
@@ -44,12 +46,12 @@ export async function validateAndStoreSession(caseCode: string): Promise<Session
 
     const { data: currentCase, error } = await supabase
       .from('cases')
-      .select('case_code, billing_status, access_activated_at, product_tier')
+      .select('id, case_code, billing_status, access_activated_at, product_tier')
       .eq('case_code', cleanedCode)
       .single();
 
     if (error || !currentCase) {
-      logger.warn({ caseCode: cleanedCode }, 'Fall nicht gefunden oder Datenbankfehler');
+      logger.warn('Fall nicht gefunden oder Datenbankfehler');
       cookieStore.delete(CASE_COOKIE); // kein verwaistes Cookie zurücklassen
       return denied('not_found');
     }
@@ -63,7 +65,7 @@ export async function validateAndStoreSession(caseCode: string): Promise<Session
       if (new Date() > expirationDate) {
         isExpired = true;
         logger.info(
-          { caseCode: cleanedCode, activatedAt: currentCase.access_activated_at },
+          { caseId: currentCase.id, activatedAt: currentCase.access_activated_at },
           'Beta-Zugriff abgelaufen'
         );
       }
@@ -95,7 +97,7 @@ export async function validateAndStoreSession(caseCode: string): Promise<Session
     const isUnlocked =
       currentCase.billing_status === 'paid' || currentCase.billing_status === 'free';
 
-    logger.debug({ caseCode: cleanedCode, isUnlocked }, 'Session-Cookie gesetzt');
+    logger.debug({ caseId: currentCase.id, isUnlocked }, 'Session-Cookie gesetzt');
 
     return {
       success: true,
@@ -105,7 +107,7 @@ export async function validateAndStoreSession(caseCode: string): Promise<Session
       caseCode: currentCase.case_code,
     };
   } catch (err) {
-    logger.error({ err, caseCode: cleanedCode }, 'Kritischer Fehler bei Session-Validierung');
+    logger.error({ err }, 'Kritischer Fehler bei Session-Validierung');
     return denied('failed');
   }
 }

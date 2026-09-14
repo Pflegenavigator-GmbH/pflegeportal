@@ -80,7 +80,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     return pdfResponse(pdfBuffer, upperCode, 'MISS');
   } catch (error: unknown) {
-    return handleApiError(error, 'api.pdf.generate.secure_dossier', upperCode);
+    return handleApiError(error, 'api.pdf.generate.secure_dossier');
   }
 }
 

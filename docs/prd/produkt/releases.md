@@ -52,6 +52,16 @@ Daraus folgt fünferlei, das andernorts als Nebensache durchginge:
    nachlassendem Gedächtnis oder in einer Ausnahmesituation ist das die wahrscheinlichste
    Abbruchstelle des ganzen Produkts. Damit ist die Wiederaufnahme (#99) keine Bequemlichkeit,
    sondern der Unterschied zwischen fertig werden und alles verlieren.
+
+   > **Nachtrag 11.09.2026.** Zwei Angaben dieses Punkts waren unzutreffend. Eine
+   > E-Mail-Rückfallebene *gibt* es — `send-access` verschickt den Fallcode per E-Mail und SMS,
+   > und genau das ist ein Befund des Rechtsgutachtens. Und #99 behandelte die Konsistenz des
+   > Ergebnisses, nicht die Wiederaufnahme. Die Antwort auf den Punkt steht jetzt in der harten
+   > Produktanforderung im Epic [Zugang & Abrechnung](epics/zugang-abrechnung.md) und in
+   > ADR-0002: Sitzung auf dem Gerät, nutzerverwaltetes Wiederherstellungsgeheimnis für andere
+   > Geräte, keine Kontaktdaten. Die Gedächtnisaufgabe verschwindet damit nicht, aber sie wird
+   > selten — nur noch nach Verlust der Sitzung — und die Sicherung ist ein geführter Schritt
+   > statt einer Bitte. Umsetzung: #134, #135.
 3. **Angehörige sind vermutlich der Regelfall, nicht die Ausnahme.** Das rückt die
    Vertretungsfrage aus #105 von der Rechtsabteilung ins Produkt: Der Trichter sollte wissen,
    für wen er ausgefüllt wird, und seine Ansprache danach richten.
@@ -233,7 +243,7 @@ Kapiteln.
 
 | Punkt | Woher |
 |---|---|
-| **Erfüllt das Produkt überhaupt § 40a SGB XI?** | tragende offene Frage — vor allem anderen |
+| ~~Erfüllt das Produkt überhaupt § 40a SGB XI?~~ | **beantwortet 06.09.2026: nein** — § 40a Abs. 1a S. 2 SGB XI nimmt den Produktkern aus; erreichbar nur für ein abgetrenntes Modul |
 | **Betrieb gegen AV_1.1 und AV_1.3 prüfen** — Verarbeitung in der EU, Schlüssel beim Hersteller | Kap. 11 · siehe unten |
 | **Kontomodell umbauen** — Zugriff über einen eigenen Authentisierungsfaktor, Freischaltcode nach Einlösung gelöscht | DMN_4.1 b, c |
 | **Einwilligungsverwaltung vollständig** — je Zweck getrennt, widerrufbar, am Konto | CNST_1.2–1.6, CNST_3.1 |

@@ -15,6 +15,11 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
+    ignore:
+      - dependency-name: "react"
+        update-types: ["version-update:semver-minor"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-minor"]
     # Minor/Patch gebündelt in einem Sammel-PR — Major-Updates kommen einzeln
     groups:
       minor-und-patch:
