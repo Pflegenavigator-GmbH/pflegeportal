@@ -1,19 +1,16 @@
 // src/components/modal/AccessShareModal.tsx
 'use client';
 
-import {
-  Mail,
-  Smartphone,
-  Download,
-  Loader2,
-  MessageCircle,
-  Share2,
-  ShieldAlert,
-} from 'lucide-react';
+// Der Versand des Zugangs per E-Mail oder SMS über Brevo ist am 14.09.2026
+// entfernt worden: Er schickte das dauerhafte Zugangsmittel an einen
+// Dienstleister, dessen Bedingungen Gesundheitsdaten ausschließen
+// (Gutachtenauftrag A24, ADR-0002). QR-Code und Teilen bleiben bis zur
+// Wiederherstellung nach #134 bestehen.
+
+import { Download, MessageCircle, Share2, ShieldAlert } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { QRCodeSVG } from 'qrcode.react';
-import { useState } from 'react';
 import { toast } from 'sonner';
 
 import {
@@ -23,7 +20,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  Input,
 } from '@/src/components/ui';
 
 interface AccessShareModalProps {
@@ -36,9 +32,6 @@ export function AccessShareModal({ caseCode, open, onOpenChange }: AccessShareMo
   const t = useTranslations('common.akteTeilen');
   const params = useParams();
   const locale = typeof params?.locale === 'string' ? params.locale : 'de';
-  const [contactType, setContactType] = useState<'email' | 'sms'>('email');
-  const [contactValue, setContactValue] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
 
   const portalLink =
     typeof window !== 'undefined'
@@ -69,30 +62,6 @@ export function AccessShareModal({ caseCode, open, onOpenChange }: AccessShareMo
       }
     };
     img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
-  };
-
-  // Brevo Versand (Nur für den Nutzer selbst)
-  const handleSendToSelf = async () => {
-    if (!contactValue) return toast.error(t('empfaengerFehlt'));
-    setIsLoading(true);
-
-    try {
-      const res = await fetch('/api/send-access', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ caseCode, contact: contactValue, type: contactType, locale }),
-      });
-
-      if (!res.ok) throw new Error();
-
-      toast.success(`Link erfolgreich per ${contactType === 'email' ? 'E-Mail' : 'SMS'} gesendet!`);
-      onOpenChange(false);
-      setContactValue('');
-    } catch {
-      toast.error(t('versandFehler'));
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   // DSGVO-konformes Teilen (Öffnet native Apps des Nutzers)
@@ -172,69 +141,6 @@ export function AccessShareModal({ caseCode, open, onOpenChange }: AccessShareMo
                 {t('eigenverantwortungText')}
               </p>
             </div>
-          </div>
-
-          <div className="my-6 border-t border-white/10" />
-
-          <div className="space-y-4 pb-1">
-            <h3 className="flex items-center gap-2 text-sm font-semibold text-[#20b2aa]">
-              <Mail className="h-4 w-4" />
-              {t('backupSenden')}
-            </h3>
-
-            <div className="flex overflow-hidden rounded-xl border border-white/10 bg-slate-950/60 p-1">
-              <button
-                onClick={() => setContactType('email')}
-                className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${
-                  contactType === 'email'
-                    ? 'bg-slate-700 text-white shadow-sm'
-                    : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                <Mail className="mr-2 inline h-4 w-4" />
-                E-Mail
-              </button>
-
-              <button
-                onClick={() => setContactType('sms')}
-                className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${
-                  contactType === 'sms'
-                    ? 'bg-slate-700 text-white shadow-sm'
-                    : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                <Smartphone className="mr-2 inline h-4 w-4" />
-                SMS
-              </button>
-            </div>
-
-            <div className="flex gap-2">
-              <Input
-                type={contactType === 'email' ? 'email' : 'tel'}
-                placeholder={contactType === 'email' ? 'meine@email.de' : '+49 151 ...'}
-                value={contactValue}
-                onChange={(e) => setContactValue(e.target.value)}
-                className="h-12 flex-1 bg-slate-950/60 border-white/10 focus-visible:ring-slate-600"
-              />
-              <Button
-                onClick={handleSendToSelf}
-                disabled={isLoading}
-                className="h-12 min-w-[96px] bg-slate-700 px-6 font-bold text-white hover:bg-slate-600"
-              >
-                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : t('senden')}
-              </Button>
-            </div>
-
-            <p className="px-2 text-center text-[11px] leading-relaxed text-slate-400">
-              🔒 <strong>{t('datenschutz')}</strong>{' '}
-              {t.rich('datenschutzText', {
-                b: (inhalt) => (
-                  <span className="underline decoration-slate-500 underline-offset-2">
-                    {inhalt}
-                  </span>
-                ),
-              })}
-            </p>
           </div>
         </div>
       </DialogContent>
