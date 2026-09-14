@@ -28,7 +28,8 @@ export async function GET(
       .single();
 
     if (error || !currentCase) {
-      throw new NotFoundError('Fall', code);
+      // case_id statt Fallcode — die Meldung landet im Protokoll (Issue #145)
+      throw new NotFoundError('Fall', session.caseId);
     }
 
     return NextResponse.json({
@@ -48,6 +49,6 @@ export async function GET(
       },
     });
   } catch (err) {
-    return handleApiError(err, 'api.cases.status', code);
+    return handleApiError(err, 'api.cases.status');
   }
 }

@@ -6,7 +6,9 @@ import { BriefPayload } from '@/src/types/briefe';
 
 export class AntragPflegegradGenerator extends BaseBriefGenerator {
   protected getTemplateParts(data: BriefPayload, heute: string): string[] {
-    logger.info({ caseCode: data.betreff }, 'Generiere Pflegegrad-Brief via DDD-Template');
+    // Weder Fallcode noch Betreff ins Log: Der Betreff kann Name oder
+    // Versichertennummer tragen (Issue #145).
+    logger.info('Generiere Pflegegrad-Brief via DDD-Template');
     return generatePflegegradTemplate(data, heute);
   }
 

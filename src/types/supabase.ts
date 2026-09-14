@@ -141,7 +141,6 @@ export interface Database {
       feedback: {
         Row: {
           id: string;
-          case_code: string | null;
           seite: string;
           feedback_text: string;
           eingabe_typ: 'text' | 'sprache' | 'klick';
@@ -151,7 +150,6 @@ export interface Database {
         };
         Insert: {
           id?: string;
-          case_code?: string | null;
           seite: string;
           feedback_text: string;
           eingabe_typ?: 'text' | 'sprache' | 'klick';
@@ -161,7 +159,6 @@ export interface Database {
         };
         Update: {
           id?: string;
-          case_code?: string | null;
           seite?: string;
           feedback_text?: string;
           eingabe_typ?: 'text' | 'sprache' | 'klick';
@@ -241,7 +238,7 @@ export interface Database {
           source: string;
           message: string;
           metadata: Json;
-          case_code: string | null;
+          case_id: string | null;
           created_at: string;
           expires_at: string;
         };
@@ -251,7 +248,7 @@ export interface Database {
           source: string;
           message: string;
           metadata?: Json;
-          case_code?: string | null;
+          case_id?: string | null;
           created_at?: string;
           expires_at?: string;
         };
@@ -261,7 +258,7 @@ export interface Database {
           source?: string;
           message?: string;
           metadata?: Json;
-          case_code?: string | null;
+          case_id?: string | null;
           created_at?: string;
           expires_at?: string;
         };

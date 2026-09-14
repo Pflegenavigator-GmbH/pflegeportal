@@ -33,10 +33,12 @@ export async function POST(req: Request) {
     const body = (await req.json()) as CheckoutBody;
     const { caseCode, paket } = body;
 
-    logger.info({ caseCode, paket }, 'Starte Checkout Session Erstellung');
+    // Den Fallcode nicht protokollieren (Issue #145); Fallbezug erst nach
+    // requireCaseSession als case_id.
+    logger.info({ paket }, 'Starte Checkout Session Erstellung');
 
     if (typeof caseCode !== 'string' || caseCode.trim() === '' || !isErlaubtesPaket(paket)) {
-      logger.warn({ caseCode, paket }, 'Validierung fehlgeschlagen: Pflichtparameter fehlen');
+      logger.warn({ paket }, 'Validierung fehlgeschlagen: Pflichtparameter fehlen');
       throw new ValidationError('Pflichtparameter caseCode oder paket fehlen oder sind ungültig.');
     }
 
@@ -163,7 +165,7 @@ export async function POST(req: Request) {
 
     if (updatePendingError) {
       logger.error(
-        { error: updatePendingError, caseCode: upperCode },
+        { error: updatePendingError, caseId: fallSession.caseId },
         'Konnte Status nicht auf pending setzen'
       );
     }
