@@ -134,7 +134,7 @@ export function generiereWiderspruchBrief(
   daten: WiderspruchDaten,
   frist: WiderspruchFrist
 ): string {
-  logger.info({ typ: daten.typ, caseCode: daten.caseCode }, 'Generiere Widerspruchsbrief');
+  logger.info({ typ: daten.typ }, 'Generiere Widerspruchsbrief');
 
   const heute = format(new Date(), 'dd.MM.yyyy');
   const bescheidDatum = format(new Date(daten.bescheidDatum), 'dd.MM.yyyy');

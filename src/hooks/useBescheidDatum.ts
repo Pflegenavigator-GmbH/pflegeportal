@@ -60,7 +60,7 @@ export function useBescheidDatum(caseCode: string | null) {
 
         if (!antwort.ok) throw new Error(`Status ${antwort.status}`);
       } catch (error) {
-        logger.error({ error, caseCode }, 'Bescheiddatum konnte nicht gespeichert werden');
+        logger.error({ error }, 'Bescheiddatum konnte nicht gespeichert werden');
         toast.error('Das Datum konnte nicht dauerhaft gespeichert werden.');
       } finally {
         setSpeichert(false);

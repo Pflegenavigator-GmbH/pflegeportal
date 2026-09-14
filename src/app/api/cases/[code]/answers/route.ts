@@ -83,7 +83,7 @@ export async function GET(
 
     return NextResponse.json(data || []);
   } catch (err) {
-    return handleApiError(err, 'api.cases.answers.get', code);
+    return handleApiError(err, 'api.cases.answers.get');
   }
 }
 
@@ -192,7 +192,7 @@ export async function POST(
 
     return NextResponse.json({ success: true, data }, { status: 201 });
   } catch (err) {
-    return handleApiError(err, 'api.cases.answers.post', code);
+    return handleApiError(err, 'api.cases.answers.post');
   }
 }
 
@@ -225,10 +225,10 @@ export async function DELETE(
 
     if (resetFehler) throw resetFehler;
 
-    logger.info({ caseCode: code }, 'Begutachtung zurückgesetzt: Antworten gelöscht');
+    logger.info({ caseId: session.caseId }, 'Begutachtung zurückgesetzt: Antworten gelöscht');
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    return handleApiError(err, 'api.cases.answers.delete', code);
+    return handleApiError(err, 'api.cases.answers.delete');
   }
 }

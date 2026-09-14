@@ -1,6 +1,10 @@
 import { logger } from '@/src/lib/logger';
 import { CacheEntry } from '@/src/types/cache'; // Falls du es auslagerst
 
+/**
+ * Der Schlüssel ist der Fallcode. Er bleibt Schlüssel im Arbeitsspeicher,
+ * erscheint aber in keinem Log (Issue #145).
+ */
 class PdfRamCache {
   private cache = new Map<string, CacheEntry>();
   private TTL = 10 * 60 * 1000;
@@ -10,17 +14,17 @@ class PdfRamCache {
     const entry = this.cache.get(key);
 
     if (!entry) {
-      logger.debug({ caseCode: key }, 'Cache-Miss: Kein Eintrag gefunden');
+      logger.debug('Cache-Miss: Kein Eintrag gefunden');
       return null;
     }
 
     if (Date.now() > entry.expiresAt) {
-      logger.info({ caseCode: key }, 'Cache-Miss: Eintrag abgelaufen (TTL überschritten)');
+      logger.info('Cache-Miss: Eintrag abgelaufen (TTL überschritten)');
       this.cache.delete(key);
       return null;
     }
 
-    logger.debug({ caseCode: key }, 'Cache-Hit: PDF aus RAM geladen');
+    logger.debug('Cache-Hit: PDF aus RAM geladen');
     return entry.buffer;
   }
 
@@ -30,13 +34,13 @@ class PdfRamCache {
       buffer,
       expiresAt: Date.now() + this.TTL,
     });
-    logger.debug({ caseCode: key, size: buffer.length }, 'Cache-Set: PDF in RAM gespeichert');
+    logger.debug({ size: buffer.length }, 'Cache-Set: PDF in RAM gespeichert');
   }
 
   clear(caseCode: string): void {
     const key = caseCode.toUpperCase();
     this.cache.delete(key);
-    logger.info({ caseCode: key }, 'Cache-Clear: Eintrag manuell gelöscht');
+    logger.info('Cache-Clear: Eintrag manuell gelöscht');
   }
 }
 

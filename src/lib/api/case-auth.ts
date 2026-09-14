@@ -35,8 +35,9 @@ export async function requireCaseSession(expectedCode: string): Promise<CaseSess
   const sessionCode = cookieStore.get(CASE_COOKIE)?.value?.trim().toUpperCase();
 
   if (!sessionCode || sessionCode !== cleanedCode) {
+    // Den angefragten Code NICHT in den Kontext legen: Der Kontext landet in
+    // Laufzeit-Log und `system_logs.metadata` (Issue #145).
     throw new UnauthorizedError('Fall-Session fehlt oder passt nicht zum angeforderten Fall.', {
-      expectedCode: cleanedCode,
       hasSessionCookie: Boolean(sessionCode),
     });
   }
@@ -49,7 +50,8 @@ export async function requireCaseSession(expectedCode: string): Promise<CaseSess
     .single();
 
   if (error || !currentCase) {
-    throw new NotFoundError('Fall', cleanedCode);
+    // Ohne Kennung: Die Meldung landet in `system_logs.message` (Issue #145).
+    throw new NotFoundError('Fall');
   }
 
   return {

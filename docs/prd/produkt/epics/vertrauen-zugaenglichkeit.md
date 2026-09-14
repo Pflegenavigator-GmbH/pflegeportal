@@ -87,13 +87,28 @@ verbietet, die über die zulässigen Zwecke hinausgehen.
 
 **Zweck** Was die Verordnung zusagt, muss im Portal auch gehen.
 
+> **Korrektur vom 11.09.2026 — die beiden vorhandenen Rechte funktionieren nicht.**
+> Hier stand „Seite vorhanden", und in der Tabelle *Geprüft und angenommen* war das als
+> geprüft vermerkt. Geprüft war nur, *dass es die Seiten gibt* — nicht, was sie tun.
+>
+> Beide Seiten senden den Antrag an `/api/feedback`. Die Route speichert nichts, versendet
+> nichts (`sendFeedbackEmail` ist auskommentiert), protokolliert nur die *Länge* der
+> Nachricht und antwortet mit Erfolg. Die Person liest danach „Löschauftrag erfolgreich
+> registriert! Das System bereinigt die Relationen im Hintergrund." bzw. „Antrag
+> revisionssicher eingegangen! Gesetzliche Bearbeitungsfrist nach Art. 12 Abs. 3 DSGVO
+> läuft." Keine dieser Aussagen trifft zu; der Antrag ist nach der Antwort verloren.
+>
+> Das ist schwerwiegender als ein fehlendes Recht: Wer eine Bestätigung erhält, verlässt
+> sich darauf. Seit dem 02.06.2026 im Code. → **#146**
+
 **Stand** Es existieren `/datenschutz/auskunft` (Art. 15) und `/datenschutz/loeschen`
-(Art. 17). Der Kriterienkatalog führt in ITV_1 bis ITV_5 darüber hinaus:
+(Art. 17) — als Formulare ohne Wirkung, siehe Korrektur oben. Der Kriterienkatalog führt in
+ITV_1 bis ITV_5 darüber hinaus:
 
 | Recht | Norm | Stand |
 |---|---|---|
-| Auskunft | Art. 15 DSGVO | Seite vorhanden |
-| Löschung | Art. 17 DSGVO | Seite vorhanden |
+| Auskunft | Art. 15 DSGVO | ~~Seite vorhanden~~ **Seite ohne Wirkung** — bestätigt, bearbeitet nicht (#146) |
+| Löschung | Art. 17 DSGVO | ~~Seite vorhanden~~ **Seite ohne Wirkung** — bestätigt, löscht nicht (#146) |
 | **Berichtigung** | Art. 16 DSGVO | **fehlt** |
 | **Einschränkung der Verarbeitung** | Art. 18 DSGVO | **fehlt** |
 | **Datenübertragbarkeit** | Art. 20 DSGVO | **fehlt** |
@@ -103,7 +118,14 @@ korrigiert sie heute durch erneutes Ausfüllen — nicht durch ein Recht, sonder
 Funktion. Ob das genügt, gehört geprüft.
 
 **Fertig, wenn** jedes der fünf Rechte einen benannten Weg im Portal hat und dieser ohne
-E-Mail-Adresse funktioniert.
+E-Mail-Adresse funktioniert — und **nachweislich wirkt**: Eine Bestätigung erscheint erst,
+wenn der Antrag gespeichert bzw. vollzogen ist.
+
+**Wie** — seit ADR-0002 naheliegend: Auskunft, Übertragbarkeit und Löschung als
+Selbstbedienung aus der Sitzung. Wer Sitzung oder Wiederherstellungsgeheimnis hat, kann
+seinen Fall selbst einsehen, exportieren und löschen. Die Kontaktfreiheit aus der harten
+Produktanforderung (Epic [Zugang & Abrechnung](zugang-abrechnung.md)) bleibt so auch hier
+gewahrt.
 
 **Hängt an** dem pseudonymen Modell: Alle fünf Wege müssen ohne Identifizierung auskommen.
 
@@ -196,7 +218,8 @@ Arabisch und Persisch und damit F4.1.
 | Aussage | Herkunft | Stand |
 |---|---|---|
 | Es gibt keine Einwilligungsverwaltung; `consent.ts` ist ein Cookie-Banner im `localStorage` | Durchsicht 29.08.2026 | geprüft |
-| Auskunft und Löschung haben Seiten; Berichtigung, Einschränkung und Übertragbarkeit nicht | `[locale]/datenschutz/` | geprüft |
+| ~~Auskunft und Löschung haben Seiten; Berichtigung, Einschränkung und Übertragbarkeit nicht~~ | `[locale]/datenschutz/` | **widerlegt 11.09.2026** — geprüft war nur das Vorhandensein der Seiten |
+| Auskunft und Löschung haben Seiten, deren Anträge nirgends ankommen; Berichtigung, Einschränkung und Übertragbarkeit fehlen | `datenschutz/auskunft`, `datenschutz/loeschen`, `api/feedback/route.ts` | geprüft |
 | ~~34 Sprachfassungen liegen ausgeliefert vor~~ | `public/locales` | **widerlegt 08.09.2026** — zwei sind aktiv, 33 antworten mit 404 |
 | Ausgeliefert werden ausschließlich `de` und `en` | `i18n/languages.ts`, Live-Prüfung 08.09.2026 | geprüft |
 | Das RTL-Fundament ist gebaut | `i18n/rtl.ts`, `rtl.test.ts`, `layout.tsx:62` | geprüft |
