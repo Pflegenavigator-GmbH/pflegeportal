@@ -1,11 +1,17 @@
 // src/lib/logger.ts
 import pino from 'pino';
 
+import { schwaerzeFallcodes } from '@/src/lib/log-schwaerzung';
+
 const environment = process.env.ENVIRONMENT || 'production';
 
 const currentLogLevel = environment === 'development' ? 'debug' : 'info';
 
-export const logger = pino({
+/**
+ * Exportiert, damit Tests die Schwärzung am echten Ausgabeweg prüfen können —
+ * mit eigenem Zielstrom statt stdout.
+ */
+export const loggerOptionen: pino.LoggerOptions = {
   level: currentLogLevel,
 
   redact: {
@@ -37,8 +43,26 @@ export const logger = pino({
       'DB_SECRET_KEY',
       'STRIPE_SECRET_KEY',
       'SUPABASE_SERVICE_ROLE_KEY',
+      // Der Fallcode ist ein Zugangsmittel (Issue #145). Bewusst NICHT der
+      // generische Schlüssel `code` — dort stehen Fehlercodes.
+      'caseCode',
+      '*.caseCode',
+      'case_code',
+      '*.case_code',
+      'expectedCode',
+      '*.expectedCode',
     ],
     censor: '[REDACTED]',
+  },
+
+  hooks: {
+    // Zweite Linie gegen Fallcodes im Log: Die Redaktion oben greift nur bei
+    // bekannten Feldnamen. Dieser Hook sieht die fertige JSON-Zeile — samt
+    // Nachricht, Fehlermeldung und Stacktrace — unmittelbar vor dem Schreiben.
+    // `formatters.log` wäre die falsche Stelle: Es läuft vor den Serializern,
+    // ein `Error` ist dort noch ein `Error` mit nicht aufzählbarer `message`.
+    // Wirkt nur serverseitig; im Browser kennt pino diesen Hook nicht.
+    streamWrite: schwaerzeFallcodes,
   },
 
   ...(environment === 'development' && {
@@ -50,7 +74,9 @@ export const logger = pino({
       },
     },
   }),
-});
+};
+
+export const logger = pino(loggerOptionen);
 
 export function maskSecret(value?: string | null): string {
   if (!value) return 'undefined';

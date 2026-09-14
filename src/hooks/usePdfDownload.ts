@@ -40,7 +40,7 @@ export function usePdfDownload({
 
     setLoadingPdf(true);
     const toastId = toast.loading('PDF-Dossier wird verschlüsselt generiert...');
-    logger.info({ caseCode, elementId }, 'Starte PDF-Generierungsprozess');
+    logger.info({ elementId }, 'Starte PDF-Generierungsprozess');
 
     try {
       const element = document.getElementById(elementId);
@@ -64,7 +64,7 @@ export function usePdfDownload({
 
       if (!response.ok) {
         if (response.status === 402) {
-          logger.info({ caseCode }, 'PDF-Generierung: Paywall-Schranke erreicht');
+          logger.info('PDF-Generierung: Paywall-Schranke erreicht');
           toast.dismiss(toastId);
           setShowPaywall(true);
           return;
@@ -83,10 +83,10 @@ export function usePdfDownload({
       link.remove();
       window.URL.revokeObjectURL(url);
 
-      logger.info({ caseCode }, 'PDF erfolgreich generiert und Download eingeleitet');
+      logger.info('PDF erfolgreich generiert und Download eingeleitet');
       toast.success('Download erfolgreich gestartet!', { id: toastId });
     } catch (error) {
-      logger.error({ error, caseCode }, 'Kritischer Fehler bei der PDF-Erstellung');
+      logger.error({ error }, 'Kritischer Fehler bei der PDF-Erstellung');
       toast.error('Fehler bei der PDF-Erstellung.', { id: toastId });
     } finally {
       setLoadingPdf(false);

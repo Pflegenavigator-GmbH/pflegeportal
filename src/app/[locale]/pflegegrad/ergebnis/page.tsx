@@ -125,7 +125,7 @@ export default function ErgebnisPage(props: PageProps) {
           router.push(`/${locale}/pflegegrad/start`);
           return;
         }
-        logger.error({ err, caseCode }, 'Ergebnis konnte nicht geladen werden');
+        logger.error({ err }, 'Ergebnis konnte nicht geladen werden');
         toast.error(tMeldung('ergebnisFehler'));
       });
   }, [caseCode, locale, router, tMeldung]);
@@ -157,13 +157,13 @@ export default function ErgebnisPage(props: PageProps) {
       }
       entferneErgebnis();
 
-      logger.info({ caseCode }, 'Begutachtung zurückgesetzt, starte neu bei Modul 1');
+      logger.info('Begutachtung zurückgesetzt, starte neu bei Modul 1');
       toast.success(tMeldung('zurueckgesetzt'));
 
       // Ladezustand bewusst aktiv lassen — die Navigation folgt unmittelbar.
       router.push(`/${locale}/pflegegrad/modul1`);
     } catch (error) {
-      logger.error({ error, caseCode }, 'Begutachtung konnte nicht zurückgesetzt werden');
+      logger.error({ error }, 'Begutachtung konnte nicht zurückgesetzt werden');
       toast.error(tMeldung('zuruecksetzenFehler'));
       setResetLaeuft(false);
       setResetDialogOffen(false);
@@ -175,7 +175,7 @@ export default function ErgebnisPage(props: PageProps) {
   const handleGdbNavigation = async () => {
     if (!caseCode) return;
     setIsVerifyingGdb(true);
-    logger.debug({ caseCode }, 'Verifiziere GdB-Lizenzfreigabe');
+    logger.debug('Verifiziere GdB-Lizenzfreigabe');
     const verificationToast = toast.loading(t('lizenzPruefen'));
 
     try {
@@ -186,7 +186,7 @@ export default function ErgebnisPage(props: PageProps) {
       const accessData = checkRes.ok ? await checkRes.json() : null;
 
       if (checkRes.status === 402 || (accessData && !accessData.isUnlocked)) {
-        logger.info({ caseCode }, 'Lizenz fehlt für GdB-Zusatzmodul. Zeige Paywall.');
+        logger.info('Lizenz fehlt für GdB-Zusatzmodul. Zeige Paywall.');
         toast.dismiss(verificationToast);
         setShowPaywall(true);
         setIsVerifyingGdb(false);

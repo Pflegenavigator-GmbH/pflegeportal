@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(existingRecord?.answers || {});
   } catch (err) {
-    return handleApiError(err, 'api.tagebuch.get', caseCode);
+    return handleApiError(err, 'api.tagebuch.get');
   }
 }
 
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    return handleApiError(err, 'api.tagebuch.post', caseCode);
+    return handleApiError(err, 'api.tagebuch.post');
   }
 }
 
@@ -162,6 +162,6 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    return handleApiError(err, 'api.tagebuch.delete', caseCode);
+    return handleApiError(err, 'api.tagebuch.delete');
   }
 }
