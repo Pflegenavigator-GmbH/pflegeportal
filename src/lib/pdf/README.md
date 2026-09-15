@@ -1,7 +1,7 @@
 # PDF-Erzeugung
 
-Serverseitiges Rendern von HTML zu A4-PDF über Puppeteer. Genutzt von den drei
-PDF-Routen (`pdf/generate`, `widerspruch/pdf`, `briefe/pdf`), die alle im
+Serverseitiges Rendern von HTML zu A4-PDF über Puppeteer. Genutzt von den zwei
+PDF-Routen (`pdf/generate`, `briefe/pdf`), die beide im
 **Node.js-Runtime** laufen (Chromium braucht Node, kein Edge).
 
 ## Chromium je Umgebung
