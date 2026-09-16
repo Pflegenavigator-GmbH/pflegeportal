@@ -1,4 +1,22 @@
 // src/lib/gdb/berechne-gesamt-gdb.ts
+/**
+ * ABGESCHALTET am 16.09.2026 — diese Funktion wird nicht mehr aufgerufen
+ * (Issue #131, Befund B-01 des Rechtsgutachtens vom 06.09.2026).
+ *
+ * Die Berechnung addiert auf den höchsten Einzelwert für jeden weiteren Wert
+ * ab 20 pauschal zehn Punkte und rundet auf Zehner. Die Versorgungsmedizinischen
+ * Grundsätze schließen Addition und Mittelwertbildung ausdrücklich aus (Anlage
+ * zu § 2 VersMedV, Teil A Nr. 3.2): Maßgeblich ist, wie sich die
+ * Beeinträchtigungen zueinander verhalten — ob sie sich verstärken, unabhängig
+ * nebeneinanderstehen oder sich überschneiden. Das Ergebnis wurde zudem mit
+ * einer Vergünstigungsliste ausgespielt und trug damit eine Erwartung an
+ * konkrete Nachteilsausgleiche.
+ *
+ * Code und Tests bleiben als Ausgangspunkt für die Gesamtschau erhalten (#26).
+ * Wer sie wieder anschließt, braucht vorher die fachliche Abnahme aus Teil B
+ * des Gutachtenauftrags. `src/app/[locale]/gdb/page.tsx` erklärt stattdessen
+ * die Abschaltung.
+ */
 
 import { verguenstigungenKatalog } from '@/src/app/[locale]/gdb/_constants/verguenstigungen';
 import { logger } from '@/src/lib/logger';

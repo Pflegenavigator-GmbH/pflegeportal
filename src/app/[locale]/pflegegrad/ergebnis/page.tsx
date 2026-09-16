@@ -8,7 +8,6 @@ import {
   AlertCircle,
   Coins,
   Calculator,
-  Accessibility,
   FolderLock,
   RefreshCw,
   ChevronDown,
@@ -70,7 +69,6 @@ export default function ErgebnisPage(props: PageProps) {
   const [hasMounted, setHasMounted] = useState(false);
   const [ergebnis, setErgebnis] = useState<PflegegradErgebnis | null>(null);
   const { triggerCheckout, checkoutLoading } = useStripeCheckout();
-  const [isVerifyingGdb, setIsVerifyingGdb] = useState(false);
   const [resetDialogOffen, setResetDialogOffen] = useState(false);
   const [resetLaeuft, setResetLaeuft] = useState(false);
 
@@ -171,36 +169,6 @@ export default function ErgebnisPage(props: PageProps) {
   };
 
   const handleCheckoutSubmit = (paketId: string) => triggerCheckout(caseCode, paketId);
-
-  const handleGdbNavigation = async () => {
-    if (!caseCode) return;
-    setIsVerifyingGdb(true);
-    logger.debug('Verifiziere GdB-Lizenzfreigabe');
-    const verificationToast = toast.loading(t('lizenzPruefen'));
-
-    try {
-      // Leichtgewichtige Statusabfrage — kein Puppeteer, kein Cache-Eintrag
-      const checkRes = await fetch(`/api/cases/${caseCode.toUpperCase()}/access`, {
-        credentials: 'include',
-      });
-      const accessData = checkRes.ok ? await checkRes.json() : null;
-
-      if (checkRes.status === 402 || (accessData && !accessData.isUnlocked)) {
-        logger.info('Lizenz fehlt für GdB-Zusatzmodul. Zeige Paywall.');
-        toast.dismiss(verificationToast);
-        setShowPaywall(true);
-        setIsVerifyingGdb(false);
-        return;
-      }
-
-      toast.dismiss(verificationToast);
-      router.push(`/${locale}/gdb`);
-    } catch (err) {
-      logger.error({ err }, 'GdB Lizenzcheck-Verbindung abgebrochen');
-      toast.error(t('lizenzFehler'), { id: verificationToast });
-      setIsVerifyingGdb(false);
-    }
-  };
 
   if (!ergebnis) {
     return (
@@ -493,24 +461,8 @@ export default function ErgebnisPage(props: PageProps) {
           </Button>
         </div>
 
-        {/* GdB-Weiche */}
-        <Card className="bg-gradient-to-r from-white/5 to-transparent border-[var(--border-subtle)] text-white p-5 rounded-xl shadow-xl">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="text-center sm:text-left">
-              <h4 className="font-bold text-sm flex items-center gap-2">
-                <Accessibility className="w-4 h-4 text-[var(--color-accent)]" /> {t('gdbTitel')}
-              </h4>
-              <p className="text-[var(--color-text-muted)] text-xs">{t('gdbText')}</p>
-            </div>
-            <Button
-              onClick={handleGdbNavigation}
-              disabled={isVerifyingGdb}
-              className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[var(--color-on-accent)] font-bold text-xs h-10 rounded-xl"
-            >
-              {isVerifyingGdb ? t('gdbPruefen') : t('gdbRechner')}
-            </Button>
-          </div>
-        </Card>
+        {/* Die GdB-Weiche stand hier bis zum 16.09.2026. Der Rechner ist
+            abgeschaltet (#131), deshalb führt kein Einstieg mehr dorthin. */}
 
         {showPaywall && (
           <PaywallModal
