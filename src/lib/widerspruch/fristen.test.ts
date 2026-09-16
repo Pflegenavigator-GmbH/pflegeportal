@@ -1,3 +1,6 @@
+import { readFileSync, readdirSync } from 'node:fs';
+import path from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -11,6 +14,45 @@ import {
   zuLokalemTagesbeginn,
   type Frist,
 } from './fristen';
+
+describe('Fristangaben in Texten (#132)', () => {
+  /**
+   * Quelltext-Sperre. Die Vier-Wochen-Frist stand bis zum 15.09.2026 in der
+   * ungenutzten Route `api/widerspruch` — kein Rechenfehler, sondern ein Text
+   * neben einer richtigen Rechnung. Ein Test der Berechnung hätte ihn nie
+   * gesehen. Gesperrt sind Wochenangaben in einer Zeile, die von Widerspruch,
+   * Klage oder Bescheid spricht. Echte Wochenfristen anderer Normen (etwa
+   * § 18 Abs. 3 SGB XI) bleiben erlaubt.
+   */
+  it('keine Wochenangabe bei Widerspruchs- oder Klagefristen in Code und Übersetzungen', () => {
+    const projekt = path.resolve(__dirname, '../../..');
+    const wurzeln = ['src', path.join('public', 'locales')];
+
+    const WOCHEN_DE = /\b(\d+|zwei|drei|vier|sechs|acht)\s*Wochen\b/i;
+    const BEZUG_DE = /widerspruch|klage|bescheid/i;
+    const WOCHEN_EN = /\b(\d+|two|three|four|six|eight)\s*weeks?\b/i;
+    const BEZUG_EN = /objection|appeal|lawsuit|decision notice|notice of decision/i;
+
+    const fundstellen = wurzeln.flatMap((wurzel) =>
+      readdirSync(path.join(projekt, wurzel), { recursive: true, encoding: 'utf8' })
+        .filter((datei) => /\.(ts|tsx|json)$/.test(datei))
+        .filter((datei) => !/\.test\.(ts|tsx)$/.test(datei))
+        .flatMap((datei) =>
+          readFileSync(path.join(projekt, wurzel, datei), 'utf8')
+            .split('\n')
+            .map((zeile, index) => ({ zeile, ort: `${path.join(wurzel, datei)}:${index + 1}` }))
+            .filter(
+              ({ zeile }) =>
+                (WOCHEN_DE.test(zeile) && BEZUG_DE.test(zeile)) ||
+                (WOCHEN_EN.test(zeile) && BEZUG_EN.test(zeile))
+            )
+            .map(({ ort, zeile }) => `${ort}  ${zeile.trim()}`)
+        )
+    );
+
+    expect(fundstellen).toEqual([]);
+  });
+});
 
 /** Lokales ISO-Datum — vermeidet die UTC-Verschiebung von toISOString(). */
 const iso = (datum: Date) =>
