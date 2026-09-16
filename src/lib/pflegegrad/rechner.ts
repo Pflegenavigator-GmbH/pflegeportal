@@ -1,6 +1,6 @@
 // src/lib/pflegegrad/rechner.ts
-import { NBA_CONFIG } from '@/src/lib/pflegegrad/constants';
 import { careLevelFromScore, weightedModulePoints } from '@/src/lib/pflegegrad/nba';
+import { leistungsbetraegeAm } from '@/src/lib/rechtsstand/rechtswerte';
 import { ModuleScores, PflegegradErgebnis } from '@/src/types/pflegegrad';
 
 // Untergrenze je Pflegegrad — für die Puffer-/Ampelberechnung
@@ -13,10 +13,15 @@ const PFLEGEGRAD_MIN: Record<number, number> = { 1: 12.5, 2: 27, 3: 47.5, 4: 70,
  *   lässt keine Aussage über Vollständigkeit zu, denn null Punkte sind ein
  *   gültiges Ergebnis (volle Selbstständigkeit). Wer die Aussage braucht,
  *   muss die Antworten mitliefern.
+ * @param stichtag Maßgeblicher Tag für die Leistungsbeträge. Sie stammen aus
+ *   `rechtsstand/rechtswerte.ts` und gelten ab einem Datum, nicht ab einem
+ *   Jahr — für eine Auswertung zu einem früheren Zeitpunkt zählt die damals
+ *   geltende Fassung.
  */
 export function calculatePflegegrad(
   scores: Partial<ModuleScores>,
-  unvollstaendigeModule: readonly number[] = []
+  unvollstaendigeModule: readonly number[] = [],
+  stichtag: Date | string = new Date()
 ): PflegegradErgebnis {
   const fullScores: ModuleScores = {
     1: scores[1] ?? 0,
@@ -37,6 +42,8 @@ export function calculatePflegegrad(
 
   // 2. Höchstwertprinzip für Kognition (M2) und Verhalten (M3)
   const maxOf23 = Math.max(w2, w3);
+
+  const betraege = leistungsbetraegeAm(stichtag);
 
   // 3. Gesamtsumme (max. 100 Punkte)
   const totalScore = Math.round((w1 + maxOf23 + w4 + w5 + w6) * 10) / 10;
@@ -64,13 +71,13 @@ export function calculatePflegegrad(
     buffer: Math.round(buffer * 10) / 10,
     missingData: unvollstaendigeModule.length > 0,
     benefits: {
-      monthlyAmount:
-        NBA_CONFIG.BENEFITS[careLevel as keyof typeof NBA_CONFIG.BENEFITS]?.monthly ?? 0,
-      reliefBudget: NBA_CONFIG.BENEFITS[careLevel as keyof typeof NBA_CONFIG.BENEFITS]?.relief ?? 0,
-      additionalBenefits:
-        careLevel >= 2 ? ['Pflegehilfsmittel (42€)', 'Wohnraumanpassung (4.180€)'] : [],
+      monthlyAmount: betraege[careLevel as 1 | 2 | 3 | 4 | 5]?.monthly ?? 0,
+      reliefBudget: betraege[careLevel as 1 | 2 | 3 | 4 | 5]?.relief ?? 0,
+      // Schlüssel, kein Text: Die Anzeige übersetzt sie. Vorher standen hier
+      // deutsche Sätze und erschienen dadurch auch in der englischen Fassung
+      // (#107).
+      additionalBenefits: careLevel >= 2 ? ['pflegehilfsmittel', 'wohnumfeld'] : [],
     },
-    recommendations:
-      careLevel === 0 ? ['Wiederholung bei Verschlechterung'] : ['Schwerbehindertenausweis prüfen'],
+    recommendations: careLevel === 0 ? ['wiederholung'] : ['schwerbehindertenausweis'],
   };
 }

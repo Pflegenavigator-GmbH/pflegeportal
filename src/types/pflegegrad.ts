@@ -22,6 +22,19 @@ export interface BewertungOption {
   punkte: number;
 }
 
+/**
+ * Zusatzleistungen und Empfehlungen sind Schlüssel, keine Sätze.
+ *
+ * Bis zum 16.09.2026 lieferte der Rechner fertige deutsche Zeichenketten
+ * („Pflegehilfsmittel (42€)"). Sie erschienen dadurch auch auf der englischen
+ * Seite, und der Betrag stand ohne Fundstelle mitten im Rechenergebnis (#107).
+ * Beträge kommen jetzt aus `rechtsstand/rechtswerte.ts`, Texte aus den
+ * Sprachdateien.
+ */
+export type ZusatzLeistung = 'pflegehilfsmittel' | 'wohnumfeld';
+
+export type Handlungsempfehlung = 'schwerbehindertenausweis' | 'wiederholung';
+
 export interface PflegegradErgebnis {
   careLevel: number;
   totalScore: number;
@@ -40,7 +53,7 @@ export interface PflegegradErgebnis {
   benefits: {
     monthlyAmount: number;
     reliefBudget: number;
-    additionalBenefits: string[];
+    additionalBenefits: ZusatzLeistung[];
   };
-  recommendations: string[];
+  recommendations: Handlungsempfehlung[];
 }

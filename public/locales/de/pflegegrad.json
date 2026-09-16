@@ -385,6 +385,17 @@
       "hoechstwertZaehlt": "Von Modul 2 und 3 zählt nur der höhere Wert. Dieser hier zählt.",
       "hoechstwertZaehltNicht": "Von Modul 2 und 3 zählt nur der höhere Wert. Dieser hier zählt nicht."
     },
+    "zusatz": {
+      "pflegehilfsmittel": "Pflegehilfsmittel zum Verbrauch: bis zu {betrag} im Monat (§ 40 Abs. 2 SGB XI)",
+      "wohnumfeld": "Wohnumfeld verbessern: Zuschuss bis zu {betrag} je Maßnahme (§ 40 Abs. 4 SGB XI)"
+    },
+    "empfehlungenTitel": "Empfohlene nächste Schritte",
+    "empfehlungen": {
+      "schwerbehindertenausweis": "Prüfen Sie, ob zusätzlich ein Schwerbehindertenausweis in Betracht kommt. Er wird beim Versorgungsamt beantragt und ist vom Pflegegrad unabhängig.",
+      "wiederholung": "Wiederholen Sie die Einschätzung, wenn sich der Gesundheitszustand verschlechtert. Für einen neuen Antrag gibt es keine Wartezeit."
+    },
+    "grenzbereichTitel": "Knapp an der Grenze:",
+    "grenzbereichText": "Ihr Ergebnis liegt dicht an der nächsten Schwelle. Führen Sie vor der Begutachtung ein Pflegetagebuch — es belegt den tatsächlichen Aufwand an einem gewöhnlichen Tag.",
     "moduleTitel": "Modul-Einstufung anpassen",
     "moduleEditieren": "Klicken zum Editieren",
     "fristenTitel": "Ihre Fristen",
