@@ -18,6 +18,10 @@
 // amtlichen Stufen abgebildet. Das ist die fachlich saubere Näherung für ein
 // reduziertes Orientierungsinstrument und hält Erwachsenen- und Kinder-Rechner
 // konsistent. FACHLICH/JURISTISCH gegen die aktuelle BRi zu verifizieren.
+//
+// Rechtsstand der hier verwendeten Werte: src/lib/rechtsstand/rechtswerte.ts
+// (`pflegegrad.schwellen`, `pflegegrad.modulgewichte`,
+// `pflegegrad.kriterien.amtlich`). Wer eine Zahl ändert, ändert sie dort mit.
 
 import { ERWARTETE_FRAGEN } from '@/src/lib/pflegegrad/fragen';
 
