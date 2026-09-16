@@ -28,7 +28,7 @@
     },
     "dauer": {
       "frage": "Wie lange läuft das Antragsverfahren?",
-      "antwort": "Nach Eingang des Antrags muss die Kasse innerhalb von 25 Werktagen einen schriftlichen Bescheid erlassen. Überschreitet sie die Frist, muss sie nach § 18 Abs. 3b SGB XI 70 Euro für jede begonnene Woche der Verzögerung zahlen."
+      "antwort": "Nach Eingang des Antrags muss die Kasse innerhalb von 25 Arbeitstagen schriftlich entscheiden (§ 18c Abs. 1 SGB XI). Überschreitet sie die Frist, muss sie nach § 18c Abs. 5 SGB XI 70 Euro für jede begonnene Woche der Verzögerung zahlen."
     },
     "widerspruch": {
       "frage": "Wie funktioniert der Widerspruch?",

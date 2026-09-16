@@ -15,6 +15,27 @@
  * Abgegrenzt werden zwei Fristarten, weil sie gegenläufig wirken:
  *  - Ausschlussfrist  — läuft ab, danach ist der Rechtsbehelf verfristet.
  *  - Wartefrist       — muss verstreichen, erst danach ist die Klage zulässig.
+ *
+ * NORMPRÜFUNG 16.09.2026 — HAUSINTERN, FACHLICHE ABNAHME STEHT AUS (#133).
+ *
+ * Geprüft wurden allein die Normbezeichnungen, gegen den Gesetzestext auf
+ * gesetze-im-internet.de und dejure.org in der jeweils geltenden Fassung. Das
+ * ist Nachschlagen, keine sozialrechtliche Beurteilung: Ob die Fristen im
+ * Einzelfall so greifen und ob die Auswahl der Fristen vollständig ist, hat
+ * niemand mit sozialrechtlicher Qualifikation bestätigt. Solange dieser Vermerk
+ * keinen Namen und kein Abnahmedatum trägt, gilt er als ungeprüft im Sinne von
+ * Teil B des Gutachtenauftrags — wer sich darauf beruft, beruft sich auf eine
+ * Eigenaussage des Teams.
+ *
+ *  - § 84 Abs. 1, § 87 Abs. 1, § 88 Abs. 1 und 2 SGG: unverändert zutreffend.
+ *  - Die 25-Arbeitstage-Frist und der Säumniszuschlag standen hier unter der
+ *    alten Gliederung des § 18 (Absätze 3 und 3b). Beide sind umgezogen: die
+ *    Frist nach § 18c Abs. 1 SGB XI, der Zuschlag nach § 18c Abs. 5
+ *    („Entscheidung über den Antrag, Fristen"). § 18 SGB XI regelt heute die
+ *    Beauftragung der Gutachter.
+ *  - Die verkürzten Fristen standen hier als „eine bzw. zwei Wochen". Das
+ *    Gesetz rechnet in Arbeitstagen: fünf nach § 18a Abs. 5, zehn nach
+ *    § 18a Abs. 6 und 7. Eine Woche ist nicht dasselbe wie fünf Arbeitstage.
  */
 import { addDays, addMonths, differenceInDays, format } from 'date-fns';
 
@@ -253,7 +274,7 @@ export const FRIST_DEFINITIONEN: Record<FristTyp, FristDefinition> = {
     anker: 'antragDatum',
     ankerBezeichnung: 'Eingang des Antrags',
     hinweis:
-      'Bleibt ein Antrag sechs Monate ohne Bescheid, ist die Untätigkeitsklage zulässig. Unabhängig davon muss die Pflegekasse bereits binnen 25 Arbeitstagen entscheiden (§ 18 Abs. 3 SGB XI).',
+      'Bleibt ein Antrag sechs Monate ohne Bescheid, ist die Untätigkeitsklage zulässig. Unabhängig davon muss die Pflegekasse bereits binnen 25 Arbeitstagen entscheiden (§ 18c Abs. 1 SGB XI).',
   },
 };
 
@@ -263,12 +284,16 @@ export const FRIST_DEFINITIONEN: Record<FristTyp, FristDefinition> = {
  */
 export const EILANTRAG_RECHTSGRUNDLAGEN = {
   bearbeitungsfrist: {
-    gesetz: '§ 18 Abs. 3 SGB XI',
-    text: 'Die Pflegekasse muss Ihnen das Begutachtungsergebnis spätestens 25 Arbeitstage nach Antragseingang mitteilen; in Krankenhaus-, Hospiz- oder Pflegezeit-Fällen gelten verkürzte Fristen von einer bzw. zwei Wochen.',
+    gesetz: '§ 18c Abs. 1 SGB XI',
+    text: 'Die Pflegekasse muss Ihnen ihre Entscheidung spätestens 25 Arbeitstage nach Eingang des Antrags schriftlich mitteilen.',
+  },
+  verkuerzteBegutachtung: {
+    gesetz: '§ 18a Abs. 5 und 6 SGB XI',
+    text: 'Im Krankenhaus, in stationärer Rehabilitation, im Hospiz oder bei ambulanter Palliativversorgung ist spätestens am fünften Arbeitstag nach Antragseingang zu begutachten; bei angekündigter Pflegezeit oder vereinbarter Familienpflegezeit innerhalb von zehn Arbeitstagen.',
   },
   saeumniszuschlag: {
-    gesetz: '§ 18 Abs. 3b SGB XI',
-    text: 'Überschreitet die Pflegekasse diese Frist, hat sie 70 Euro für jede begonnene Woche der Verspätung zu zahlen.',
+    gesetz: '§ 18c Abs. 5 SGB XI',
+    text: 'Überschreitet die Pflegekasse die Frist, hat sie für jede begonnene Woche der Fristüberschreitung 70 Euro zu zahlen — es sei denn, sie hat die Verzögerung nicht zu vertreten.',
   },
   eilrechtsschutz: {
     gesetz: '§ 86b Abs. 2 SGG',
