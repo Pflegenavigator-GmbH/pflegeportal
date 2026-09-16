@@ -59,9 +59,13 @@ Die Leistungsbeträge sind zum 01.01.2025 um 4,5 Prozent gestiegen und gelten
 keine Jahresangabe: Die Frage „Ist das noch aktuell?" beantwortet der
 Prüfvermerk, nicht die Jahreszahl im Wert.
 
-## Bekannter Rückstand
+## Leistungsbeträge
 
-Die Leistungsbeträge im Code entsprechen dem Stand vor dem 01.01.2025
-(Pflegegeld 332/573/765/947 statt 347/599/800/990, Entlastungsbetrag 125 statt
-131). Der Katalog führt beide Fassungen, und ein Test hält den Rückstand fest.
-Die Umstellung ist **#107** — danach ist dieser Test zu löschen.
+Sie kommen ausschließlich von hier: `leistungsbetraegeAm(stichtag)` liefert
+Pflegegeld und Entlastungsbetrag in der zum Stichtag geltenden Fassung, und
+`calculatePflegegrad` nimmt den Stichtag entgegen. Eine zweite Tabelle im Code
+gibt es seit **#107** nicht mehr — `pflegegrad/constants.ts` ist entfallen.
+
+Der Rückstand, den dieses Verzeichnis zuerst nur dokumentiert hat, ist damit
+behoben: Bis zum 16.09.2026 zeigte das Portal 332/573/765/947 Euro Pflegegeld
+und 125 Euro Entlastungsbetrag, also den Stand vor dem 01.01.2025.

@@ -12,13 +12,38 @@ export class SessionExpiredError extends Error {
   }
 }
 
+/**
+ * Baut aus einer fehlgeschlagenen Antwort einen Fehler mit dem Grund darin.
+ *
+ * Vorher warfen beide Funktionen einen festen Satz ohne Status und Code; in der
+ * Browserkonsole erschien `{}`. Man sah, DASS etwas scheiterte, aber weder
+ * Status noch Fehlerart — das kostete beim Speicherfehler vom 16.09.2026 die
+ * meiste Zeit.
+ *
+ * Der ausführliche Grund („Frageschlüssel ‚kochen' gehört nicht zu Modul 1")
+ * bleibt bewusst im Serverlog: Die API gibt nach außen nur eine allgemeine
+ * Meldung heraus. Hier landen deshalb Status und Code, nicht mehr.
+ */
+async function fehlerAusAntwort(res: Response, standardtext: string): Promise<Error> {
+  try {
+    const koerper = (await res.json()) as { error?: { code?: string; message?: string } };
+    const teile = [koerper.error?.code, koerper.error?.message].filter(Boolean);
+    if (teile.length > 0) {
+      return new Error(`${standardtext} (${res.status}, ${teile.join(': ')})`);
+    }
+  } catch {
+    // Kein JSON im Körper — dann bleibt es beim Standardtext samt Status.
+  }
+  return new Error(`${standardtext} (${res.status})`);
+}
+
 export async function loadModuleAnswers<T = Record<string, string>>(
   caseCode: string,
   moduleName: AssessmentModuleName
 ): Promise<T | null> {
   const res = await fetch(`/api/cases/${caseCode.toUpperCase()}/answers`);
   if (res.status === 401) throw new SessionExpiredError();
-  if (!res.ok) throw new Error('Antworten konnten nicht geladen werden.');
+  if (!res.ok) throw await fehlerAusAntwort(res, 'Antworten konnten nicht geladen werden');
 
   const data = (await res.json()) as Array<{ module_number: number; answers: T }>;
   const moduleNumber = ASSESSMENT_MODULES[moduleName];
@@ -41,7 +66,7 @@ export async function saveModuleAnswers(
     body: JSON.stringify({ moduleName, answers }),
   });
   if (res.status === 401) throw new SessionExpiredError();
-  if (!res.ok) throw new Error('Speichern der Modulantworten fehlgeschlagen.');
+  if (!res.ok) throw await fehlerAusAntwort(res, 'Speichern der Modulantworten fehlgeschlagen');
 }
 
 /**

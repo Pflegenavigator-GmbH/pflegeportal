@@ -82,3 +82,34 @@ describe('Pflegegrad Rechner - Schweregrad-Modell', () => {
     expect(knapp.trafficLight).toBe('rot');
   });
 });
+
+describe('Leistungsbeträge und Texte (#107)', () => {
+  it('liefert Schlüssel statt fertiger Sätze', () => {
+    const mitLeistung = calculatePflegegrad(createMockScores({ 4: 18 }), [], '2026-09-16');
+
+    expect(mitLeistung.benefits.additionalBenefits).toEqual(['pflegehilfsmittel', 'wohnumfeld']);
+    expect(mitLeistung.recommendations).toEqual(['schwerbehindertenausweis']);
+
+    const ohneLeistung = calculatePflegegrad(createMockScores({}), [], '2026-09-16');
+    expect(ohneLeistung.benefits.additionalBenefits).toEqual([]);
+    expect(ohneLeistung.recommendations).toEqual(['wiederholung']);
+  });
+
+  it('zahlt die Beträge der geltenden Fassung', () => {
+    // Modul 4 voll = 40 gewichtete Punkte = Pflegegrad 2.
+    const ergebnis = calculatePflegegrad(createMockScores({ 4: 18 }), [], '2026-09-16');
+
+    expect(ergebnis.careLevel).toBe(2);
+    expect(ergebnis.benefits.monthlyAmount).toBe(347);
+    expect(ergebnis.benefits.reliefBudget).toBe(131);
+  });
+
+  it('gibt für Pflegegrad 1 kein Pflegegeld aus', () => {
+    // 2,5 (M1) + 10 (M4) = 12,5 Punkte — genau die Schwelle zu Pflegegrad 1.
+    const ergebnis = calculatePflegegrad(createMockScores({ 1: 3, 4: 4 }), [], '2026-09-16');
+
+    expect(ergebnis.careLevel).toBe(1);
+    expect(ergebnis.benefits.monthlyAmount).toBe(0);
+    expect(ergebnis.benefits.reliefBudget).toBe(131);
+  });
+});

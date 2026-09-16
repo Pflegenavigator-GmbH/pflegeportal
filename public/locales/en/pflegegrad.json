@@ -385,6 +385,17 @@
       "hoechstwertZaehlt": "Only the higher of module 2 and 3 counts. This one counts.",
       "hoechstwertZaehltNicht": "Only the higher of module 2 and 3 counts. This one does not count."
     },
+    "zusatz": {
+      "pflegehilfsmittel": "Consumable care aids: up to {betrag} per month (§ 40 (2) SGB XI)",
+      "wohnumfeld": "Home adaptation: grant of up to {betrag} per measure (§ 40 (4) SGB XI)"
+    },
+    "empfehlungenTitel": "Recommended next steps",
+    "empfehlungen": {
+      "schwerbehindertenausweis": "Check whether a severe disability pass may also apply. You apply for it at the pension office, independently of your care level.",
+      "wiederholung": "Repeat the assessment if health deteriorates. There is no waiting period before filing a new application."
+    },
+    "grenzbereichTitel": "Close to the threshold:",
+    "grenzbereichText": "Your result sits just below the next level. Keep a care diary before the assessment — it documents the actual effort on an ordinary day.",
     "moduleTitel": "Adjust module ratings",
     "moduleEditieren": "Click to edit",
     "fristenTitel": "Your deadlines",

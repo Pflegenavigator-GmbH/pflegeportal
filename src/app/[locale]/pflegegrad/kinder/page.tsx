@@ -44,7 +44,6 @@ import {
   saveModuleAnswers,
   SessionExpiredError,
 } from '@/src/lib/pflegegrad/client-api';
-import { NBA_CONFIG } from '@/src/lib/pflegegrad/constants';
 import { speichereErgebnis } from '@/src/lib/pflegegrad/ergebnis-storage';
 import {
   AgeGroup,
@@ -58,6 +57,7 @@ import {
   parseKinderModuleData,
   serializeKinderModuleData,
 } from '@/src/lib/pflegegrad/kinder-storage';
+import { leistungsbetraegeAm } from '@/src/lib/rechtsstand/rechtswerte';
 
 interface ChildInfo {
   name: string;
@@ -520,10 +520,11 @@ export default function KinderModusPage() {
               <CardFooter className="border-t border-white/5 p-4 bg-white/[0.01]">
                 <Button
                   onClick={() => {
-                    // Leistungsbeträge aus der zentralen Gesetzeskonfiguration
-                    // statt hartkodiert — bleibt bei Satzänderungen konsistent
-                    const benefits = NBA_CONFIG.BENEFITS[
-                      result.level as keyof typeof NBA_CONFIG.BENEFITS
+                    // Leistungsbeträge aus dem Rechtsstand-Katalog, in der
+                    // heute geltenden Fassung — samt Fundstelle und Prüfdatum
+                    // (#107, #138).
+                    const benefits = leistungsbetraegeAm(new Date())[
+                      result.level as 1 | 2 | 3 | 4 | 5
                     ] ?? { monthly: 0, relief: 0 };
                     // Über die Speicherschicht statt direkt: Sie bindet den
                     // Eintrag an den aktuellen Fall, damit ihn kein anderer

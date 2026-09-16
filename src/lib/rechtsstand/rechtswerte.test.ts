@@ -1,11 +1,17 @@
 // src/lib/rechtsstand/rechtswerte.test.ts
 import { describe, expect, it } from 'vitest';
 
-import { NBA_CONFIG } from '@/src/lib/pflegegrad/constants';
 import { MODULE_KRITERIEN, MODULE_WEIGHTS, PFLEGEGRAD_THRESHOLDS } from '@/src/lib/pflegegrad/nba';
+import { calculatePflegegrad } from '@/src/lib/pflegegrad/rechner';
 import { EILANTRAG_RECHTSGRUNDLAGEN, FRIST_DEFINITIONEN } from '@/src/lib/widerspruch/fristen';
 
-import { RECHTSWERTE, fassungen, rechtswertAm, ungeprüfteWerte } from './rechtswerte';
+import {
+  RECHTSWERTE,
+  fassungen,
+  leistungsbetraegeAm,
+  rechtswertAm,
+  ungeprüfteWerte,
+} from './rechtswerte';
 
 const ISO_DATUM = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -125,23 +131,31 @@ describe('Abgleich mit dem rechnenden Code', () => {
   });
 
   /**
-   * Dieser Test hält einen bekannten Rückstand fest, statt ihn zu verschweigen:
-   * Der Code zahlt die Beträge vor der Erhöhung zum 01.01.2025 aus. Sobald
-   * #107 ihn aktualisiert, schlägt der Test fehl — dann ist er zu löschen, und
-   * der normale Abgleich gegen die geltende Fassung tritt an seine Stelle.
+   * Der Rückstand aus #107 ist behoben: Bis zum 16.09.2026 zeigte das Portal
+   * die Beträge von vor 2025. Dieser Test hält fest, dass die Anzeige jetzt aus
+   * dem Katalog kommt — und zwar aus der zum Stichtag geltenden Fassung.
    */
-  it('Leistungsbeträge: der Code liegt nachweislich hinter dem geltenden Recht (#107)', () => {
-    const imCode = Object.fromEntries(
-      Object.entries(NBA_CONFIG.BENEFITS).map(([grad, betrag]) => [grad, betrag.monthly])
+  it('Leistungsbeträge stammen aus dem Katalog, in der zum Stichtag geltenden Fassung', () => {
+    const heute = calculatePflegegrad({ 4: 18 }, [], '2026-09-16');
+    const damals = calculatePflegegrad({ 4: 18 }, [], '2024-06-30');
+
+    expect(heute.careLevel).toBe(damals.careLevel);
+    expect(heute.benefits.monthlyAmount).toBe(
+      leistungsbetraegeAm('2026-09-16')[heute.careLevel as 1 | 2 | 3 | 4 | 5].monthly
     );
+    // Dieselbe Begutachtung, anderer Stichtag: der Betrag der damaligen Fassung.
+    expect(damals.benefits.monthlyAmount).toBe(
+      leistungsbetraegeAm('2024-06-30')[damals.careLevel as 1 | 2 | 3 | 4 | 5].monthly
+    );
+    expect(heute.benefits.monthlyAmount).not.toBe(damals.benefits.monthlyAmount);
+  });
 
-    const alteFassung = rechtswertAm('leistungen.pflegegeld', '2024-12-31')!;
-    const geltend = rechtswertAm('leistungen.pflegegeld', new Date())!;
+  it('gibt für Pflegegrad 1 kein Pflegegeld, aber den Entlastungsbetrag', () => {
+    const betraege = leistungsbetraegeAm('2026-09-16');
 
-    expect(imCode).toEqual(alteFassung.wert);
-    expect(imCode).not.toEqual(geltend.wert);
-    expect(NBA_CONFIG.BENEFITS[2].relief).toBe(125);
-    expect(rechtswertAm('leistungen.entlastungsbetrag', new Date())!.wert).toBe(131);
+    expect(betraege[1]).toEqual({ monthly: 0, relief: 131 });
+    expect(betraege[2]).toEqual({ monthly: 347, relief: 131 });
+    expect(betraege[5]).toEqual({ monthly: 990, relief: 131 });
   });
 });
 

@@ -16,7 +16,7 @@ import {
   CalendarClock,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState, use } from 'react';
 import { toast } from 'sonner';
 
@@ -45,6 +45,7 @@ import { logger } from '@/src/lib/logger';
 import { loadCaseResult, SessionExpiredError } from '@/src/lib/pflegegrad/client-api';
 import { entferneErgebnis } from '@/src/lib/pflegegrad/ergebnis-storage';
 import { KRITERIEN_GESAMT } from '@/src/lib/pflegegrad/nba';
+import { rechtswertAm } from '@/src/lib/rechtsstand/rechtswerte';
 import { berechneFristen } from '@/src/lib/widerspruch/fristen';
 import { PflegegradErgebnis, EinstufungAmpel } from '@/src/types/pflegegrad';
 
@@ -63,7 +64,24 @@ const MVP_PRODUCTS = [
 export default function ErgebnisPage(props: PageProps) {
   const tMeldung = useTranslations('pflegegrad.meldungen');
   const t = useTranslations('pflegegrad.ergebnis');
+  const formatiere = useFormatter();
   const router = useRouter();
+
+  /** Beträge in der Schreibweise der jeweiligen Sprache, ohne Nachkommastellen. */
+  const euro = (betrag: number) =>
+    formatiere.number(betrag, {
+      style: 'currency',
+      currency: 'EUR',
+      maximumFractionDigits: 0,
+    });
+
+  /**
+   * Die Beträge der Zusatzleistungen stehen im Rechtsstand-Katalog, nicht im
+   * Text — sonst müsste man bei einer Gesetzesänderung die Sprachdateien
+   * durchsuchen (#107, #138).
+   */
+  const zusatzBetrag = (leistung: 'pflegehilfsmittel' | 'wohnumfeld') =>
+    (rechtswertAm(`leistungen.${leistung}`, new Date())?.wert as number | undefined) ?? 0;
   const params = use(props.params);
   const locale = params?.locale || 'de';
 
@@ -330,7 +348,7 @@ export default function ErgebnisPage(props: PageProps) {
                   <span className="text-xs text-[var(--color-text-muted)]">
                     {t('pflegegeldLabel')}
                   </span>
-                  <p className="text-2xl font-bold">{ergebnis.benefits.monthlyAmount} €</p>
+                  <p className="text-2xl font-bold">{euro(ergebnis.benefits.monthlyAmount)}</p>
                   <p className="text-[10px] text-[var(--color-text-faint)] mt-1">
                     {t('pflegegeldHinweis')}
                   </p>
@@ -339,7 +357,7 @@ export default function ErgebnisPage(props: PageProps) {
                   <span className="text-xs text-[var(--color-text-muted)]">
                     {t('entlastungLabel')}
                   </span>
-                  <p className="text-2xl font-bold">{ergebnis.benefits.reliefBudget} €</p>
+                  <p className="text-2xl font-bold">{euro(ergebnis.benefits.reliefBudget)}</p>
                   <p className="text-[10px] text-[var(--color-text-faint)] mt-1">
                     {t('entlastungHinweis')}
                   </p>
@@ -371,7 +389,9 @@ export default function ErgebnisPage(props: PageProps) {
                 <span className="text-xs text-[var(--color-text-muted)]">
                   {t('pg1EntlastungLabel')}
                 </span>
-                <p className="text-2xl font-bold text-white">{ergebnis.benefits.reliefBudget} €</p>
+                <p className="text-2xl font-bold text-white">
+                  {euro(ergebnis.benefits.reliefBudget)}
+                </p>
                 <p className="text-[11px] text-[var(--color-text-muted)] mt-1.5 leading-relaxed">
                   {t('pg1Text')}
                 </p>
@@ -432,13 +452,13 @@ export default function ErgebnisPage(props: PageProps) {
               {t('zusatzTitel')}
             </h4>
             <div className="grid gap-2 sm:grid-cols-2">
-              {ergebnis.benefits.additionalBenefits.map((benefit, idx) => (
+              {ergebnis.benefits.additionalBenefits.map((benefit) => (
                 <div
-                  key={idx}
+                  key={benefit}
                   className="p-3 bg-[var(--surface-hairline)] border border-[var(--border-faint)] rounded-xl text-xs text-[var(--color-text-subtle)] flex items-center gap-2"
                 >
                   <CheckCircle2 className="w-4 h-4 text-[var(--color-accent)] flex-shrink-0" />
-                  <span>{benefit}</span>
+                  <span>{t(`zusatz.${benefit}`, { betrag: euro(zusatzBetrag(benefit)) })}</span>
                 </div>
               ))}
             </div>

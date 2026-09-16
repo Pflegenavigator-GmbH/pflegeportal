@@ -23,10 +23,11 @@
  *     eine Prüfung älter als ein Jahr ist. Das ist der jährliche Termin aus
  *     #138, nur ohne Kalendereintrag, den niemand liest.
  *
- * Die Werte stehen weiterhin dort, wo gerechnet wird (`nba.ts`, `fristen.ts`,
- * `constants.ts`); der Katalog ist die Stelle, an der man sie ohne Suche
- * durchgeht. `rechtswerte.test.ts` gleicht beide Seiten ab, damit sie nicht
- * auseinanderlaufen.
+ * Schwellen und Gewichte stehen weiterhin dort, wo gerechnet wird (`nba.ts`,
+ * `fristen.ts`); der Katalog ist die Stelle, an der man sie ohne Suche
+ * durchgeht, und `rechtswerte.test.ts` gleicht beide Seiten ab. Die
+ * Leistungsbeträge kommen seit #107 ausschließlich von hier — `constants.ts`
+ * mit seiner zweiten Tabelle gibt es nicht mehr.
  */
 
 /** Art der Prüfung — der Unterschied entscheidet, worauf man sich berufen kann. */
@@ -205,7 +206,7 @@ export const RECHTSWERTE: readonly Rechtswert[] = [
     quelle: `${GESETZE_IM_INTERNET}/sgb_11/__37.html`,
     geprueft: null,
     hinweis:
-      'Diese Fassung setzt der Code ein (`NBA_CONFIG.BENEFITS`), mit dem Kommentar „Gesetzlicher Satz 2026". Sie ist seit dem 01.01.2025 überholt — siehe nächste Fassung. `gueltigAb` ist hier eine Annahme, kein Beleg; die Aktualisierung ist #107.',
+      'Historische Fassung. Bis zum 16.09.2026 zeigte das Portal diese Beträge, mit dem Kommentar „Gesetzlicher Satz 2026" (#107). `gueltigAb` ist eine Annahme aus dem damaligen Code, kein Beleg — die Zeile steht nur noch für die Historie.',
   },
   {
     schluessel: 'leistungen.pflegegeld',
@@ -217,7 +218,7 @@ export const RECHTSWERTE: readonly Rechtswert[] = [
     quelle: `${GESETZE_IM_INTERNET}/sgb_11/__37.html`,
     geprueft: NORMTEXT_16_09_2026,
     hinweis:
-      'GELTENDES RECHT, vom Code noch nicht übernommen. Bekanntmachung vom 14.11.2024; gilt im Jahr 2026 unverändert fort — die Erhöhung um 4,5 Prozent zum 01.01.2025 war die erste Dynamisierung, die nächste folgt nach § 30 SGB XI zum 01.01.2028 und danach im Dreijahresrhythmus. Die Umstellung ist #107 — erst danach zeigt das Portal die richtigen Beträge.',
+      'Bekanntmachung vom 14.11.2024; gilt im Jahr 2026 unverändert fort — die Erhöhung um 4,5 Prozent zum 01.01.2025 war die erste Dynamisierung, die nächste folgt nach § 30 SGB XI zum 01.01.2028 und danach im Dreijahresrhythmus. Die Umstellung ist #107 — erst danach zeigt das Portal die richtigen Beträge.',
   },
   {
     schluessel: 'leistungen.entlastungsbetrag',
@@ -229,7 +230,7 @@ export const RECHTSWERTE: readonly Rechtswert[] = [
     quelle: `${GESETZE_IM_INTERNET}/sgb_11/__45b.html`,
     geprueft: null,
     hinweis:
-      'Diese Fassung setzt der Code ein. Seit dem 01.01.2025 überholt, siehe nächste Zeile; Umstellung ist #107.',
+      'Historische Fassung, bis zum 16.09.2026 im Code (#107). Seit dem 01.01.2025 überholt, siehe nächste Zeile.',
   },
   {
     schluessel: 'leistungen.entlastungsbetrag',
@@ -241,7 +242,30 @@ export const RECHTSWERTE: readonly Rechtswert[] = [
     quelle: `${GESETZE_IM_INTERNET}/sgb_11/__45b.html`,
     geprueft: NORMTEXT_16_09_2026,
     hinweis:
-      'GELTENDES RECHT, vom Code noch nicht übernommen — #107. Gilt im Jahr 2026 unverändert fort; nächste Dynamisierung zum 01.01.2028 (§ 30 SGB XI).',
+      'Gilt im Jahr 2026 unverändert fort; nächste Dynamisierung zum 01.01.2028 (§ 30 SGB XI).',
+  },
+  {
+    schluessel: 'leistungen.pflegehilfsmittel',
+    bezeichnung: 'Zum Verbrauch bestimmte Pflegehilfsmittel, monatlich',
+    wert: 42,
+    einheit: 'Euro je Monat',
+    gueltigAb: '2025-01-01',
+    fundstelle: '§ 40 Abs. 2 SGB XI',
+    quelle: `${GESETZE_IM_INTERNET}/sgb_11/__40.html`,
+    geprueft: NORMTEXT_16_09_2026,
+    hinweis: 'Stand vor #107: als Zeichenkette „Pflegehilfsmittel (42€)" im Rechner, ohne Beleg.',
+  },
+  {
+    schluessel: 'leistungen.wohnumfeld',
+    bezeichnung: 'Zuschuss je Maßnahme zur Verbesserung des Wohnumfeldes',
+    wert: 4180,
+    einheit: 'Euro je Maßnahme',
+    gueltigAb: '2025-01-01',
+    fundstelle: '§ 40 Abs. 4 SGB XI',
+    quelle: `${GESETZE_IM_INTERNET}/sgb_11/__40.html`,
+    geprueft: NORMTEXT_16_09_2026,
+    hinweis:
+      'Je Maßnahme und Person; leben mehrere Anspruchsberechtigte zusammen, ist der Gesamtbetrag je Maßnahme auf 16.720 Euro begrenzt.',
   },
   {
     schluessel: 'gdb.verguenstigungen.schwellen',
@@ -292,6 +316,40 @@ export function rechtswertAm(schluessel: string, stichtag: Date | string): Recht
       .filter((wert) => wert.gueltigAb <= tag)
       .at(-1) ?? null
   );
+}
+
+/** Leistungsbeträge je Pflegegrad, wie sie der Rechner ausgibt. */
+export interface Leistungsbetraege {
+  /** Pflegegeld, monatlich. */
+  monthly: number;
+  /** Entlastungsbetrag, monatlich. */
+  relief: number;
+}
+
+/**
+ * Die Leistungsbeträge in der Fassung, die zum Stichtag galt.
+ *
+ * Einzige Quelle für die Beträge, die das Portal anzeigt (#107). Vorher standen
+ * sie als eigene Tabelle in `pflegegrad/constants.ts` — mit dem Kommentar
+ * „Gesetzlicher Satz 2026" über Werten von vor 2025. Wer sie hier ändert,
+ * ändert damit die Anzeige; eine zweite Stelle gibt es nicht mehr.
+ *
+ * Pflegegrad 1 erhält kein Pflegegeld (§ 37 Abs. 1 SGB XI), aber den
+ * Entlastungsbetrag.
+ */
+export function leistungsbetraegeAm(
+  stichtag: Date | string
+): Record<1 | 2 | 3 | 4 | 5, Leistungsbetraege> {
+  const pflegegeld = rechtswertAm('leistungen.pflegegeld', stichtag)?.wert as
+    Record<string, number> | undefined;
+  const entlastung = rechtswertAm('leistungen.entlastungsbetrag', stichtag)?.wert as
+    number | undefined;
+
+  const grade = [1, 2, 3, 4, 5] as const;
+
+  return Object.fromEntries(
+    grade.map((grad) => [grad, { monthly: pflegegeld?.[grad] ?? 0, relief: entlastung ?? 0 }])
+  ) as Record<1 | 2 | 3 | 4 | 5, Leistungsbetraege>;
 }
 
 /** Einträge ohne Prüfvermerk — der ehrliche Rest, den jemand angehen muss. */
