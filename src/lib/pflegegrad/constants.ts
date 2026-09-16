@@ -3,6 +3,11 @@
 // Hinweis: Das Bewertungsmodell (Modulgewichte, Schweregrad-Stufung,
 // Pflegegrad-Schwellen) liegt jetzt zentral in src/lib/pflegegrad/nba.ts.
 // Hier verbleiben nur die gesetzlichen Leistungsbeträge.
+//
+// Rechtsstand: src/lib/rechtsstand/rechtswerte.ts, Schlüssel
+// `leistungen.pflegegeld` und `leistungen.entlastungsbetrag`. Dort steht auch,
+// dass diese Werte dem Stand vor dem 01.01.2025 entsprechen — die Umstellung
+// ist #107.
 
 export const NBA_CONFIG = {
   BENEFITS: {

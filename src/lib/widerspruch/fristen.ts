@@ -36,6 +36,9 @@
  *  - Die verkürzten Fristen standen hier als „eine bzw. zwei Wochen". Das
  *    Gesetz rechnet in Arbeitstagen: fünf nach § 18a Abs. 5, zehn nach
  *    § 18a Abs. 6 und 7. Eine Woche ist nicht dasselbe wie fünf Arbeitstage.
+ *
+ * Rechtsstand der Fristlängen und Fundstellen: src/lib/rechtsstand/rechtswerte.ts
+ * (Schlüssel `fristen.*`). Ein Test gleicht beide Seiten ab.
  */
 import { addDays, addMonths, differenceInDays, format } from 'date-fns';
 
