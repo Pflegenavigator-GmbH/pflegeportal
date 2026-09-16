@@ -21,6 +21,7 @@ import type briefe from '../../public/locales/de/briefe.json';
 import type common from '../../public/locales/de/common.json';
 import type emRente from '../../public/locales/de/em-rente.json';
 import type faq from '../../public/locales/de/faq.json';
+import type gdb from '../../public/locales/de/gdb.json';
 import type hilfe from '../../public/locales/de/hilfe.json';
 import type kombileistungen from '../../public/locales/de/kombileistungen.json';
 import type pflegegrad from '../../public/locales/de/pflegegrad.json';
@@ -48,6 +49,7 @@ interface Nachrichten {
   unterstuetzung: typeof unterstuetzung;
   'em-rente': typeof emRente;
   rechtliches: typeof rechtliches;
+  gdb: typeof gdb;
 }
 
 declare module 'next-intl' {

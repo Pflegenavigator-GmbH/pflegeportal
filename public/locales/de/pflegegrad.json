@@ -349,8 +349,6 @@
     },
     "lizenzPruefen": "Verifiziere aktive Lizenzrechte für Zusatzmodule…",
     "lizenzFehler": "Verbindungsfehler bei der Lizenzprüfung.",
-    "gdbPruefen": "Prüfe…",
-    "gdbRechner": "GdB-Rechner",
     "reset": {
       "titel": "Begutachtung neu beginnen?",
       "beschreibung": "Sie beantworten alle Fragen der sechs Module noch einmal von vorne. Ihre bisherigen Antworten werden dabei endgültig gelöscht und lassen sich nicht wiederherstellen.",
@@ -383,8 +381,6 @@
     "pdf": "PDF",
     "teilen": "Teilen",
     "briefe": "Briefe",
-    "gdbTitel": "Grad der Behinderung prüfen?",
-    "gdbText": "Erhalten Sie Steuerfreibeträge und Zusatzurlaub.",
     "seitenTitel": "Ihre NBA-Leistungsanalyse",
     "seitenUntertitel": "Ermittelt nach den Begutachtungs-Richtlinien",
     "zusammenfassung": "Zusammenfassung",

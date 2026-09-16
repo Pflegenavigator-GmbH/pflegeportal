@@ -349,8 +349,6 @@
     },
     "lizenzPruefen": "Verifying licence rights for add-on modules…",
     "lizenzFehler": "Connection error while checking the licence.",
-    "gdbPruefen": "Checking…",
-    "gdbRechner": "Disability degree calculator",
     "reset": {
       "titel": "Start the assessment again?",
       "beschreibung": "You will answer all questions from the six modules again from the beginning. Your previous answers will be permanently deleted and cannot be restored.",
@@ -383,8 +381,6 @@
     "pdf": "PDF",
     "teilen": "Share",
     "briefe": "Letters",
-    "gdbTitel": "Check your degree of disability?",
-    "gdbText": "You may be entitled to tax allowances and extra leave.",
     "seitenTitel": "Your NBA assessment results",
     "seitenUntertitel": "Determined according to the official assessment guidelines",
     "zusammenfassung": "Summary",
