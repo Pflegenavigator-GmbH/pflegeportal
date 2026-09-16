@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import {
   AMPEL_SCHWELLE_GELB,
   AMPEL_SCHWELLE_GRUEN,
+  EILANTRAG_RECHTSGRUNDLAGEN,
   ampelStatusFuerTage,
   berechneFristFuerTyp,
   berechneFristen,
@@ -21,8 +22,8 @@ describe('Fristangaben in Texten (#132)', () => {
    * ungenutzten Route `api/widerspruch` — kein Rechenfehler, sondern ein Text
    * neben einer richtigen Rechnung. Ein Test der Berechnung hätte ihn nie
    * gesehen. Gesperrt sind Wochenangaben in einer Zeile, die von Widerspruch,
-   * Klage oder Bescheid spricht. Echte Wochenfristen anderer Normen (etwa
-   * § 18 Abs. 3 SGB XI) bleiben erlaubt.
+   * Klage oder Bescheid spricht. Wochenangaben anderer Vorschriften bleiben
+   * erlaubt — etwa die 70 Euro je begonnener Woche aus § 18c Abs. 5 SGB XI.
    */
   it('keine Wochenangabe bei Widerspruchs- oder Klagefristen in Code und Übersetzungen', () => {
     const projekt = path.resolve(__dirname, '../../..');
@@ -46,6 +47,50 @@ describe('Fristangaben in Texten (#132)', () => {
                 (WOCHEN_DE.test(zeile) && BEZUG_DE.test(zeile)) ||
                 (WOCHEN_EN.test(zeile) && BEZUG_EN.test(zeile))
             )
+            .map(({ ort, zeile }) => `${ort}  ${zeile.trim()}`)
+        )
+    );
+
+    expect(fundstellen).toEqual([]);
+  });
+});
+
+describe('Normbezeichnungen der Bearbeitungsfristen (#133)', () => {
+  it('zitiert die geltende Gliederung: Frist in § 18c Abs. 1, Zuschlag in § 18c Abs. 5', () => {
+    expect(EILANTRAG_RECHTSGRUNDLAGEN.bearbeitungsfrist.gesetz).toBe('§ 18c Abs. 1 SGB XI');
+    expect(EILANTRAG_RECHTSGRUNDLAGEN.saeumniszuschlag.gesetz).toBe('§ 18c Abs. 5 SGB XI');
+  });
+
+  it('nennt die verkürzten Begutachtungsfristen in Arbeitstagen, nicht in Wochen', () => {
+    const { gesetz, text } = EILANTRAG_RECHTSGRUNDLAGEN.verkuerzteBegutachtung;
+
+    expect(gesetz).toBe('§ 18a Abs. 5 und 6 SGB XI');
+    expect(text).toMatch(/fünften Arbeitstag/);
+    expect(text).toMatch(/zehn Arbeitstagen/);
+    // „Eine Woche" ist nicht dasselbe wie fünf Arbeitstage — genau das stand hier.
+    expect(text).not.toMatch(/Wochen?\b/);
+  });
+
+  /**
+   * Quelltext-Sperre gegen die alte Gliederung. § 18 SGB XI regelt heute die
+   * Beauftragung der Gutachter; wer ihn für die Bearbeitungsfrist zitiert,
+   * zitiert eine Vorschrift, die etwas anderes sagt.
+   */
+  it('zitiert nirgends mehr § 18 Abs. 3 oder Abs. 3b SGB XI', () => {
+    const projekt = path.resolve(__dirname, '../../..');
+    const wurzeln = ['src', path.join('public', 'locales')];
+
+    const VERALTET = /§\s*18\s*(Abs\.\s*3b?|\(3b?\))\s*SGB\s*(XI|11)/i;
+
+    const fundstellen = wurzeln.flatMap((wurzel) =>
+      readdirSync(path.join(projekt, wurzel), { recursive: true, encoding: 'utf8' })
+        .filter((datei) => /\.(ts|tsx|json)$/.test(datei))
+        .filter((datei) => !/\.test\.(ts|tsx)$/.test(datei))
+        .flatMap((datei) =>
+          readFileSync(path.join(projekt, wurzel, datei), 'utf8')
+            .split('\n')
+            .map((zeile, index) => ({ zeile, ort: `${path.join(wurzel, datei)}:${index + 1}` }))
+            .filter(({ zeile }) => VERALTET.test(zeile))
             .map(({ ort, zeile }) => `${ort}  ${zeile.trim()}`)
         )
     );

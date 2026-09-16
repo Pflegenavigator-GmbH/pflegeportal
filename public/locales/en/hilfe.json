@@ -28,7 +28,7 @@
     },
     "dauer": {
       "frage": "How long does the application take?",
-      "antwort": "Once the application is received, the fund must issue a written decision within 25 working days. If it misses the deadline, it must pay €70 for each begun week of delay under § 18 (3b) SGB XI."
+      "antwort": "Once the application is received, the fund must issue a written decision within 25 working days (§ 18c (1) SGB XI). If it misses the deadline, it must pay €70 for each begun week of delay under § 18c (5) SGB XI."
     },
     "widerspruch": {
       "frage": "How does an appeal work?",
