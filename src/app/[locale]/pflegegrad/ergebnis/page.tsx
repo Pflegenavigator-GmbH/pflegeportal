@@ -44,6 +44,7 @@ import { useStripeCheckout } from '@/src/hooks/useStripeCheckout';
 import { logger } from '@/src/lib/logger';
 import { loadCaseResult, SessionExpiredError } from '@/src/lib/pflegegrad/client-api';
 import { entferneErgebnis } from '@/src/lib/pflegegrad/ergebnis-storage';
+import { KRITERIEN_GESAMT } from '@/src/lib/pflegegrad/nba';
 import { berechneFristen } from '@/src/lib/widerspruch/fristen';
 import { PflegegradErgebnis, EinstufungAmpel } from '@/src/types/pflegegrad';
 
@@ -298,6 +299,14 @@ export default function ErgebnisPage(props: PageProps) {
               <h4 className="text-sm font-bold text-gray-200">{t('erklaerungTitel')}</h4>
               <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
                 {t.rich('erklaerungText', { b: (inhalt) => <strong>{inhalt}</strong> })}
+              </p>
+              {/* Die Schwellen darüber sind amtlich, unsere Zahl ist es nicht —
+                  das muss im selben Atemzug stehen (#137). */}
+              <p className="text-xs text-amber-300/90 leading-relaxed">
+                {t('erklaerungHinweis', {
+                  erhoben: KRITERIEN_GESAMT.erhoben,
+                  amtlich: KRITERIEN_GESAMT.amtlich,
+                })}
               </p>
             </div>
           </div>
