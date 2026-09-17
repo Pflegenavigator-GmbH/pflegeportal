@@ -18,8 +18,10 @@
  * höchste Latenz.
  */
 
-/** Fallcode-Format, wie es die API erwartet (z.B. PF-1663-4638). */
-const FALLCODE_MUSTER = /^PF-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
+import { CASE_CODE_PATTERN } from '@/src/lib/case-code';
+
+/** Fallcode-Format — die eine Regel steht in `src/lib/case-code.ts` (#153). */
+const FALLCODE_MUSTER = CASE_CODE_PATTERN;
 
 /**
  * Gültigkeitsdauer eines Prüfergebnisses. Kurz genug, dass eine frische

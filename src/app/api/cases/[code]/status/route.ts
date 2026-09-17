@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireCaseSession } from '@/src/lib/api/case-auth';
 import { handleApiError } from '@/src/lib/api/error-handler';
 import { ValidationError, NotFoundError } from '@/src/lib/api/errors';
+import { istGueltigerFallcode } from '@/src/lib/case-code';
 import { createAdminSupabaseClient } from '@/src/lib/supabase/admin';
 
 export async function GET(
@@ -12,7 +13,7 @@ export async function GET(
 ) {
   const { code } = await params;
   try {
-    if (!code || !code.match(/^PF-[A-Z0-9]{4}-[A-Z0-9]{4}$/)) {
+    if (!istGueltigerFallcode(code)) {
       throw new ValidationError('Das eingegebene Fallcode-Format ist ungültig.');
     }
 
@@ -22,7 +23,7 @@ export async function GET(
     const { data: currentCase, error } = await supabase
       .from('cases')
       .select(
-        'id, case_code, status, billing_status, product_tier, access_unlocked_at, care_level_guess, total_score, traffic_light'
+        'id, status, billing_status, product_tier, access_unlocked_at, care_level_guess, total_score, traffic_light'
       )
       .eq('id', session.caseId)
       .single();
@@ -36,7 +37,9 @@ export async function GET(
       success: true,
       data: {
         id: currentCase.id,
-        caseCode: currentCase.case_code,
+        // Aus der geprüften Sitzung, nicht aus der Datenbank: Der Klartext
+        // steht dort nicht mehr (#153).
+        caseCode: session.caseCode,
         status: currentCase.status,
         billingStatus: currentCase.billing_status,
         productTier: currentCase.product_tier,

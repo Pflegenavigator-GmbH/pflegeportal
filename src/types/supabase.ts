@@ -6,7 +6,14 @@ export interface Database {
       cases: {
         Row: {
           id: string;
+          /**
+           * Klartext-Fallcode. Wird mit #153 entfernt, sobald der Backfill
+           * verifiziert ist — bis dahin steht die Spalte noch, wird aber von
+           * keiner Abfrage mehr benutzt. Gesucht wird über `case_code_hash`.
+           */
           case_code: string;
+          /** HMAC-SHA-256(CASE_CODE_PEPPER, normalisierter Code). */
+          case_code_hash: string | null;
           status: string;
           created_at: string;
           updated_at: string;
@@ -27,7 +34,8 @@ export interface Database {
         };
         Insert: {
           id?: string;
-          case_code: string;
+          case_code?: string;
+          case_code_hash?: string | null;
           status?: string;
           created_at?: string;
           updated_at?: string;
@@ -49,6 +57,7 @@ export interface Database {
         Update: {
           id?: string;
           case_code?: string;
+          case_code_hash?: string | null;
           status?: string;
           created_at?: string;
           updated_at?: string;

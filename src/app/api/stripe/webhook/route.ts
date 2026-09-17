@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
+import { berechneCaseCodeHash } from '@/src/lib/case-code-server';
 import { logger } from '@/src/lib/logger';
 import { stripe } from '@/src/lib/stripe/server';
 import { createAdminSupabaseClient } from '@/src/lib/supabase/admin';
@@ -112,7 +113,7 @@ export async function POST(req: NextRequest) {
       const { data: caseDb, error: caseError } = await supabase
         .from('cases')
         .select('id, billing_status')
-        .eq('case_code', upperCode)
+        .eq('case_code_hash', berechneCaseCodeHash(upperCode))
         .maybeSingle();
 
       if (caseError) throw caseError;
@@ -187,7 +188,7 @@ export async function POST(req: NextRequest) {
       const { error: updateError } = await supabase
         .from('cases')
         .update({ billing_status: 'expired' })
-        .eq('case_code', upperCode);
+        .eq('case_code_hash', berechneCaseCodeHash(upperCode));
 
       if (updateError) throw updateError;
 
