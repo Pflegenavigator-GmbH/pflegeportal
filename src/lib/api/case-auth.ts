@@ -2,13 +2,11 @@
 import { cookies } from 'next/headers';
 
 import { NotFoundError, UnauthorizedError, ValidationError } from '@/src/lib/api/errors';
+import { normalizeCaseCode } from '@/src/lib/case-code';
+import { berechneCaseCodeHash, gleicherFallcode } from '@/src/lib/case-code-server';
 import { createAdminSupabaseClient } from '@/src/lib/supabase/admin';
 
 const CASE_COOKIE = 'pf_case_code';
-
-// Bewusst permissiv (die Code-Generierung liegt in der DB-RPC create_case),
-// aber streng genug, um Injection-/Enumeration-Rauschen früh abzuweisen.
-const CASE_CODE_PATTERN = /^[A-Z0-9][A-Z0-9_-]{3,63}$/;
 
 export interface CaseSession {
   caseId: string;
@@ -25,16 +23,18 @@ export interface CaseSession {
  * in korrekte HTTP-Statuscodes (400/401/404) übersetzt.
  */
 export async function requireCaseSession(expectedCode: string): Promise<CaseSession> {
-  const cleanedCode = expectedCode.trim().toUpperCase();
+  const cleanedCode = normalizeCaseCode(expectedCode);
 
-  if (!CASE_CODE_PATTERN.test(cleanedCode)) {
+  if (!cleanedCode) {
     throw new ValidationError('Ungültiges Fallcode-Format.');
   }
 
   const cookieStore = await cookies();
-  const sessionCode = cookieStore.get(CASE_COOKIE)?.value?.trim().toUpperCase();
+  const sessionCode = normalizeCaseCode(cookieStore.get(CASE_COOKIE)?.value);
 
-  if (!sessionCode || sessionCode !== cleanedCode) {
+  // Vergleich in konstanter Zeit: Ein `===` bricht beim ersten abweichenden
+  // Zeichen ab und verrät über die Laufzeit, wie weit ein Rateversuch stimmte.
+  if (!sessionCode || !gleicherFallcode(sessionCode, cleanedCode)) {
     // Den angefragten Code NICHT in den Kontext legen: Der Kontext landet in
     // Laufzeit-Log und `system_logs.metadata` (Issue #145).
     throw new UnauthorizedError('Fall-Session fehlt oder passt nicht zum angeforderten Fall.', {
@@ -45,8 +45,8 @@ export async function requireCaseSession(expectedCode: string): Promise<CaseSess
   const supabase = createAdminSupabaseClient();
   const { data: currentCase, error } = await supabase
     .from('cases')
-    .select('id, case_code, billing_status, product_tier')
-    .eq('case_code', cleanedCode)
+    .select('id, billing_status, product_tier')
+    .eq('case_code_hash', berechneCaseCodeHash(cleanedCode))
     .single();
 
   if (error || !currentCase) {
@@ -56,7 +56,9 @@ export async function requireCaseSession(expectedCode: string): Promise<CaseSess
 
   return {
     caseId: currentCase.id,
-    caseCode: currentCase.case_code,
+    // Aus der Eingabe, nicht aus der Datenbank: Der Klartext wird dort nicht
+    // mehr gelesen (#153).
+    caseCode: cleanedCode,
     billingStatus: currentCase.billing_status,
     productTier: currentCase.product_tier,
     isUnlocked: currentCase.billing_status === 'paid' || currentCase.billing_status === 'free',

@@ -3,12 +3,13 @@
 
 import { cookies } from 'next/headers';
 
+import { normalizeCaseCode } from '@/src/lib/case-code';
+import { berechneCaseCodeHash } from '@/src/lib/case-code-server';
 import { logger } from '@/src/lib/logger';
 import { createAdminSupabaseClient } from '@/src/lib/supabase/admin';
 
 const CASE_COOKIE = 'pf_case_code';
 const BETA_ACCESS_MONTHS = 12;
-const CASE_CODE_PATTERN = /^[A-Z0-9][A-Z0-9_-]{3,63}$/;
 
 interface SessionStatus {
   /** Fall existiert in der DB und ist nicht abgelaufen → Session gültig */
@@ -22,7 +23,7 @@ interface SessionStatus {
 }
 
 export async function validateAndStoreSession(caseCode: string): Promise<SessionStatus> {
-  const cleanedCode = caseCode.trim().toUpperCase();
+  const cleanedCode = normalizeCaseCode(caseCode);
   // Den Fallcode an keiner Stelle protokollieren — er ist das Zugangsmittel
   // (Issue #145). Fallbezug im Log ist die case_id, sobald der Fall gefunden ist.
   logger.info('Validiere Fall-Session');
@@ -35,7 +36,7 @@ export async function validateAndStoreSession(caseCode: string): Promise<Session
     caseCode: null,
   });
 
-  if (!CASE_CODE_PATTERN.test(cleanedCode)) {
+  if (!cleanedCode) {
     logger.warn('Fallcode mit ungültigem Format abgelehnt');
     return denied('invalid_format');
   }
@@ -46,8 +47,8 @@ export async function validateAndStoreSession(caseCode: string): Promise<Session
 
     const { data: currentCase, error } = await supabase
       .from('cases')
-      .select('id, case_code, billing_status, access_activated_at, product_tier')
-      .eq('case_code', cleanedCode)
+      .select('id, billing_status, access_activated_at, product_tier')
+      .eq('case_code_hash', berechneCaseCodeHash(cleanedCode))
       .single();
 
     if (error || !currentCase) {
@@ -78,7 +79,7 @@ export async function validateAndStoreSession(caseCode: string): Promise<Session
         isUnlocked: false,
         isExpired: true,
         billingStatus: currentCase.billing_status,
-        caseCode: currentCase.case_code,
+        caseCode: cleanedCode,
       };
     }
 
@@ -86,7 +87,7 @@ export async function validateAndStoreSession(caseCode: string): Promise<Session
     // Das Cookie wird für JEDEN existierenden, nicht abgelaufenen Fall gesetzt —
     // auch bei billing_status 'pending'. Premium-Gates regeln die Seiten selbst
     // über isUnlocked (Paywall).
-    cookieStore.set(CASE_COOKIE, currentCase.case_code, {
+    cookieStore.set(CASE_COOKIE, cleanedCode, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
@@ -104,7 +105,7 @@ export async function validateAndStoreSession(caseCode: string): Promise<Session
       isUnlocked,
       isExpired: false,
       billingStatus: currentCase.billing_status,
-      caseCode: currentCase.case_code,
+      caseCode: cleanedCode,
     };
   } catch (err) {
     logger.error({ err }, 'Kritischer Fehler bei Session-Validierung');

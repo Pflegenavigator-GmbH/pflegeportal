@@ -3,6 +3,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { POST } from './route';
 
+vi.mock('server-only', () => ({}));
+
 // 1. Spies via hoisted deklarieren
 const { constructEventMock, supabaseFromMock, supabaseInsertMock, supabaseUpdateMock } = vi.hoisted(
   () => ({
@@ -93,7 +95,7 @@ describe('Stripe Webhook API Route', () => {
           payment_status: 'paid',
           amount_total: 4900,
           metadata: {
-            case_code: 'PFLEGE456',
+            case_code: 'PF-PFLG-0456',
             paket: 'standard_monthly',
           },
         },

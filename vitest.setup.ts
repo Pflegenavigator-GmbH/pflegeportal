@@ -5,6 +5,15 @@ import { vi } from 'vitest';
 // 1. Umgebungsvariablen global stubben
 vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://mock.supabase.co');
 vi.stubEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY', 'mock-key');
+// Ohne Pepper wirft die Ableitung des Fallcode-Suchschlüssels absichtlich
+// (#153). Für Tests genügt ein fester Wert — er muss nur lang genug sein.
+//
+// Bewusst als direkte Zuweisung statt `vi.stubEnv`: Mehrere Testdateien rufen
+// in ihrem `afterEach` `vi.unstubAllEnvs()` auf. Das hätte den Pepper mit
+// entfernt, und ab dem zweiten Test derselben Datei wäre jede Fallsuche an
+// einer Ausnahme gescheitert — mit einer Fehlermeldung, die nach einem
+// Datenbankproblem aussieht.
+process.env.CASE_CODE_PEPPER = 'test-pepper-mindestens-32-zeichen-lang!!';
 
 // 2. CookieStore-Mocking (da dies in fast allen Server-Supabase-Tests vorkommt)
 vi.mock('next/headers', () => ({
