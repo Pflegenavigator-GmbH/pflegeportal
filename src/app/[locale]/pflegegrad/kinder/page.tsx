@@ -36,6 +36,7 @@ import {
   RadioGroup,
   RadioGroupItem,
 } from '@/src/components/ui';
+import { useFallcode } from '@/src/hooks/useFallcode';
 import { useStripeCheckout } from '@/src/hooks/useStripeCheckout';
 import { ladeFreischaltung } from '@/src/lib/billing/entitlement';
 import { logger } from '@/src/lib/logger';
@@ -100,22 +101,17 @@ export default function KinderModusPage() {
   // in ihren Server-Routen.
   const [isUnlocked, setIsUnlocked] = useState(false);
 
-  const caseCode = typeof window !== 'undefined' ? localStorage.getItem('case_code') : null;
+  // Nur Anzeige (#135); ob ein Fall offen ist, entscheidet die Sitzung.
+  const caseCode = useFallcode();
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setHasMounted(true);
     }, 0);
 
-    if (!caseCode) {
-      toast.error(tMeldung('keineSitzung'));
-      router.push(`/${locale}/pflegegrad/start`);
-      return () => clearTimeout(timer);
-    }
-
     // 📥 Eventuell existierende Kinder-Antworten samt altersrelevanten
     // Stammdaten laden. Alte Datensätze ohne Metadaten bleiben kompatibel.
-    loadModuleAnswers<Record<string, unknown>>(caseCode, 'kinder')
+    loadModuleAnswers<Record<string, unknown>>('kinder')
       .then((storedData) => {
         if (storedData && Object.keys(storedData).length > 0) {
           const parsed = parseKinderModuleData(storedData, childInfo);
@@ -134,7 +130,7 @@ export default function KinderModusPage() {
         logger.info('Keine alten Antworten für den Kinder-Modus gefunden.');
       });
 
-    ladeFreischaltung(caseCode)
+    ladeFreischaltung()
       .then((freischaltung) => {
         setIsUnlocked(freischaltung.status === 'freigeschaltet');
       })
@@ -147,7 +143,7 @@ export default function KinderModusPage() {
     // childInfo ist nur der Fallback für alte Datensätze. Lokale Änderungen
     // dürfen diesen Initial-Ladevorgang nicht erneut auslösen.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseCode, locale, router, tMeldung]);
+  }, [locale, router, tMeldung]);
 
   const categories = getAssessmentCategories(childInfo.age);
   const totalQuestions = categories.reduce((sum, cat) => sum + cat.questions.length, 0);
@@ -176,15 +172,11 @@ export default function KinderModusPage() {
     if (currentCategory < categories.length - 1) {
       setCurrentCategory((prev) => prev + 1);
     } else {
-      // 🚀 SPEICHERN: kompletter Kinder-Antwortstand in einem atomaren Request
-      if (!caseCode) {
-        toast.error(tMeldung('keineSitzung'));
-        router.push(`/${locale}/pflegegrad/start`);
-        return;
-      }
-
+      // 🚀 SPEICHERN: kompletter Kinder-Antwortstand in einem atomaren Request.
+      // Ob die Sitzung trägt, meldet die API (401) — der Anzeigecode sagt
+      // darüber nichts (#135).
       try {
-        await saveModuleAnswers(caseCode, 'kinder', serializeKinderModuleData(childInfo, answers));
+        await saveModuleAnswers('kinder', serializeKinderModuleData(childInfo, answers));
       } catch (err) {
         if (err instanceof SessionExpiredError) {
           toast.error(tMeldung('sitzungAbgelaufen'));
@@ -213,7 +205,7 @@ export default function KinderModusPage() {
   };
 
   // 💳 Kinder-Dossier: zentraler Checkout-Hook (Beta-Paket)
-  const startStripeCheckout = () => triggerCheckout(caseCode, 'beta_special');
+  const startStripeCheckout = () => triggerCheckout('beta_special');
 
   if (!hasMounted) return null;
 

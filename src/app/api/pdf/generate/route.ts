@@ -15,7 +15,6 @@ export const runtime = 'nodejs';
 export const maxDuration = 60;
 
 interface PDFGenerateRequest {
-  caseCode?: string;
   html?: string;
   title?: string;
   footerText?: string;
@@ -24,34 +23,30 @@ interface PDFGenerateRequest {
 const MAX_HTML_BYTES = 1_000_000; // 1 MB Dokumenten-HTML ist mehr als genug
 
 export async function POST(request: NextRequest): Promise<Response> {
-  let upperCode: string | undefined;
-
   try {
     const body: PDFGenerateRequest = await request.json();
-    const { caseCode, html, footerText } = body;
+    const { html, footerText } = body;
 
-    if (!caseCode || !html) {
+    if (!html) {
       return NextResponse.json({ error: 'Parameter fehlen.' }, { status: 400 });
     }
     if (Buffer.byteLength(html, 'utf-8') > MAX_HTML_BYTES) {
       throw new ValidationError('Dokumenteninhalt überschreitet das Größenlimit.');
     }
 
-    upperCode = caseCode.toUpperCase();
-
     // ============================================================================
     // 🛡️ AUTORISIERUNG VOR ALLEM ANDEREN — auch vor dem Cache.
-    // Session-Cookie ist Pflicht (kein "optionaler" Check mehr) und der
-    // Billing-Status kommt direkt aus der Session-Prüfung.
+    // Der Fall kommt aus der Sitzung; einen Fallcode nimmt diese Route seit
+    // #135 nicht mehr entgegen.
     // ============================================================================
-    const session = await requireCaseSession(upperCode);
+    const session = await requireCaseSession();
 
     if (!session.isUnlocked) {
       return NextResponse.json({ error: 'Zahlung erforderlich.' }, { status: 402 });
     }
 
     // ============================================================================
-    // ⚡ RAM-Cache: Schlüssel ist inhaltsspezifisch (Fallcode + Content-Hash).
+    // ⚡ RAM-Cache: Schlüssel ist inhaltsspezifisch (case_id + Content-Hash).
     // Verhindert, dass z.B. ein anderes Dokument desselben Falls einen
     // veralteten oder falschen Treffer liefert.
     // ============================================================================
@@ -60,15 +55,14 @@ export async function POST(request: NextRequest): Promise<Response> {
       .update(footerText || '')
       .digest('hex')
       .slice(0, 16);
-    const cacheKey = `${upperCode}:${contentHash}`;
+    const cacheKey = `${session.caseId}:${contentHash}`;
 
     const cachedBuffer = pdfRamCache.get(cacheKey);
     if (cachedBuffer) {
-      return pdfResponse(cachedBuffer, upperCode, 'HIT');
+      return pdfResponse(cachedBuffer, 'HIT');
     }
 
     const fullHtml = buildStandardPdfHtml({
-      caseCode: upperCode,
       productTier: session.productTier || 'beta',
       contentHtml: html,
     });
@@ -78,18 +72,24 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     pdfRamCache.set(cacheKey, pdfBuffer);
 
-    return pdfResponse(pdfBuffer, upperCode, 'MISS');
+    return pdfResponse(pdfBuffer, 'MISS');
   } catch (error: unknown) {
     return handleApiError(error, 'api.pdf.generate.secure_dossier');
   }
 }
 
-function pdfResponse(buffer: Uint8Array, caseCode: string, cacheState: 'HIT' | 'MISS'): Response {
+/**
+ * Der Dateiname trägt seit #135 keinen Fallcode mehr: Der Client kennt ihn
+ * nicht mehr, und in der Datenbank steht seit #153 nur sein Hash. Ein Datum
+ * unterscheidet die Dateien im Download-Ordner ebenso gut.
+ */
+function pdfResponse(buffer: Uint8Array, cacheState: 'HIT' | 'MISS'): Response {
+  const datum = new Date().toISOString().slice(0, 10);
   return new Response(Buffer.from(buffer), {
     status: 200,
     headers: {
       'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="PflegeGutachten_${sanitizeFilename(caseCode)}.pdf"`,
+      'Content-Disposition': `attachment; filename="PflegeGutachten_${sanitizeFilename(datum)}.pdf"`,
       'Content-Length': buffer.length.toString(),
       'X-Cache': cacheState,
     },

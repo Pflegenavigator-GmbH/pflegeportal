@@ -14,6 +14,25 @@
  * Deshalb steht der Fallbezug hier IM Datum: Passt er nicht, gilt der Eintrag
  * als nicht vorhanden und wird entfernt. Ein gebrochenes Aufräumen führt dann
  * zu einem fehlenden Ergebnis statt zu einem falschen.
+ *
+ * ENTSCHEIDUNG vom 19.09.2026 zu Art. 9 DSGVO (#135)
+ *
+ * Der Pflegegrad ist ein Gesundheitsdatum. Er bleibt trotzdem im
+ * `localStorage`, aber unter drei Bedingungen:
+ *
+ *  1. **Er ist nicht die Wahrheit.** Die Ergebnisseite lädt den Pflegegrad
+ *     serverseitig berechnet (`loadCaseResult`). Der lokale Eintrag dient nur
+ *     der Kinder-Begutachtung und der Weiche auf der Startseite.
+ *  2. **Er ist an den Fallcode im Arbeitsspeicher gebunden.** Seit #135 lebt
+ *     der nur in der laufenden Browsersitzung. Nach einem Neuladen gibt es
+ *     also keinen passenden Bezug mehr — der Eintrag wird beim nächsten Lesen
+ *     entfernt statt ausgeliefert. Gesundheitsdaten überdauern damit
+ *     höchstens eine Sitzung des Browsers.
+ *  3. **Er verschwindet beim Schließen des Falls** (`clearCaseData`).
+ *
+ * Die Alternative wäre gewesen, gar nichts lokal abzulegen. Dagegen sprach,
+ * dass die Kinder-Begutachtung ihr Ergebnis sonst an den Server schicken
+ * müsste, bevor überhaupt feststeht, ob die Person es behalten will.
  */
 import { ERGEBNIS_KEY, getStoredCaseCode } from '@/src/lib/case-storage';
 

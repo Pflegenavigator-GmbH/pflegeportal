@@ -44,6 +44,7 @@
     "zurueck": "Back",
     "fall": {
       "keiner": "No case",
+      "geoeffnet": "Case open",
       "codeEingeben": "Enter case code",
       "pruefe": "Checking...",
       "oeffnen": "Open case",
@@ -52,7 +53,8 @@
       "kopiert": "Code copied",
       "wirdBeendet": "Closing...",
       "schliessen": "Close case",
-      "schliessenBestaetigung": "Do you really want to close the current case session?"
+      "schliessenBestaetigung": "Do you really want to close the current case session?",
+      "codeNichtVerfuegbar": "The case number is shown once — after a reload it is no longer visible here."
     },
     "fehler": {
       "abgelaufen": "This beta access expired after 12 months.",

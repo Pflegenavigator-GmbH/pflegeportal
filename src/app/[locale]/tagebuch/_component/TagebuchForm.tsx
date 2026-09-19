@@ -18,18 +18,12 @@ import {
 import { TagebuchEintrag, PflegeHelfer, SchlafQualitaet } from '@/src/types/tagebuch';
 
 export interface TagebuchFormProps {
-  caseCode: string;
   onSavedAction: () => void;
   entryToEdit: { key: string; data: TagebuchEintrag } | null;
   onCancelAction: () => void;
 }
 
-export function TagebuchForm({
-  caseCode,
-  onSavedAction,
-  entryToEdit,
-  onCancelAction,
-}: TagebuchFormProps) {
+export function TagebuchForm({ onSavedAction, entryToEdit, onCancelAction }: TagebuchFormProps) {
   const t = useTranslations('tagebuch.formular');
   // 🪄 REPARATUR: States direkt aus der Prop ableiten statt über einen useEffect
   const [datum, setDatum] = useState(() =>
@@ -65,8 +59,8 @@ export function TagebuchForm({
       const response = await fetch('/api/tagebuch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
-          caseCode,
           entryKey: entryToEdit?.key,
           payload: {
             date: datum,

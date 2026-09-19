@@ -6,11 +6,12 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-import { validateAndStoreSession } from '@/src/app/actions/case-session';
 import { PaywallModal } from '@/src/components/modal/PaywallModal';
 import { TagebuchPreviewModal } from '@/src/components/modal/TagebuchPreviewModal';
 import { Button } from '@/src/components/ui';
+import { useFallcode } from '@/src/hooks/useFallcode';
 import { useStripeCheckout } from '@/src/hooks/useStripeCheckout';
+import { ladeFreischaltung } from '@/src/lib/billing/entitlement';
 import { TagebuchData, TagebuchEintrag } from '@/src/types/tagebuch';
 
 interface GroupedEntries {
@@ -21,17 +22,17 @@ const MVP_PRODUCTS = [{ id: 'beta_special', name: 'Beta-Special (12 Monate)', pr
 
 export function TagebuchListe({
   entries,
-  caseCode,
   onRefresh,
   onSelect,
 }: {
   entries: TagebuchData;
-  caseCode: string;
   onRefresh: () => void;
   onSelect: (key: string, data: TagebuchEintrag) => void;
 }) {
   const t = useTranslations('tagebuch.liste');
   const { triggerCheckout } = useStripeCheckout();
+  /** Nur für die Anzeige in Vorschau und Paywall (#135). */
+  const fallcode = useFallcode();
   const [openMonths, setOpenMonths] = useState<string[]>([]);
   const [isExporting, setIsExporting] = useState(false);
 
@@ -54,8 +55,9 @@ export function TagebuchListe({
     e.stopPropagation();
     if (!confirm(t('loeschBestaetigung'))) return;
 
-    const res = await fetch(`/api/tagebuch?caseCode=${caseCode}&entryKey=${key}`, {
+    const res = await fetch(`/api/tagebuch?entryKey=${encodeURIComponent(key)}`, {
       method: 'DELETE',
+      credentials: 'include',
     });
     if (res.ok) {
       onRefresh();
@@ -69,10 +71,12 @@ export function TagebuchListe({
   const handlePdfExportInit = async () => {
     const toastId = toast.loading(t('lizenzPruefen'));
     try {
-      const status = await validateAndStoreSession(caseCode);
+      // Freischaltung über die Sitzung prüfen — ein Fallcode liegt im Browser
+      // nicht mehr (#135).
+      const freischaltung = await ladeFreischaltung({ erzwingeNeuladen: true });
       toast.dismiss(toastId);
 
-      if (!status.success || !status.isUnlocked) {
+      if (freischaltung.status !== 'freigeschaltet') {
         setShowPaywall(true);
       } else {
         setShowPreview(true);
@@ -91,10 +95,10 @@ export function TagebuchListe({
       const response = await fetch(`/api/pdf/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
-          caseCode: caseCode.toUpperCase(),
           documentType: 'tagebuch',
-          title: `Pflegetagebuch_Akte_${caseCode.toUpperCase()}`,
+          title: 'Pflegetagebuch',
         }),
       });
 
@@ -108,7 +112,7 @@ export function TagebuchListe({
     }
   };
 
-  const handleCheckoutSubmit = (paketId: string) => triggerCheckout(caseCode, paketId);
+  const handleCheckoutSubmit = (paketId: string) => triggerCheckout(paketId);
 
   return (
     <div className="space-y-3">
@@ -220,7 +224,7 @@ export function TagebuchListe({
       {showPreview && (
         <TagebuchPreviewModal
           entries={entries}
-          caseCode={caseCode}
+          caseCode={fallcode ?? ''}
           isDownloading={isExporting}
           onDownload={executePdfDownload}
           onClose={() => setShowPreview(false)}
@@ -229,7 +233,7 @@ export function TagebuchListe({
 
       {showPaywall && (
         <PaywallModal
-          caseCode={caseCode}
+          caseCode={fallcode ?? ''}
           isExpired={false}
           products={MVP_PRODUCTS}
           onCheckout={handleCheckoutSubmit}

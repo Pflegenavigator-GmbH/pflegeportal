@@ -26,9 +26,7 @@ describe('GET /api/cases/[code]/result', () => {
   });
 
   it('liefert das serverseitig berechnete Ergebnis ohne Route-seitige Mutation', async () => {
-    const response = await GET(new NextRequest('http://localhost/api/cases/PF-1234-5678/result'), {
-      params: Promise.resolve({ code: 'PF-1234-5678' }),
-    });
+    const response = await GET(new NextRequest('http://localhost/api/cases/PF-1234-5678/result'));
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({

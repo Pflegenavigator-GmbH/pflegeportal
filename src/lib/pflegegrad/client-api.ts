@@ -38,10 +38,10 @@ async function fehlerAusAntwort(res: Response, standardtext: string): Promise<Er
 }
 
 export async function loadModuleAnswers<T = Record<string, string>>(
-  caseCode: string,
   moduleName: AssessmentModuleName
 ): Promise<T | null> {
-  const res = await fetch(`/api/cases/${caseCode.toUpperCase()}/answers`);
+  // Kein Fallcode im Pfad: Der Fall kommt aus der Sitzung (#135).
+  const res = await fetch('/api/case/answers', { credentials: 'include' });
   if (res.status === 401) throw new SessionExpiredError();
   if (!res.ok) throw await fehlerAusAntwort(res, 'Antworten konnten nicht geladen werden');
 
@@ -56,13 +56,13 @@ export async function loadModuleAnswers<T = Record<string, string>>(
  * damit keine Eingaben verloren gehen.
  */
 export async function saveModuleAnswers(
-  caseCode: string,
   moduleName: AssessmentModuleName,
   answers: Record<string, string | number | boolean>
 ): Promise<void> {
-  const res = await fetch(`/api/cases/${caseCode.toUpperCase()}/answers`, {
+  const res = await fetch('/api/case/answers', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify({ moduleName, answers }),
   });
   if (res.status === 401) throw new SessionExpiredError();
@@ -73,8 +73,8 @@ export async function saveModuleAnswers(
  * Holt das serverseitig berechnete Pflegegrad-Ergebnis. Der Server ist die
  * einzige Wahrheit — es wird nichts mehr aus localStorage rekonstruiert.
  */
-export async function loadCaseResult(caseCode: string): Promise<PflegegradErgebnis> {
-  const res = await fetch(`/api/cases/${caseCode.toUpperCase()}/result`);
+export async function loadCaseResult(): Promise<PflegegradErgebnis> {
+  const res = await fetch('/api/case/result', { credentials: 'include' });
   if (res.status === 401) throw new SessionExpiredError();
   if (!res.ok) throw new Error('Ergebnis konnte nicht berechnet werden.');
 

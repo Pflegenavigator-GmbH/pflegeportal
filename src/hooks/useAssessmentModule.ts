@@ -67,21 +67,15 @@ export function useAssessmentModule({ moduleName, questionKeys, next }: UseAsses
   const [hasMounted, setHasMounted] = useState(false);
   const [antworten, setAntworten] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
-  const [caseCode] = useState<string | null>(() =>
-    typeof window !== 'undefined' ? localStorage.getItem('case_code') : null
-  );
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setHasMounted(true);
 
-    if (!caseCode) {
-      toast.error('Keine aktive Fall-Session gefunden. Bitte starten Sie neu.');
-      router.push(`/${localeStr}/pflegegrad/start`);
-      return;
-    }
-
-    loadModuleAnswers(caseCode, moduleName)
+    // Ob eine Sitzung besteht, entscheidet seit #135 der Server: Ein fehlender
+    // Fallcode im Browser ist kein Hinweis mehr, weil dort keiner mehr liegt.
+    // Eine ungültige Sitzung meldet die API mit 401.
+    loadModuleAnswers(moduleName)
       .then((gespeicherte) => {
         if (gespeicherte) setAntworten(gespeicherte);
       })
@@ -93,7 +87,7 @@ export function useAssessmentModule({ moduleName, questionKeys, next }: UseAsses
         }
         logger.info(`Keine Vorab-Daten für ${moduleName} gefunden.`);
       });
-  }, [caseCode, localeStr, router, moduleName]);
+  }, [localeStr, router, moduleName]);
 
   const setAntwort = (key: string, wert: string) =>
     setAntworten((prev) => ({ ...prev, [key]: wert }));
@@ -104,11 +98,10 @@ export function useAssessmentModule({ moduleName, questionKeys, next }: UseAsses
   const fortschritt = (questionKeys.filter((k) => antworten[k]).length / questionKeys.length) * 100;
 
   const speichernUndWeiter = async () => {
-    if (!caseCode) return;
     setLoading(true);
     try {
       // Nur die eigenen Fragen senden — siehe nurEigeneFragen.
-      await saveModuleAnswers(caseCode, moduleName, nurEigeneFragen(antworten, questionKeys));
+      await saveModuleAnswers(moduleName, nurEigeneFragen(antworten, questionKeys));
       toast.success('Fortschritt gespeichert.');
       router.push(next(localeStr));
     } catch (err) {
@@ -134,7 +127,6 @@ export function useAssessmentModule({ moduleName, questionKeys, next }: UseAsses
   return {
     locale: localeStr,
     hasMounted,
-    caseCode,
     antworten,
     setAntwort,
     loading,

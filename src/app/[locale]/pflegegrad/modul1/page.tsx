@@ -7,6 +7,7 @@ import { useMemo } from 'react';
 
 import { useAssessmentModule } from '@/src/hooks/useAssessmentModule';
 import { useBewertungen } from '@/src/hooks/useBewertungen';
+import { useFallcode } from '@/src/hooks/useFallcode';
 import { FRAGEN_MODUL_1_IDS } from '@/src/lib/pflegegrad/fragen';
 
 import { AssessmentModuleShell } from '../_components/AssessmentModuleShell';
@@ -21,6 +22,10 @@ export default function Modul1Page() {
     questionKeys: [...FRAGEN_MODUL_1_IDS],
     next: (l) => `/${l}/pflegegrad/modul2`,
   });
+
+  // Nur Anzeige: nach einem Neuladen leer, weil der Fallcode seit #135 allein
+  // im Arbeitsspeicher steht.
+  const fallcode = useFallcode();
 
   // Die IDs sind fachlich, die Texte kommen aus den Übersetzungen. Dank
   // `as const` prüft TypeScript die zusammengesetzten Schlüssel mit.
@@ -42,7 +47,7 @@ export default function Modul1Page() {
       weightLabel={t('weight')}
       icon={Accessibility}
       accentColor="#4a90e2"
-      caseCode={m.caseCode}
+      caseCode={fallcode}
       fortschritt={m.fortschritt}
       backHref={`/${m.locale}/pflegegrad/start`}
       backLabel={t('zurueck')}

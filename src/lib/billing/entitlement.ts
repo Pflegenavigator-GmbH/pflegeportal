@@ -10,18 +10,13 @@
  * schlimmstenfalls erscheint die Paywall verspätet oder überflüssig.
  * Deshalb darf dieser Wert nie als alleinige Zugriffsbedingung dienen.
  *
- * Abgefragt wird bewusst `/api/cases/[code]/status` (Session-Prüfung plus ein
+ * Abgefragt wird bewusst `/api/case/status` (Sitzungsprüfung plus ein
  * indizierter Select). Früher lief die Prüfung über einen Dummy-Aufruf an
  * `/api/pdf/generate` — der passierte bei freigeschalteten Fällen die
  * 402-Schranke und startete anschließend Headless Chrome für ein PDF, das
  * sofort verworfen wurde. Genau die zahlenden Nutzer trugen also die
  * höchste Latenz.
  */
-
-import { CASE_CODE_PATTERN } from '@/src/lib/case-code';
-
-/** Fallcode-Format — die eine Regel steht in `src/lib/case-code.ts` (#153). */
-const FALLCODE_MUSTER = CASE_CODE_PATTERN;
 
 /**
  * Gültigkeitsdauer eines Prüfergebnisses. Kurz genug, dass eine frische
@@ -37,53 +32,34 @@ export type Freischaltung =
   /** Prüfung nicht möglich (z.B. Netzfehler) — weder freigeben noch Paywall. */
   | { status: 'unbekannt' };
 
-interface CacheEintrag {
-  ergebnis: Freischaltung;
-  gueltigBis: number;
-}
-
 /**
- * Modulweiter Cache: lebt genau eine Seitensitzung lang und wird bei einem
- * vollständigen Seitenwechsel (z.B. Rückkehr aus dem Stripe-Checkout)
- * ohnehin neu aufgebaut.
- */
-const cache = new Map<string, CacheEintrag>();
-
-/**
- * Laufende Anfragen je Fallcode. Verhindert, dass mehrere gleichzeitige
- * Aktionen dieselbe Prüfung mehrfach anstoßen.
- */
-const laufendeAnfragen = new Map<string, Promise<Freischaltung>>();
-
-export function istGueltigerFallcode(code: string | null | undefined): code is string {
-  return typeof code === 'string' && FALLCODE_MUSTER.test(code.trim().toUpperCase());
-}
-
-/**
- * Verwirft zwischengespeicherte Ergebnisse.
+ * Zwischengespeichertes Ergebnis der laufenden Sitzung.
  *
- * @param caseCode Nur diesen Fall verwerfen; ohne Angabe den gesamten Cache.
+ * Seit #135 gibt es keinen Fallcode mehr im Client und damit auch nichts mehr
+ * zu unterscheiden: Ein Gerät hat genau eine Sitzung, also genau einen
+ * Freischaltungsstatus. Aus der früheren Map je Fallcode wird ein einzelner
+ * Eintrag.
  */
-export function verwerfeFreischaltung(caseCode?: string | null): void {
-  if (!caseCode) {
-    cache.clear();
-    laufendeAnfragen.clear();
-    return;
-  }
-  const schluessel = caseCode.trim().toUpperCase();
-  cache.delete(schluessel);
-  laufendeAnfragen.delete(schluessel);
+let gecached: { ergebnis: Freischaltung; gueltigBis: number } | null = null;
+
+/** Laufende Anfrage — verhindert, dass mehrere Aktionen dieselbe Prüfung anstoßen. */
+let laufendeAnfrage: Promise<Freischaltung> | null = null;
+
+/** Verwirft das zwischengespeicherte Ergebnis — etwa nach einer Zahlung. */
+export function verwerfeFreischaltung(): void {
+  gecached = null;
+  laufendeAnfrage = null;
 }
 
-async function frageStatusAb(fallcode: string): Promise<Freischaltung> {
+async function frageStatusAb(): Promise<Freischaltung> {
   try {
-    const antwort = await fetch(`/api/cases/${encodeURIComponent(fallcode)}/status`, {
+    const antwort = await fetch('/api/case/status', {
       credentials: 'include',
       headers: { Accept: 'application/json' },
     });
 
     if (!antwort.ok) {
-      // 401/403/404 bedeuten: kein nutzbarer Zugriff auf diesen Fall.
+      // 401/403/404 bedeuten: keine nutzbare Sitzung.
       // Serverfehler dagegen sagen nichts über den Zahlstatus aus.
       if (antwort.status >= 500) return { status: 'unbekannt' };
       return { status: 'gesperrt', grund: 'kein-fall' };
@@ -103,40 +79,31 @@ async function frageStatusAb(fallcode: string): Promise<Freischaltung> {
 }
 
 /**
- * Liefert den Freischaltungsstatus eines Falls — aus dem Cache, sofern frisch.
+ * Liefert den Freischaltungsstatus der aktuellen Sitzung — aus dem Cache,
+ * sofern frisch.
  *
  * Unentschiedene Ergebnisse (`unbekannt`) werden nicht zwischengespeichert,
  * damit eine vorübergehende Störung nicht für Minuten festgeschrieben wird.
  */
 export async function ladeFreischaltung(
-  caseCode: string | null | undefined,
   optionen: { erzwingeNeuladen?: boolean } = {}
 ): Promise<Freischaltung> {
-  if (!istGueltigerFallcode(caseCode)) {
-    return { status: 'gesperrt', grund: 'kein-fall' };
-  }
-
-  const fallcode = caseCode.trim().toUpperCase();
-
   if (!optionen.erzwingeNeuladen) {
-    const gecached = cache.get(fallcode);
     if (gecached && gecached.gueltigBis > Date.now()) return gecached.ergebnis;
-
-    const laufend = laufendeAnfragen.get(fallcode);
-    if (laufend) return laufend;
+    if (laufendeAnfrage) return laufendeAnfrage;
   }
 
-  const anfrage = frageStatusAb(fallcode)
+  const anfrage = frageStatusAb()
     .then((ergebnis) => {
       if (ergebnis.status !== 'unbekannt') {
-        cache.set(fallcode, { ergebnis, gueltigBis: Date.now() + FREISCHALTUNG_TTL_MS });
+        gecached = { ergebnis, gueltigBis: Date.now() + FREISCHALTUNG_TTL_MS };
       }
       return ergebnis;
     })
     .finally(() => {
-      laufendeAnfragen.delete(fallcode);
+      laufendeAnfrage = null;
     });
 
-  laufendeAnfragen.set(fallcode, anfrage);
+  laufendeAnfrage = anfrage;
   return anfrage;
 }

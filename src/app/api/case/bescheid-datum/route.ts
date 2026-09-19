@@ -1,4 +1,4 @@
-// src/app/api/cases/[code]/bescheid-datum/route.ts
+// src/app/api/case/bescheid-datum/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
 import { requireCaseSession } from '@/src/lib/api/case-auth';
@@ -19,11 +19,9 @@ interface BescheidDatumRequest {
  * Verbindliche Prüfinstanz: Die Validierung im Formular dient nur der
  * schnellen Rückmeldung und wird hier unabhängig wiederholt.
  */
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ code: string }> }) {
-  const { code } = await params;
-
+export async function PUT(request: NextRequest) {
   try {
-    const session = await requireCaseSession(code);
+    const session = await requireCaseSession();
     const body = (await request.json()) as BescheidDatumRequest;
 
     // Explizites Zurücksetzen erlauben — der Nutzer darf eine Fehleingabe
@@ -58,14 +56,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 /** Liefert das gespeicherte Bescheiddatum des Falls. */
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ code: string }> }
-) {
-  const { code } = await params;
-
+export async function GET(_request: NextRequest) {
   try {
-    const session = await requireCaseSession(code);
+    const session = await requireCaseSession();
 
     const supabase = createAdminSupabaseClient();
     const { data, error } = await supabase

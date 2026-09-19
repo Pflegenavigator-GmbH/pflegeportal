@@ -66,6 +66,12 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
   const t = useTranslations('common.header');
   const tA11y = useTranslations('common.accessibility');
   const [caseCode, setCaseCode] = useState<string | null>(null);
+  /**
+   * Ob ein Fall offen ist, weiß seit #135 nur der Server: Der Fallcode liegt
+   * nicht mehr im Browser, und das Sitzungscookie ist HttpOnly. `caseCode` ist
+   * reine Anzeige und nach einem Neuladen leer — die Sitzung besteht trotzdem.
+   */
+  const [sitzungOffen, setSitzungOffen] = useState(false);
   const [inputCode, setInputCode] = useState('');
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -79,7 +85,18 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
 
     window.addEventListener('storage', syncCaseCode);
     window.addEventListener(CASE_CODE_EVENT, syncCaseCode);
+
+    let abgebrochen = false;
+    fetch('/api/case/status', { credentials: 'include' })
+      .then((antwort) => {
+        if (!abgebrochen) setSitzungOffen(antwort.ok);
+      })
+      .catch(() => {
+        // Ohne Antwort keine Aussage — der Kopf zeigt dann „Kein Fall".
+      });
+
     return () => {
+      abgebrochen = true;
       window.removeEventListener('storage', syncCaseCode);
       window.removeEventListener(CASE_CODE_EVENT, syncCaseCode);
     };
@@ -96,10 +113,15 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
       if (session.success && session.isExpired) {
         toast.error(t('fehler.abgelaufen'));
       } else if (session.success) {
-        // Schreibt localStorage + feuert das Event → syncCaseCode aktualisiert den State
+        // Merkt den Code für die Anzeige (nur im Arbeitsspeicher) und feuert
+        // das Event → syncCaseCode aktualisiert den State.
         storeCaseCode(cleanedCode);
-        // Hard-Reload, damit Server Components das neue Cookie mitbekommen
-        window.location.reload();
+        setSitzungOffen(true);
+        // `router.refresh()` statt `location.reload()`: Ein vollständiges
+        // Neuladen würde den eben eingegebenen Code aus dem Arbeitsspeicher
+        // werfen, und die Kopfzeile zeigte trotz offener Sitzung keine
+        // Fallnummer mehr (#135).
+        router.refresh();
       } else {
         toast.error(t('fehler.codeUnbekannt'));
       }
@@ -289,8 +311,10 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
               <DropdownMenuTrigger asChild>
                 <div className={styles.caseBadge}>
                   <FolderLock className="w-4 h-4 flex-shrink-0" />
-                  <span className={`${styles.caseText} ${caseCode ? styles.caseTextActive : ''}`}>
-                    {caseCode ?? t('fall.keiner')}
+                  <span
+                    className={`${styles.caseText} ${sitzungOffen ? styles.caseTextActive : ''}`}
+                  >
+                    {caseCode ?? (sitzungOffen ? t('fall.geoeffnet') : t('fall.keiner'))}
                   </span>
                 </div>
               </DropdownMenuTrigger>
@@ -298,7 +322,7 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
                 className="w-64 bg-[#0a1c3a] border-white/10 text-white p-4"
                 align="end"
               >
-                {!caseCode ? (
+                {!sitzungOffen ? (
                   <div className="space-y-2">
                     <DropdownMenuLabel className="text-xs text-gray-400 p-0 font-bold">
                       {t('fall.codeEingeben')}
@@ -329,6 +353,15 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
+                        // Teilen braucht den Fallcode, und der lebt seit #135
+                        // nur im Arbeitsspeicher. Nach einem Neuladen ist er
+                        // weg — dann erklärt der Hinweis das, statt einen
+                        // leeren Dialog zu öffnen. Die dauerhafte Lösung ist
+                        // die Gerätekopplung (#143).
+                        if (!caseCode) {
+                          toast.info(t('fall.codeNichtVerfuegbar'));
+                          return;
+                        }
                         setIsShareModalOpen(true);
                         document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
                       }}
@@ -338,6 +371,10 @@ export default function AppHeaderChrome({ locale }: AppHeaderChromeProps) {
                     </button>
                     <DropdownMenuItem
                       onClick={() => {
+                        if (!caseCode) {
+                          toast.info(t('fall.codeNichtVerfuegbar'));
+                          return;
+                        }
                         navigator.clipboard.writeText(caseCode);
                         toast.success(t('fall.kopiert'));
                       }}

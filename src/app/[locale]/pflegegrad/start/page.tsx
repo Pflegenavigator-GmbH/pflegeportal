@@ -21,6 +21,7 @@ import {
 import { useStripeCheckout } from '@/src/hooks/useStripeCheckout';
 import { EREIGNISSE } from '@/src/lib/analytics/events';
 import { verfolge, verfolgeEinmalig } from '@/src/lib/analytics/track';
+import { ladeFreischaltung } from '@/src/lib/billing/entitlement';
 import { storeCaseCode } from '@/src/lib/case-storage';
 import { logger } from '@/src/lib/logger';
 import { hatErgebnisFuerAktuellenFall } from '@/src/lib/pflegegrad/ergebnis-storage';
@@ -68,23 +69,21 @@ export default function PflegegradStartPage(props: PageProps) {
   const { triggerCheckout, checkoutLoading } = useStripeCheckout();
 
   useEffect(() => {
-    if (searchParams.session_id && searchParams.check_code) {
-      const checkCode = searchParams.check_code.trim().toUpperCase();
-
-      validateAndStoreSession(checkCode).then((status) => {
-        if (!status.success) return;
-
-        // localStorage + Event → AppHeaderChrome aktualisiert sich sofort
-        storeCaseCode(checkCode);
+    if (searchParams.session_id) {
+      // Rückkehr aus dem Stripe-Checkout. Die Rücksprungadresse trägt seit
+      // #142 keinen Fallcode mehr — die Sitzung überlebt den Umweg über
+      // Stripe (Cookie mit SameSite=Lax) und sagt, welcher Fall gemeint ist.
+      ladeFreischaltung({ erzwingeNeuladen: true }).then((freischaltung) => {
+        const freigeschaltet = freischaltung.status === 'freigeschaltet';
 
         // Einmalig je Stripe-Sitzung: Ohne diesen Riegel zählt ein Reload den
         // Kauf erneut, denn session_id bleibt in der URL stehen, solange die
         // Freischaltung noch aussteht.
         verfolgeEinmalig(EREIGNISSE.kaufErfolgreich, searchParams.session_id ?? 'unbekannt', {
-          freigeschaltet: Boolean(status.isUnlocked),
+          freigeschaltet,
         });
 
-        if (status.isUnlocked) {
+        if (freigeschaltet) {
           toast.success(tMeldung('premiumFrei'));
           router.push(`/${locale}/pflegegrad/modul1`);
         } else {
@@ -194,7 +193,7 @@ export default function PflegegradStartPage(props: PageProps) {
     }
   };
 
-  const handleCheckout = (paketId: string) => triggerCheckout(caseCode, paketId);
+  const handleCheckout = (paketId: string) => triggerCheckout(paketId);
 
   return (
     <main className="min-h-screen bg-slate-900 py-12 px-4 text-white">

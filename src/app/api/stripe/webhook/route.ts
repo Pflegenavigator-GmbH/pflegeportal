@@ -59,9 +59,11 @@ export async function POST(req: NextRequest) {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
-    // Der Fallcode kommt hier noch aus den Stripe-Metadaten (Ablösung: #142).
-    // Er dient ausschließlich der Suche und wird an keiner Stelle protokolliert —
-    // Fallbezug im Log ist die case_id (Issue #145).
+    // Seit #142 steht die case_id in den Metadaten. Der Fallcode bleibt als
+    // Rückfall stehen, solange Checkout-Sitzungen aus der Zeit davor noch
+    // offen sein können; er wird ausschließlich zur Suche verwendet und
+    // nirgends protokolliert (Issue #145).
+    const caseId = session.metadata?.case_id;
     const caseCode = session.metadata?.case_code;
     const rohesPaket = session.metadata?.paket;
 
@@ -70,8 +72,8 @@ export async function POST(req: NextRequest) {
       'Verarbeite checkout.session.completed'
     );
 
-    if (!caseCode) {
-      logger.error({ sessionId: session.id }, 'Kein case_code in den Stripe-Metadaten gefunden');
+    if (!caseId && !caseCode) {
+      logger.error({ sessionId: session.id }, 'Weder case_id noch case_code in den Metadaten');
       return NextResponse.json({ error: 'Metadaten fehlen' }, { status: 400 });
     }
 
@@ -93,7 +95,6 @@ export async function POST(req: NextRequest) {
     }
 
     const validatedPaket = rohesPaket;
-    const upperCode = caseCode.toUpperCase();
     const dbProductTier = paketToTier(validatedPaket);
 
     try {
@@ -110,11 +111,12 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ received: true, idempotent: true }, { status: 200 });
       }
 
-      const { data: caseDb, error: caseError } = await supabase
-        .from('cases')
-        .select('id, billing_status')
-        .eq('case_code_hash', berechneCaseCodeHash(upperCode))
-        .maybeSingle();
+      const fallSuche = supabase.from('cases').select('id, billing_status');
+      const { data: caseDb, error: caseError } = await (
+        caseId
+          ? fallSuche.eq('id', caseId)
+          : fallSuche.eq('case_code_hash', berechneCaseCodeHash(caseCode!))
+      ).maybeSingle();
 
       if (caseError) throw caseError;
       if (!caseDb) throw new Error('Fall zu den Stripe-Metadaten nicht gefunden.');
@@ -172,23 +174,22 @@ export async function POST(req: NextRequest) {
     // Abo gekündigt oder nach fehlgeschlagenen Zahlungen beendet:
     // Zugang schließen, sonst bleibt der Fall dauerhaft 'paid'.
     const subscription = event.data.object as Stripe.Subscription;
+    const caseId = subscription.metadata?.case_id;
     const caseCode = subscription.metadata?.case_code;
 
-    if (!caseCode) {
+    if (!caseId && !caseCode) {
       logger.warn(
         { subscriptionId: subscription.id },
-        'subscription.deleted ohne case_code-Metadaten — ignoriert'
+        'subscription.deleted ohne Fallbezug in den Metadaten — ignoriert'
       );
-      return NextResponse.json({ received: true, ignored: 'no_case_code' }, { status: 200 });
+      return NextResponse.json({ received: true, ignored: 'kein_fallbezug' }, { status: 200 });
     }
 
-    const upperCode = caseCode.toUpperCase();
-
     try {
-      const { error: updateError } = await supabase
-        .from('cases')
-        .update({ billing_status: 'expired' })
-        .eq('case_code_hash', berechneCaseCodeHash(upperCode));
+      const abgelaufen = supabase.from('cases').update({ billing_status: 'expired' });
+      const { error: updateError } = await (caseId
+        ? abgelaufen.eq('id', caseId)
+        : abgelaufen.eq('case_code_hash', berechneCaseCodeHash(caseCode!)));
 
       if (updateError) throw updateError;
 

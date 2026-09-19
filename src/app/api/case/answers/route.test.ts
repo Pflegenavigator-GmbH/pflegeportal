@@ -33,13 +33,13 @@ describe('DELETE /api/cases/[code]/answers', () => {
 
   it('delegiert den Erwachsenen-Reset an die transaktionale Datenbankfunktion', async () => {
     const response = await DELETE(
-      new NextRequest('http://localhost/api/cases/PF-1234-5678/answers', { method: 'DELETE' }),
-      { params: Promise.resolve({ code: 'PF-1234-5678' }) }
+      new NextRequest('http://localhost/api/cases/PF-1234-5678/answers', { method: 'DELETE' })
     );
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ success: true });
-    expect(requireCaseSessionMock).toHaveBeenCalledWith('PF-1234-5678');
+    // Seit #135 ohne Argument: Der Fall kommt aus der Sitzung.
+    expect(requireCaseSessionMock).toHaveBeenCalledWith();
     expect(rpcMock).toHaveBeenCalledOnce();
     expect(rpcMock).toHaveBeenCalledWith('reset_adult_assessment', {
       p_case_id: 'case-uuid-1',
@@ -51,8 +51,7 @@ describe('DELETE /api/cases/[code]/answers', () => {
     rpcMock.mockResolvedValue({ error: databaseError });
 
     const response = await DELETE(
-      new NextRequest('http://localhost/api/cases/PF-1234-5678/answers', { method: 'DELETE' }),
-      { params: Promise.resolve({ code: 'PF-1234-5678' }) }
+      new NextRequest('http://localhost/api/cases/PF-1234-5678/answers', { method: 'DELETE' })
     );
 
     expect(response.status).toBe(500);

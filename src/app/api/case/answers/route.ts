@@ -1,4 +1,4 @@
-// src/api/cases/[code]/answers/route.ts
+// src/app/api/case/answers/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
 import { requireCaseSession } from '@/src/lib/api/case-auth';
@@ -64,13 +64,9 @@ function parseAnswersObject(input: unknown): Record<string, AnswerValue> {
   return Object.fromEntries(result) as Record<string, AnswerValue>;
 }
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ code: string }> }
-) {
-  const { code } = await params;
+export async function GET(_request: NextRequest) {
   try {
-    const session = await requireCaseSession(code);
+    const session = await requireCaseSession();
     const supabase = createAdminSupabaseClient();
 
     const { data, error } = await supabase
@@ -101,13 +97,9 @@ interface BulkAnswerPayload {
  * EIN atomarer Upsert ersetzt den kompletten Modulstand und eliminiert die
  * Race Condition der früheren parallelen Einzel-Requests.
  */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ code: string }> }
-) {
-  const { code } = await params;
+export async function POST(request: NextRequest) {
   try {
-    const session = await requireCaseSession(code);
+    const session = await requireCaseSession();
 
     let body: BulkAnswerPayload;
     try {
@@ -209,14 +201,9 @@ export async function POST(
  * das Bescheiddatum bleibt erhalten — es ist eine Tatsache aus der realen
  * Welt und hängt nicht an der Selbsteinschätzung.
  */
-export async function DELETE(
-  _request: NextRequest,
-  { params }: { params: Promise<{ code: string }> }
-) {
-  const { code } = await params;
-
+export async function DELETE(_request: NextRequest) {
   try {
-    const session = await requireCaseSession(code);
+    const session = await requireCaseSession();
     const supabase = createAdminSupabaseClient();
 
     const { error: resetFehler } = await supabase.rpc('reset_adult_assessment', {
