@@ -30,11 +30,21 @@ export default function Startseite() {
   const [hatAktiveSession, setHatAktiveSession] = useState(false);
 
   useEffect(() => {
-    const storedCode = typeof window !== 'undefined' ? localStorage.getItem('case_code') : null;
-    if (storedCode) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setHatAktiveSession(true);
-    }
+    // Ob ein Fall offen ist, weiß seit #135 nur der Server: Im Browser liegt
+    // kein Fallcode mehr, und das Sitzungscookie ist HttpOnly.
+    let abgebrochen = false;
+
+    fetch('/api/case/status', { credentials: 'include' })
+      .then((antwort) => {
+        if (!abgebrochen && antwort.ok) setHatAktiveSession(true);
+      })
+      .catch(() => {
+        // Kein Netz, keine Aussage — die Startseite zeigt dann den Normalfall.
+      });
+
+    return () => {
+      abgebrochen = true;
+    };
   }, []);
 
   const funktionen = [

@@ -16,15 +16,9 @@ import { TagebuchData, TagebuchEintrag } from '@/src/types/tagebuch';
 
 // GET: Abrufen aller Einträge eines Falls
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const caseCode = searchParams.get('caseCode');
-
-  if (!caseCode) {
-    return NextResponse.json({ error: 'Fallcode erforderlich' }, { status: 400 });
-  }
-
   try {
-    const session = await requireCaseSession(caseCode);
+    // Der Fall kommt aus der Sitzung, nicht aus einem Parameter (#135).
+    const session = await requireCaseSession();
     const supabase = createAdminSupabaseClient();
 
     const { data: existingRecord, error } = await supabase
@@ -44,21 +38,18 @@ export async function GET(request: NextRequest) {
 
 // POST: Hinzufügen oder Aktualisieren eines Eintrags im JSONB-Tree
 export async function POST(request: NextRequest) {
-  let caseCode: string | undefined;
   try {
     const body = (await request.json()) as {
-      caseCode?: string;
       entryKey?: string | null;
       payload?: TagebuchEintrag;
     };
-    caseCode = body.caseCode;
     const { entryKey, payload } = body;
 
-    if (!caseCode || !payload || !payload.date) {
+    if (!payload || !payload.date) {
       throw new ValidationError('Payload unvollständig.');
     }
 
-    const session = await requireCaseSession(caseCode);
+    const session = await requireCaseSession();
     const supabase = createAdminSupabaseClient();
 
     // Hole den bestehenden Tree
@@ -114,10 +105,9 @@ export async function POST(request: NextRequest) {
 // DELETE: Entfernen eines Eintrags aus dem JSONB-Tree
 export async function DELETE(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const caseCode = searchParams.get('caseCode');
   const entryKey = searchParams.get('entryKey');
 
-  if (!caseCode || !entryKey) {
+  if (!entryKey) {
     return NextResponse.json({ error: 'Parameter unvollständig' }, { status: 400 });
   }
 
@@ -127,7 +117,7 @@ export async function DELETE(request: NextRequest) {
       throw new ValidationError('Ungültiger Eintrags-Schlüssel.');
     }
 
-    const session = await requireCaseSession(caseCode);
+    const session = await requireCaseSession();
     const supabase = createAdminSupabaseClient();
 
     const { data: existingRecord } = await supabase

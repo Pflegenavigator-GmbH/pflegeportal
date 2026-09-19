@@ -1,23 +1,16 @@
-// src/app/api/cases/[code]/status/route.ts
+// src/app/api/case/status/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
 import { requireCaseSession } from '@/src/lib/api/case-auth';
 import { handleApiError } from '@/src/lib/api/error-handler';
-import { ValidationError, NotFoundError } from '@/src/lib/api/errors';
-import { istGueltigerFallcode } from '@/src/lib/case-code';
+import { NotFoundError } from '@/src/lib/api/errors';
 import { createAdminSupabaseClient } from '@/src/lib/supabase/admin';
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ code: string }> }
-) {
-  const { code } = await params;
+export async function GET(_request: NextRequest) {
   try {
-    if (!istGueltigerFallcode(code)) {
-      throw new ValidationError('Das eingegebene Fallcode-Format ist ungültig.');
-    }
-
-    const session = await requireCaseSession(code);
+    // Kein Fallcode mehr im Pfad und keine Formatprüfung: Der Fall ergibt sich
+    // aus der Sitzung (#135).
+    const session = await requireCaseSession();
 
     const supabase = createAdminSupabaseClient();
     const { data: currentCase, error } = await supabase
@@ -37,9 +30,9 @@ export async function GET(
       success: true,
       data: {
         id: currentCase.id,
-        // Aus der geprüften Sitzung, nicht aus der Datenbank: Der Klartext
-        // steht dort nicht mehr (#153).
-        caseCode: session.caseCode,
+        // Der Fallcode wird bewusst NICHT zurückgegeben: Serverseitig existiert
+        // er seit #153 nur noch als Hash, und die Sitzung kommt seit #135 ohne
+        // ihn aus.
         status: currentCase.status,
         billingStatus: currentCase.billing_status,
         productTier: currentCase.product_tier,

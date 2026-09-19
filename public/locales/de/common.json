@@ -44,6 +44,7 @@
     "zurueck": "Zurück",
     "fall": {
       "keiner": "Kein Fall",
+      "geoeffnet": "Fall geöffnet",
       "codeEingeben": "Fallcode eingeben",
       "pruefe": "Prüfe...",
       "oeffnen": "Akte öffnen",
@@ -52,7 +53,8 @@
       "kopiert": "Code kopiert",
       "wirdBeendet": "Wird beendet...",
       "schliessen": "Fall schließen",
-      "schliessenBestaetigung": "Möchten Sie die aktuelle Fall-Session wirklich schließen?"
+      "schliessenBestaetigung": "Möchten Sie die aktuelle Fall-Session wirklich schließen?",
+      "codeNichtVerfuegbar": "Die Fallnummer wird nur einmal angezeigt — nach dem Neuladen ist sie hier nicht mehr sichtbar."
     },
     "fehler": {
       "abgelaufen": "Dieser Beta-Zugang ist nach 12 Monaten abgelaufen.",

@@ -36,7 +36,8 @@ const rendereHook = () =>
 describe('useAssessmentModule — Speichern fremder Schlüssel', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    window.localStorage.setItem('case_code', 'PF-TEST-0001');
+    // Kein Fallcode mehr im Browser (#135): Die Sitzung trägt, die API
+    // entscheidet.
   });
 
   /**
@@ -64,7 +65,7 @@ describe('useAssessmentModule — Speichern fremder Schlüssel', () => {
       await result.current.speichernUndWeiter();
     });
 
-    expect(saveModuleAnswers).toHaveBeenCalledWith('PF-TEST-0001', 'modul1', {
+    expect(saveModuleAnswers).toHaveBeenCalledWith('modul1', {
       m1_1: '1',
       m1_2: '2',
       m1_3: '0',

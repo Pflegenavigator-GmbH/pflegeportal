@@ -78,6 +78,37 @@ export interface Database {
         };
         Relationships: [];
       };
+      case_sessions: {
+        Row: {
+          id: string;
+          case_id: string;
+          /** SHA-256 des Sitzungsnachweises — nie der Nachweis selbst (#135). */
+          token_hash: string;
+          created_at: string;
+          last_used_at: string;
+          expires_at: string;
+          revoked_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          case_id: string;
+          token_hash: string;
+          created_at?: string;
+          last_used_at?: string;
+          expires_at: string;
+          revoked_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          case_id?: string;
+          token_hash?: string;
+          created_at?: string;
+          last_used_at?: string;
+          expires_at?: string;
+          revoked_at?: string | null;
+        };
+        Relationships: [];
+      };
       answers: {
         Row: {
           id: string;

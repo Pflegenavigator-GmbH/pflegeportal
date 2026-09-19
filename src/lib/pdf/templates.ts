@@ -3,7 +3,6 @@
 import { Page } from 'puppeteer-core';
 
 interface BuildHtmlOptions {
-  caseCode: string;
   productTier: string;
   contentHtml: string;
 }
@@ -11,11 +10,7 @@ interface BuildHtmlOptions {
 /**
  * Erzeugt das standardisierte Corporate-Identity HTML-Skelett für Gutachten
  */
-export function buildStandardPdfHtml({
-  caseCode,
-  productTier,
-  contentHtml,
-}: BuildHtmlOptions): string {
+export function buildStandardPdfHtml({ productTier, contentHtml }: BuildHtmlOptions): string {
   return `
     <!DOCTYPE html>
     <html>
@@ -36,7 +31,7 @@ export function buildStandardPdfHtml({
     </head>
     <body>
       <div style="font-size: 10px; color: #64748b; text-align: right; font-family: monospace; margin-bottom: 20px;">
-        AKTE: ${caseCode.toUpperCase()} • TARIF: ${productTier.toUpperCase()}
+        TARIF: ${productTier.toUpperCase()}
       </div>
       ${contentHtml}
     </body>

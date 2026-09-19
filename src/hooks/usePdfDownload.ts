@@ -7,7 +7,6 @@ import { toast } from 'sonner';
 import { logger } from '@/src/lib/logger';
 
 interface DownloadOptions {
-  caseCode: string | null;
   elementId: string;
   documentTitle?: string;
   footerText?: string;
@@ -22,7 +21,6 @@ interface UsePdfDownloadReturn {
 }
 
 export function usePdfDownload({
-  caseCode,
   elementId,
   documentTitle,
   footerText,
@@ -32,12 +30,8 @@ export function usePdfDownload({
   const [showPaywall, setShowPaywall] = useState(false);
 
   const downloadPdf = useCallback(async () => {
-    if (!caseCode) {
-      logger.warn('PDF-Download ohne Fallcode abgebrochen');
-      toast.error('Kein gültiger Fallcode vorhanden.');
-      return;
-    }
-
+    // Kein Fallcode mehr nötig: Der Fall kommt aus der Sitzung, und ohne sie
+    // antwortet die Route mit 401 (#135).
     setLoadingPdf(true);
     const toastId = toast.loading('PDF-Dossier wird verschlüsselt generiert...');
     logger.info({ elementId }, 'Starte PDF-Generierungsprozess');
@@ -55,9 +49,8 @@ export function usePdfDownload({
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          caseCode: caseCode.toUpperCase(),
           html: htmlContent,
-          title: documentTitle || `Dokument_${caseCode.toUpperCase()}`,
+          title: documentTitle || 'Dokument',
           footerText: footerText || 'PflegeNavigator EU gUG',
         }),
       });
@@ -77,7 +70,7 @@ export function usePdfDownload({
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${documentTitle || 'Dokument'}_${caseCode.toUpperCase()}.pdf`;
+      link.download = `${documentTitle || 'Dokument'}.pdf`;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -91,7 +84,7 @@ export function usePdfDownload({
     } finally {
       setLoadingPdf(false);
     }
-  }, [caseCode, elementId, documentTitle, footerText, fallbackHtml]);
+  }, [elementId, documentTitle, footerText, fallbackHtml]);
 
   return { downloadPdf, loadingPdf, showPaywall, setShowPaywall };
 }

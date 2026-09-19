@@ -19,7 +19,6 @@ const ERLAUBTE_PAKETE = [
 type ErlaubtesPaket = (typeof ERLAUBTE_PAKETE)[number];
 
 interface CheckoutBody {
-  caseCode?: unknown;
   paket?: unknown;
   locale?: unknown;
 }
@@ -31,24 +30,21 @@ function isErlaubtesPaket(value: unknown): value is ErlaubtesPaket {
 export async function POST(req: Request) {
   try {
     const body = (await req.json()) as CheckoutBody;
-    const { caseCode, paket } = body;
+    const { paket } = body;
 
     // Den Fallcode nicht protokollieren (Issue #145); Fallbezug erst nach
     // requireCaseSession als case_id.
     logger.info({ paket }, 'Starte Checkout Session Erstellung');
 
-    if (typeof caseCode !== 'string' || caseCode.trim() === '' || !isErlaubtesPaket(paket)) {
-      logger.warn({ paket }, 'Validierung fehlgeschlagen: Pflichtparameter fehlen');
-      throw new ValidationError('Pflichtparameter caseCode oder paket fehlen oder sind ungültig.');
+    if (!isErlaubtesPaket(paket)) {
+      logger.warn({ paket }, 'Validierung fehlgeschlagen: unbekanntes Paket');
+      throw new ValidationError('Pflichtparameter paket fehlt oder ist ungültig.');
     }
 
-    // Der Fallcode allein genügt nicht: Ohne diese Prüfung könnte jeder, der
-    // einen fremden Code kennt, für diesen Fall einen Checkout auslösen und
-    // damit dessen Abrechnungszustand von außen anstoßen. `requireCaseSession`
-    // gleicht den Code gegen das HttpOnly-Cookie ab und liefert die caseId
-    // gleich mit — der spätere Existenz-Select entfällt dadurch.
-    const fallSession = await requireCaseSession(caseCode);
-    const upperCode = fallSession.caseCode;
+    // Der Fall kommt ausschließlich aus der Sitzung (#135). Vorher nahm die
+    // Route einen Fallcode entgegen; wer einen fremden Code kannte, konnte für
+    // diesen Fall einen Checkout auslösen.
+    const fallSession = await requireCaseSession();
     const locale = isValidLocale(body.locale) ? body.locale : 'de';
 
     const supabase = createAdminSupabaseClient();
@@ -139,7 +135,10 @@ export async function POST(req: Request) {
     const priceId = productDb.id;
     const isSubscription = paket.includes('monthly') || paket.includes('yearly');
     const baseUrl = getBaseUrl();
-    const metadata = { case_code: upperCode, paket };
+    // case_id statt case_code in den Metadaten (#142): Stripe ist ein
+    // Drittland-Verarbeiter, und der Fallcode war dort das Zugangsmittel im
+    // Klartext. Die case_id ist ohne die Datenbank wertlos.
+    const metadata = { case_id: fallSession.caseId, paket };
 
     // Erstellung der Stripe-Checkout-Session
     const session = await stripe.checkout.sessions.create({
@@ -147,7 +146,10 @@ export async function POST(req: Request) {
       line_items: [{ price: priceId, quantity: 1 }],
       mode: isSubscription ? 'subscription' : 'payment',
       allow_promotion_codes: true,
-      success_url: `${baseUrl}/${locale}/pflegegrad/start?session_id={CHECKOUT_SESSION_ID}&check_code=${encodeURIComponent(upperCode)}`,
+      // Kein Fallcode in der Rücksprungadresse (#142): Sie steht in
+      // Browserverlauf, Referrer und Server-Protokollen. Der Fall ergibt sich
+      // bei der Rückkehr aus der Sitzung.
+      success_url: `${baseUrl}/${locale}/pflegegrad/start?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/${locale}/pflegegrad/start?error=cancelled`,
       metadata,
       // Metadaten auch auf dem Abo selbst — nur so kann der Webhook bei

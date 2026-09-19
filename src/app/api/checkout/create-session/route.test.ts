@@ -68,19 +68,19 @@ describe('Create Session API Route', () => {
     supabaseEqMock.mockReturnThis();
     supabaseInMock.mockReturnThis();
 
-    // Standardfall: gültige Session zum angefragten Code.
-    requireCaseSessionMock.mockImplementation(async (code: string) => ({
+    // Standardfall: gültige Sitzung. Seit #135 nimmt requireCaseSession keinen
+    // Fallcode mehr entgegen — der Fall ergibt sich aus dem Sitzungscookie.
+    requireCaseSessionMock.mockResolvedValue({
       caseId: 'case-uuid-123',
-      caseCode: code.trim().toUpperCase(),
       billingStatus: 'free',
       productTier: null,
       isUnlocked: false,
-    }));
+    });
   });
 
-  it('weist einen fremden Fallcode ohne passende Session ab', async () => {
-    // Kernabsicherung aus #100: Wer den Code kennt, aber keine Session hat,
-    // darf für diesen Fall keinen Abrechnungsvorgang anstoßen.
+  it('weist eine Anfrage ohne gültige Sitzung ab', async () => {
+    // Kernabsicherung aus #100, verschärft durch #135: Ein Fallcode öffnet den
+    // Checkout gar nicht mehr — ohne Sitzung gibt es keinen Abrechnungsvorgang.
     const { UnauthorizedError } = await import('@/src/lib/api/errors');
     requireCaseSessionMock.mockRejectedValueOnce(
       new UnauthorizedError('Fall-Session fehlt oder passt nicht zum angeforderten Fall.')
@@ -88,7 +88,7 @@ describe('Create Session API Route', () => {
 
     const mockRequest = new Request('http://localhost/api/checkout/create-session', {
       method: 'POST',
-      body: JSON.stringify({ caseCode: 'PF-FREM-DCOD', paket: 'standard_monthly' }),
+      body: JSON.stringify({ paket: 'standard_monthly' }),
     });
 
     await POST(mockRequest);
@@ -103,7 +103,7 @@ describe('Create Session API Route', () => {
   it('sollte 400/Validierungsfehler auswerfen, wenn Parameter fehlen', async () => {
     const mockRequest = new Request('http://localhost/api/checkout/create-session', {
       method: 'POST',
-      body: JSON.stringify({ caseCode: '' }), // 'paket' fehlt komplett
+      body: JSON.stringify({}), // 'paket' fehlt komplett
     });
 
     await POST(mockRequest);
@@ -117,7 +117,7 @@ describe('Create Session API Route', () => {
   it('sollte abbrechen, wenn das Beta-Special-Limit von 1000 Plätzen voll ist', async () => {
     const mockRequest = new Request('http://localhost/api/checkout/create-session', {
       method: 'POST',
-      body: JSON.stringify({ caseCode: 'BETA123', paket: 'beta_special' }),
+      body: JSON.stringify({ paket: 'beta_special' }),
     });
 
     // 1. Einen spezifischen Mock für das verkettete .eq() nach dem .update() erstellen
@@ -160,7 +160,7 @@ describe('Create Session API Route', () => {
   it('sollte eine Subscription-Session für Standard-Pakete erstellen und URL zurückgeben', async () => {
     const mockRequest = new Request('http://localhost/api/checkout/create-session', {
       method: 'POST',
-      body: JSON.stringify({ caseCode: 'CASE999', paket: 'standard_monthly' }),
+      body: JSON.stringify({ paket: 'standard_monthly' }),
     });
 
     // Mocks für erfolgreichen Durchlauf orchestrieren

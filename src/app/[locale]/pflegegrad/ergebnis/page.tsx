@@ -39,6 +39,7 @@ import {
   DropdownMenuTrigger,
 } from '@/src/components/ui';
 import { useBescheidDatum } from '@/src/hooks/useBescheidDatum';
+import { useFallcode } from '@/src/hooks/useFallcode';
 import { usePdfDownload } from '@/src/hooks/usePdfDownload';
 import { useStripeCheckout } from '@/src/hooks/useStripeCheckout';
 import { logger } from '@/src/lib/logger';
@@ -91,27 +92,19 @@ export default function ErgebnisPage(props: PageProps) {
   const [resetDialogOffen, setResetDialogOffen] = useState(false);
   const [resetLaeuft, setResetLaeuft] = useState(false);
 
-  const [caseCode] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('case_code');
-    }
-    return null;
-  });
+  // Nur zur Anzeige: Nach einem Neuladen ist der Code weg — die Sitzung trägt
+  // trotzdem (#135).
+  const caseCode = useFallcode();
 
-  const {
-    bescheidDatum,
-    speichereBescheidDatum,
-    speichert: speichertDatum,
-  } = useBescheidDatum(caseCode);
+  const { bescheidDatum, speichereBescheidDatum, speichert: speichertDatum } = useBescheidDatum();
 
   // Fristen ergeben sich rein rechnerisch aus dem Bescheiddatum — kein
   // Serveraufruf nötig, die Anzeige folgt der Eingabe unmittelbar.
   const fristenUebersicht = useMemo(() => berechneFristen({ bescheidDatum }), [bescheidDatum]);
 
   const { downloadPdf, loadingPdf, showPaywall, setShowPaywall } = usePdfDownload({
-    caseCode,
     elementId: 'nba-analysis-content',
-    documentTitle: `PflegeGutachten_${caseCode?.toUpperCase()}`,
+    documentTitle: 'PflegeGutachten',
     footerText: 'PflegeNavigator EU gUG — Offizielles Orientierungsgutachten nach § 14 SGB XI',
     fallbackHtml: ergebnis
       ? `<h2>{t('zusammenfassung')}</h2><p>Errechneter Pflegegrad: ${ergebnis.careLevel}</p>`
@@ -122,17 +115,13 @@ export default function ErgebnisPage(props: PageProps) {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setHasMounted(true);
 
-    if (!caseCode) {
-      logger.warn('Keine aktive Fall-Session gefunden. Leite um.');
-      toast.error(tMeldung('keineSitzungKurz'));
-      router.push(`/${locale}/pflegegrad/start`);
-      return;
-    }
-
+    // Ob ein Fall offen ist, entscheidet die Sitzung, nicht der Browser: Der
+    // Server antwortet ohne sie mit 401, und der Fang unten leitet um (#135).
+    //
     // Server ist die einzige Wahrheit: Rohpunkte und Pflegegrad werden
     // serverseitig aus den gespeicherten Antworten berechnet — kein
     // localStorage, kein setTimeout-Lifecycle-Workaround mehr.
-    loadCaseResult(caseCode)
+    loadCaseResult()
       .then((berechnetesErgebnis) => {
         setErgebnis(berechnetesErgebnis);
       })
@@ -145,7 +134,7 @@ export default function ErgebnisPage(props: PageProps) {
         logger.error({ err }, 'Ergebnis konnte nicht geladen werden');
         toast.error(tMeldung('ergebnisFehler'));
       });
-  }, [caseCode, locale, router, tMeldung]);
+  }, [locale, router, tMeldung]);
 
   /**
    * Setzt die Begutachtung zurück.
@@ -156,11 +145,9 @@ export default function ErgebnisPage(props: PageProps) {
    * alten Antworten anschließend wieder vom Server.
    */
   const handleReEvaluateFromScratch = async () => {
-    if (!caseCode) return;
-
     setResetLaeuft(true);
     try {
-      const antwort = await fetch(`/api/cases/${caseCode.toUpperCase()}/answers`, {
+      const antwort = await fetch('/api/case/answers', {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -187,7 +174,7 @@ export default function ErgebnisPage(props: PageProps) {
     }
   };
 
-  const handleCheckoutSubmit = (paketId: string) => triggerCheckout(caseCode, paketId);
+  const handleCheckoutSubmit = (paketId: string) => triggerCheckout(paketId);
 
   if (!ergebnis) {
     return (
@@ -226,7 +213,7 @@ export default function ErgebnisPage(props: PageProps) {
   const aktuelleAmpel = ampelKonfig[ergebnis.trafficLight];
 
   const shareErgebnis = () => {
-    if (navigator.share && caseCode) {
+    if (navigator.share) {
       navigator
         .share({
           title: 'Pflegegrad-Orientierungswert',

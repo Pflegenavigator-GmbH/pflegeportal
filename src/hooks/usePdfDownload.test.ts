@@ -37,7 +37,6 @@ describe('usePdfDownload Hook', () => {
 
     const { result } = renderHook(() =>
       usePdfDownload({
-        caseCode: 'CASE123',
         elementId: 'test-content',
       })
     );
@@ -61,7 +60,6 @@ describe('usePdfDownload Hook', () => {
 
     const { result } = renderHook(() =>
       usePdfDownload({
-        caseCode: 'CASE123',
         elementId: 'test-content',
       })
     );

@@ -5,16 +5,19 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import { clearCaseSession, validateAndStoreSession } from '@/src/app/actions/case-session';
 import AppHeaderChrome from '@/src/components/navigation/AppHeaderChrome';
+import { clearCaseData, storeCaseCode } from '@/src/lib/case-storage';
 
 import common from '../../../public/locales/de/common.json';
 
 // 1. Next.js Navigation Hooks mocken
 const mockPush = vi.fn();
 const mockBack = vi.fn();
+const mockRefresh = vi.fn();
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
     push: mockPush,
     back: mockBack,
+    refresh: mockRefresh,
   }),
   usePathname: () => '/de/briefe', // Wir simulieren, dass wir nicht auf der Startseite sind
   // `useParams` braucht das per next/dynamic nachgeladene AccessShareModal.
@@ -69,9 +72,16 @@ const sitzung = (
 });
 
 describe('AppHeaderChrome Component', () => {
+  /** Antwort von `/api/case/status` — entscheidet, ob ein Fall offen ist (#135). */
+  const sitzungAntwort = (offen: boolean) =>
+    vi.fn().mockResolvedValue({ ok: offen, status: offen ? 200 : 401, json: async () => ({}) });
+
   beforeEach(() => {
     vi.clearAllMocks();
     window.localStorage.clear();
+    // Der Anzeige-Fallcode lebt seit #135 im Arbeitsspeicher des Moduls.
+    clearCaseData();
+    vi.stubGlobal('fetch', sitzungAntwort(false));
 
     // Navigation im Test unterbinden. `assign` gehört dazu — der Fall-Reset
     // nutzt window.location.assign, nicht den Router.
@@ -93,11 +103,20 @@ describe('AppHeaderChrome Component', () => {
     expect(screen.getByText('Kein Fall')).toBeInTheDocument();
   });
 
-  it('sollte den Fallcode aus dem LocalStorage direkt beim Laden anzeigen', () => {
-    window.localStorage.setItem('case_code', 'PF-BETA-2026');
+  it('zeigt den in dieser Browsersitzung eingegebenen Fallcode an', () => {
+    storeCaseCode('PF-BETA-2026');
     rendereHeader();
 
     expect(screen.getByText('PF-BETA-2026')).toBeInTheDocument();
+  });
+
+  it('zeigt bei offener Sitzung ohne bekannten Code „Fall geöffnet"', async () => {
+    // Nach einem Neuladen ist der Code weg, die Sitzung besteht weiter (#135).
+    vi.stubGlobal('fetch', sitzungAntwort(true));
+
+    rendereHeader();
+
+    expect(await screen.findByText('Fall geöffnet')).toBeInTheDocument();
   });
 
   it('sollte bei erfolgreicher Server-Validierung den Code speichern und die Seite neu laden', async () => {
@@ -118,9 +137,12 @@ describe('AppHeaderChrome Component', () => {
     expect(validateAndStoreSession).toHaveBeenCalledWith('PF-VALID-1234');
 
     await waitFor(() => {
-      expect(window.localStorage.getItem('case_code')).toBe('PF-VALID-1234');
-      // Hard-Reload, damit Server Components das neue Cookie sehen.
-      expect(window.location.reload).toHaveBeenCalled();
+      // Der Code landet nur im Arbeitsspeicher — und wird sofort angezeigt.
+      expect(screen.getByText('PF-VALID-1234')).toBeInTheDocument();
+      // `router.refresh()` statt Neuladen: Ein Reload würde den Code aus dem
+      // Arbeitsspeicher werfen (#135).
+      expect(mockRefresh).toHaveBeenCalled();
+      expect(window.location.reload).not.toHaveBeenCalled();
     });
   });
 
@@ -144,7 +166,10 @@ describe('AppHeaderChrome Component', () => {
   });
 
   it('sollte beim Schließen des Falls die Session serverseitig entwerten und lokal aufräumen', async () => {
-    window.localStorage.setItem('case_code', 'PF-DELETE-ME');
+    // Offene Sitzung UND bekannter Anzeigecode — nur dann bietet der Kopf das
+    // Schließen an (#135).
+    vi.stubGlobal('fetch', sitzungAntwort(true));
+    storeCaseCode('PF-DELETE-ME');
     // Gesundheitsbezogene Reste, die ein bewusstes Schließen nicht überleben
     // dürfen — auf einem geteilten Rechner läge sonst der Pflegegrad offen.
     window.localStorage.setItem('pflegegrad-ergebnis', '{"grad":3}');
@@ -157,14 +182,13 @@ describe('AppHeaderChrome Component', () => {
 
     rendereHeader();
 
-    fireEvent.click(screen.getByText('PF-DELETE-ME'));
-    fireEvent.click(screen.getByText('Fall schließen'));
+    fireEvent.click(await screen.findByText('PF-DELETE-ME'));
+    fireEvent.click(await screen.findByText('Fall schließen'));
 
     await waitFor(() => {
       // Das HTTP-only-Cookie kann nur der Server entwerten — ein reines
       // Aufräumen im localStorage würde die Sitzung offen lassen.
       expect(clearCaseSession).toHaveBeenCalled();
-      expect(window.localStorage.getItem('case_code')).toBeNull();
       expect(window.localStorage.getItem('pflegegrad-ergebnis')).toBeNull();
       expect(window.localStorage.getItem('widersprueche_pipeline')).toBeNull();
       expect(window.localStorage.getItem('pf-a11y')).toBe('{"contrast":"high"}');
@@ -174,16 +198,17 @@ describe('AppHeaderChrome Component', () => {
     });
   });
 
-  it('sollte den Fall behalten, wenn der Bestätigungsdialog abgelehnt wird', () => {
-    window.localStorage.setItem('case_code', 'PF-KEEP-ME');
+  it('sollte den Fall behalten, wenn der Bestätigungsdialog abgelehnt wird', async () => {
+    vi.stubGlobal('fetch', sitzungAntwort(true));
+    storeCaseCode('PF-KEEP-ME');
     vi.spyOn(window, 'confirm').mockReturnValue(false);
 
     rendereHeader();
 
-    fireEvent.click(screen.getByText('PF-KEEP-ME'));
-    fireEvent.click(screen.getByText('Fall schließen'));
+    fireEvent.click(await screen.findByText('PF-KEEP-ME'));
+    fireEvent.click(await screen.findByText('Fall schließen'));
 
     expect(clearCaseSession).not.toHaveBeenCalled();
-    expect(window.localStorage.getItem('case_code')).toBe('PF-KEEP-ME');
+    expect(screen.getByText('PF-KEEP-ME')).toBeInTheDocument();
   });
 });
