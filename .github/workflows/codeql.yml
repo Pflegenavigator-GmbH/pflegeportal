@@ -4,12 +4,7 @@
 name: CodeQL
 
 on:
-  push:
-    branches: ["main", "develop"]
-  pull_request:
-    branches: ["main", "develop"]
-  schedule:
-    - cron: "22 18 * * 4"
+  workflow_dispatch:
 
 concurrency:
   group: codeql-${{ github.ref }}

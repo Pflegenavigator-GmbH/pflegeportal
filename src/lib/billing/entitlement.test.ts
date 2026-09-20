@@ -1,13 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  FREISCHALTUNG_TTL_MS,
-  istGueltigerFallcode,
-  ladeFreischaltung,
-  verwerfeFreischaltung,
-} from './entitlement';
-
-const FALLCODE = 'PF-1663-4638';
+import { FREISCHALTUNG_TTL_MS, ladeFreischaltung, verwerfeFreischaltung } from './entitlement';
 
 /** Antwort des /status-Endpunkts nachbilden. */
 const antwort = (isUnlocked: boolean) =>
@@ -35,26 +28,18 @@ describe('Freischaltungs-Cache', () => {
     vi.unstubAllGlobals();
   });
 
-  it('erkennt gültige und ungültige Fallcodes', () => {
-    expect(istGueltigerFallcode(FALLCODE)).toBe(true);
-    expect(istGueltigerFallcode('pf-1663-4638')).toBe(true); // Groß-/Kleinschreibung egal
-    expect(istGueltigerFallcode('OFFLINE_WD')).toBe(false);
-    expect(istGueltigerFallcode(null)).toBe(false);
-    expect(istGueltigerFallcode('')).toBe(false);
-  });
+  it('meldet ohne Sitzung "kein-fall" — der Server entscheidet das, nicht der Client', async () => {
+    fetchMock.mockResolvedValue(fehlerAntwort(401));
 
-  it('fragt ohne gültigen Fallcode gar nicht erst an', async () => {
-    const ergebnis = await ladeFreischaltung(null);
-
-    expect(ergebnis).toEqual({ status: 'gesperrt', grund: 'kein-fall' });
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(await ladeFreischaltung()).toEqual({ status: 'gesperrt', grund: 'kein-fall' });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it('liefert freigeschaltet und fragt beim zweiten Mal aus dem Cache', async () => {
     fetchMock.mockResolvedValue(antwort(true));
 
-    expect(await ladeFreischaltung(FALLCODE)).toEqual({ status: 'freigeschaltet' });
-    expect(await ladeFreischaltung(FALLCODE)).toEqual({ status: 'freigeschaltet' });
+    expect(await ladeFreischaltung()).toEqual({ status: 'freigeschaltet' });
+    expect(await ladeFreischaltung()).toEqual({ status: 'freigeschaltet' });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
@@ -62,7 +47,7 @@ describe('Freischaltungs-Cache', () => {
   it('meldet einen unbezahlten Fall als gesperrt', async () => {
     fetchMock.mockResolvedValue(antwort(false));
 
-    expect(await ladeFreischaltung(FALLCODE)).toEqual({
+    expect(await ladeFreischaltung()).toEqual({
       status: 'gesperrt',
       grund: 'nicht-bezahlt',
     });
@@ -72,9 +57,9 @@ describe('Freischaltungs-Cache', () => {
     fetchMock.mockResolvedValue(antwort(true));
 
     const ergebnisse = await Promise.all([
-      ladeFreischaltung(FALLCODE),
-      ladeFreischaltung(FALLCODE),
-      ladeFreischaltung(FALLCODE),
+      ladeFreischaltung(),
+      ladeFreischaltung(),
+      ladeFreischaltung(),
     ]);
 
     expect(ergebnisse.every((e) => e.status === 'freigeschaltet')).toBe(true);
@@ -83,10 +68,10 @@ describe('Freischaltungs-Cache', () => {
 
   it('fragt nach Ablauf der Gültigkeitsdauer erneut an', async () => {
     fetchMock.mockResolvedValue(antwort(true));
-    await ladeFreischaltung(FALLCODE);
+    await ladeFreischaltung();
 
     vi.setSystemTime(Date.now() + FREISCHALTUNG_TTL_MS + 1);
-    await ladeFreischaltung(FALLCODE);
+    await ladeFreischaltung();
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
@@ -94,19 +79,19 @@ describe('Freischaltungs-Cache', () => {
   it('erkennt eine zwischenzeitliche Zahlung nach dem Verwerfen', async () => {
     fetchMock.mockResolvedValueOnce(antwort(false)).mockResolvedValueOnce(antwort(true));
 
-    expect((await ladeFreischaltung(FALLCODE)).status).toBe('gesperrt');
+    expect((await ladeFreischaltung()).status).toBe('gesperrt');
 
-    verwerfeFreischaltung(FALLCODE);
+    verwerfeFreischaltung();
 
-    expect((await ladeFreischaltung(FALLCODE)).status).toBe('freigeschaltet');
+    expect((await ladeFreischaltung()).status).toBe('freigeschaltet');
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it('erzwingt auf Wunsch eine frische Prüfung', async () => {
     fetchMock.mockResolvedValue(antwort(true));
 
-    await ladeFreischaltung(FALLCODE);
-    await ladeFreischaltung(FALLCODE, { erzwingeNeuladen: true });
+    await ladeFreischaltung();
+    await ladeFreischaltung({ erzwingeNeuladen: true });
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
@@ -116,26 +101,29 @@ describe('Freischaltungs-Cache', () => {
 
     // Ein Ausfall darf zahlende Nutzer weder aussperren noch dauerhaft
     // festgeschrieben werden.
-    expect(await ladeFreischaltung(FALLCODE)).toEqual({ status: 'unbekannt' });
-    expect(await ladeFreischaltung(FALLCODE)).toEqual({ status: 'freigeschaltet' });
+    expect(await ladeFreischaltung()).toEqual({ status: 'unbekannt' });
+    expect(await ladeFreischaltung()).toEqual({ status: 'freigeschaltet' });
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it('behandelt einen Serverfehler als unbekannt, fehlenden Zugriff als gesperrt', async () => {
     fetchMock.mockResolvedValueOnce(fehlerAntwort(503));
-    expect(await ladeFreischaltung(FALLCODE)).toEqual({ status: 'unbekannt' });
+    expect(await ladeFreischaltung()).toEqual({ status: 'unbekannt' });
 
     verwerfeFreischaltung();
     fetchMock.mockResolvedValueOnce(fehlerAntwort(401));
-    expect(await ladeFreischaltung(FALLCODE)).toEqual({ status: 'gesperrt', grund: 'kein-fall' });
+    expect(await ladeFreischaltung()).toEqual({ status: 'gesperrt', grund: 'kein-fall' });
   });
 
-  it('hält Fälle getrennt', async () => {
-    const andererFall = 'PF-AAAA-BBBB';
+  it('kennt genau einen Status je Gerät', async () => {
+    // Vorher lag der Cache je Fallcode. Seit #135 hat ein Gerät genau eine
+    // Sitzung — ein zweiter Fall entsteht erst, wenn die Sitzung wechselt, und
+    // dann verwirft `verwerfeFreischaltung` den Eintrag.
     fetchMock.mockResolvedValueOnce(antwort(true)).mockResolvedValueOnce(antwort(false));
 
-    expect((await ladeFreischaltung(FALLCODE)).status).toBe('freigeschaltet');
-    expect((await ladeFreischaltung(andererFall)).status).toBe('gesperrt');
+    expect((await ladeFreischaltung()).status).toBe('freigeschaltet');
+    verwerfeFreischaltung();
+    expect((await ladeFreischaltung()).status).toBe('gesperrt');
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });

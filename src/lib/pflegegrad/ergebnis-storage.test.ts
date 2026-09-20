@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { ERGEBNIS_KEY, storeCaseCode } from '@/src/lib/case-storage';
+import { clearCaseData, ERGEBNIS_KEY, storeCaseCode } from '@/src/lib/case-storage';
 
 import {
   entferneErgebnis,
@@ -17,6 +17,10 @@ const ERGEBNIS = {
 
 describe('Ergebnis-Speicher (fallgebunden)', () => {
   beforeEach(() => {
+    localStorage.clear();
+    // Der Fallcode lebt seit #135 im Arbeitsspeicher des Moduls und übersteht
+    // ein `localStorage.clear()` — er muss eigens zurückgesetzt werden.
+    clearCaseData();
     localStorage.clear();
   });
 
@@ -35,8 +39,11 @@ describe('Ergebnis-Speicher (fallgebunden)', () => {
     speichereErgebnis(ERGEBNIS);
 
     // Fremden Fall setzen, ohne das übliche Aufräumen — simuliert einen
-    // künftigen Codepfad, der die Invariante bricht.
-    localStorage.setItem('case_code', 'PF-BBBB-2222');
+    // künftigen Codepfad, der die Invariante bricht. Der Eintrag im Speicher
+    // bleibt dabei absichtlich stehen.
+    const gemerkt = localStorage.getItem(ERGEBNIS_KEY);
+    storeCaseCode('PF-BBBB-2222');
+    localStorage.setItem(ERGEBNIS_KEY, gemerkt ?? '');
 
     expect(ladeErgebnis()).toBeNull();
     expect(hatErgebnisFuerAktuellenFall()).toBe(false);
@@ -45,7 +52,10 @@ describe('Ergebnis-Speicher (fallgebunden)', () => {
   it('entfernt einen fremden Eintrag beim Lesen (Selbstheilung)', () => {
     storeCaseCode('PF-AAAA-1111');
     speichereErgebnis(ERGEBNIS);
-    localStorage.setItem('case_code', 'PF-BBBB-2222');
+
+    const gemerkt = localStorage.getItem(ERGEBNIS_KEY);
+    storeCaseCode('PF-BBBB-2222');
+    localStorage.setItem(ERGEBNIS_KEY, gemerkt ?? '');
 
     ladeErgebnis();
 
@@ -53,8 +63,9 @@ describe('Ergebnis-Speicher (fallgebunden)', () => {
     expect(localStorage.getItem(ERGEBNIS_KEY)).toBeNull();
   });
 
-  it('speichert nichts ohne aktiven Fall', () => {
-    // Ein Ergebnis ohne Zuordnung wäre beim Lesen ohnehin wertlos.
+  it('speichert nichts ohne bekannten Fallcode', () => {
+    // Nach einem Neuladen ist der Code aus dem Arbeitsspeicher verschwunden
+    // (#135). Ein Ergebnis ohne Zuordnung wäre beim Lesen ohnehin wertlos.
     speichereErgebnis(ERGEBNIS);
 
     expect(localStorage.getItem(ERGEBNIS_KEY)).toBeNull();

@@ -62,7 +62,6 @@ jobs:
         run: |
           cp .env.example .env.local
           {
-            echo "BREVO_API_KEY=ci_dummy_key_123"
             echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_dummy"
             echo "STRIPE_SECRET_KEY=sk_test_dummy"
           } >> .env.local
@@ -99,7 +98,6 @@ jobs:
         run: |
           cp .env.example .env.local
           {
-            echo "BREVO_API_KEY=ci_dummy_key_123"
             echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_dummy"
             echo "STRIPE_SECRET_KEY=sk_test_dummy"
           } >> .env.local
@@ -268,7 +266,6 @@ jobs:
         run: |
           cp .env.example .env.local
           {
-            echo "BREVO_API_KEY=ci_dummy_key_123"
             echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_dummy"
             echo "STRIPE_SECRET_KEY=sk_test_dummy"
           } >> .env.local
@@ -315,7 +312,6 @@ jobs:
       SUPABASE_URL: https://test.supabase.co
       SUPABASE_SERVICE_ROLE_KEY: ci_dummy_service_role
       NEXT_PUBLIC_URL: http://localhost:3000
-      BREVO_API_KEY: ci_dummy_key_123
       NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_dummy
       STRIPE_SECRET_KEY: sk_test_dummy
     steps:

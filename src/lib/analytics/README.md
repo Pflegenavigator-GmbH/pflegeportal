@@ -28,11 +28,15 @@ Verbindung, kein Fehler. Das ist der Normalzustand in der Entwicklung.
 
 ## Die vier Zusicherungen
 
-Alle vier sind in `track.test.ts` und `consent.test.ts` abgedeckt:
+Abgedeckt in `Analytics.test.tsx`, `track.test.ts` und `consent.test.ts`:
 
 1. **Kein Skript ohne Einwilligung.** Die Analytics-Komponente rendert das
    `<Script>`-Element erst, wenn zugestimmt wurde. Vorher wird nichts geladen
-   und keine Verbindung aufgebaut.
+   und keine Verbindung aufgebaut. **Umami wird nirgends sonst eingebunden —
+   nie in einem Layout.** Ein Skript im Root-Layout umging die Einwilligung
+   bis zum 15.09.2026 auf jeder Seite (#154); `Analytics.test.tsx` sperrt
+   Umami-Adressen außerhalb von `Analytics.tsx` und `cloud.umami.is` in der
+   CSP.
 2. **Kein Ereignis ohne Einwilligung.** `verfolge()` prüft die Einwilligung bei
    jedem Aufruf erneut. Das ist die zweite Verteidigungslinie: Nach einem
    Widerruf bleibt das geladene Skript im Speicher, wird aber nie wieder
@@ -75,7 +79,7 @@ Einstiegsart, ja/nein-Flags.
 
 ## Rechtliches
 
-- **Rechtsgrundlage:** Art. 6 Abs. 1 lit. a DSGVO, § 25 Abs. 1 TTDSG.
+- **Rechtsgrundlage:** Art. 6 Abs. 1 lit. a DSGVO, § 25 Abs. 1 TDDDG (bis Mai 2024: TTDSG).
 - **Widerruf:** Art. 7 Abs. 3 DSGVO — erreichbar über „Cookie-Einstellungen"
   im Footer und auf der Datenschutzseite (`CookieEinstellungenButton`).
 - Umami setzt keine Cookies und bildet keine geräteübergreifenden Profile.

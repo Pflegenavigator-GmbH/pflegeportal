@@ -19,6 +19,7 @@ import {
   Progress,
 } from '@/src/components/ui';
 import { useAssessmentModule } from '@/src/hooks/useAssessmentModule';
+import { useFallcode } from '@/src/hooks/useFallcode';
 
 /**
  * Modul 6 hat je Frage eigene Optionen mit Titel und Erläuterung. Fachlich
@@ -43,7 +44,8 @@ export default function Modul6Page() {
     next: (l) => `/${l}/pflegegrad/ergebnis`,
   });
 
-  const caseCode = m.caseCode;
+  // Nur Anzeige (#135).
+  const caseCode = useFallcode();
   const answers = m.antworten;
   const saving = m.loading;
   const isComplete = m.alleBeantwortet;

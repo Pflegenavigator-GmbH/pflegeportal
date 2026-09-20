@@ -8,7 +8,6 @@ import {
   AlertCircle,
   Coins,
   Calculator,
-  Accessibility,
   FolderLock,
   RefreshCw,
   ChevronDown,
@@ -17,7 +16,7 @@ import {
   CalendarClock,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState, use } from 'react';
 import { toast } from 'sonner';
 
@@ -40,11 +39,14 @@ import {
   DropdownMenuTrigger,
 } from '@/src/components/ui';
 import { useBescheidDatum } from '@/src/hooks/useBescheidDatum';
+import { useFallcode } from '@/src/hooks/useFallcode';
 import { usePdfDownload } from '@/src/hooks/usePdfDownload';
 import { useStripeCheckout } from '@/src/hooks/useStripeCheckout';
 import { logger } from '@/src/lib/logger';
 import { loadCaseResult, SessionExpiredError } from '@/src/lib/pflegegrad/client-api';
 import { entferneErgebnis } from '@/src/lib/pflegegrad/ergebnis-storage';
+import { KRITERIEN_GESAMT } from '@/src/lib/pflegegrad/nba';
+import { rechtswertAm } from '@/src/lib/rechtsstand/rechtswerte';
 import { berechneFristen } from '@/src/lib/widerspruch/fristen';
 import { PflegegradErgebnis, EinstufungAmpel } from '@/src/types/pflegegrad';
 
@@ -63,38 +65,46 @@ const MVP_PRODUCTS = [
 export default function ErgebnisPage(props: PageProps) {
   const tMeldung = useTranslations('pflegegrad.meldungen');
   const t = useTranslations('pflegegrad.ergebnis');
+  const formatiere = useFormatter();
   const router = useRouter();
+
+  /** Beträge in der Schreibweise der jeweiligen Sprache, ohne Nachkommastellen. */
+  const euro = (betrag: number) =>
+    formatiere.number(betrag, {
+      style: 'currency',
+      currency: 'EUR',
+      maximumFractionDigits: 0,
+    });
+
+  /**
+   * Die Beträge der Zusatzleistungen stehen im Rechtsstand-Katalog, nicht im
+   * Text — sonst müsste man bei einer Gesetzesänderung die Sprachdateien
+   * durchsuchen (#107, #138).
+   */
+  const zusatzBetrag = (leistung: 'pflegehilfsmittel' | 'wohnumfeld') =>
+    (rechtswertAm(`leistungen.${leistung}`, new Date())?.wert as number | undefined) ?? 0;
   const params = use(props.params);
   const locale = params?.locale || 'de';
 
   const [hasMounted, setHasMounted] = useState(false);
   const [ergebnis, setErgebnis] = useState<PflegegradErgebnis | null>(null);
   const { triggerCheckout, checkoutLoading } = useStripeCheckout();
-  const [isVerifyingGdb, setIsVerifyingGdb] = useState(false);
   const [resetDialogOffen, setResetDialogOffen] = useState(false);
   const [resetLaeuft, setResetLaeuft] = useState(false);
 
-  const [caseCode] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('case_code');
-    }
-    return null;
-  });
+  // Nur zur Anzeige: Nach einem Neuladen ist der Code weg — die Sitzung trägt
+  // trotzdem (#135).
+  const caseCode = useFallcode();
 
-  const {
-    bescheidDatum,
-    speichereBescheidDatum,
-    speichert: speichertDatum,
-  } = useBescheidDatum(caseCode);
+  const { bescheidDatum, speichereBescheidDatum, speichert: speichertDatum } = useBescheidDatum();
 
   // Fristen ergeben sich rein rechnerisch aus dem Bescheiddatum — kein
   // Serveraufruf nötig, die Anzeige folgt der Eingabe unmittelbar.
   const fristenUebersicht = useMemo(() => berechneFristen({ bescheidDatum }), [bescheidDatum]);
 
   const { downloadPdf, loadingPdf, showPaywall, setShowPaywall } = usePdfDownload({
-    caseCode,
     elementId: 'nba-analysis-content',
-    documentTitle: `PflegeGutachten_${caseCode?.toUpperCase()}`,
+    documentTitle: 'PflegeGutachten',
     footerText: 'PflegeNavigator EU gUG — Offizielles Orientierungsgutachten nach § 14 SGB XI',
     fallbackHtml: ergebnis
       ? `<h2>{t('zusammenfassung')}</h2><p>Errechneter Pflegegrad: ${ergebnis.careLevel}</p>`
@@ -105,17 +115,13 @@ export default function ErgebnisPage(props: PageProps) {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setHasMounted(true);
 
-    if (!caseCode) {
-      logger.warn('Keine aktive Fall-Session gefunden. Leite um.');
-      toast.error(tMeldung('keineSitzungKurz'));
-      router.push(`/${locale}/pflegegrad/start`);
-      return;
-    }
-
+    // Ob ein Fall offen ist, entscheidet die Sitzung, nicht der Browser: Der
+    // Server antwortet ohne sie mit 401, und der Fang unten leitet um (#135).
+    //
     // Server ist die einzige Wahrheit: Rohpunkte und Pflegegrad werden
     // serverseitig aus den gespeicherten Antworten berechnet — kein
     // localStorage, kein setTimeout-Lifecycle-Workaround mehr.
-    loadCaseResult(caseCode)
+    loadCaseResult()
       .then((berechnetesErgebnis) => {
         setErgebnis(berechnetesErgebnis);
       })
@@ -128,7 +134,7 @@ export default function ErgebnisPage(props: PageProps) {
         logger.error({ err }, 'Ergebnis konnte nicht geladen werden');
         toast.error(tMeldung('ergebnisFehler'));
       });
-  }, [caseCode, locale, router, tMeldung]);
+  }, [locale, router, tMeldung]);
 
   /**
    * Setzt die Begutachtung zurück.
@@ -139,11 +145,9 @@ export default function ErgebnisPage(props: PageProps) {
    * alten Antworten anschließend wieder vom Server.
    */
   const handleReEvaluateFromScratch = async () => {
-    if (!caseCode) return;
-
     setResetLaeuft(true);
     try {
-      const antwort = await fetch(`/api/cases/${caseCode.toUpperCase()}/answers`, {
+      const antwort = await fetch('/api/case/answers', {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -170,37 +174,7 @@ export default function ErgebnisPage(props: PageProps) {
     }
   };
 
-  const handleCheckoutSubmit = (paketId: string) => triggerCheckout(caseCode, paketId);
-
-  const handleGdbNavigation = async () => {
-    if (!caseCode) return;
-    setIsVerifyingGdb(true);
-    logger.debug('Verifiziere GdB-Lizenzfreigabe');
-    const verificationToast = toast.loading(t('lizenzPruefen'));
-
-    try {
-      // Leichtgewichtige Statusabfrage — kein Puppeteer, kein Cache-Eintrag
-      const checkRes = await fetch(`/api/cases/${caseCode.toUpperCase()}/access`, {
-        credentials: 'include',
-      });
-      const accessData = checkRes.ok ? await checkRes.json() : null;
-
-      if (checkRes.status === 402 || (accessData && !accessData.isUnlocked)) {
-        logger.info('Lizenz fehlt für GdB-Zusatzmodul. Zeige Paywall.');
-        toast.dismiss(verificationToast);
-        setShowPaywall(true);
-        setIsVerifyingGdb(false);
-        return;
-      }
-
-      toast.dismiss(verificationToast);
-      router.push(`/${locale}/gdb`);
-    } catch (err) {
-      logger.error({ err }, 'GdB Lizenzcheck-Verbindung abgebrochen');
-      toast.error(t('lizenzFehler'), { id: verificationToast });
-      setIsVerifyingGdb(false);
-    }
-  };
+  const handleCheckoutSubmit = (paketId: string) => triggerCheckout(paketId);
 
   if (!ergebnis) {
     return (
@@ -239,7 +213,7 @@ export default function ErgebnisPage(props: PageProps) {
   const aktuelleAmpel = ampelKonfig[ergebnis.trafficLight];
 
   const shareErgebnis = () => {
-    if (navigator.share && caseCode) {
+    if (navigator.share) {
       navigator
         .share({
           title: 'Pflegegrad-Orientierungswert',
@@ -331,6 +305,14 @@ export default function ErgebnisPage(props: PageProps) {
               <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
                 {t.rich('erklaerungText', { b: (inhalt) => <strong>{inhalt}</strong> })}
               </p>
+              {/* Die Schwellen darüber sind amtlich, unsere Zahl ist es nicht —
+                  das muss im selben Atemzug stehen (#137). */}
+              <p className="text-xs text-amber-300/90 leading-relaxed">
+                {t('erklaerungHinweis', {
+                  erhoben: KRITERIEN_GESAMT.erhoben,
+                  amtlich: KRITERIEN_GESAMT.amtlich,
+                })}
+              </p>
             </div>
           </div>
         </Card>
@@ -353,7 +335,7 @@ export default function ErgebnisPage(props: PageProps) {
                   <span className="text-xs text-[var(--color-text-muted)]">
                     {t('pflegegeldLabel')}
                   </span>
-                  <p className="text-2xl font-bold">{ergebnis.benefits.monthlyAmount} €</p>
+                  <p className="text-2xl font-bold">{euro(ergebnis.benefits.monthlyAmount)}</p>
                   <p className="text-[10px] text-[var(--color-text-faint)] mt-1">
                     {t('pflegegeldHinweis')}
                   </p>
@@ -362,7 +344,7 @@ export default function ErgebnisPage(props: PageProps) {
                   <span className="text-xs text-[var(--color-text-muted)]">
                     {t('entlastungLabel')}
                   </span>
-                  <p className="text-2xl font-bold">{ergebnis.benefits.reliefBudget} €</p>
+                  <p className="text-2xl font-bold">{euro(ergebnis.benefits.reliefBudget)}</p>
                   <p className="text-[10px] text-[var(--color-text-faint)] mt-1">
                     {t('entlastungHinweis')}
                   </p>
@@ -394,7 +376,9 @@ export default function ErgebnisPage(props: PageProps) {
                 <span className="text-xs text-[var(--color-text-muted)]">
                   {t('pg1EntlastungLabel')}
                 </span>
-                <p className="text-2xl font-bold text-white">{ergebnis.benefits.reliefBudget} €</p>
+                <p className="text-2xl font-bold text-white">
+                  {euro(ergebnis.benefits.reliefBudget)}
+                </p>
                 <p className="text-[11px] text-[var(--color-text-muted)] mt-1.5 leading-relaxed">
                   {t('pg1Text')}
                 </p>
@@ -455,13 +439,13 @@ export default function ErgebnisPage(props: PageProps) {
               {t('zusatzTitel')}
             </h4>
             <div className="grid gap-2 sm:grid-cols-2">
-              {ergebnis.benefits.additionalBenefits.map((benefit, idx) => (
+              {ergebnis.benefits.additionalBenefits.map((benefit) => (
                 <div
-                  key={idx}
+                  key={benefit}
                   className="p-3 bg-[var(--surface-hairline)] border border-[var(--border-faint)] rounded-xl text-xs text-[var(--color-text-subtle)] flex items-center gap-2"
                 >
                   <CheckCircle2 className="w-4 h-4 text-[var(--color-accent)] flex-shrink-0" />
-                  <span>{benefit}</span>
+                  <span>{t(`zusatz.${benefit}`, { betrag: euro(zusatzBetrag(benefit)) })}</span>
                 </div>
               ))}
             </div>
@@ -493,24 +477,8 @@ export default function ErgebnisPage(props: PageProps) {
           </Button>
         </div>
 
-        {/* GdB-Weiche */}
-        <Card className="bg-gradient-to-r from-white/5 to-transparent border-[var(--border-subtle)] text-white p-5 rounded-xl shadow-xl">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="text-center sm:text-left">
-              <h4 className="font-bold text-sm flex items-center gap-2">
-                <Accessibility className="w-4 h-4 text-[var(--color-accent)]" /> {t('gdbTitel')}
-              </h4>
-              <p className="text-[var(--color-text-muted)] text-xs">{t('gdbText')}</p>
-            </div>
-            <Button
-              onClick={handleGdbNavigation}
-              disabled={isVerifyingGdb}
-              className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[var(--color-on-accent)] font-bold text-xs h-10 rounded-xl"
-            >
-              {isVerifyingGdb ? t('gdbPruefen') : t('gdbRechner')}
-            </Button>
-          </div>
-        </Card>
+        {/* Die GdB-Weiche stand hier bis zum 16.09.2026. Der Rechner ist
+            abgeschaltet (#131), deshalb führt kein Einstieg mehr dorthin. */}
 
         {showPaywall && (
           <PaywallModal

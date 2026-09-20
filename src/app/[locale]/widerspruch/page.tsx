@@ -31,6 +31,7 @@ import {
   Textarea,
 } from '@/src/components/ui';
 import { useBescheidDatum } from '@/src/hooks/useBescheidDatum';
+import { useFallcode } from '@/src/hooks/useFallcode';
 import { usePdfDownload } from '@/src/hooks/usePdfDownload';
 import { useStripeCheckout } from '@/src/hooks/useStripeCheckout';
 import { ladeFreischaltung, verwerfeFreischaltung } from '@/src/lib/billing/entitlement';
@@ -88,14 +89,11 @@ export default function WiderspruchPage(props: PageProps) {
   const [briefText, setBriefText] = useState('');
   const [showErgebnis, setShowErgebnis] = useState(false);
 
-  const [caseCode] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('case_code');
-    }
-    return null;
-  });
+  // Nur Anzeige und Briefkopf: Nach einem Neuladen leer, die Sitzung trägt
+  // trotzdem (#135).
+  const caseCode = useFallcode();
 
-  const { bescheidDatum: gespeichertesBescheidDatum } = useBescheidDatum(caseCode);
+  const { bescheidDatum: gespeichertesBescheidDatum } = useBescheidDatum();
 
   // Auf der Ergebnisseite erfasstes Datum übernehmen, damit es nicht zweimal
   // eingegeben werden muss. Anpassung während des Renderns statt im Effekt
@@ -144,7 +142,6 @@ export default function WiderspruchPage(props: PageProps) {
 
   // 1. Hook: PDF-Download-Infrastruktur
   const { downloadPdf, loadingPdf, showPaywall, setShowPaywall } = usePdfDownload({
-    caseCode: caseCode || 'OFFLINE_WD',
     elementId: 'widerspruch-preview-zone',
     documentTitle: `Widerspruchsschreiben_${versicherterName.replace(/\s+/g, '_')}`,
     footerText: 'PflegeNavigator EU gUG — Offizielles Schreiben nach § 78 SGB X',
@@ -212,7 +209,7 @@ export default function WiderspruchPage(props: PageProps) {
   const mitFreischaltung = async (aktion: () => void) => {
     setIsVerifying(true);
     try {
-      const freischaltung = await ladeFreischaltung(caseCode);
+      const freischaltung = await ladeFreischaltung();
 
       if (freischaltung.status === 'freigeschaltet') {
         aktion();
@@ -630,12 +627,12 @@ export default function WiderspruchPage(props: PageProps) {
             onCheckout={(paketId) => {
               // Vor dem Wechsel zu Stripe verwerfen, damit ein zwischenzeitlich
               // bezahlter Fall nach der Rückkehr nicht am alten Cache hängt.
-              verwerfeFreischaltung(caseCode);
-              return triggerCheckout(caseCode, paketId);
+              verwerfeFreischaltung();
+              return triggerCheckout(paketId);
             }}
             onClose={() => {
               // Der Kauf kann auch in einem anderen Tab erfolgt sein.
-              verwerfeFreischaltung(caseCode);
+              verwerfeFreischaltung();
               setShowPaywall(false);
             }}
             loading={checkoutLoading}

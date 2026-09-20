@@ -349,8 +349,6 @@
     },
     "lizenzPruefen": "Verifying licence rights for add-on modules…",
     "lizenzFehler": "Connection error while checking the licence.",
-    "gdbPruefen": "Checking…",
-    "gdbRechner": "Disability degree calculator",
     "reset": {
       "titel": "Start the assessment again?",
       "beschreibung": "You will answer all questions from the six modules again from the beginning. Your previous answers will be permanently deleted and cannot be restored.",
@@ -362,7 +360,7 @@
     },
     "keinPflegegrad": "No care level",
     "pflegegradN": "Care level {stufe}",
-    "punktwert": "Score: {punkte} out of 100.",
+    "punktwert": "Orientation value: {punkte} out of 100 — not an official score.",
     "erklaerungTitel": "How is my care level determined? (In plain terms)",
     "erklaerungText": "The law does not measure a care level in minutes or hours, but purely by how much <b>independence in everyday life</b> you retain. The assessment system awards points across the areas listed below. From 12.5 points you receive care level 1, from 27 points level 2, from 47.5 points level 3, from 70 points level 4, and from 90 points the highest level 5.",
     "anspruecheTitel": "Benefits and combined care",
@@ -376,6 +374,28 @@
     "pg1Text": "At care level 1 the fund does not yet pay a care allowance directly. You do, however, receive the full relief amount. It is earmarked and can be reimbursed for approved everyday companions, home help or day care.",
     "pg0Titel": "Note on your current score",
     "pg0Text": "With your calculated score of {punkte} points you currently fall below the statutory threshold of 12.5 points for a care level. Should your situation deteriorate in everyday life, it is worth repeating the assessment promptly with the new circumstances.",
+    "erklaerungHinweis": "Important: this questionnaire covers {erhoben} of the {amtlich} criteria used by the official assessment instrument. The thresholds named above apply to the assessment carried out by the Medical Service. Our figure approximates it and does not replace it.",
+    "modulListe": {
+      "titel": "Module values from your answers",
+      "hinweis": "We collect {erhoben} of the {amtlich} criteria used by the official assessment instrument. For each module we estimate one of {stufen} levels from the share of questionnaire points reached — the official point thresholds of the assessment are not applied. The figures below are therefore not official points.",
+      "kriterien": "{erhoben} of {amtlich} criteria collected",
+      "stufe": "Level {stufe} of {maximum}",
+      "gewichtung": "counts {punkte} of {gewicht} weighting points",
+      "rohwert": "Questionnaire: {roh} of {maximum} points",
+      "hoechstwertZaehlt": "Only the higher of module 2 and 3 counts. This one counts.",
+      "hoechstwertZaehltNicht": "Only the higher of module 2 and 3 counts. This one does not count."
+    },
+    "zusatz": {
+      "pflegehilfsmittel": "Consumable care aids: up to {betrag} per month (§ 40 (2) SGB XI)",
+      "wohnumfeld": "Home adaptation: grant of up to {betrag} per measure (§ 40 (4) SGB XI)"
+    },
+    "empfehlungenTitel": "Recommended next steps",
+    "empfehlungen": {
+      "schwerbehindertenausweis": "Check whether a severe disability pass may also apply. You apply for it at the pension office, independently of your care level.",
+      "wiederholung": "Repeat the assessment if health deteriorates. There is no waiting period before filing a new application."
+    },
+    "grenzbereichTitel": "Close to the threshold:",
+    "grenzbereichText": "Your result sits just below the next level. Keep a care diary before the assessment — it documents the actual effort on an ordinary day.",
     "moduleTitel": "Adjust module ratings",
     "moduleEditieren": "Click to edit",
     "fristenTitel": "Your deadlines",
@@ -383,10 +403,8 @@
     "pdf": "PDF",
     "teilen": "Share",
     "briefe": "Letters",
-    "gdbTitel": "Check your degree of disability?",
-    "gdbText": "You may be entitled to tax allowances and extra leave.",
     "seitenTitel": "Your NBA assessment results",
-    "seitenUntertitel": "Determined according to the official assessment guidelines",
+    "seitenUntertitel": "Orientation based on a shortened questionnaire",
     "zusammenfassung": "Summary",
     "aktenOptionen": "Case options",
     "neuEvaluieren": "Reassess"

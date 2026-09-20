@@ -1,0 +1,17 @@
+{
+  "titel": "Der GdB-Rechner ist abgeschaltet",
+  "untertitel": "Wir zeigen hier keine Zahl mehr an, für die wir nicht geradestehen können.",
+  "warumTitel": "Warum wir ihn abgeschaltet haben",
+  "warumText": "Der Rechner hat die Einzelwerte zusammengezählt. Genau das schließen die Versorgungsmedizinischen Grundsätze aus (Anlage zu § 2 VersMedV, Teil A Nr. 3.2). Maßgeblich ist, wie sich die Beeinträchtigungen zueinander verhalten: ob sie sich gegenseitig verstärken, unabhängig nebeneinanderstehen oder sich überschneiden. Das ist eine wertende Betrachtung des Einzelfalls und keine Rechenformel.",
+  "warumHinweis": "Wenn Sie hier früher eine Zahl gesehen haben, verlassen Sie sich bitte nicht darauf. Sie kann deutlich zu hoch oder zu niedrig gewesen sein — und damit auch die Vergünstigungen, die dazu angezeigt wurden.",
+  "wohinTitel": "Wo Sie eine belastbare Auskunft bekommen",
+  "amtTitel": "Versorgungsamt",
+  "amtText": "Den Grad der Behinderung stellt allein das Versorgungsamt fest, auf Antrag und nach Auswertung der ärztlichen Befunde. Zuständig ist die Stelle an Ihrem Wohnort; je nach Bundesland heißt sie Versorgungsamt, Amt für soziale Angelegenheiten oder Landesamt.",
+  "verbandTitel": "Sozialverband",
+  "verbandText": "Sozialverbände wie der VdK und der SoVD beraten zum Antrag und vertreten ihre Mitglieder auch im Widerspruchs- und Klageverfahren. Die Beratung setzt in der Regel eine Mitgliedschaft voraus.",
+  "antragTitel": "Antrag stellen",
+  "antragText": "Ein Anschreiben für den Erstantrag beim Versorgungsamt können Sie weiterhin erzeugen. Es enthält keine Einschätzung eines Grades, sondern stellt den Antrag.",
+  "antragLink": "Zu den Anschreiben",
+  "zurueck": "Zur Startseite",
+  "stand": "Abgeschaltet am 16.09.2026. Ob und wann eine fachlich geprüfte Gesamtschau zurückkommt, ist offen."
+}

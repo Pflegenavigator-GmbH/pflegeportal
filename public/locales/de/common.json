@@ -44,6 +44,7 @@
     "zurueck": "Zurück",
     "fall": {
       "keiner": "Kein Fall",
+      "geoeffnet": "Fall geöffnet",
       "codeEingeben": "Fallcode eingeben",
       "pruefe": "Prüfe...",
       "oeffnen": "Akte öffnen",
@@ -52,7 +53,8 @@
       "kopiert": "Code kopiert",
       "wirdBeendet": "Wird beendet...",
       "schliessen": "Fall schließen",
-      "schliessenBestaetigung": "Möchten Sie die aktuelle Fall-Session wirklich schließen?"
+      "schliessenBestaetigung": "Möchten Sie die aktuelle Fall-Session wirklich schließen?",
+      "codeNichtVerfuegbar": "Die Fallnummer wird nur einmal angezeigt — nach dem Neuladen ist sie hier nicht mehr sichtbar."
     },
     "fehler": {
       "abgelaufen": "Dieser Beta-Zugang ist nach 12 Monaten abgelaufen.",
@@ -228,20 +230,12 @@
   },
   "akteTeilen": {
     "appsTeilen": "Über eigene Apps teilen",
-    "datenschutz": "Datenschutz:",
-    "datenschutzText": "Ihre Kontaktdaten werden <b>nicht</b> in unserer Datenbank gespeichert. Sie werden ausschließlich für diesen einmaligen Versand genutzt.",
     "eigenverantwortung": "Eigenverantwortung:",
     "eigenverantwortungText": "Dieser Knopf öffnet das Nachrichten-Programm Ihres eigenen Geräts. Bitte teilen Sie den Link ausschließlich mit Personen Ihres Vertrauens.",
-    "empfaengerFehlt": "Bitte geben Sie einen Empfänger an.",
     "linkKopiert": "Link in die Zwischenablage kopiert!",
     "qrSpeichern": "QR-Code ausdrucken / speichern",
-    "senden": "Senden",
     "teilenTitel": "Mit Angehörigen teilen",
     "titel": "Fall-Zugang verwalten",
-    "untertitel": "Speichern Sie den Zugang für sich selbst oder teilen Sie ihn sicher mit Angehörigen.",
-    "versandFehler": "Versand fehlgeschlagen. Bitte versuchen Sie es später erneut.",
-    "backupSenden": "Backup an mich selbst senden",
-    "sms": "SMS",
-    "email": "E-Mail"
+    "untertitel": "Speichern Sie den Zugang für sich selbst oder teilen Sie ihn sicher mit Angehörigen."
   }
 }

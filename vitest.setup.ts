@@ -5,13 +5,22 @@ import { vi } from 'vitest';
 // 1. Umgebungsvariablen global stubben
 vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://mock.supabase.co');
 vi.stubEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY', 'mock-key');
+// Ohne Pepper wirft die Ableitung des Fallcode-Suchschlüssels absichtlich
+// (#153). Für Tests genügt ein fester Wert — er muss nur lang genug sein.
+//
+// Bewusst als direkte Zuweisung statt `vi.stubEnv`: Mehrere Testdateien rufen
+// in ihrem `afterEach` `vi.unstubAllEnvs()` auf. Das hätte den Pepper mit
+// entfernt, und ab dem zweiten Test derselben Datei wäre jede Fallsuche an
+// einer Ausnahme gescheitert — mit einer Fehlermeldung, die nach einem
+// Datenbankproblem aussieht.
+process.env.CASE_CODE_PEPPER = 'test-pepper-mindestens-32-zeichen-lang!!';
 
 // 2. CookieStore-Mocking (da dies in fast allen Server-Supabase-Tests vorkommt)
 vi.mock('next/headers', () => ({
-    cookies: vi.fn().mockResolvedValue({
-        getAll: vi.fn().mockReturnValue([]),
-        set: vi.fn(),
-    }),
+  cookies: vi.fn().mockResolvedValue({
+    getAll: vi.fn().mockReturnValue([]),
+    set: vi.fn(),
+  }),
 }));
 
 // localStorage-Attrappe MIT Zustand. Zuvor waren es leere vi.fn() — `getItem`
@@ -21,32 +30,42 @@ vi.mock('next/headers', () => ({
 // (toHaveBeenCalledWith) unverändert möglich bleiben.
 let localStorageDaten: Record<string, string> = {};
 const localStorageMock = {
-    getItem: vi.fn((schluessel: string) =>
-        Object.prototype.hasOwnProperty.call(localStorageDaten, schluessel)
-            ? localStorageDaten[schluessel]
-            : null
-    ),
-    setItem: vi.fn((schluessel: string, wert: string) => {
-        localStorageDaten[schluessel] = String(wert);
-    }),
-    removeItem: vi.fn((schluessel: string) => {
-        delete localStorageDaten[schluessel];
-    }),
-    clear: vi.fn(() => {
-        localStorageDaten = {};
-    }),
-    key: vi.fn((index: number) => Object.keys(localStorageDaten)[index] ?? null),
-    get length() {
-        return Object.keys(localStorageDaten).length;
-    },
+  getItem: vi.fn((schluessel: string) =>
+    Object.prototype.hasOwnProperty.call(localStorageDaten, schluessel)
+      ? localStorageDaten[schluessel]
+      : null
+  ),
+  setItem: vi.fn((schluessel: string, wert: string) => {
+    localStorageDaten[schluessel] = String(wert);
+  }),
+  removeItem: vi.fn((schluessel: string) => {
+    delete localStorageDaten[schluessel];
+  }),
+  clear: vi.fn(() => {
+    localStorageDaten = {};
+  }),
+  key: vi.fn((index: number) => Object.keys(localStorageDaten)[index] ?? null),
+  get length() {
+    return Object.keys(localStorageDaten).length;
+  },
 };
 // Nur unter jsdom: Tests mit `// @vitest-environment node` haben kein `window`.
 if (typeof window !== 'undefined') {
-    Object.defineProperty(window, 'localStorage', {
-        value: localStorageMock,
-        configurable: true,
-    });
+  Object.defineProperty(window, 'localStorage', {
+    value: localStorageMock,
+    configurable: true,
+  });
 }
 
 // 3. Fetch global mocken (nützlich für API-Tests)
-global.fetch = vi.fn();
+//
+// Die Attrappe liefert bewusst eine *Antwort* statt `undefined`: Seit #135
+// fragen mehrere Komponenten beim Rendern `/api/case/status` ab. Ein `fetch`,
+// das `undefined` zurückgibt, ließ jeden dieser Tests an `.then` scheitern —
+// mit einer Meldung, die nach einem Fehler in der Komponente aussah.
+global.fetch = vi.fn().mockResolvedValue({
+  ok: false,
+  status: 401,
+  json: async () => ({}),
+  text: async () => '',
+});

@@ -11,7 +11,7 @@ import { verfolge } from '@/src/lib/analytics/track';
 import { logger } from '@/src/lib/logger';
 
 interface UseStripeCheckoutReturn {
-  triggerCheckout: (caseCode: string | null, paketId: string) => Promise<void>;
+  triggerCheckout: (paketId: string) => Promise<void>;
   checkoutLoading: boolean;
 }
 
@@ -24,13 +24,9 @@ export function useStripeCheckout(): UseStripeCheckoutReturn {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   const triggerCheckout = useCallback(
-    async (caseCode: string | null, paketId: string) => {
-      if (!caseCode) {
-        logger.warn({ paketId }, 'Checkout-Versuch ohne gültigen Fallcode abgebrochen');
-        toast.error('Kein gültiger Fallcode für den Checkout vorhanden.');
-        return;
-      }
-
+    async (paketId: string) => {
+      // Der Fall kommt aus der Sitzung (#135); ein Fallcode wird weder
+      // gebraucht noch übertragen.
       setCheckoutLoading(true);
       const toastId = toast.loading('Sicheres Bezahlfenster von Stripe wird geladen...');
 
@@ -40,11 +36,8 @@ export function useStripeCheckout(): UseStripeCheckoutReturn {
         const res = await fetch('/api/checkout/create-session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            caseCode: caseCode.toUpperCase(),
-            paket: paketId,
-            locale,
-          }),
+          body: JSON.stringify({ paket: paketId, locale }),
+          credentials: 'include',
         });
 
         if (!res.ok) {

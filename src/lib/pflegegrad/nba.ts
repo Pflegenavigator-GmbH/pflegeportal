@@ -18,6 +18,12 @@
 // amtlichen Stufen abgebildet. Das ist die fachlich saubere Näherung für ein
 // reduziertes Orientierungsinstrument und hält Erwachsenen- und Kinder-Rechner
 // konsistent. FACHLICH/JURISTISCH gegen die aktuelle BRi zu verifizieren.
+//
+// Rechtsstand der hier verwendeten Werte: src/lib/rechtsstand/rechtswerte.ts
+// (`pflegegrad.schwellen`, `pflegegrad.modulgewichte`,
+// `pflegegrad.kriterien.amtlich`). Wer eine Zahl ändert, ändert sie dort mit.
+
+import { ERWARTETE_FRAGEN } from '@/src/lib/pflegegrad/fragen';
 
 export type AdultModuleNumber = 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -46,6 +52,35 @@ export const MODULE_MAX_RAW: Record<AdultModuleNumber, number> = {
 };
 
 /**
+ * Wie viele Kriterien der Fragebogen erhebt — und wie viele das amtliche
+ * Begutachtungsinstrument kennt (Anlage 1 zu § 15 SGB XI, Module 1 bis 6).
+ *
+ * `erhoben` wird aus {@link ERWARTETE_FRAGEN} abgeleitet und nicht abgeschrieben:
+ * Wer eine Frage ergänzt, ändert damit auch die Angabe auf der Ergebnisseite.
+ * `amtlich` ist der gesetzliche Katalog und ändert sich nur mit ihm.
+ *
+ * Diese Zahlen sind der Grund, warum die amtlichen Punktschwellen auf Modulebene
+ * nicht anwendbar sind — die Ergebnisseite sagt das mit ihnen (Issue #137).
+ */
+export const MODULE_KRITERIEN: Record<AdultModuleNumber, { erhoben: number; amtlich: number }> = {
+  1: { erhoben: ERWARTETE_FRAGEN[1].length, amtlich: 5 },
+  2: { erhoben: ERWARTETE_FRAGEN[2].length, amtlich: 11 },
+  3: { erhoben: ERWARTETE_FRAGEN[3].length, amtlich: 13 },
+  4: { erhoben: ERWARTETE_FRAGEN[4].length, amtlich: 13 },
+  5: { erhoben: ERWARTETE_FRAGEN[5].length, amtlich: 16 },
+  6: { erhoben: ERWARTETE_FRAGEN[6].length, amtlich: 6 },
+};
+
+/** Summe über alle Module — für den Hinweis über der Modulliste. */
+export const KRITERIEN_GESAMT = Object.values(MODULE_KRITERIEN).reduce(
+  (summe, modul) => ({
+    erhoben: summe.erhoben + modul.erhoben,
+    amtlich: summe.amtlich + modul.amtlich,
+  }),
+  { erhoben: 0, amtlich: 0 }
+);
+
+/**
  * Rohpunkte-Anteil → eine der fünf amtlichen Schweregradstufen (0 / 0,25 / 0,5
  * / 0,75 / 1). 0 Punkte bedeuten keine Beeinträchtigung.
  */
@@ -56,6 +91,15 @@ export function severityFraction(raw: number, maxRaw: number): number {
   if (ratio <= 0.5) return 0.5;
   if (ratio <= 0.75) return 0.75;
   return 1;
+}
+
+/**
+ * Schweregradstufe 0 bis 4 — dieselbe Näherung wie {@link severityFraction},
+ * nur als ganze Stufe. Die Ergebnisseite zeigt sie statt einer Punktzahl, damit
+ * niemand sie für eine amtliche Punktzahl hält (Issue #137).
+ */
+export function severityStufe(raw: number, maxRaw: number): 0 | 1 | 2 | 3 | 4 {
+  return (severityFraction(raw, maxRaw) * 4) as 0 | 1 | 2 | 3 | 4;
 }
 
 /** Gewichtete Punkte eines Erwachsenen-Moduls aus seinen Rohpunkten. */

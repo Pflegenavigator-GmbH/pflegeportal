@@ -1,6 +1,5 @@
 // src/app/layout.tsx
 import type { Metadata } from 'next';
-import Script from 'next/script';
 import type { ReactNode } from 'react';
 
 export const metadata: Metadata = {
@@ -35,15 +34,16 @@ type Props = {
   children: ReactNode;
 };
 
+/**
+ * Hier werden keine Drittanbieter-Skripte eingebunden.
+ *
+ * Bis zum 15.09.2026 stand hier ein Umami-`<Script>` — auf jeder Seite, am
+ * Cookie-Banner vorbei (Issue #154). Geladen wurde es nur deshalb nicht, weil
+ * die CSP dessen Host nicht zulässt. Analyse läuft ausschließlich über
+ * `src/components/analytics/Analytics.tsx`, die erst nach Einwilligung
+ * rendert. `Analytics.test.tsx` schlägt fehl, wenn hier wieder ein Skript
+ * auftaucht.
+ */
 export default function RootLayout({ children }: Props) {
-  return (
-    <>
-      {children}
-      <Script
-        src="https://cloud.umami.is/script.js"
-        data-website-id="b7e85a8a-1267-4a42-b561-9b9a5acb5bb6"
-        strategy="afterInteractive"
-      />
-    </>
-  );
+  return children;
 }

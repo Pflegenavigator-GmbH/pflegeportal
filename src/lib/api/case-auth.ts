@@ -1,64 +1,52 @@
 // src/lib/api/case-auth.ts
-import { cookies } from 'next/headers';
-
-import { NotFoundError, UnauthorizedError, ValidationError } from '@/src/lib/api/errors';
-import { createAdminSupabaseClient } from '@/src/lib/supabase/admin';
-
-const CASE_COOKIE = 'pf_case_code';
-
-// Bewusst permissiv (die Code-Generierung liegt in der DB-RPC create_case),
-// aber streng genug, um Injection-/Enumeration-Rauschen früh abzuweisen.
-const CASE_CODE_PATTERN = /^[A-Z0-9][A-Z0-9_-]{3,63}$/;
+import { UnauthorizedError } from '@/src/lib/api/errors';
+import { leseSitzung, uebernehmeAltesCookie, type Sitzung } from '@/src/lib/api/session';
 
 export interface CaseSession {
   caseId: string;
-  caseCode: string;
   billingStatus: string;
   productTier: string | null;
   isUnlocked: boolean;
 }
 
 /**
- * Zentrale Autorisierung für alle fallbezogenen Operationen.
- * Prüft: Format des Codes, Übereinstimmung mit dem HTTP-only-Session-Cookie
- * und Existenz des Falls. Wirft typisierte Fehler, die handleApiError()
- * in korrekte HTTP-Statuscodes (400/401/404) übersetzt.
+ * Zentrale Autorisierung für alle fallbezogenen Operationen (#135).
+ *
+ * Bis zum 19.09.2026 nahm diese Funktion einen Fallcode entgegen und verglich
+ * ihn mit dem Cookie `pf_case_code`, in dem derselbe Code stand. Das war keine
+ * Prüfung, sondern ein Vergleich des Zugangsmittels mit sich selbst: Wer den
+ * Code hatte, kam hinein — dauerhaft, unwiderruflich, ohne Ablauf.
+ *
+ * Jetzt entscheidet allein die Sitzung. Der Fall ergibt sich aus ihr; ein vom
+ * Aufrufer mitgeschickter Code hat keine Berechtigungswirkung mehr und wird
+ * deshalb gar nicht erst entgegengenommen.
  */
-export async function requireCaseSession(expectedCode: string): Promise<CaseSession> {
-  const cleanedCode = expectedCode.trim().toUpperCase();
+export async function requireCaseSession(): Promise<CaseSession> {
+  const sitzung = (await leseSitzung()) ?? (await uebernehmeAltesCookie());
 
-  if (!CASE_CODE_PATTERN.test(cleanedCode)) {
-    throw new ValidationError('Ungültiges Fallcode-Format.');
+  if (!sitzung) {
+    // Ohne Kennung im Kontext: Er landet in Laufzeit-Log und
+    // `system_logs.metadata` (Issue #145).
+    throw new UnauthorizedError('Keine gültige Fall-Sitzung.');
   }
 
-  const cookieStore = await cookies();
-  const sessionCode = cookieStore.get(CASE_COOKIE)?.value?.trim().toUpperCase();
+  return zuCaseSession(sitzung);
+}
 
-  if (!sessionCode || sessionCode !== cleanedCode) {
-    // Den angefragten Code NICHT in den Kontext legen: Der Kontext landet in
-    // Laufzeit-Log und `system_logs.metadata` (Issue #145).
-    throw new UnauthorizedError('Fall-Session fehlt oder passt nicht zum angeforderten Fall.', {
-      hasSessionCookie: Boolean(sessionCode),
-    });
-  }
+/**
+ * Wie {@link requireCaseSession}, wirft aber nicht. Für Stellen, die ohne
+ * Sitzung einfach nichts anzeigen statt einen Fehler zu melden.
+ */
+export async function leseCaseSession(): Promise<CaseSession | null> {
+  const sitzung = (await leseSitzung()) ?? (await uebernehmeAltesCookie());
+  return sitzung ? zuCaseSession(sitzung) : null;
+}
 
-  const supabase = createAdminSupabaseClient();
-  const { data: currentCase, error } = await supabase
-    .from('cases')
-    .select('id, case_code, billing_status, product_tier')
-    .eq('case_code', cleanedCode)
-    .single();
-
-  if (error || !currentCase) {
-    // Ohne Kennung: Die Meldung landet in `system_logs.message` (Issue #145).
-    throw new NotFoundError('Fall');
-  }
-
+function zuCaseSession(sitzung: Sitzung): CaseSession {
   return {
-    caseId: currentCase.id,
-    caseCode: currentCase.case_code,
-    billingStatus: currentCase.billing_status,
-    productTier: currentCase.product_tier,
-    isUnlocked: currentCase.billing_status === 'paid' || currentCase.billing_status === 'free',
+    caseId: sitzung.caseId,
+    billingStatus: sitzung.billingStatus,
+    productTier: sitzung.productTier,
+    isUnlocked: sitzung.isUnlocked,
   };
 }

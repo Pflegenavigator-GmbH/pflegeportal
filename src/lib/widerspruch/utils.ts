@@ -8,7 +8,6 @@ import {
   zuLokalemTagesbeginn,
   type AmpelStatus,
 } from '@/src/lib/widerspruch/fristen';
-import { ModuleScores } from '@/src/types/pflegegrad';
 
 // Fristen-Domäne liegt in ./fristen.ts; hier re-exportiert, damit der
 // Widerspruch-Bereich eine Import-Adresse behält.
@@ -159,84 +158,4 @@ export function generiereWiderspruchBrief(
   }
 
   return `${daten.versicherterName}\n${daten.strasse}\n${daten.plz} ${daten.ort}\n\nAn die\n${daten.pflegekasse}\nWiderspruchsstelle\n[Bitte Anschrift der Kasse ergänzen]\n\n\n${daten.ort}, den ${heute}\n\nBetreff: ${betreffzeile}\nVersicherungsnummer: ${daten.versicherungsnummer || '[BITTE EINTRAGEN]'}\nAktenzeichen Portal: ${daten.caseCode?.toUpperCase() || 'OFFLINE_CORE'}\n\nSehr geehrte Damen und Herren,\n\n${kernAnschreiben}\n\nBEGRÜNDUNG / ANTRAGSMATERIE:\n${kernBegruendung}\n\nDie gesetzliche Frist für dieses Verfahren läuft gemäß ${frist.gesetz} am ${format(frist.fristEndeWerktag, 'dd.MM.yyyy')} ab. Ich bitte um eine schriftliche Bestätigung des Eingangs.\n\nMit freundlichen Grüßen,\n\n\n___________________________\n${daten.versicherterName}`;
-}
-
-export function generateWiderspruchBegruendung(
-  currentLevel: number,
-  expectedLevel: number,
-  scores: ModuleScores,
-  userReasons?: string
-): string {
-  const lines: string[] = [
-    `Nach den NBA-Kriterien ergibt sich aus den vorliegenden Einschränkungen ein höherer Pflegebedarf als im Pflegegrad ${currentLevel} berücksichtigt.\n`,
-  ];
-  if (scores[4] > 40)
-    lines.push(
-      'Selbstversorgung (Gewichtung 40%): Deutliche Einschränkungen bei Körperpflege, An-/Auskleiden sowie Essen/Trinken erfordern tägliche Unterstützung.'
-    );
-  if (scores[2] > 15 || scores[3] > 15)
-    lines.push(
-      'Kognition/Verhalten (Gewichtung 15%): Einschränkungen in Orientierung, Entscheidungsfähigkeit oder psychische Belastungen liegen vor.'
-    );
-  if (scores[5] > 20)
-    lines.push(
-      'Krankheitsbewältigung (Gewichtung 20%): Komplexe medizinische Maßnahmen und Medikamentenmanagement sind notwendig.'
-    );
-  if (scores[1] > 10)
-    lines.push(
-      'Mobilität (Gewichtung 10%): Einschränkungen bei Aufstehen, Gehen oder Treppensteigen schränken die Teilhabe ein.'
-    );
-  lines.push(
-    '\n',
-    `Die Summe der Beeinträchtigungen entspricht dem Pflegegrad ${expectedLevel}. Die aktuelle Einstufung in Pflegegrad ${currentLevel} bildet den tatsächlichen Hilfebedarf nicht ab.`
-  );
-  if (userReasons) lines.push('\n', 'Zusätzliche Begründung:', userReasons);
-  lines.push(
-    '\n',
-    'Rechtliche Grundlage:',
-    'Gemäß § 124 SGB XI beantrage ich eine erneute Begutachtung durch den MDK.'
-  );
-  return lines.join('\n');
-}
-
-// --- CHANCEN & CHECKLISTEN ---
-
-export function calculateWiderspruchChance(
-  currentLevel: number,
-  expectedLevel: number,
-  scores: ModuleScores
-): {
-  chance: 'high' | 'medium' | 'low';
-  reason: string;
-} {
-  const scoreDiff = expectedLevel - currentLevel;
-  if (scoreDiff === 1 && scores[4] > 40)
-    return {
-      chance: 'high',
-      reason: 'Nur 1 Level Unterschied, starke Selbstversorgungs-Einschränkungen (40% Gewichtung)',
-    };
-  if (scoreDiff <= 2 && (scores[2] > 10 || scores[3] > 10))
-    return {
-      chance: 'medium',
-      reason: 'Mögliche Verbesserung durch vollständige Begutachtung aller Module',
-    };
-  return {
-    chance: 'low',
-    reason: 'Größerer Unterschied - erfolgreich wenn neue medizinische Entwicklungen vorliegen',
-  };
-}
-
-export function getMDPreparationChecklist(): string[] {
-  return [
-    'Alle Medikamente bereitlegen',
-    'Ärztliche Berichte parat haben',
-    'Pflegeprotokoll/Tagebuch aktuell (letzte 4 Wochen)',
-    'Zeitaufwand dokumentiert: Wie lange dauert was?',
-    'Häufigkeiten notiert: Wie oft pro Tag?',
-    'Schlechte Tage beschreiben (nicht die guten!)',
-    'Fragen vorbereitet',
-    'Unterlagen sortiert: Arztberichte, Rezepte, Labor',
-    'Begleitung organisiert',
-    'Notizblock für eigene Notizen',
-  ];
 }

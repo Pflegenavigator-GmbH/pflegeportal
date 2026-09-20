@@ -44,6 +44,7 @@
     "zurueck": "Back",
     "fall": {
       "keiner": "No case",
+      "geoeffnet": "Case open",
       "codeEingeben": "Enter case code",
       "pruefe": "Checking...",
       "oeffnen": "Open case",
@@ -52,7 +53,8 @@
       "kopiert": "Code copied",
       "wirdBeendet": "Closing...",
       "schliessen": "Close case",
-      "schliessenBestaetigung": "Do you really want to close the current case session?"
+      "schliessenBestaetigung": "Do you really want to close the current case session?",
+      "codeNichtVerfuegbar": "The case number is shown once — after a reload it is no longer visible here."
     },
     "fehler": {
       "abgelaufen": "This beta access expired after 12 months.",
@@ -228,20 +230,12 @@
   },
   "akteTeilen": {
     "appsTeilen": "Share via your own apps",
-    "datenschutz": "Data protection:",
-    "datenschutzText": "Your contact details are <b>not</b> stored in our database. They are used solely for this one-off delivery.",
     "eigenverantwortung": "Your responsibility:",
     "eigenverantwortungText": "This button opens the messaging app on your own device. Only share the link with people you trust.",
-    "empfaengerFehlt": "Please enter a recipient.",
     "linkKopiert": "Link copied to the clipboard.",
     "qrSpeichern": "Print / save QR code",
-    "senden": "Send",
     "teilenTitel": "Share with relatives",
     "titel": "Manage case access",
-    "untertitel": "Keep the access for yourself or share it securely with relatives.",
-    "versandFehler": "The message could not be sent. Please try again later.",
-    "backupSenden": "Send a backup to myself",
-    "sms": "SMS",
-    "email": "Email"
+    "untertitel": "Keep the access for yourself or share it securely with relatives."
   }
 }

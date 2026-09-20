@@ -1,0 +1,17 @@
+{
+  "titel": "The disability degree calculator has been switched off",
+  "untertitel": "We no longer show a number here that we cannot stand behind.",
+  "warumTitel": "Why we switched it off",
+  "warumText": "The calculator added the individual values together. That is precisely what the German medical assessment principles rule out (Annex to § 2 VersMedV, Part A No. 3.2). What matters is how the impairments relate to one another: whether they reinforce each other, stand side by side independently, or overlap. That is a judgement about the individual case, not a formula.",
+  "warumHinweis": "If you saw a number here in the past, please do not rely on it. It may have been far too high or far too low — and so were the benefits listed alongside it.",
+  "wohinTitel": "Where to get a reliable answer",
+  "amtTitel": "Pension office (Versorgungsamt)",
+  "amtText": "Only the pension office determines the degree of disability, on application and after reviewing the medical findings. The office responsible is the one where you live; depending on the federal state it is called Versorgungsamt, Amt für soziale Angelegenheiten or Landesamt.",
+  "verbandTitel": "Social association",
+  "verbandText": "Social associations such as VdK and SoVD advise on the application and represent their members in objection and court proceedings. Advice usually requires membership.",
+  "antragTitel": "Filing an application",
+  "antragText": "You can still generate a letter for a first application to the pension office. It does not estimate a degree — it files the application.",
+  "antragLink": "Go to the letters",
+  "zurueck": "Back to the home page",
+  "stand": "Switched off on 16 September 2026. Whether and when a professionally reviewed overall assessment returns is open."
+}

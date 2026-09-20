@@ -2,25 +2,32 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import { validateAndStoreSession, clearCaseSession } from '@/src/app/actions/case-session';
+import { berechneCaseCodeHash } from '@/src/lib/case-code-server';
+
+// `case-code-server` ist mit `server-only` markiert — im Test wie überall
+// sonst im Repo neutralisiert.
+vi.mock('server-only', () => ({}));
 
 // ============================================================================
 // 🧪 MOCK-SETUP
 // ============================================================================
 
 // 1. Spies über vi.hoisted definieren, damit die vi.mock-Factories darauf zugreifen können
-const { supabaseEqMock, supabaseSingleMock, cookieSetMock, cookieDeleteMock } = vi.hoisted(() => ({
-  supabaseEqMock: vi.fn(),
-  supabaseSingleMock: vi.fn(),
-  cookieSetMock: vi.fn(),
-  cookieDeleteMock: vi.fn(),
-}));
+const { supabaseEqMock, supabaseSingleMock, erzeugeSitzungMock, beendeSitzungMock } = vi.hoisted(
+  () => ({
+    supabaseEqMock: vi.fn(),
+    supabaseSingleMock: vi.fn(),
+    erzeugeSitzungMock: vi.fn(),
+    beendeSitzungMock: vi.fn(),
+  })
+);
 
-// 2. Next.js Cookies mocken — WICHTIG: die neue Action nutzt set UND delete
-vi.mock('next/headers', () => ({
-  cookies: vi.fn().mockResolvedValue({
-    set: cookieSetMock,
-    delete: cookieDeleteMock,
-  }),
+// Seit #135 legt die Action keine Cookies mehr selbst an, sondern delegiert an
+// den Sitzungsbestand. Geprüft wird hier die Entscheidung, nicht das Cookie —
+// dessen Eigenschaften prüft `src/lib/api/session.test.ts`.
+vi.mock('@/src/lib/api/session', () => ({
+  erzeugeSitzung: erzeugeSitzungMock,
+  beendeSitzung: beendeSitzungMock,
 }));
 
 // 3. Supabase-Admin-Client mocken (Fluent API: from → select → eq → single)
@@ -49,6 +56,7 @@ vi.mock('@/src/lib/logger', () => ({
 // ============================================================================
 
 interface DbCase {
+  id: string;
   case_code: string;
   billing_status: string;
   access_activated_at: string | null;
@@ -64,6 +72,7 @@ function mockDbResult(data: DbCase | null, error: Error | null = null) {
 /** Baut einen Standard-Fall mit überschreibbaren Feldern */
 function buildCase(overrides: Partial<DbCase> = {}): DbCase {
   return {
+    id: 'case-uuid-1',
     case_code: 'PF-TEST-0001',
     billing_status: 'paid',
     access_activated_at: '2026-01-01T12:00:00.000Z',
@@ -71,8 +80,6 @@ function buildCase(overrides: Partial<DbCase> = {}): DbCase {
     ...overrides,
   };
 }
-
-const CASE_COOKIE = 'pf_case_code';
 
 // ============================================================================
 // ✅ TESTS: validateAndStoreSession
@@ -96,12 +103,17 @@ describe('validateAndStoreSession', () => {
   // Eingabe-Normalisierung
   // --------------------------------------------------------------------------
 
-  it('normalisiert den Fallcode (trim + Großschreibung) vor der DB-Abfrage', async () => {
+  it('normalisiert den Fallcode und sucht über den Hash, nicht über den Klartext', async () => {
     mockDbResult(buildCase({ case_code: 'PF-ABCD-1234' }));
 
     await validateAndStoreSession('  pf-abcd-1234  ');
 
-    expect(supabaseEqMock).toHaveBeenCalledWith('case_code', 'PF-ABCD-1234');
+    // Der Klartext verlässt die Anwendung nicht mehr Richtung Datenbank (#153);
+    // gesucht wird über den aus der normalisierten Form abgeleiteten Schlüssel.
+    expect(supabaseEqMock).toHaveBeenCalledWith(
+      'case_code_hash',
+      berechneCaseCodeHash('PF-ABCD-1234')
+    );
   });
 
   // --------------------------------------------------------------------------
@@ -111,7 +123,7 @@ describe('validateAndStoreSession', () => {
   it('schlägt fehl, wenn der Fall in der DB nicht existiert', async () => {
     mockDbResult(null, new Error('Not found'));
 
-    const result = await validateAndStoreSession('NOTFOUND');
+    const result = await validateAndStoreSession('PF-NOTF-0404');
 
     expect(result).toEqual({
       success: false,
@@ -125,16 +137,16 @@ describe('validateAndStoreSession', () => {
   it('räumt bei unbekanntem Fallcode ein evtl. verwaistes Cookie ab', async () => {
     mockDbResult(null, new Error('Not found'));
 
-    await validateAndStoreSession('NOTFOUND');
+    await validateAndStoreSession('PF-NOTF-0404');
 
-    expect(cookieDeleteMock).toHaveBeenCalledWith(CASE_COOKIE);
-    expect(cookieSetMock).not.toHaveBeenCalled();
+    expect(beendeSitzungMock).toHaveBeenCalled();
+    expect(erzeugeSitzungMock).not.toHaveBeenCalled();
   });
 
   it('behandelt data=null ohne error-Objekt ebenfalls als "nicht gefunden"', async () => {
     mockDbResult(null, null);
 
-    const result = await validateAndStoreSession('GHOST');
+    const result = await validateAndStoreSession('PF-GHST-0404');
 
     expect(result.success).toBe(false);
     expect(result.billingStatus).toBe('not_found');
@@ -145,29 +157,19 @@ describe('validateAndStoreSession', () => {
   // --------------------------------------------------------------------------
 
   it('schaltet einen bezahlten Fall frei und setzt das Session-Cookie korrekt', async () => {
-    mockDbResult(buildCase({ case_code: 'CASE123', billing_status: 'paid' }));
+    mockDbResult(buildCase({ case_code: 'PF-CASE-0123', billing_status: 'paid' }));
 
-    const result = await validateAndStoreSession('case123');
+    const result = await validateAndStoreSession('pf-case-0123');
 
     expect(result).toEqual({
       success: true,
       isUnlocked: true,
       isExpired: false,
       billingStatus: 'paid',
-      caseCode: 'CASE123',
+      caseCode: 'PF-CASE-0123',
     });
 
-    expect(cookieSetMock).toHaveBeenCalledExactlyOnceWith(
-      CASE_COOKIE,
-      'CASE123',
-      expect.objectContaining({
-        httpOnly: true,
-        sameSite: 'strict',
-        path: '/',
-        maxAge: 60 * 60 * 24 * 30,
-      })
-    );
-    expect(cookieDeleteMock).not.toHaveBeenCalled();
+    expect(erzeugeSitzungMock).toHaveBeenCalledExactlyOnceWith('case-uuid-1');
   });
 
   it('behandelt billing_status "free" wie "paid" (isUnlocked=true)', async () => {
@@ -177,7 +179,7 @@ describe('validateAndStoreSession', () => {
 
     expect(result.success).toBe(true);
     expect(result.isUnlocked).toBe(true);
-    expect(cookieSetMock).toHaveBeenCalledOnce();
+    expect(erzeugeSitzungMock).toHaveBeenCalledExactlyOnceWith('case-uuid-1');
   });
 
   // --------------------------------------------------------------------------
@@ -197,11 +199,7 @@ describe('validateAndStoreSession', () => {
     expect(result.caseCode).toBe('PF-TEST-0001');
 
     // Cookie MUSS trotz "pending" gesetzt werden
-    expect(cookieSetMock).toHaveBeenCalledExactlyOnceWith(
-      CASE_COOKIE,
-      'PF-TEST-0001',
-      expect.objectContaining({ httpOnly: true })
-    );
+    expect(erzeugeSitzungMock).toHaveBeenCalledExactlyOnceWith('case-uuid-1');
   });
 
   // --------------------------------------------------------------------------
@@ -212,24 +210,24 @@ describe('validateAndStoreSession', () => {
     // Aktivierung März 2025, Gegenwart Juli 2026 → deutlich über 12 Monate
     mockDbResult(
       buildCase({
-        case_code: 'BETA999',
+        case_code: 'PF-BETA-0999',
         billing_status: 'paid',
         product_tier: 'beta',
         access_activated_at: '2025-03-01T12:00:00.000Z',
       })
     );
 
-    const result = await validateAndStoreSession('BETA999');
+    const result = await validateAndStoreSession('PF-BETA-0999');
 
     // Der Fall EXISTIERT — die UI soll "abgelaufen" erklären, nicht "ungültig"
     expect(result.success).toBe(true);
     expect(result.isExpired).toBe(true);
     expect(result.isUnlocked).toBe(false);
-    expect(result.caseCode).toBe('BETA999');
+    expect(result.caseCode).toBe('PF-BETA-0999');
 
     // Kein neues Cookie, altes wird entwertet
-    expect(cookieSetMock).not.toHaveBeenCalled();
-    expect(cookieDeleteMock).toHaveBeenCalledWith(CASE_COOKIE);
+    expect(erzeugeSitzungMock).not.toHaveBeenCalled();
+    expect(beendeSitzungMock).toHaveBeenCalled();
   });
 
   it('lässt Beta-Fälle INNERHALB der 12 Monate normal passieren', async () => {
@@ -246,7 +244,7 @@ describe('validateAndStoreSession', () => {
 
     expect(result.isExpired).toBe(false);
     expect(result.isUnlocked).toBe(true);
-    expect(cookieSetMock).toHaveBeenCalledOnce();
+    expect(erzeugeSitzungMock).toHaveBeenCalledExactlyOnceWith('case-uuid-1');
   });
 
   it('Grenzfall: einen Tag VOR Ablauf ist der Beta-Zugang noch gültig', async () => {
@@ -288,7 +286,7 @@ describe('validateAndStoreSession', () => {
     const result = await validateAndStoreSession('PF-TEST-0001');
 
     expect(result.isExpired).toBe(false);
-    expect(cookieSetMock).toHaveBeenCalledOnce();
+    expect(erzeugeSitzungMock).toHaveBeenCalledExactlyOnceWith('case-uuid-1');
   });
 
   it('überspringt die Ablauf-Prüfung, wenn access_activated_at fehlt (Beta ohne Aktivierung)', async () => {
@@ -305,37 +303,7 @@ describe('validateAndStoreSession', () => {
     expect(result.success).toBe(true);
   });
 
-  // --------------------------------------------------------------------------
-  // Cookie-Sicherheit (secure-Flag abhängig von der Umgebung)
-  // --------------------------------------------------------------------------
-
-  it('setzt secure=true in Produktion', async () => {
-    vi.stubEnv('NODE_ENV', 'production');
-    mockDbResult(buildCase());
-
-    await validateAndStoreSession('PF-TEST-0001');
-
-    expect(cookieSetMock).toHaveBeenCalledWith(
-      CASE_COOKIE,
-      expect.any(String),
-      expect.objectContaining({ secure: true })
-    );
-  });
-
-  it('setzt secure=false in Development (localhost ohne HTTPS)', async () => {
-    vi.stubEnv('NODE_ENV', 'development');
-    mockDbResult(buildCase());
-
-    await validateAndStoreSession('PF-TEST-0001');
-
-    expect(cookieSetMock).toHaveBeenCalledWith(
-      CASE_COOKIE,
-      expect.any(String),
-      expect.objectContaining({ secure: false })
-    );
-  });
-
-  // --------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
   // Harte Fehler (DB down, Timeout, geworfene Exceptions)
   // --------------------------------------------------------------------------
 
@@ -352,7 +320,7 @@ describe('validateAndStoreSession', () => {
       billingStatus: 'failed',
       caseCode: null,
     });
-    expect(cookieSetMock).not.toHaveBeenCalled();
+    expect(erzeugeSitzungMock).not.toHaveBeenCalled();
   });
 });
 
@@ -365,10 +333,12 @@ describe('clearCaseSession', () => {
     vi.clearAllMocks();
   });
 
-  it('löscht das Session-Cookie serverseitig', async () => {
+  it('beendet die Sitzung serverseitig', async () => {
     await clearCaseSession();
 
-    expect(cookieDeleteMock).toHaveBeenCalledExactlyOnceWith(CASE_COOKIE);
-    expect(cookieSetMock).not.toHaveBeenCalled();
+    // Widerruf statt nur Cookie löschen: Ein gelöschtes Cookie allein ließe die
+    // Sitzung auf dem Server bis zum Ablauf gültig (#135).
+    expect(beendeSitzungMock).toHaveBeenCalledOnce();
+    expect(erzeugeSitzungMock).not.toHaveBeenCalled();
   });
 });

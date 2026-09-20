@@ -3,7 +3,7 @@
 
 import { BookOpen, PlusCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState, useEffect, useCallback, useSyncExternalStore } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import { Button } from '@/src/components/ui';
 import { TagebuchData, TagebuchEintrag } from '@/src/types/tagebuch';
@@ -11,22 +11,10 @@ import { TagebuchData, TagebuchEintrag } from '@/src/types/tagebuch';
 import { TagebuchForm } from './_component/TagebuchForm';
 import { TagebuchListe } from './_component/TagebuchListe';
 
-const subscribe = (listener: () => void) => {
-  if (typeof window === 'undefined') return () => {};
-  window.addEventListener('storage', listener);
-  return () => window.removeEventListener('storage', listener);
-};
-
-const getSnapshot = () => {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem('case_code');
-};
-
-const getServerSnapshot = () => null;
-
 export default function TagebuchPage() {
   const t = useTranslations('tagebuch');
-  const caseCode = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  /** Ob eine Sitzung besteht, beantwortet der Server (#135) — nicht der Browser. */
+  const [sitzungOffen, setSitzungOffen] = useState<boolean | null>(null);
 
   const [entries, setEntries] = useState<TagebuchData>({});
   const [activeEntry, setActiveEntry] = useState<{ key: string; data: TagebuchEintrag } | null>(
@@ -34,9 +22,9 @@ export default function TagebuchPage() {
   );
 
   const fetchEntries = useCallback(async () => {
-    if (!caseCode) return;
     try {
-      const res = await fetch(`/api/tagebuch?caseCode=${caseCode}`);
+      const res = await fetch('/api/tagebuch', { credentials: 'include' });
+      setSitzungOffen(res.ok);
       if (res.ok) {
         const data = await res.json();
         setEntries(data);
@@ -44,15 +32,15 @@ export default function TagebuchPage() {
     } catch (error) {
       console.error('Fehler beim Laden des Tagebuchs:', error);
     }
-  }, [caseCode]);
+  }, []);
 
   useEffect(() => {
     let isSubscribed = true;
 
     const loadData = async () => {
-      if (!caseCode) return;
       try {
-        const res = await fetch(`/api/tagebuch?caseCode=${caseCode}`);
+        const res = await fetch('/api/tagebuch', { credentials: 'include' });
+        if (isSubscribed) setSitzungOffen(res.ok);
         if (res.ok) {
           const data = await res.json();
           if (isSubscribed) {
@@ -69,14 +57,16 @@ export default function TagebuchPage() {
     return () => {
       isSubscribed = false;
     };
-  }, [caseCode]);
+  }, []);
 
   // Funktion zum Zurücksetzen des Formulars auf einen neuen Eintrag
   const handleNewEntryTrigger = () => {
     setActiveEntry(null);
   };
 
-  if (caseCode === null) {
+  // Erst nach der ersten Antwort entscheiden: Vorher wüsste die Seite nicht,
+  // ob wirklich keine Sitzung besteht.
+  if (sitzungOffen === false) {
     return <div className="text-center py-20 text-gray-400">{t('fallcodeFehlt')}</div>;
   }
 
@@ -103,7 +93,6 @@ export default function TagebuchPage() {
           {/* Haupt-Block: Strukturierte Erfassung (3/4 Breite auf Desktop) */}
           <div className="md:col-span-9 order-first md:order-last sticky md:top-6">
             <TagebuchForm
-              caseCode={caseCode}
               onSavedAction={() => {
                 fetchEntries();
                 setActiveEntry(null);
@@ -126,7 +115,6 @@ export default function TagebuchPage() {
 
             <TagebuchListe
               entries={entries}
-              caseCode={caseCode}
               onRefresh={fetchEntries}
               onSelect={(key, data) => setActiveEntry({ key, data })}
             />

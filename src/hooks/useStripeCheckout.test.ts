@@ -43,7 +43,7 @@ describe('useStripeCheckout Hook', () => {
     const { result } = renderHook(() => useStripeCheckout());
 
     await act(async () => {
-      await result.current.triggerCheckout('FALL123', 'paket_basic');
+      await result.current.triggerCheckout('paket_basic');
     });
 
     // 3. Jetzt klappt die Assertion, da fetchSpy eine echte vi.fn() ist!
@@ -51,18 +51,25 @@ describe('useStripeCheckout Hook', () => {
       '/api/checkout/create-session',
       expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ caseCode: 'FALL123', paket: 'paket_basic', locale: 'de' }),
+        body: JSON.stringify({ paket: 'paket_basic', locale: 'de' }),
       })
     );
 
     expect(window.location.href).toBe(mockResponse.url);
   });
 
-  it('sollte Fehlerbehandlung bei fehlendem caseCode zeigen', async () => {
+  it('meldet einen Fehler, wenn die Sitzung den Checkout ablehnt', async () => {
+    // Seit #135 schickt der Hook keinen Fallcode mehr mit; ob ein Fall offen
+    // ist, entscheidet die Sitzung — die Route antwortet sonst mit 401.
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: false, status: 401, json: async () => ({}) })
+    );
+
     const { result } = renderHook(() => useStripeCheckout());
 
     await act(async () => {
-      await result.current.triggerCheckout(null, 'paket_basic');
+      await result.current.triggerCheckout('paket_basic');
     });
 
     expect(toast.error).toHaveBeenCalled();
