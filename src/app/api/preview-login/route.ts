@@ -15,52 +15,50 @@ export async function POST(request: NextRequest) {
     body = await request.json();
   } catch {
     return NextResponse.json(
-        {
-          success: false,
-          error: 'Ungültige Anfrage.',
-        },
-        {
-          status: 400,
-        }
+      {
+        success: false,
+        error: 'Ungültige Anfrage.',
+      },
+      {
+        status: 400,
+      }
     );
   }
 
   const password =
-      typeof body === 'object' &&
-      body !== null &&
-      'password' in body &&
-      typeof body.password === 'string'
-          ? body.password
-          : '';
+    typeof body === 'object' &&
+    body !== null &&
+    'password' in body &&
+    typeof body.password === 'string'
+      ? body.password
+      : '';
 
   const expectedPassword = process.env.PREVIEW_PASSWORD;
   const tokenSecret = process.env.PREVIEW_TOKEN_SECRET;
 
   if (!expectedPassword || !tokenSecret) {
-    console.error(
-        '[preview-login] Preview-Konfiguration unvollständig.'
-    );
+    console.error('[preview-login] Preview-Konfiguration unvollständig.');
 
     return NextResponse.json(
-        {
-          success: false,
-          error: 'Die Vorschau ist derzeit nicht verfügbar.',
-        },
-        {
-          status: 500,
-        }
+      {
+        success: false,
+        error: 'Die Vorschau ist derzeit nicht verfügbar.',
+      },
+      {
+        status: 500,
+      }
     );
   }
 
   if (password !== expectedPassword) {
     return NextResponse.json(
-        {
-          success: false,
-          error: 'Das eingegebene Passwort ist nicht korrekt.',
-        },
-        {
-          status: 401,
-        }
+      {
+        success: false,
+        error: 'Das eingegebene Passwort ist nicht korrekt.',
+      },
+      {
+        status: 401,
+      }
     );
   }
 
