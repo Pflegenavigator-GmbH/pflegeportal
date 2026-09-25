@@ -6,6 +6,8 @@
 import { NextRequest } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { verifyPreviewToken } from '@/src/lib/preview/preview-auth';
+
 import proxy from './proxy';
 
 // next-intl bringt sein eigenes Middleware-Bündel mit, das `next/server` in
@@ -21,9 +23,23 @@ vi.mock('@/src/lib/redis/middleware-api', () => ({
   handleApiRequest: vi.fn().mockResolvedValue(new Response(null, { status: 204 })),
 }));
 
-const anfrage = (pfad: string, mitCookie = false) => {
+// Die kryptografische Prüfung bekommt eigene Unit-Tests.
+// Hier interessiert nur, wie der Proxy mit gültigen bzw. ungültigen
+// Preview-Tokens umgeht.
+vi.mock('@/src/lib/preview/preview-auth', () => ({
+  PREVIEW_COOKIE_NAME: 'preview-access',
+  verifyPreviewToken: vi.fn(),
+}));
+
+const mockedVerifyPreviewToken = vi.mocked(verifyPreviewToken);
+
+const anfrage = (pfad: string, token?: string) => {
   const request = new NextRequest(`http://localhost:3000${pfad}`);
-  if (mitCookie) request.cookies.set('preview-access', 'allowed');
+
+  if (token) {
+    request.cookies.set('preview-access', token);
+  }
+
   return request;
 };
 
@@ -36,6 +52,10 @@ const istUmleitungZurAnmeldung = (antwort: Response) =>
 describe('Vorschau-Sperre in der Middleware', () => {
   beforeEach(() => {
     vi.stubEnv('PREVIEW_PROTECTION_ENABLED', 'true');
+    vi.stubEnv('PREVIEW_TOKEN_SECRET', 'test-preview-token-secret');
+
+    mockedVerifyPreviewToken.mockReset();
+    mockedVerifyPreviewToken.mockResolvedValue(false);
   });
 
   afterEach(() => {
@@ -53,17 +73,42 @@ describe('Vorschau-Sperre in der Middleware', () => {
       }
 
       const antwort = await proxy(anfrage('/de/pflegegrad/start'));
+
       expect(istUmleitungZurAnmeldung(antwort), `Wert: ${String(wert)}`).toBe(false);
     }
   });
 
   it('sperrt bei aktiver Vorschau jede Seite ohne Cookie', async () => {
-    expect(istUmleitungZurAnmeldung(await proxy(anfrage('/de/pflegegrad/start')))).toBe(true);
+    const antwort = await proxy(anfrage('/de/pflegegrad/start'));
+
+    expect(istUmleitungZurAnmeldung(antwort)).toBe(true);
+
+    expect(mockedVerifyPreviewToken).not.toHaveBeenCalled();
   });
 
-  it('lässt mit Cookie durch', async () => {
-    expect(istUmleitungZurAnmeldung(await proxy(anfrage('/de/pflegegrad/start', true)))).toBe(
-      false
+  it('lässt mit gültigem signiertem Token durch', async () => {
+    mockedVerifyPreviewToken.mockResolvedValue(true);
+
+    const antwort = await proxy(anfrage('/de/pflegegrad/start', 'gueltiger-signierter-token'));
+
+    expect(istUmleitungZurAnmeldung(antwort)).toBe(false);
+
+    expect(mockedVerifyPreviewToken).toHaveBeenCalledWith(
+      'gueltiger-signierter-token',
+      'test-preview-token-secret'
+    );
+  });
+
+  it('sperrt bei ungültigem oder manipuliertem Token', async () => {
+    mockedVerifyPreviewToken.mockResolvedValue(false);
+
+    const antwort = await proxy(anfrage('/de/pflegegrad/start', 'manipulierter-token'));
+
+    expect(istUmleitungZurAnmeldung(antwort)).toBe(true);
+
+    expect(mockedVerifyPreviewToken).toHaveBeenCalledWith(
+      'manipulierter-token',
+      'test-preview-token-secret'
     );
   });
 
@@ -93,5 +138,17 @@ describe('Vorschau-Sperre in der Middleware', () => {
 
   it('sperrt andere API-Routen weiterhin', async () => {
     expect(istUmleitungZurAnmeldung(await proxy(anfrage('/api/case/status')))).toBe(true);
+  });
+
+  it('schlägt geschlossen fehl, wenn bei aktivem Schutz das Token-Secret fehlt', async () => {
+    vi.stubEnv('PREVIEW_TOKEN_SECRET', '');
+
+    const antwort = await proxy(anfrage('/de/pflegegrad/start'));
+
+    expect(antwort.status).toBe(500);
+
+    expect(istUmleitungZurAnmeldung(antwort)).toBe(false);
+
+    expect(mockedVerifyPreviewToken).not.toHaveBeenCalled();
   });
 });

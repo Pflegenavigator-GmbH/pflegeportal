@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 
 import { routing } from '@/src/i18n/routing';
+import { PREVIEW_COOKIE_NAME, verifyPreviewToken } from '@/src/lib/preview/preview-auth';
 import { handleApiRequest } from '@/src/lib/redis/middleware-api';
 
 const intlMiddleware = createMiddleware(routing);
@@ -14,12 +15,35 @@ export default async function proxy(request: NextRequest) {
   const previewProtectionEnabled = process.env.PREVIEW_PROTECTION_ENABLED === 'true';
 
   /*
-   * Preview-Schutz nur ausführen, wenn er für die jeweilige
-   * Deployment-Umgebung aktiviert wurde.
+   * Der Preview-Schutz wird nur auf Deployments aktiviert,
+   * auf denen PREVIEW_PROTECTION_ENABLED=true gesetzt wurde.
    */
   if (previewProtectionEnabled) {
-    const hasPreviewAccess = request.cookies.get('preview-access')?.value === 'allowed';
+    const tokenSecret = process.env.PREVIEW_TOKEN_SECRET;
 
+    /*
+     * Fail closed:
+     *
+     * Wenn der Preview-Schutz aktiviert wurde, aber kein Secret
+     * konfiguriert ist, darf nicht versehentlich die Website
+     * freigegeben werden.
+     */
+    if (!tokenSecret) {
+      console.error('[preview-auth] PREVIEW_TOKEN_SECRET ist nicht konfiguriert.');
+
+      return new NextResponse('Preview protection is not configured correctly.', {
+        status: 500,
+      });
+    }
+
+    const token = request.cookies.get(PREVIEW_COOKIE_NAME)?.value;
+
+    const hasPreviewAccess = token ? await verifyPreviewToken(token, tokenSecret) : false;
+
+    /*
+     * Die Login-Seite selbst muss natürlich ohne Session
+     * erreichbar sein.
+     */
     const isLoginRoute =
       pathname === '/preview-login' ||
       routing.locales.some(
@@ -28,23 +52,32 @@ export default async function proxy(request: NextRequest) {
       );
 
     /*
-     * Dieser Endpoint muss ohne Preview-Cookie erreichbar sein,
-     * da dort das Passwort geprüft wird.
+     * Dieser Endpoint muss ebenfalls ohne Session erreichbar sein,
+     * weil dort das Passwort geprüft und die Session erzeugt wird.
      */
     const isPreviewLoginApi = pathname === '/api/preview-login';
 
     /*
-     * Maschinelle Aufrufer haben kein Cookie und können sich auch keines
-     * holen. Stripe beantwortet eine Weiterleitung mit „zugestellt" — die
-     * Zahlung bliebe unverbucht, und es fiele erst bei der Abrechnung auf.
-     * Die Route prüft die Stripe-Signatur selbst; die Sperre trägt hier
-     * nichts bei.
+     * Maschinelle Aufrufer können den interaktiven Preview-Login
+     * nicht durchführen.
+     *
+     * Der Stripe-Webhook authentifiziert Requests selbst über die
+     * Stripe-Signatur und wird deshalb vom Preview-Schutz ausgenommen.
      */
     const isMaschinenEndpunkt = pathname === '/api/stripe/webhook';
 
     if (!hasPreviewAccess && !isLoginRoute && !isPreviewLoginApi && !isMaschinenEndpunkt) {
       const url = request.nextUrl.clone();
 
+      /*
+       * Vorhandene Locale beibehalten:
+       *
+       * /de/pflegegrad/start
+       *        ↓
+       * /de/preview-login
+       *
+       * statt erst über /preview-login umleiten zu müssen.
+       */
       const locale = routing.locales.find(
         (locale) => pathname === `/${locale}` || pathname.startsWith(`/${locale}/`)
       );
@@ -55,7 +88,10 @@ export default async function proxy(request: NextRequest) {
     }
   }
 
-  // API-Routen: Rate-Limit + Cache, kein Sprach-Routing.
+  /*
+   * API-Routen:
+   * Rate-Limit + Cache, kein Sprach-Routing.
+   */
   if (pathname.startsWith('/api/')) {
     try {
       return await handleApiRequest(request);
@@ -66,7 +102,10 @@ export default async function proxy(request: NextRequest) {
     }
   }
 
-  // Alle übrigen Seiten: next-intl-Locale-Routing.
+  /*
+   * Alle übrigen Seiten:
+   * next-intl-Locale-Routing.
+   */
   return intlMiddleware(request);
 }
 
