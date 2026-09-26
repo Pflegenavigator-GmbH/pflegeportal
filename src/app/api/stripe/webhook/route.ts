@@ -4,7 +4,7 @@ import Stripe from 'stripe';
 
 import { berechneCaseCodeHash } from '@/src/lib/case-code-server';
 import { logger } from '@/src/lib/logger';
-import { stripe } from '@/src/lib/stripe/server';
+import { getStripe } from '@/src/lib/stripe/server';
 import { createAdminSupabaseClient } from '@/src/lib/supabase/admin';
 import { schreibeSystemLog } from '@/src/lib/system-log';
 
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(body, signature, secret);
+    event = getStripe().webhooks.constructEvent(body, signature, secret);
     logger.info({ eventType: event.type }, 'Stripe Webhook Signatur verifiziert');
   } catch (err: unknown) {
     const error = err as Error;

@@ -1,11 +1,17 @@
 // src/lib/pdf/puppeteer.ts
-import chromium from '@sparticuz/chromium';
 import puppeteer, { Browser } from 'puppeteer-core';
 
 import { logger } from '@/src/lib/logger';
 
-/** Minimal-Flags für die lokale Entwicklung (System-Chrome/-Chromium). */
-const LOKALE_ARGS = [
+/**
+ * Flags für ein Chromium, das als Systempaket vorliegt — lokale Entwicklung
+ * ebenso wie der Container.
+ *
+ * `--disable-dev-shm-usage` ist im Container nicht optional: Docker gibt einem
+ * Container standardmäßig 64 MB `/dev/shm`, und Chromium stürzt beim Rendern
+ * größerer Seiten darin ab. Die Compose-Datei hebt das Limit zusätzlich an.
+ */
+const SYSTEM_ARGS = [
   '--no-sandbox',
   '--disable-setuid-sandbox',
   '--disable-dev-shm-usage',
@@ -31,8 +37,9 @@ function istServerless(): boolean {
  * Ermittelt Chromium-Pfad, Flags und Headless-Modus je Umgebung.
  *
  * Reihenfolge (erste zutreffende gewinnt):
- *  1. PUPPETEER_EXECUTABLE_PATH — expliziter Override (lokale Entwicklung
- *     mit eigenem Browser, abweichende Umgebungen).
+ *  1. PUPPETEER_EXECUTABLE_PATH — expliziter Override. Diesen Weg nimmt auch
+ *     der Container: Dort liegt Chromium als Systempaket im Image, der Pfad
+ *     steht im Dockerfile (#177).
  *  2. Serverless (Vercel/Lambda) — gebündeltes @sparticuz/chromium; das
  *     System-Chromium `/usr/bin/chromium` existiert dort NICHT, weshalb die
  *     PDF-Erzeugung ohne diesen Zweig in Produktion scheiterte.
@@ -42,10 +49,19 @@ function istServerless(): boolean {
 async function ermittleStartOptionen(): Promise<StartOptionen> {
   const override = process.env.PUPPETEER_EXECUTABLE_PATH;
   if (override) {
-    return { executablePath: override, args: LOKALE_ARGS, headless: true };
+    return { executablePath: override, args: SYSTEM_ARGS, headless: true };
   }
 
   if (istServerless()) {
+    /*
+     * Bewusst erst hier geladen und nicht am Dateikopf: @sparticuz/chromium
+     * bringt einen eigenen, komprimierten Browser mit und existiert allein für
+     * Lambda-artige Umgebungen. Im Container wird es nie erreicht — und wenn
+     * das Paket mit dem Abschied von Vercel verschwindet, ist hier eine Zeile
+     * zu löschen statt eine Abhängigkeit am Dateikopf aufzulösen.
+     */
+    const { default: chromium } = await import('@sparticuz/chromium');
+
     return {
       executablePath: await chromium.executablePath(),
       args: chromium.args,
@@ -56,12 +72,12 @@ async function ermittleStartOptionen(): Promise<StartOptionen> {
   if (process.platform === 'darwin') {
     return {
       executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-      args: LOKALE_ARGS,
+      args: SYSTEM_ARGS,
       headless: true,
     };
   }
 
-  return { executablePath: '/usr/bin/chromium', args: LOKALE_ARGS, headless: true };
+  return { executablePath: '/usr/bin/chromium', args: SYSTEM_ARGS, headless: true };
 }
 
 /**

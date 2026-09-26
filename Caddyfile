@@ -1,0 +1,29 @@
+# Caddy ist der einzige Dienst, der nach außen sichtbar ist (ADR-0003).
+# Alles andere — Anwendung, Valkey — liegt im internen Netz der Compose-Datei
+# und hat keinen veröffentlichten Port.
+#
+# TLS besorgt Caddy selbst, sobald DOMAIN ein echter Name ist. Ohne die
+# Variable läuft es auf localhost, für den Probelauf auf dem eigenen Rechner.
+
+{$DOMAIN:localhost} {
+	encode zstd gzip
+
+	# Die Bereitschaftsprüfung ist für den Betrieb da, nicht für die
+	# Öffentlichkeit: Sie verrät unter anderem, ob die Ratenbegrenzung gerade
+	# nur prozesslokal wirkt (#176). 404 statt 403 — wer nicht hineindarf,
+	# muss auch nicht erfahren, dass es den Endpunkt gibt.
+	@bereitschaft path /api/health
+	respond @bereitschaft 404
+
+	reverse_proxy app:3000 {
+		# Next streamt die Antwort (Suspense, Loading-Zustände). Ein puffernder
+		# Proxy davor würde daraus wieder eine Antwort am Stück machen — die
+		# Seite erschiene erst, wenn alles fertig ist.
+		flush_interval -1
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}

@@ -17,11 +17,11 @@ const { constructEventMock, supabaseFromMock, supabaseInsertMock, supabaseUpdate
 
 // 2. Stripe-Instanz mocken
 vi.mock('@/src/lib/stripe/server', () => ({
-  stripe: {
+  getStripe: () => ({
     webhooks: {
       constructEvent: constructEventMock,
     },
-  },
+  }),
 }));
 
 // 3. Supabase Admin-Client mocken (synchron, kein Promise)
