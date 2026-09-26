@@ -137,16 +137,66 @@ Die Sicherheitslage, bewusst akzeptierte Befunde und deren Begründung stehen in
 
 ## Deployment
 
-Ziel ist **Vercel**. Der Build läuft als `output: "standalone"`; Chromium wird
-in der Serverless-Umgebung automatisch über `@sparticuz/chromium` aufgelöst
-(siehe `src/lib/pdf/README.md`). Sicherheits-Header samt Content Security
-Policy setzt `next.config.ts`.
+Derzeit läuft die Anwendung auf **Vercel**; Ziel ist ein eigener Server mit
+Containern (ADR-0003, #177/#178). Beide Wege nutzen denselben Build:
+`output: "standalone"` in `next.config.ts`. Sicherheits-Header samt Content
+Security Policy setzt ebenfalls `next.config.ts`.
+
+Chromium für die PDF-Erzeugung kommt je nach Umgebung aus einer anderen Quelle
+— im Container als Systempaket, auf Vercel über `@sparticuz/chromium`
+(`src/lib/pdf/puppeteer.ts`, `src/lib/pdf/README.md`).
 
 Einmalig einzurichten:
 
-1. Umgebungsvariablen in Vercel hinterlegen (siehe `.env.example`).
+1. Umgebungsvariablen hinterlegen (siehe `.env.example` bzw.
+   `.env.container.example`).
 2. Stripe-Webhook auf `/api/stripe/webhook` zeigen lassen.
 3. Supabase Database Webhook auf `posts` → `/api/revalidate` (Presseportal).
+
+### Container
+
+```bash
+docker build \
+  --build-arg NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co \
+  --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=… \
+  --build-arg NEXT_PUBLIC_URL=https://pflegenavigator.example \
+  -t pflegeportal:lokal .
+```
+
+Die Werte mit dem Präfix `NEXT_PUBLIC_` müssen beim **Bauen** vorliegen: Next
+schreibt sie ins Browser-Bündel. Alles andere — Supabase-Service-Key, Pepper,
+Stripe — kommt erst beim **Start** aus `.env.container` und steht nie im Abbild.
+
+```bash
+cp .env.container.example .env.container   # ausfüllen
+docker compose --env-file .env.container up -d
+```
+
+Öffentlich erreichbar ist allein Caddy. Anwendung und Valkey haben keinen
+veröffentlichten Port.
+
+| Endpunkt | Frage | Wer fragt |
+| --- | --- | --- |
+| `/api/live` | Läuft der Prozess? | der Container selbst (`HEALTHCHECK`) |
+| `/api/health` | Kann er auch arbeiten? | die Auslieferung, danach die Beobachtung |
+
+`/api/health` prüft die Datenbank und meldet den Zustand des Ratenspeichers.
+Caddy gibt den Endpunkt nach außen **nicht** frei — die Auskunft, dass die
+Ratenbegrenzung gerade nur prozesslokal wirkt, hilft niemandem außer jemandem,
+der Fallcodes durchprobiert.
+
+Gemessen auf einem Testlauf des Abbilds (12-seitiges PDF):
+
+| | Speicher |
+| --- | --- |
+| Leerlauf | 48 MB |
+| eine PDF-Erzeugung | 578 MB in der Spitze |
+| zwei gleichzeitig | 749 MB in der Spitze |
+
+Deshalb steht `PDF_MAX_PARALLEL` auf 1: Jede Erzeugung startet eine eigene
+Chromium-Instanz, und auf 2 GB RAM teilen sich alle denselben Speicher.
+Wartende Anfragen stehen in einer kurzen Schlange
+(`src/lib/pdf/warteschlange.ts`).
 
 ## Lizenz
 

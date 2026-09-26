@@ -65,15 +65,23 @@ export const loggerOptionen: pino.LoggerOptions = {
     streamWrite: schwaerzeFallcodes,
   },
 
-  ...(environment === 'development' && {
-    transport: {
-      target: 'pino-pretty',
-      options: {
-        colorize: true,
-        translateTime: 'SYS:standard',
+  /*
+   * Lesbare Ausgabe nur in der Entwicklung. Die zweite Bedingung ist kein
+   * Gürtel-und-Hosenträger: pino-pretty ist eine Entwicklungsabhängigkeit und
+   * liegt im Produktions-Abbild nicht vor. Stünde dort versehentlich
+   * ENVIRONMENT=development, scheiterte pino beim Laden des Transports — und
+   * damit jede Seite, die den Logger anfasst, mit Status 500 (#177).
+   */
+  ...(environment === 'development' &&
+    process.env.NODE_ENV !== 'production' && {
+      transport: {
+        target: 'pino-pretty',
+        options: {
+          colorize: true,
+          translateTime: 'SYS:standard',
+        },
       },
-    },
-  }),
+    }),
 };
 
 export const logger = pino(loggerOptionen);

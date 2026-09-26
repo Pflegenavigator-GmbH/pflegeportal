@@ -7,7 +7,7 @@ import { handleApiError } from '@/src/lib/api/error-handler';
 import { ValidationError } from '@/src/lib/api/errors';
 import { getBaseUrl } from '@/src/lib/env';
 import { logger } from '@/src/lib/logger';
-import { stripe } from '@/src/lib/stripe/server';
+import { getStripe } from '@/src/lib/stripe/server';
 import { createAdminSupabaseClient } from '@/src/lib/supabase/admin';
 
 const ERLAUBTE_PAKETE = [
@@ -141,7 +141,7 @@ export async function POST(req: Request) {
     const metadata = { case_id: fallSession.caseId, paket };
 
     // Erstellung der Stripe-Checkout-Session
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       payment_method_types: ['card', 'sepa_debit'],
       line_items: [{ price: priceId, quantity: 1 }],
       mode: isSubscription ? 'subscription' : 'payment',

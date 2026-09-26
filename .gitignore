@@ -33,6 +33,9 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 !.env.example
+# Vorlage der Laufzeit-Umgebung des Containers (#177) — enthält nur
+# Platzhalter und gehört ins Repository. Die gefüllte .env.container nicht.
+!.env.container.example
 
 # vercel
 .vercel

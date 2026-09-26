@@ -6,6 +6,7 @@ import { Browser, HTTPRequest } from 'puppeteer-core';
 
 import { launchPDFBrowser } from '@/src/lib/pdf/puppeteer';
 import { compilePageToA4Buffer, PdfMargin } from '@/src/lib/pdf/templates';
+import { mitPdfPlatz } from '@/src/lib/pdf/warteschlange';
 
 export interface RenderPdfOptions {
   footerText?: string;
@@ -21,11 +22,19 @@ export interface RenderPdfOptions {
  * blockiert. Damit kann selbst eingeschleustes HTML keine internen Dienste
  * oder Cloud-Metadaten-Endpunkte kontaktieren. Der Browser wird immer
  * geschlossen — auch im Fehlerfall.
+ *
+ * Läuft nur, wenn die Warteschlange einen Platz freigibt: Chromium ist der
+ * mit Abstand teuerste Teil der Anwendung, und auf einem einzelnen Server
+ * teilen sich alle Renderings denselben Arbeitsspeicher (#177).
  */
 export async function renderHtmlToPdf(
   html: string,
   options: RenderPdfOptions = {}
 ): Promise<Uint8Array> {
+  return mitPdfPlatz(() => rendere(html, options));
+}
+
+async function rendere(html: string, options: RenderPdfOptions): Promise<Uint8Array> {
   let browser: Browser | null = null;
   try {
     browser = await launchPDFBrowser();

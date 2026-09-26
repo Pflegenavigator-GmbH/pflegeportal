@@ -1,0 +1,37 @@
+# Was nicht in den Build-Kontext gehört.
+#
+# Jede Datei hier wird beim Bauen an den Docker-Daemon übertragen. Groß ist
+# vor allem node_modules — und es hätte im Kontext ohnehin nichts verloren:
+# Die Abhängigkeiten werden im Image aus package-lock.json installiert, damit
+# sie zur Zielplattform passen und nicht zum Rechner des Entwicklers.
+
+node_modules
+.next
+out
+build
+
+.git
+.github
+.vscode
+.idea
+
+# Geheimnisse gelangen zur Laufzeit in den Container, niemals ins Image.
+.env
+.env.*
+!.env.example
+
+# Prüf- und Berichtsartefakte
+coverage
+playwright-report
+test-results
+*.log
+
+# Wird im Image nicht gebraucht
+e2e
+scripts
+supabase
+docs
+*.md
+!README.md
+
+.DS_Store

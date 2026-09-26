@@ -19,7 +19,27 @@ folgender Reihenfolge — die erste zutreffende Regel gewinnt:
 Der Serverless-Zweig (2) ist der eigentliche Fix: Auf Vercel existiert
 `/usr/bin/chromium` **nicht**, weshalb die PDF-Erzeugung dort ohne
 `@sparticuz/chromium` fehlschlug. Das Paket liefert ein Lambda-taugliches
-Chromium-Binary samt passender Startflags.
+Chromium-Binary samt passender Startflags. Es wird erst **in** diesem Zweig
+geladen, nicht am Dateikopf — im Container gibt es das Paket nicht mehr zu
+laden, sobald Vercel wegfällt.
+
+Der Container nimmt Weg (1): Chromium liegt dort als Systempaket im Abbild,
+der Pfad steht im [Dockerfile](../../../Dockerfile). Damit verschwindet eine
+Abhängigkeit, die es nur gab, weil AWS Lambda keinen Browser mitbringt
+(#177).
+
+## Gleichzeitigkeit
+
+Jede Erzeugung startet eine eigene Chromium-Instanz. Auf Vercel verteilte sich
+das über Funktionsaufrufe; auf einem einzelnen Server teilen sich alle
+Erzeugungen denselben Arbeitsspeicher. Gemessen im Abbild: 578 MB in der
+Spitze für ein 12-seitiges Dokument, 749 MB bei zwei gleichzeitigen.
+
+[`warteschlange.ts`](warteschlange.ts) begrenzt deshalb, wie viele Erzeugungen
+gleichzeitig laufen (`PDF_MAX_PARALLEL`, Vorgabe 1). Wartende Anfragen stehen
+in einer kurzen Schlange; ist sie voll oder dauert es zu lange, antwortet die
+Route mit 429. Eine abgelehnte Anfrage ist ein Ergebnis — ein Container, den
+der OOM-Killer trifft, ist keines.
 
 ## Bundling (wichtig)
 

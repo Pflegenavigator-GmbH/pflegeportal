@@ -3,28 +3,49 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('stripe');
 
-describe('Stripe Instance', () => {
+describe('Stripe-Instanz', () => {
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
+    // Die Instanz hängt am globalen Kontext und überlebt `resetModules`.
+    delete (globalThis as { stripeInstance?: unknown }).stripeInstance;
   });
 
-  it('sollte Stripe initialisieren, wenn der Key gesetzt ist', async () => {
-    // 1. Env-Stub setzen
+  it('initialisiert Stripe beim ersten Aufruf, wenn der Schlüssel gesetzt ist', async () => {
     vi.stubEnv('STRIPE_SECRET_KEY', 'sk_test_123');
 
-    // 2. Erst JETZT importieren
-    const { stripe } = await import('./server');
+    const { getStripe } = await import('./server');
+
+    expect(Stripe).not.toHaveBeenCalled();
+
+    const client = getStripe();
 
     expect(Stripe).toHaveBeenCalledTimes(1);
     expect(Stripe).toHaveBeenCalledWith('sk_test_123', expect.any(Object));
-    expect(stripe).toBeDefined();
+    expect(client).toBeDefined();
   });
 
-  it('sollte Fehler werfen, wenn der Key fehlt', async () => {
-    // Env entfernen
+  it('erzeugt die Instanz nur einmal', async () => {
+    vi.stubEnv('STRIPE_SECRET_KEY', 'sk_test_123');
+
+    const { getStripe } = await import('./server');
+    getStripe();
+    getStripe();
+
+    expect(Stripe).toHaveBeenCalledTimes(1);
+  });
+
+  /**
+   * Das Laden der Datei darf NICHT mehr werfen: `next build` wertet jede Route
+   * aus, um ihre Konfiguration einzusammeln, und lud damit auch dieses Modul.
+   * Der Build brauchte dadurch ein Produktionsgeheimnis, das er nie benutzt —
+   * im Container-Abbild ist das keine Option (#177).
+   */
+  it('lässt sich ohne Schlüssel laden und scheitert erst beim Aufruf', async () => {
     vi.stubEnv('STRIPE_SECRET_KEY', '');
 
-    await expect(import('./server')).rejects.toThrow('STRIPE_SECRET_KEY fehlt');
+    const { getStripe } = await import('./server');
+
+    expect(() => getStripe()).toThrow('STRIPE_SECRET_KEY fehlt');
   });
 });

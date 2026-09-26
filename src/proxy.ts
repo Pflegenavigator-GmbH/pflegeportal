@@ -63,8 +63,15 @@ export default async function proxy(request: NextRequest) {
      *
      * Der Stripe-Webhook authentifiziert Requests selbst über die
      * Stripe-Signatur und wird deshalb vom Preview-Schutz ausgenommen.
+     *
+     * Die beiden Prüfrouten ebenso: Sie werden aus dem Container heraus
+     * abgefragt (Liveness) und nach einer Auslieferung von der Pipeline
+     * (Bereitschaft) — beide ohne Cookie. Eine Weiterleitung auf die
+     * Anmeldeseite läse sich dort als „Dienst antwortet nicht" (#177).
+     * `/api/health` gibt Caddy nach außen ohnehin nicht frei.
      */
-    const isMaschinenEndpunkt = pathname === '/api/stripe/webhook';
+    const isMaschinenEndpunkt =
+      pathname === '/api/stripe/webhook' || pathname === '/api/health' || pathname === '/api/live';
 
     if (!hasPreviewAccess && !isLoginRoute && !isPreviewLoginApi && !isMaschinenEndpunkt) {
       const url = request.nextUrl.clone();

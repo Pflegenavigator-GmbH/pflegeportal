@@ -29,13 +29,13 @@ const {
 
 // 2. Stripe mocken
 vi.mock('@/src/lib/stripe/server', () => ({
-  stripe: {
+  getStripe: () => ({
     checkout: {
       sessions: {
         create: stripeSessionsCreateMock,
       },
     },
-  },
+  }),
 }));
 
 // 3. Supabase Admin-Client mocken (synchron, kein Promise)

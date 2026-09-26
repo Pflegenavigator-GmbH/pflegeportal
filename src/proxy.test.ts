@@ -136,6 +136,17 @@ describe('Vorschau-Sperre in der Middleware', () => {
     expect(istUmleitungZurAnmeldung(await proxy(anfrage('/api/stripe/webhook')))).toBe(false);
   });
 
+  /**
+   * Beide Prüfrouten werden ohne Cookie abgefragt: die eine aus dem Container
+   * heraus, die andere von der Pipeline nach einer Auslieferung. Eine
+   * Weiterleitung auf die Anmeldeseite läse sich dort als Ausfall (#177).
+   */
+  it('lässt die Prüfrouten des Containers durch', async () => {
+    for (const pfad of ['/api/health', '/api/live']) {
+      expect(istUmleitungZurAnmeldung(await proxy(anfrage(pfad))), pfad).toBe(false);
+    }
+  });
+
   it('sperrt andere API-Routen weiterhin', async () => {
     expect(istUmleitungZurAnmeldung(await proxy(anfrage('/api/case/status')))).toBe(true);
   });

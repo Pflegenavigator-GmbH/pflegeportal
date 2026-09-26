@@ -62,14 +62,15 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-    // `output: "standalone"` ist bewusst NICHT gesetzt.
+    // Kopiert die Serverdateien samt der wirklich benötigten node_modules nach
+    // `.next/standalone`, dazu ein eigener `server.js`. Das ist die Grundlage
+    // des Images (#177): Ohne diesen Modus müsste der Container den gesamten
+    // Abhängigkeitsbaum mitschleppen.
     //
-    // Der Modus kopiert die Serverdateien nach `.next/standalone` und ist für
-    // Eigenhosting oder Docker gedacht. Dieses Projekt läuft auf Vercel; dort
-    // legt die Plattform die Serverdateien selbst ab und meldet im Build
-    // ausdrücklich „Applying modifyConfig from Vercel". Ein Dockerfile gibt es
-    // im Repo nicht, in der CI wird der Ordner nirgends referenziert — er
-    // wurde also von niemandem genutzt.
+    // Auf Vercel ist die Einstellung folgenlos — die Plattform legt ihre eigene
+    // Konfiguration darüber („Applying modifyConfig from Vercel"). Deshalb
+    // steht hier keine Verzweigung: ein Build-Pfad für beide Ziele.
+    output: "standalone",
 
     images: {
         unoptimized: true,

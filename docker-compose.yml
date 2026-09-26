@@ -1,0 +1,91 @@
+# Betriebsbild für einen einzelnen Server (ADR-0003: Container, kein
+# Kubernetes). Öffentlich erreichbar ist allein Caddy; die Anwendung und
+# Valkey haben keinen veröffentlichten Port und sind nur im internen Netz
+# ansprechbar.
+#
+# Start:  docker compose --env-file .env.container up -d
+# Vorlage der Variablen: .env.container.example
+
+services:
+  app:
+    # In der Produktion setzt die Pipeline hier den Digest des geprüften
+    # Abbilds ein (#178) — nicht eine Marke, die auf etwas anderes zeigen
+    # kann als das, was getestet wurde.
+    image: ${APP_IMAGE:-pflegeportal:lokal}
+    build:
+      context: .
+      args:
+        # Diese Werte landen beim Bauen im Browser-Bündel und können deshalb
+        # nicht erst beim Start gesetzt werden (siehe Dockerfile).
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+        NEXT_PUBLIC_URL: ${NEXT_PUBLIC_URL}
+        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}
+        NEXT_PUBLIC_UMAMI_SRC: ${NEXT_PUBLIC_UMAMI_SRC:-}
+    env_file:
+      - .env.container
+    expose:
+      - '3000'
+    # Chromium legt seine Puffer unter /dev/shm ab. Docker gibt dort
+    # standardmäßig 64 MB — zu wenig für größere Dokumente. Die Flags in
+    # src/lib/pdf/puppeteer.ts fangen das zusätzlich ab.
+    shm_size: 256mb
+    # Ein Speicherlimit ist auf einem 2-GB-Server keine Feinheit: Ohne Limit
+    # nimmt sich ein entgleitender Chromium so viel, bis der Kernel irgendeinen
+    # Prozess abräumt — womöglich Caddy. Mit Limit trifft es den Verursacher.
+    mem_limit: 1200m
+    # Next beendet bei SIGTERM von selbst sauber: laufende Anfragen werden
+    # fertig bedient. Die Next-Dokumentation empfiehlt 10 bis 30 Sekunden.
+    stop_grace_period: 30s
+    restart: unless-stopped
+    networks:
+      - intern
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # Hier liegen die ausgestellten Zertifikate. Ohne dieses Volume holt
+      # Caddy sie nach jedem Neustart neu — und läuft in die Ratenbegrenzung
+      # von Let's Encrypt.
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+    mem_limit: 128m
+    restart: unless-stopped
+    networks:
+      - intern
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    # `--save ""` schaltet das Schreiben auf die Platte ab: Hier liegen
+    # Zählerstände der Ratenbegrenzung und zwischengespeicherter Gesetzestext.
+    # Beides darf bei einem Neustart verloren gehen.
+    command: valkey-server --save "" --maxmemory 64mb --maxmemory-policy allkeys-lru
+    mem_limit: 96m
+    restart: unless-stopped
+    networks:
+      - intern
+    # ACHTUNG: Die Anwendung spricht Valkey noch NICHT an. Sie nutzt weiterhin
+    # den Upstash-Client, und der spricht HTTP/REST, nicht das Redis-Protokoll
+    # (#136). Der Dienst steht hier, weil er zur Zieltopologie gehört und die
+    # Umstellung dann nur noch eine Frage der Konfiguration ist.
+    #
+    # Gute Nachricht dafür: Seit Next 16 läuft proxy.ts in der Node-Laufzeit,
+    # nicht mehr in der Edge-Laufzeit. Ein gewöhnlicher Redis-Client ist damit
+    # dort überhaupt erst möglich.
+
+networks:
+  intern:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:
