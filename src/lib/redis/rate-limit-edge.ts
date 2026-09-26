@@ -5,13 +5,15 @@
  * Bevorzugt Upstash (Sliding Window, über alle Edge-Instanzen konsistent).
  * Ohne Redis fällt es auf den prozesslokalen In-Memory-Limiter zurück — der
  * ist in verteilten Edge-Umgebungen nur ein Näherungswert, verhindert aber,
- * dass eine fehlende Konfiguration das Limit komplett aushebelt.
+ * dass eine fehlende Konfiguration das Limit komplett aushebelt. Dasselbe
+ * gilt, wenn Redis konfiguriert, aber gestört ist (`verfuegbarkeit.ts`).
  */
 import { Ratelimit } from '@upstash/ratelimit';
 
 import { checkRateLimit } from '@/src/lib/api/rate-limit';
 
 import { redis } from './client';
+import { meldeRedisAusfall, meldeRedisErfolg, redisVerfuegbar } from './verfuegbarkeit';
 
 /** 60 Anfragen pro Minute und IP — der im Issue vorgegebene Richtwert. */
 export const RATE_LIMIT_MAX = 60;
@@ -45,16 +47,19 @@ export interface RateLimitErgebnis {
  * greift der In-Memory-Fallback, damit das Limit nicht komplett entfällt.
  */
 export async function rateLimit(schluessel: string): Promise<RateLimitErgebnis> {
-  if (ratelimit) {
+  // `redisVerfuegbar()` überspringt den Aufruf, solange eine Störung anhält.
+  // Ohne diese Abfrage zahlt jede Anfrage erneut für denselben toten Host
+  // (#176).
+  if (ratelimit && redisVerfuegbar()) {
     try {
       const { success, limit, remaining, reset } = await ratelimit.limit(schluessel);
+      meldeRedisErfolg();
       return { erlaubt: success, limit, verbleibend: remaining, reset };
     } catch (error) {
       // Ausweichen auf den lokalen Fallback statt die Anfrage zu verlieren.
-      // Bewusst geloggt: Ein stiller Redis-Ausfall würde das Rate-Limit auf
-      // prozesslokal degradieren, ohne dass es jemand bemerkt. console statt
-      // pino (Edge-Runtime).
-      console.error('[rate-limit] Upstash nicht erreichbar, nutze In-Memory-Fallback:', error);
+      // Die Meldung übernimmt der Verfügbarkeitsschalter — einmal beim Öffnen
+      // der Sperre statt bei jeder Anfrage.
+      meldeRedisAusfall('rate-limit', error);
     }
   }
 

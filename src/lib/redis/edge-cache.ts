@@ -16,6 +16,7 @@
  * geschrieben.
  */
 import { redis } from './client';
+import { meldeRedisAusfall, meldeRedisErfolg, redisVerfuegbar } from './verfuegbarkeit';
 
 interface CacheRegel {
   /** Exakter Pfad oder Präfix (mit abschließendem '/'). */
@@ -70,18 +71,18 @@ export function cacheSchluessel(pathname: string, search: string): string {
 
 /** Liest einen Eintrag. Nie werfend — ein Cache-Fehler darf nichts blockieren. */
 export async function leseCache(key: string): Promise<GecachteAntwort | null> {
-  if (!redis) return null;
+  // Bei anhaltender Störung gar nicht erst fragen (#176).
+  if (!redis || !redisVerfuegbar()) return null;
   try {
-    return await redis.get<GecachteAntwort>(key);
+    const treffer = await redis.get<GecachteAntwort>(key);
+    meldeRedisErfolg();
+    return treffer;
   } catch (error) {
-    // Sichtbar machen statt still schlucken: signalisiert eine Redis-Störung.
-    // console statt pino (Edge-Runtime). Fällt auf "kein Treffer" zurück.
-    //
-    // Der Schlüssel wird bewusst NICHT geloggt: Er enthält Pfad und Query der
-    // Anfrage und ist damit nutzergesteuert (CodeQL js/log-injection). Für die
-    // Diagnose genügt hier, dass Redis gestört ist — bei einer Störung trifft
-    // es ohnehin jeden Schlüssel.
-    console.error('[edge-cache] Lesen fehlgeschlagen.', error);
+    // Fällt auf "kein Treffer" zurück. Gemeldet wird über den
+    // Verfügbarkeitsschalter — der protokolliert allein den Bereich, nie den
+    // Schlüssel: Der trägt Pfad und Query der Anfrage und ist damit
+    // nutzergesteuert (CodeQL js/log-injection).
+    meldeRedisAusfall('cache-lesen', error);
     return null;
   }
 }
@@ -96,17 +97,14 @@ export async function schreibeCache(
   antwort: GecachteAntwort
 ): Promise<void> {
   const regel = regelFuer(pathname);
-  if (!redis || !regel) return;
+  if (!redis || !regel || !redisVerfuegbar()) return;
   try {
     await redis.set(key, antwort, { ex: regel.ttl });
+    meldeRedisErfolg();
   } catch (error) {
-    // Best effort, aber nicht lautlos — eine anhaltende Redis-Störung soll
-    // in den Logs auffallen. console statt pino (Edge-Runtime).
-    //
-    // Geloggt wird `regel.pfad` statt des Schlüssels: Der Schlüssel trägt Pfad
-    // und Query der Anfrage und ist nutzergesteuert, `regel.pfad` dagegen ein
-    // Literal aus CACHE_REGELN. Damit bleibt erkennbar, welche Routenfamilie
-    // betroffen ist, ohne dass Nutzereingaben ins Log fließen.
-    console.error('[edge-cache] Schreiben fehlgeschlagen für Regel', regel.pfad, error);
+    // Best effort, aber nicht lautlos — eine anhaltende Redis-Störung soll in
+    // den Logs auffallen. Gemeldet wird über den Verfügbarkeitsschalter, der
+    // weder Schlüssel noch Pfad protokolliert: Beide stammen aus der Anfrage.
+    meldeRedisAusfall('cache-schreiben', error);
   }
 }
